@@ -1,4 +1,4 @@
-package tirocinio;
+package Tirocinio;
 
 import java.io.*;
 import org.apache.pdfbox.cos.COSDocument;
@@ -9,9 +9,8 @@ import org.apache.pdfbox.util.PDFTextStripper;
 public class PdfToTxt
 {
 
-    public String path_pdf = null;
-    public String path_txt = null; 
-    public String text_utf8 = null;
+    private String path_pdf = null;
+    public String path_txt = null;
     public File file_txt = null;
 
     /* Costruttore */
@@ -20,20 +19,21 @@ public class PdfToTxt
         this.path_pdf = pathPDF;
     }
 
-    /* Funzione per convertire file.pdf in file.txt "pulito" e avente codifica "UTF-8 */
+    /* Funzione per creare file.txt */
     public File Convert()
     {
-    	
-    	File f = null;
-    	
+        File f = null;
+
+        PrintStream fr = null;
+
         try
         {
             /* Inserisco e pulisco la stringa */
             String s = Clean(PdfToStringUTF8());
-            this.text_utf8 = s;
+            System.out.println(s);
             this.path_txt = this.path_pdf.substring(0, this.path_pdf.length()-4) + ".txt";
             f = new File(this.path_txt);
-            PrintStream fr = new PrintStream(new FileOutputStream(this.path_txt),false,"UTF-8");
+            fr = new PrintStream(new FileOutputStream(this.path_txt),false,"UTF-8");
             fr.print(s);
             fr.close();
         }
@@ -50,7 +50,7 @@ public class PdfToTxt
     private String PdfToStringUTF8()
     {
         String s1 = null, s2 = null;
-        
+
         PDFParser parser;
 
         File f = new File(this.path_pdf);
@@ -87,10 +87,10 @@ public class PdfToTxt
     private String Clean(String s1)
     {
         int j = -1;
-        
+
         String [] suffix = {"ment", "ity", "ty", "tion", "sion", "ance", "ence", "age", "dom", "hood", "ness",
                             "ism", "our" , "logy", "er", "or", "es", "ist", "ess", "able", "ible", "ous", "al",
-                            "ent", "ate", "ete", "ing", "ish", "ful", "less", "ly", "wise", "wards", "ward", "where", "ize"};
+                            "ent", "ate", "ete", "ing", "ish", "ful", "less", "ly", "wise", "wards", "ward", "where"};
         String s2 = "";
 
         for(int i = 0; i < s1.length(); i++)
@@ -126,7 +126,7 @@ public class PdfToTxt
 
         for(int i = 0; i < str.length(); i++)
         {
-            if(str.charAt(i) == '–' ||str.charAt(i) == '­')
+            if(str.charAt(i) == '�')
             {
 
                 for(int x = 0; x < s.length; x++)
@@ -148,20 +148,17 @@ public class PdfToTxt
 
                 if(!trovato) p = p + String.valueOf(str.charAt(i));
             }
-           
-            
-            else p = p + String.valueOf(str.charAt(i));
-            	
+            else
+                p = p + String.valueOf(str.charAt(i));
         }
-        p=p.replaceAll("\u25cf", " ");
-        p=p.replaceAll("\u2022", " ");
+
         return p;
     }
-/*
-    public static void main(String[] args)
-    {
-    	PdfToTxt f = new PdfToTxt("/Users/danielecicciarella/Desktop/Tirocinio/tool-NLPtoFP/data/CBTC Vendors Evaluation.pdf");
-    	f.Convert();
-    }
-*/
+
+     public static void main(String[] args) throws IOException
+     {
+         PdfToTxt f = new PdfToTxt("C:/Documents and Settings/Daniele/Documenti/handbook.pdf");
+         f.file_txt = f.Convert();
+     }
 }
+
