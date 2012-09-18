@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package tirocinio;
+package Tir;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;

@@ -1,4 +1,4 @@
-package tirocinio;
+package Tir;
 
 import java.io.*;
 import org.apache.pdfbox.cos.COSDocument;
@@ -126,7 +126,7 @@ public class PdfToTxt
 
         for(int i = 0; i < str.length(); i++)
         {
-            if(str.charAt(i) == '–' ||str.charAt(i) == '­')
+            if(str.charAt(i) == '-' ||str.charAt(i) == ' ')
             {
 
                 for(int x = 0; x < s.length; x++)
