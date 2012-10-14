@@ -1,8 +1,5 @@
-package Tir;
-
 import java.io.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.regex.*;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -16,25 +13,27 @@ import org.apache.pdfbox.util.PDFTextStripper;
 public class PdfToTxt
 {
 	/* Percorso in cui si trova il file.pdf */
-    public String path_pdf = null;
+    private String pathPdf = null;
 
     /* Percorso in cui viene creato il file.txt */
-    public String path_txt = null;
+    private String pathTxt = null;
     
     /* Stringa contenente il contenuto del file.pdf*/
-    public String text_utf8 = null;
+    private String textUtf8 = null;
 
     /** Costruttore
 
      	  @param pathPDF: Stringa contenente la path dove è situato il pdf da analizzare
 
-		      @return Vengono inizializzate le path del file.pdf e del file.txt
+		  @return Vengono inizializzate le path del file.pdf e del file.txt
 
     */
-    public PdfToTxt(String pathPDF)
+    public PdfToTxt(String s)
     {
-        path_pdf = pathPDF;
-        path_txt = path_pdf.substring(0, path_pdf.length()-4) + ".txt";
+    	/* Settiamo path del file.pdf */
+        setPathPdf(s);       
+        /* Settiamo path del file.txt */
+        setPathTxt(pathPdf.substring(0, pathPdf.length()-4) + ".txt");
     }
 
     /** Funzione per convertire file.pdf in file.txt "pulito" e con codifica "UTF-8
@@ -43,14 +42,16 @@ public class PdfToTxt
      	@return null: Se vi sono stati errori
 
     */
-    public File Convert()
+    public File convertFile()
     {
-        PrintStream fr = null;
+        PrintStream ps = null;
 
-        File f = new File(this.path_txt);
+        File f = new File(pathTxt);
 
-        if((text_utf8 = CleanString(PdfToStringUTF8()))== null)
-            return null;
+        setTextUtf8(cleanString(pdfToStringUTF8()));
+        
+        if(getTextUtf8() == null)
+        	return null;
 
         try
         {
@@ -58,9 +59,9 @@ public class PdfToTxt
                Apro in scrittura il file.txt scrivendoci
                il contenuto di "text_UTF_8"
             */
-            fr =
+            ps =
                 new PrintStream(
-                    new FileOutputStream(this.path_txt),false,"UTF-8");
+                    new FileOutputStream(pathTxt),false,"UTF-8");
         }
         catch (UnsupportedEncodingException ex)
         {
@@ -73,8 +74,8 @@ public class PdfToTxt
             return null;
         }
 
-        fr.print(text_utf8);
-        fr.close();
+        ps.print(getTextUtf8());
+        ps.close();
 
         return f;
     }
@@ -86,13 +87,13 @@ public class PdfToTxt
        	@return null: Se vi sono stati errori
 
     */
-    private String PdfToStringUTF8()
+    private String pdfToStringUTF8()
     {
-        PDFParser parser = null;
+        PDFParser pp = null;
 
-        COSDocument cosDoc = null;
+        COSDocument cd = null;
 
-        File f = new File(this.path_pdf);
+        File f = new File(pathPdf);
 
         try
         {
@@ -100,21 +101,21 @@ public class PdfToTxt
                Apro in lettura il file.pdf ed il suo contenuto
                è convertito in stringa con codifica UTF-8
             */
-            parser =
+            pp =
                 new PDFParser(
                     new FileInputStream(f));
 
-            parser.parse();
+            pp.parse();
 
-            cosDoc = parser.getDocument();
+            cd = pp.getDocument();
 
             /* Stringa con codifica specificata */
             String s =
                 new String(
                     new PDFTextStripper().getText(
-                        new PDDocument(cosDoc)).getBytes(),"UTF-8");
+                        new PDDocument(cd)).getBytes(),"UTF-8");
 
-            cosDoc.close();
+            cd.close();
 
             return s;
         }
@@ -131,7 +132,7 @@ public class PdfToTxt
     }
 
     /** Funzione che effettua la pulizia del testo utilizzando
-     	  le espressioni regolari
+     	le espressioni regolari
 
      	  @param s1: Stringa da ripulire
 
@@ -139,46 +140,105 @@ public class PdfToTxt
      	  @return null: Se vi sono argomenti invalidi
 
     */
-    private String CleanString(String s)
+    private String cleanString(String s)
     {
         Matcher m = null;
 
-        Pattern es0 = Pattern.compile("-\\s");
-        Pattern es1 = Pattern.compile("(http|www)[a-zA-Z0-9\\-\\.\\_\\?\\!\\&\\:\\/\\%\\-\\+\\=]+");
-        Pattern es2 = Pattern.compile("http[a-zA-Z0-9\\-\\.\\_\\?\\!\\&\\:\\/\\%\\s\\-\\=]+\\s");
-        Pattern es3 = Pattern.compile("[^a-zA-Z0-9\\-\\.\\_\\-\\,\\;\\?\\!\\s\\(\\)\\:\\/\\%]");
-        Pattern es4 = Pattern.compile("(\\..)[\\.]+");
-        Pattern es5 = Pattern.compile("\\.[\\s]+");
-        Pattern es6 = Pattern.compile("\\s[\\s]+");
+        Pattern p0 = Pattern.compile("-\\s");
+        Pattern p1 = Pattern.compile("(http|www)[a-zA-Z0-9\\-\\.\\_\\?\\!\\&\\:\\/\\%\\-\\+\\=]+");
+        Pattern p2 = Pattern.compile("http[a-zA-Z0-9\\-\\.\\_\\?\\!\\&\\:\\/\\%\\s\\-\\=]+\\s");
+        Pattern p3 = Pattern.compile("[^a-zA-Z0-9\\-\\.\\_\\-\\,\\;\\?\\!\\s\\(\\)\\:\\/\\%]");
+        Pattern p4 = Pattern.compile("(\\..)[\\.]+");
+        Pattern p5 = Pattern.compile("\\.[\\s]+");
+        Pattern p6 = Pattern.compile("\\s[\\s]+");
 
         if(s == null || s.equals(""))
             return null;
 
-
         /* Elimino i '-' alla fine di ogni riga */
-        m = es0.matcher(s);
+        m = p0.matcher(s);
         s = m.replaceAll("");
         /* Sostituisco i siti (www || http) con spazi bianchi */
-        m = es1.matcher(s);
+        m = p1.matcher(s);
         s = m.replaceAll(" ");
         /* Sostituisco i siti http aventi il riferimento alla pagine web con spazio bianchi */
-        m = es2.matcher(s);
+        m = p2.matcher(s);
        	s = m.replaceAll(" ");
         /* Sostituisco i caratteri speciali con spazio bianco */
-        m = es3.matcher(s);
+        m = p3.matcher(s);
         s = m.replaceAll(" ");
         /* Sostituisco la sequenza consecutiva di puntini > 3 con spazio bianco */
-        m = es4.matcher(s);
+        m = p4.matcher(s);
         s = m.replaceAll(" ");
         /* Elimino tutti i break line */
         s = s.replaceAll("\n", " ");
-        /* Inserisco dopo i '.' i break line solo se la lettera dopo è maiuscola */
-        m = es5.matcher(s);
+        /* Inserisco dopo i '.' i break line */
+        m = p5.matcher(s);
         s = m.replaceAll(".\n");
         /* Sostituisco la sequenza di spazi bianchi > 2 con un solo spazio bianco */
-        m = es6.matcher(s);
+        m = p6.matcher(s);
         s = m.replaceAll(" ");
 
         return s;
+    }
+    
+    /** 
+     
+        @return
+     
+    */
+    public String getPathPdf()
+    {
+    	return this.pathPdf;
+    }
+    
+    /** 
+     
+        @param pathPdf
+        
+    */
+    public void setPathPdf(String pathPdf)
+    {
+    	this.pathPdf = new String(pathPdf);
+    }
+    
+    /**
+    
+     * @return
+     
+    */
+    public String getPathTxt()
+    {
+    	return this.pathTxt;
+    }
+    
+    /** 
+    
+    @param pathPdf
+    
+    */
+    public void setPathTxt(String pathTxt)
+    {
+    	this.pathTxt = new String(pathTxt);
+    }
+    
+    /**
+    
+     * @return
+     
+    */
+    public String getTextUtf8()
+    {
+    	return this.textUtf8;
+    }
+    
+    /** 
+    
+    @param pathPdf
+    
+    */
+    public void setTextUtf8(String textUtf8)
+    {
+    	this.textUtf8 = new String(textUtf8);
     }
 }

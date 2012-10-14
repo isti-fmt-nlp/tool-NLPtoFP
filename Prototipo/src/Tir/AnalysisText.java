@@ -1,5 +1,3 @@
-package Tir;
-
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -13,33 +11,36 @@ import java.util.regex.*;
 class AnalysisText extends PdfToTxt
 {
     /* URL a cui ci dobbiamo connettere per ottenere le analisi */
-    private final String http_URL ="http://www.ilc.cnr.it/dylanlab/index.php?page=texttools&hl=en_US&showtemplate=false";
+    private final String URL_ANALYSIS ="http://www.ilc.cnr.it/dylanlab/index.php?page=texttools&hl=en_US&showtemplate=false";
 
     /* ArrayList contenenti i vari termini rilevanti */
-    public ArrayList<String> Relevant = new ArrayList<String>();
-    public ArrayList<String> Domain = new ArrayList<String>();
-    public ArrayList<String> Single = new ArrayList<String>();
+    public ArrayList <String> termRelevant, termDomain, termSingle;
     
     /* ArrayList contenenti le path dove sono situate le pagine Html */
-    public ArrayList<String> Path_html = new ArrayList<String>();
+    private ArrayList<String> pageHtml;
 
     /** Costruttore
 
- 	      @param pathPDF: Stringa contenente la path dove è situato il pdf da analizzare
+ 	      @param pathPdf: Stringa contenente la path dove è situato il pdf da analizzare
 
 	       @note Vengono inizializzate le path del file.pdf e del file.txt
 
     */
-    public AnalysisText(String pathPDF)
+    public AnalysisText(String s)
     {
-        super(pathPDF);
+        super(s);
     }
 
     /** Funzione carica i dati della precedente analisi */
-    public void LoadAnalysis()
+    public void loadAnalysis()
     {
+    	initializePageHtml();
+        initializeTermRelevant();
+        initializeTermDomain();
+        initializeTermSingle();
+    	
         for(int i = 0; i < 4; i++)
-            Path_html.add(path_pdf.substring(0, path_pdf.length()-4) + i +".html");
+            pageHtml.add(getPathPdf().substring(0, getPathPdf().length()-4) + i +".html");
 
         for(int i = 0; i < 3; i++)
         {
@@ -49,23 +50,24 @@ class AnalysisText extends PdfToTxt
 
                 BufferedReader reader =
                    new BufferedReader(
-                        new FileReader(path_pdf.substring(0, path_pdf.length()-4) + i +".txt"));
+                        new FileReader(
+                        		getPathPdf().substring(0, getPathPdf().length()-4) + i +".txt"));
 
                 while( (s = reader.readLine()) != null )
                 {
                     if(!s.equals("") && !s.equals("\n") && !s.equals(" "))
                     {
                         if(i == 0)
-                            Relevant.add(s);
+                        	termRelevant.add(s);
 
                         else if(i == 1)
-                            Domain.add(s);
+                        	termDomain.add(s);
 
                         else
-                            Single.add(s);
+                        	termSingle.add(s);
                     }
                 }
-                reader.close();
+                reader.close(); 
             }
 
             catch (FileNotFoundException ex)
@@ -79,6 +81,9 @@ class AnalysisText extends PdfToTxt
                 return ;
             }
         }
+        Collections.sort(termRelevant);
+        Collections.sort(termDomain);
+        Collections.sort(termSingle);
     }
 
     /** Funzione si connette al sito "http_URL" per ottenere le
@@ -88,79 +93,85 @@ class AnalysisText extends PdfToTxt
         @return false: Se vi sono stati errori.
 
     */
-    public boolean RunAnalysis()
+    public boolean runAnalysis()
     {
         int i = 0;
 
-        ArrayList<String> AUrl = null;
+        ArrayList <String> listUrl = null;
 
-        if(Convert() == null)
+        initializePageHtml();
+
+        if(convertFile() == null)
             return false;
 
-        if(((AUrl = (ArrayList<String>) ConnectionAnalysis()))==null)
+        if(((listUrl = (ArrayList<String>) connectionAnalysis()))==null)
             return false;
 
         try
         {
-            while(i < AUrl.size())
+            while(i < listUrl.size())
             {
-                String HttpURL = AUrl.get(i), p = "", temp = null, s = null;
+                String httpURL = listUrl.get(i), p = "", temp = null, s = null;
 
-                URL myURL = new URL(HttpURL);
+                URL myURL = new URL(httpURL);
 
-                HttpURLConnection con =
+                HttpURLConnection huc =
                    (HttpURLConnection)
                         myURL.openConnection();
 
-                con.setRequestMethod("GET");
-                con.setDoOutput(true);
-                con.setDoInput(true);
+                huc.setRequestMethod("GET");
+                huc.setDoOutput(true);
+                huc.setDoInput(true);
 
-                DataOutputStream output =
+                DataOutputStream dot =
                     new DataOutputStream(
-                        con.getOutputStream());
+                        huc.getOutputStream());
 
-                output.close();
+                dot.close();
 
-                BufferedReader buffer =
+                BufferedReader br =
                     new BufferedReader(
-                        new InputStreamReader(con.getInputStream()));
+                        new InputStreamReader(huc.getInputStream()));
 
-                while ((temp=buffer.readLine()) != null)
+                while ((temp=br.readLine()) != null)
                     p = p + temp;
 
-                buffer.close();
+                br.close();
 
-                if(!Refresh(p))
+                if(!refreshAnalysis(p))
                 {
-                    con.disconnect();
+                    huc.disconnect();
+                    
                     Thread.sleep(10000);
+                    
                     continue;
                 }
-                if((s = CleanHTML(p))!= null)
+                if((s = cleanHTML(p))!= null)
                 {
                     /* Pagine Html contenenti le analisi */
-                    PrintWriter write =
+                    PrintWriter pw =
                         new PrintWriter(
                             new BufferedWriter(
-                                new FileWriter(path_pdf.substring(0, path_pdf.length()-4) + i +".html",false)));
+                                new FileWriter(
+                                		getPathPdf().substring(0, getPathPdf().length()-4) + i +".html",false)));
 
-                    write.print(s);
-                    write.close();
-                    Path_html.add(path_pdf.substring(0, path_pdf.length()-4) + i +".html");   
+                    pw.print(s);
+                    pw.close();
+                    
+                    pageHtml.add(getPathPdf().substring(0, getPathPdf().length()-4) + i +".html");   
 
                     if(i == 2)
                     {
-                        File f = new File(path_pdf.substring(0, path_pdf.length()-4) + i +".html");
+                        File f = new File(getPathPdf().substring(0, getPathPdf().length()-4) + i +".html");
 
-                        if(!TermExtraction(f))
+                        if(!termRDS(f))
                             return false;
                     }
                 }
                 else
                     return false;
 
-                con.disconnect();
+                huc.disconnect();
 
                 i = i + 1;
             }
@@ -196,57 +207,57 @@ class AnalysisText extends PdfToTxt
         @return false: Se vi sono stati errori
 
     */
-    private Collection<String> ConnectionAnalysis()
+    private Collection<String> connectionAnalysis()
     {
-        String text = text_utf8, p = " ", temp, jid = null;
+        String p = " ", temp, jid = null;
 
-        ArrayList<String> AUrl = new ArrayList<String>();
+        ArrayList<String> listUrl = new ArrayList<String>();
 
         try
         {
-            String query = "input_text=" + URLEncoder.encode(text, "UTF-8");
+            String query = "input_text=" + URLEncoder.encode(getTextUtf8(), "UTF-8");
 
-            URL myURL = new URL(http_URL);
+            URL myURL = new URL(URL_ANALYSIS);
 
-            HttpURLConnection con =
+            HttpURLConnection huc =
                 (HttpURLConnection)
                     myURL.openConnection();
 
-            con.setRequestMethod("POST");
-            con.setRequestProperty("Content-lenght", String.valueOf(query.length()));
-            con.setDoOutput(true);
-            con.setDoInput(true);
+            huc.setRequestMethod("POST");
+            huc.setRequestProperty("Content-lenght", String.valueOf(query.length()));
+            huc.setDoOutput(true);
+            huc.setDoInput(true);
 
-            DataOutputStream output =
+            DataOutputStream dos =
                 new DataOutputStream(
-                    con.getOutputStream());
+                    huc.getOutputStream());
 
-            output.writeBytes(query);
-            output.close();
+            dos.writeBytes(query);
+            dos.close();
 
-            BufferedReader buffer =
+            BufferedReader br =
                 new BufferedReader(
-                    new InputStreamReader(con.getInputStream()));
+                    new InputStreamReader(huc.getInputStream()));
 
-            while ((temp=buffer.readLine()) != null)
+            while ((temp=br.readLine()) != null)
                 p = p + temp;
 
-            buffer.close();
+            br.close();
 
-            if((jid = FindJid(p)) == null)
+            if((jid = findJid(p)) == null)
             {
                 System.out.println("Error not find yid");
                 return null;
             }
 
-            AUrl.add((http_URL + jid));
-            AUrl.add((http_URL + jid + "&tmid=tm_sentence_splitter"));
-            AUrl.add((http_URL + jid + "&tmid=tm_term_extractor"));
-            AUrl.add((http_URL + jid + "&tmid=tm_parser"));
+            listUrl.add((URL_ANALYSIS + jid));
+            listUrl.add((URL_ANALYSIS + jid + "&tmid=tm_sentence_splitter"));
+            listUrl.add((URL_ANALYSIS + jid + "&tmid=tm_term_extractor"));
+            listUrl.add((URL_ANALYSIS + jid + "&tmid=tm_parser"));
 
-            con.disconnect();
+            huc.disconnect();
 
-            return AUrl;
+            return listUrl;
         }
         catch (MalformedURLException ex)
         {
@@ -274,7 +285,7 @@ class AnalysisText extends PdfToTxt
         @return null: Se jid non ci è stato assegnato
 
     */
-    private String FindJid(String s)
+    private String findJid(String s)
     {
         int i;
 
@@ -303,7 +314,7 @@ class AnalysisText extends PdfToTxt
         @return false: Analisi non terminata
 
     */
-    private boolean Refresh(String s)
+    private boolean refreshAnalysis(String s)
     {
         if(s == null || s.equals(""))
             return false;
@@ -327,7 +338,7 @@ class AnalysisText extends PdfToTxt
      	@return null: Se vi sono stati errori
 
     */
-    private String CleanHTML(String s)
+    private String cleanHTML(String s)
     {
         int i, j, t, u;
 
@@ -352,9 +363,13 @@ class AnalysisText extends PdfToTxt
         @return false: Se vi sono stati errori
 
     */
-    private boolean TermExtraction(File f)
+    private boolean termRDS(File f)
     {
         int i = 2;
+
+        initializeTermRelevant();
+        initializeTermDomain();
+        initializeTermSingle();
 
         Pattern es1 = Pattern.compile("<[^<]+?>");
         Pattern es2 = Pattern.compile("\\s[\\s]+");
@@ -382,12 +397,16 @@ class AnalysisText extends PdfToTxt
 
             m = es1.matcher(p);
             p = m.replaceAll("\n");
+            /* */
             m = es2.matcher(p);
             p = m.replaceAll(" ");
+            /* */
             m = es3.matcher(p);
             p = m.replaceAll(" %% ");
+            /* */
             m = es4.matcher(p);
             p = m.replaceAll(" ");
+            /* */
             m = es5.matcher(p);
             p = m.replaceAll("%%");
             temp = p.split("%%");
@@ -395,21 +414,19 @@ class AnalysisText extends PdfToTxt
             while(!temp[i].trim().equals(t[1]))
             {
                 if(!temp[i].equals("") && !temp[i].equals("\n") && !temp[i].equals(" "))
-                {
-                    Relevant.add(temp[i].trim());
-                    i = i + 1;
-                }
+                    termRelevant.add(temp[i].trim());
+                    
+                i = i + 1;
             }
-
+            
             i = i + 1;
 
             while(!temp[i].trim().equals(t[2]))
             {
                 if(!temp[i].equals("") && !temp[i].equals("\n") && !temp[i].equals(" "))
-                {
-                    Domain.add(temp[i].trim());
-                    i = i + 1;
-                }
+                    termDomain.add(temp[i].trim());
+                    
+                i = i + 1;
             }
 
             i = i + 1;
@@ -417,30 +434,39 @@ class AnalysisText extends PdfToTxt
             while(i < temp.length)
             {
                 if(!temp[i].equals("") && !temp[i].equals("\n") && !temp[i].equals(" "))
-                {
-                    Single.add(temp[i].trim());
-                    i = i + 1;
-                }
+                    termSingle.add(temp[i].trim());
+                    
+                i = i + 1;
             }
+            
+            Collections.sort(termRelevant);
+            Collections.sort(termDomain);
+            Collections.sort(termSingle);
 
             for(i = 0; i < 3; i++)
             {
                 PrintWriter writer =
                     new PrintWriter(
                         new BufferedWriter(
-                            new FileWriter(path_pdf.substring(0, path_pdf.length()-4) + i + ".txt")));
-
+                            new FileWriter(getPathPdf().substring(0, getPathPdf().length()-4) + i + ".txt")));
+                
+                /* Controllare vuoto ?*/
                 if(i == 0)
-                    for(int j = 0; j< Relevant.size(); j++)
-                        writer.print(Relevant.get(j) + "\n");
+                {
+                    for(int j = 0; j< termRelevant.size(); j++)
+                        writer.print(termRelevant.get(j) + "\n");
+                }
 
                 else if(i == 1)
-                    for(int j = 0; j< Domain.size(); j++)
-                        writer.print(Domain.get(j) + "\n");
-
+                {
+                    for(int j = 0; j< termDomain.size(); j++)
+                        writer.print(termDomain.get(j) + "\n");
+                }
                 else
-                    for(int j = 0; j< Single.size(); j++)
-                        writer.print(Single.get(j) + "\n");
+                {
+                    for(int j = 0; j< termSingle.size(); j++)
+                        writer.print(termSingle.get(j) + "\n");
+                }
 
                 writer.close();
             }
@@ -456,5 +482,34 @@ class AnalysisText extends PdfToTxt
             System.out.println("Exception TermExtraction [1]: " + e.getMessage());
             return false;
         }
+    }
+
+    private void initializeTermRelevant()
+    {
+    	termRelevant = null;
+    	termRelevant = new ArrayList<String>();
+    }
+    
+    private void initializeTermDomain()
+    {
+    	termDomain = null;
+    	termDomain = new ArrayList<String>();
+    }
+    
+    private void initializeTermSingle()
+    {
+    	termSingle = null;
+    	termSingle = new ArrayList<String>();
+    }
+    
+    private void initializePageHtml()
+    {
+    	pageHtml = null;
+    	pageHtml = new ArrayList<String>();
+    }
+    
+    public String getPageHtml(int i)
+    {
+    	return pageHtml.get(i);
     }
 }
