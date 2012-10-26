@@ -1,3 +1,5 @@
+package project;
+
 /**
 	La classe ThreadRecordPdf ha come obiettivo di assegnare
 	un RecordPdf a un thread. Ogni Thread analizzerà parallelamente,
@@ -13,9 +15,9 @@ public class ThreadRecordPdf extends Thread
     
     /** Costruttore
 
- 	      @param pathPDF: Stringa contenente la path dove è situato il pdf da analizzare
+ 	      @param pathPdf: Stringa contenente la path dove è situato il pdf da analizzare
 
-	      @note Vengono inizializzate le path del file.pdf e del file.txt
+	      @note Vengono inizializzate le path del file.pdf
 
     */
     public ThreadRecordPdf(String pathPdf)
@@ -24,9 +26,9 @@ public class ThreadRecordPdf extends Thread
     }
     
     /** 
-        Funzione eseguita da ogni Thread. Ognuno di essi esegue 
+        Funzione eseguita da ogni thread. Ognuno di essi esegue 
         l'analisi del file.pdf assegnatogli
-     */
+    */
     @Override
     public void run()
     {

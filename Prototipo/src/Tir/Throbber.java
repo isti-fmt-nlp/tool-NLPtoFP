@@ -1,8 +1,12 @@
+package project;
+
 import java.awt.*;
 import javax.swing.*;
 
 public class Throbber extends JPanel
 {
+	public Image imageThrobber = null;
+	
 	public Throbber()
 	{
 		setLayout(null);
@@ -12,9 +16,8 @@ public class Throbber extends JPanel
 	@Override
 	public void paint(Graphics g)
 	{
-		Image im = Toolkit.getDefaultToolkit().getImage(
-				"/Users/danielecicciarella/Desktop/Spinning_wheel_throbber.gif");
-		
-		g.drawImage(im, 200, 0, 32, 32, null);
+		imageThrobber = Toolkit.getDefaultToolkit().getImage(
+				"/Users/danielecicciarella/Desktop/Spinning_wheel_throbber.gif");	
+		g.drawImage(imageThrobber, 200, 0, 32, 32, null);
 	}
 }
