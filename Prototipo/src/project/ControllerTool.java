@@ -1,20 +1,15 @@
 package project;
 
-import java.awt.FileDialog;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Observable;
 import java.util.Observer;
-
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 
 import project.ModelTool.ProjectStatus;
 
