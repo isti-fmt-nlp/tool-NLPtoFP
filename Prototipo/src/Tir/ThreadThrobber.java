@@ -1,6 +1,6 @@
+package project;
+
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.*;
 
@@ -8,15 +8,15 @@ public class ThreadThrobber extends Thread
 {
 	private Throbber throbber = new Throbber();
 	
-	private boolean runThrobber = false;
+	private boolean runThrobber = true;
 	
 	private JFrame jFrameThrobber = new JFrame();
 
 	@Override 
 	public void run()
 	{
+		/* Creo il jlabel di avvertimento */
 		JLabel jl = new JLabel("A few minutes the analysis ends...");
-		
 		jl.setBounds(new Rectangle(20,10,250,30));
 		
 		jFrameThrobber.setLayout(null);
@@ -26,16 +26,15 @@ public class ThreadThrobber extends Thread
 		jFrameThrobber.add(throbber);
 		jFrameThrobber.setVisible(true);
 		
-		while(!isRunThrobber())
+		/* Attendo che l'analisi sia terminata */
+		while(isRunThrobber())
 			jFrameThrobber.repaint();
 		
 		jFrameThrobber.setVisible(false);
 		jFrameThrobber.removeAll();
-		jFrameThrobber.setBounds(new Rectangle(0,0,0,0));
-		
+		jFrameThrobber.setBounds(new Rectangle(0,0,0,0));	
 		JOptionPane.showMessageDialog(
 						jFrameThrobber,"The analysis file is finished...","Finish Analysis", JOptionPane.WARNING_MESSAGE);
-		
 		jFrameThrobber.setVisible(false);
 		jFrameThrobber.dispose();
 	}

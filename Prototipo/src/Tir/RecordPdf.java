@@ -1,3 +1,4 @@
+package project;
 
 import java.io.*;
 
@@ -8,15 +9,12 @@ import java.io.*;
 public final class RecordPdf extends AnalysisText
 {
     /** Costruttore
-
- 	      @param pathPDF: Stringa contenente la path dove è situato il pdf da analizzare
-
-	       @note Vengono inizializzate le path del file.pdf e del file.txt
-
-    */
-    public RecordPdf(String s)
+     * 
+     * @param pathPdf: Stringa contenente la path dove è situato il pdf da analizzare
+     */
+    public RecordPdf(String pathPdf)
     {
-        super(s);
+        super(pathPdf);
     }
 
     /** Funzione che carica tutte le informazioni del file.pdf
@@ -29,16 +27,20 @@ public final class RecordPdf extends AnalysisText
         /* Carico i dati del file.pdf già in precedenza calcolati */
         if((new File(this.getPathTxt()).exists()) && (new File(this.getPathTxt()).lastModified() > new File(this.getPathPdf()).lastModified()))
         {
-            this.loadAnalysis();
-            return true;
+            if(loadAnalysis())
+            	return true;
+            
+            else 
+            	return false;
         }
         /* Calcolo i dati del nuovo file.pdf */
         else
         {
-            if(!runAnalysis())
-                return false;
-
-            else return true;
+            if(runAnalysis())
+                return true;
+            
+            else 
+            	return false;
         }
     }
 }

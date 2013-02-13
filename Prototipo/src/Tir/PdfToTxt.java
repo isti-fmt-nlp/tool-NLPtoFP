@@ -1,16 +1,12 @@
+package project;
+
 import java.io.*;
 import java.util.regex.*;
-import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
 
-/**
-   La classe PdfToTxt ha come obiettivo di convertire il file.pdf
-   in un file.txt. Il contenuto del file.txt avrà codifica UTF-8 ed
-   il testo sarà "ripulito".
-*/
-public class PdfToTxt
+public class PdfToTxt implements PdfToTxtI
 {
 	/* Percorso in cui si trova il file.pdf */
     private String pathPdf = null;
@@ -28,40 +24,35 @@ public class PdfToTxt
 		  @return Vengono inizializzate le path del file.pdf e del file.txt
 
     */
-    public PdfToTxt(String s)
+    public PdfToTxt(String pathPdf)
     {
-    	/* Settiamo path del file.pdf */
-        setPathPdf(s);       
-        /* Settiamo path del file.txt */
-        setPathTxt(pathPdf.substring(0, pathPdf.length()-4) + ".txt");
+    	/* Settiamo le path */
+        this.pathPdf = pathPdf;
+        this.pathTxt = pathPdf.substring(0, pathPdf.length()-4) + ".txt";
     }
 
-    /** Funzione per convertire file.pdf in file.txt "pulito" e con codifica "UTF-8
 
-     	@return f: File con codifica UTF-8 e pulitura file
-     	@return null: Se vi sono stati errori
-
-    */
     public File convertFile()
     {
-        PrintStream ps = null;
-
         File f = new File(pathTxt);
 
-        setTextUtf8(cleanString(pdfToStringUTF8()));
-        
-        if(getTextUtf8() == null)
+        /*   
+            Estraiamo e puliamo il contenuto del file pdf
+        */
+        if((textUtf8 = cleanString(convertPdfToStringUTF8()))==null)
         	return null;
-
+        
         try
         {
             /*
-               Apro in scrittura il file.txt scrivendoci
-               il contenuto di "text_UTF_8"
+               Apro in scrittura il file txt scrivendoci
+               il contenuto di "textUtf8"
             */
-            ps =
-                new PrintStream(
-                    new FileOutputStream(pathTxt),false,"UTF-8");
+        	PrintStream ps =
+            		new PrintStream(
+            				new FileOutputStream(pathTxt),false,"UTF-8");      	
+        	ps.print(textUtf8);
+            ps.close();
         }
         catch (UnsupportedEncodingException ex)
         {
@@ -73,12 +64,25 @@ public class PdfToTxt
             System.out.println("Exception Convert [1]: " + ex.getMessage());
             return null;
         }
-
-        ps.print(getTextUtf8());
-        ps.close();
-
         return f;
     }
+    
+    public String getPathPdf()
+    {
+    	return this.pathPdf;
+    }
+    
+    public String getPathTxt()
+    {
+    	return this.pathTxt;
+    }
+    
+    public String getTextUtf8()
+    {
+    	return this.textUtf8;
+    }
+    
+    /* -= FUNZIONI Ausiliarie =- */
 
     /** Funzione per convertire file.pdf in stringa
 
@@ -87,36 +91,24 @@ public class PdfToTxt
        	@return null: Se vi sono stati errori
 
     */
-    private String pdfToStringUTF8()
+	private String convertPdfToStringUTF8()
     {
+	    File f = new File(pathPdf);
+
         PDFParser pp = null;
-
-        COSDocument cd = null;
-
-        File f = new File(pathPdf);
-
+		
         try
         {
-            /*
-               Apro in lettura il file.pdf ed il suo contenuto
-               è convertito in stringa con codifica UTF-8
+            /* 
+               Estraggo il contenuto del file pdf con codifica UTF-8
             */
-            pp =
-                new PDFParser(
-                    new FileInputStream(f));
-
-            pp.parse();
-
-            cd = pp.getDocument();
-
-            /* Stringa con codifica specificata */
-            String s =
-                new String(
-                    new PDFTextStripper().getText(
-                        new PDDocument(cd)).getBytes(),"UTF-8");
-
-            cd.close();
-
+            pp = new PDFParser(new FileInputStream(f));				
+            pp.parse();              
+            
+            String s = new String(
+            		new PDFTextStripper().getText(
+            			new PDDocument(pp.getDocument())).getBytes(),"UTF-8");
+			
             return s;
         }
         catch (FileNotFoundException e)
@@ -180,65 +172,5 @@ public class PdfToTxt
         s = m.replaceAll(" ");
 
         return s;
-    }
-    
-    /** 
-     
-        @return
-     
-    */
-    public String getPathPdf()
-    {
-    	return this.pathPdf;
-    }
-    
-    /** 
-     
-        @param pathPdf
-        
-    */
-    public void setPathPdf(String pathPdf)
-    {
-    	this.pathPdf = new String(pathPdf);
-    }
-    
-    /**
-    
-     * @return
-     
-    */
-    public String getPathTxt()
-    {
-    	return this.pathTxt;
-    }
-    
-    /** 
-    
-    @param pathPdf
-    
-    */
-    public void setPathTxt(String pathTxt)
-    {
-    	this.pathTxt = new String(pathTxt);
-    }
-    
-    /**
-    
-     * @return
-     
-    */
-    public String getTextUtf8()
-    {
-    	return this.textUtf8;
-    }
-    
-    /** 
-    
-    @param pathPdf
-    
-    */
-    public void setTextUtf8(String textUtf8)
-    {
-    	this.textUtf8 = new String(textUtf8);
     }
 }
