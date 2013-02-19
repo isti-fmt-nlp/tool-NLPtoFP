@@ -3,6 +3,8 @@
  * @author Daniele Cicciarella
  *
  */
+package view;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,9 +27,6 @@ public class ModelParserUTF8
 	/* Stringa contenente il percorso del file */
 	private String pathFile = null;
 	
-	/* Stringa contenente il percorso del progetto */
-	private String pathProject = null;
-	
 	/* Stringa contenente il percorso del nuovo file */
 	private String pathFileUTF8 = null;
 	
@@ -42,7 +41,6 @@ public class ModelParserUTF8
 	public ModelParserUTF8(String pathFile, String pathProject) 
 	{
 		this.pathFile = pathFile;
-		this.pathProject = pathProject;
 		this.pathFileUTF8 = 
 				new String(pathProject + "/" + new File(pathFile).getName().substring(0, new File(pathFile).getName().length() - 4) + ".txt");
 	}

@@ -3,6 +3,10 @@
  * @author Daniele Cicciarella
  *
  */
+package main;
+
+import view.*;
+
 public final class CommonalityMiningTool 
 {
 	public static void main(String[] args) 

@@ -3,6 +3,8 @@
  * @author Daniele Cicciarella
  *
  */
+package view;
+
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
@@ -470,18 +472,31 @@ public class ViewProject implements Observer, Runnable
 	{
 		if(al == null)
 		{
+			frameProject.remove(panelLateralProject.getPanelTree());
+			frameProject.remove(panelCentralProject.getPanelAnalysis());
+			
+			panelLateralProject = new ViewPanelLateral(menuTreeProject);
+			
+			panelCentralProject = new ViewPanelCentral(buttonCommonalitiesEnd);
+			
 			panelLateralProject.createTree(s);
 	    	panelLateralProject.getTree().addMouseListener(controllerProject);
 	    	buttonProjectSP.setEnabled(true);
 	    	buttonProjectLF.setEnabled(true);
 	    	menuProjectD.setEnabled(true);
 	    	menuProjectS.setEnabled(true);
-	    	frameProject.remove(panelLateralProject.getPanelTree());
 	    	frameProject.add(panelLateralProject.getPanelTree());	    	
 	    	frameProject.repaint();   
 		}
 		else
 		{
+			frameProject.remove(panelLateralProject.getPanelTree());
+			frameProject.remove(panelCentralProject.getPanelAnalysis());   
+			
+			panelLateralProject = new ViewPanelLateral(menuTreeProject);
+			
+			panelCentralProject = new ViewPanelCentral(buttonCommonalitiesEnd);
+		
 			panelLateralProject.loadTree(s, al);
 	    	panelLateralProject.getTree().addMouseListener(controllerProject);
 	    	panelLateralProject.setAnalysisLeafTree(
@@ -489,10 +504,9 @@ public class ViewProject implements Observer, Runnable
 	    	buttonProjectSP.setEnabled(true);
 	    	buttonProjectLF.setEnabled(true);
 	    	menuProjectD.setEnabled(true);
-	    	menuProjectS.setEnabled(true);
-	    	frameProject.remove(panelLateralProject.getPanelTree());
+	    	menuProjectS.setEnabled(true);	    		
 	    	frameProject.add(panelLateralProject.getPanelTree());	    	
-	    	frameProject.repaint();   
+	    	frameProject.repaint();   	    	
 		}
 	}
 	

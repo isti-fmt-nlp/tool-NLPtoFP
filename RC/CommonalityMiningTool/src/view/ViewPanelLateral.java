@@ -3,20 +3,16 @@
  * @author Daniele Cicciarella
  *
  */
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics;
+package view;
+
 import java.awt.Rectangle;
-import java.awt.SystemColor;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTree;
@@ -24,11 +20,15 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreePath;
 
 public class ViewPanelLateral extends JFrame
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	/* JPanel in cui viene inserito l'albero del progetto */
 	private JPanel panelTree = new JPanel();
 	
@@ -289,77 +289,6 @@ public class ViewPanelLateral extends JFrame
 				menuTree.show(me.getComponent(), me.getX(), me.getY());
 				me.consume();
 			}	
-		}
-	}
-	
-	/** Gestisce la grafica dell'albero del progetto */
-	class ColorTree extends JLabel implements TreeCellRenderer
-	{
-		
-		private String nameTree = null;
-		
-		private DefaultMutableTreeNode rootTree = null;
-		
-		private ArrayList <String> analysisNodeTree = new ArrayList <String> ();
-			
-		private ImageIcon folderTree = new ImageIcon("./src/DATA/Tree/folder.gif");
-		
-		private ImageIcon squareRedTree = new ImageIcon("./src/DATA/Tree/squarer.gif");
-		
-		private ImageIcon squareGreenTree = new ImageIcon("./src/DATA/Tree/squareg.gif");
-
-		private boolean bSelected = false;
-		
-		public ColorTree(String nameTree, DefaultMutableTreeNode rootTree, ArrayList <String> analysisNodeTree)
-		{
-			this.nameTree = nameTree;
-			this.rootTree = rootTree;
-			this.analysisNodeTree = analysisNodeTree;
-		}
-		
-		@Override
-		public Component getTreeCellRendererComponent( JTree tree,
-						Object value, boolean bSelected, boolean bExpanded,
-								boolean bLeaf, int iRow, boolean bHasFocus )
-		{
-			this.bSelected = bSelected;
-			
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
-			
-			String labelText = (String)node.getUserObject();		
-			
-			if(labelText.equals(nameTree))
-				setIcon(folderTree);
-			
-			else if(labelText.equals("Input"))
-				setIcon(folderTree);
-				
-			else if( labelText.equals("Commonalities"))
-				setIcon(folderTree);
-			
-			else 
-			{
-				for(int i = 0; i < analysisNodeTree.size(); i++)
-				{
-					if(labelText.equals(rootTree.getChildAt(0).getChildAt(i).toString()) && analysisNodeTree.get(i).equals("NO"))
-						setIcon(squareRedTree);
-
-					else if(labelText.equals(rootTree.getChildAt(0).getChildAt(i).toString()) && analysisNodeTree.get(i).equals("YES"))
-						setIcon(squareGreenTree);		
-				}
-			}
-			setText(labelText);			
-			return this;
-		}
-		
-		public void paint(Graphics g)
-		{
-			Color c = bSelected ? SystemColor.textHighlight : Color.WHITE;
-			
-			g.setColor(c);
-			g.fillRect(0, 0, getWidth() - 1, getHeight() - 1);
-			
-			super.paint(g);
 		}
 	}
 }

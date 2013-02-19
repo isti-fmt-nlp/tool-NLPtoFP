@@ -3,6 +3,8 @@
  * @author Daniele Cicciarella
  *
  */
+package view;
+
 import java.io.File;
 
 public class ModelFile extends ModelAnalysis implements Runnable

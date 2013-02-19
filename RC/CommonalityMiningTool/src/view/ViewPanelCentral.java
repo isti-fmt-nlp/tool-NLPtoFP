@@ -3,10 +3,14 @@
  * @author Daniele Cicciarella
  *
  */
+package view;
+
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -363,20 +367,39 @@ public class ViewPanelCentral
 			for(int i = 0; i < alCC.size(); i++)
 			{
 				checkBoxCommonalities.add(new JCheckBox(alCC.get(i)));
-				checkBoxCommonalities.get(i).setSelected(true);
-				checkBoxCommonalities.get(i).setEnabled(false);
+				
+				if(alCS.contains(alCC.get(i)))
+					checkBoxCommonalities.get(i).setSelected(true);
+				else
+					checkBoxCommonalities.get(i).setSelected(false);
+				
 				panelCommonalities.add(checkBoxCommonalities.get(i));
 			}
 			
 			for(int i = 0; i < alCS.size(); i++)
 			{
-				System.out.println(alCS.get(i));
 				if(!alCC.contains(alCS.get(i)))
 				{
 					checkBoxCommonalities.add(new JCheckBox(alCS.get(i)));
-					checkBoxCommonalities.get(i).setSelected(true);
-					checkBoxCommonalities.get(i).setForeground(Color.RED);
-					panelCommonalities.add(checkBoxCommonalities.get(i));		
+					checkBoxCommonalities.get(checkBoxCommonalities.size()-1).setSelected(true);
+					checkBoxCommonalities.get(checkBoxCommonalities.size()-1).setForeground(Color.RED);
+					checkBoxCommonalities.get(checkBoxCommonalities.size()-1).addMouseListener(
+							new MouseAdapter()
+							{			
+									@Override
+									public void mouseClicked(MouseEvent me) 
+									{							
+										if(me.getButton() == 3)
+										{
+											for(int i = 0; i < checkBoxCommonalities.size(); i++)
+											{
+												if(checkBoxCommonalities.get(i).equals(me.getSource()))
+													removeCheckBox(checkBoxCommonalities.get(i).getText());
+											}	
+										}
+									}
+							});
+					panelCommonalities.add(checkBoxCommonalities.get(checkBoxCommonalities.size()-1));		
 				}
 			}
 		}
@@ -426,7 +449,43 @@ public class ViewPanelCentral
 		checkBoxCommonalities.add(new JCheckBox(s));
 		checkBoxCommonalities.get(checkBoxCommonalities.size()-1).setSelected(true);
 		checkBoxCommonalities.get(checkBoxCommonalities.size()-1).setForeground(Color.RED);
+		checkBoxCommonalities.get(checkBoxCommonalities.size()-1).addMouseListener(
+				new MouseAdapter()
+				{			
+						@Override
+						public void mouseClicked(MouseEvent me) 
+						{							
+							if(me.getButton() == 3)
+							{
+								for(int i = 0; i < checkBoxCommonalities.size(); i++)
+								{
+									if(checkBoxCommonalities.get(i).equals(me.getSource()))
+										removeCheckBox(checkBoxCommonalities.get(i).getText());
+								}	
+							}
+						}
+				});
 		panelCommonalities.add(checkBoxCommonalities.get(checkBoxCommonalities.size()-1));	
 		panelCommonalities.validate();
+	}
+	
+	/** Rimuove una JCheckBox dal tab delle commonalities candidates
+	 * 
+	 * @param s stringa contenente il nome da rimuovere
+	 */
+	private void removeCheckBox(String s) 
+	{
+		if(s == null)
+			return;
+		
+		for(int i = 0; i < checkBoxCommonalities.size(); i++)
+		{
+			if(s.equals(checkBoxCommonalities.get(i).getText()))
+			{
+				panelCommonalities.remove(checkBoxCommonalities.get(i));
+				checkBoxCommonalities.remove(i);
+				panelCommonalities.validate();
+			}
+		}
 	}
 }
