@@ -5,12 +5,21 @@
  */
 package main;
 
+import java.awt.Image;
+import java.awt.Toolkit;
+
+import com.apple.eawt.Application;
+
 import view.*;
 
 public final class CommonalityMiningTool 
 {
 	public static void main(String[] args) 
 	{
+		Application application = Application.getApplication();
+		Image image = Toolkit.getDefaultToolkit().getImage("./src/DATA/Program/CMT.png");
+		application.setDockIconImage(image);
+		
 		ModelProject modelProject = new ModelProject();
 		
 		ViewProject viewProject = new ViewProject(modelProject);

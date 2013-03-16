@@ -44,7 +44,11 @@ import org.xml.sax.helpers.DefaultHandler;
         	else if(i == 0 && l && !p)
         		nameInput.add(new String(ch, start, length));
         		
-        	else {}
+        	else 
+        	{
+        		n = r;
+        		r = n;
+        	}
         }
     	
     	@Override

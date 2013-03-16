@@ -175,7 +175,7 @@ public class ViewProject implements Observer, Runnable
 		buttonProjectLF.setBounds(new Rectangle(310,10,105,50));
 		buttonProjectLF.setEnabled(false);
 		
-		buttonProjectEC = new JButton("Extract Commonalities");
+		buttonProjectEC = new JButton("Extract Commonality");
 		buttonProjectEC.addActionListener(controllerProject);
 		buttonProjectEC.setBounds(new Rectangle(460,10,165,50));
 		buttonProjectEC.setEnabled(false);

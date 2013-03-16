@@ -358,7 +358,6 @@ public class ViewPanelCentral
 			{
 				checkBoxCommonalities.add(new JCheckBox(alCC.get(i)));
 				checkBoxCommonalities.get(i).setSelected(true);
-				checkBoxCommonalities.get(i).setEnabled(false);
 				panelCommonalities.add(checkBoxCommonalities.get(i));
 			}
 		}
