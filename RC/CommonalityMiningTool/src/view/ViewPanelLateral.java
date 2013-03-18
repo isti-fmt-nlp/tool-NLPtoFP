@@ -78,7 +78,7 @@ public class ViewPanelLateral extends JFrame
 
 		rootTree = new DefaultMutableTreeNode(s);
 		rootTree.add(new DefaultMutableTreeNode("Input"));
-		rootTree.add(new DefaultMutableTreeNode("Commonalities"));
+		rootTree.add(new DefaultMutableTreeNode("Commonality"));
 		
 		graficTree = new DefaultTreeModel(rootTree);
 			
@@ -116,7 +116,7 @@ public class ViewPanelLateral extends JFrame
 
 		rootTree = new DefaultMutableTreeNode(s);
 		rootTree.add(new DefaultMutableTreeNode("Input"));
-		rootTree.add(new DefaultMutableTreeNode("Commonalities"));
+		rootTree.add(new DefaultMutableTreeNode("Commonality"));
 		
 		graficTree = new DefaultTreeModel(rootTree);
 

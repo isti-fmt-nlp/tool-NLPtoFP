@@ -495,10 +495,10 @@ public class ModelProject extends Observable implements Runnable
 			
 			String s = "<table border=" + String.valueOf('"') + String.valueOf('2') + String.valueOf('"') + "align=" + String.valueOf('"') + "center" + String.valueOf('"') + ">";
 			
-			s += "<tr><th>n.</th><th>Commonalities Selected</th></tr>";
+			s += "<tr><th>n.</th><th>Selected Commonality</th></tr>";
 			
-			for(int i = 1; i < commonalitiesSelected.size(); i++)
-				s += "<tr><td>" + String.valueOf(i) + "</td><td>" + commonalitiesSelected.get(i) + "</td></tr>";
+			for(int i = 0; i < commonalitiesSelected.size(); i++)
+				s += "<tr><td>" + String.valueOf(i+1) + "</td><td>" + commonalitiesSelected.get(i) + "</td></tr>";
 			
 			s += "</table>";		
 			pw.print(s);
