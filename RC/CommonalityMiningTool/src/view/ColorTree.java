@@ -63,7 +63,7 @@ import javax.swing.tree.TreeCellRenderer;
 			else if(labelText.equals("Input"))
 				setIcon(folderTree);
 				
-			else if( labelText.equals("Commonalities"))
+			else if( labelText.equals("Commonality"))
 				setIcon(folderTree);
 			
 			else 

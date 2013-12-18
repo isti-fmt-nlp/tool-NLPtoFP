@@ -80,7 +80,7 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 			if((i = viewProject.deleteFiledDialog()) != 1)
 				modelProject.removeFileProject(i);
 		}
-		else if(ae.getActionCommand().equals("Extract Commonalities"))
+		else if(ae.getActionCommand().equals("Extract Commonality"))
 		{
 			viewProject.extractCommonalitiesdDialog();
 		}

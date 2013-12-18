@@ -146,7 +146,7 @@ public class ViewPanelCentral
 			{
 				case 0:
 				{
-					tabCommonalities[1].add("Commonalities Candidates", getTabCommonalitiesCandidates(alCC, alCS));
+					tabCommonalities[1].add("Commonality Candidates", getTabCommonalitiesCandidates(alCC, alCS));
 					break;
 				}
 				case 1:
@@ -154,7 +154,7 @@ public class ViewPanelCentral
 					if( s == null)
 						break;
 					
-					tabCommonalities[1].add("Commonalities Selected", getTabHTMLFile(s));		
+					tabCommonalities[1].add("Selected Commonality", getTabHTMLFile(s));		
 					break;
 				}
 				default: break;
@@ -173,12 +173,12 @@ public class ViewPanelCentral
 	public void refreshTabCommonalitesSelected(String s) 
 	{
 		if(tabCommonalities[1].getTabCount() != 2)
-			tabCommonalities[1].add("Commonalities Selected", getTabHTMLFile(s));
+			tabCommonalities[1].add("Selected Commonality", getTabHTMLFile(s));
 		
 		else
 		{
 			tabCommonalities[1].remove(1);
-			tabCommonalities[1].add("Commonalities Selected", getTabHTMLFile(s));
+			tabCommonalities[1].add("Selected Commonality", getTabHTMLFile(s));
 		}
 		
 		panelAnalysis.removeAll();
@@ -357,9 +357,8 @@ public class ViewPanelCentral
 			for(int i = 0; i < alCC.size(); i++)
 			{
 				checkBoxCommonalities.add(new JCheckBox(alCC.get(i)));
-				checkBoxCommonalities.get(i).setSelected(true);
-				checkBoxCommonalities.get(i).setEnabled(false);
-				panelCommonalities.add(checkBoxCommonalities.get(i));
+				checkBoxCommonalities.get(checkBoxCommonalities.size()-1).setSelected(true);
+				panelCommonalities.add(checkBoxCommonalities.get(checkBoxCommonalities.size()-1));
 			}
 		}
 		else
@@ -409,7 +408,7 @@ public class ViewPanelCentral
 				   ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		jsp.setBounds(15,30,490,260);;
 		
-		JLabel jl = new JLabel("Add term at the commonalities candidates:");
+		JLabel jl = new JLabel("Add term at the commonality candidates:");
 		jl.setBounds(16, 297, 400, 30);
 		
 		final JTextField jtf = new JTextField();

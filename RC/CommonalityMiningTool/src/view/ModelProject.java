@@ -62,7 +62,7 @@ public class ModelProject extends Observable implements Runnable
 	private ArrayList <String> commonalitiesSelected = null;
 	
 	/* boolean contenente lo stato del progetto */
-	private boolean [] stateProject = new boolean[2];
+	private boolean [] stateProject = {false, false};
 	
 	/** Thread: Attende la terminazione dei thread workerProject e calcala i commonalities candidates
 	 * 
@@ -154,8 +154,6 @@ public class ModelProject extends Observable implements Runnable
 			pathCommanalitiesCandidates = pathProject + "/CommanalitiesC.log";
 			pathCommanalitiesSelected = pathProject + "/CommanalitiesS.log";
 			pathCommanalitiesSelectedHTML = pathProject + "/CommanalitiesS.html";
-			stateProject[0] = false;
-			stateProject[1] = false;
 			
 			SAXParser parser = spf.newSAXParser();
 			parser.parse(pathXML, parserXML);
@@ -220,7 +218,8 @@ public class ModelProject extends Observable implements Runnable
 	 */
 	public File saveProject()
 	{		
-		String s = "<root>" + nameProject + "<node>Input";
+		String s ="<?xml version=" + String.valueOf('"') + "1.0" + String.valueOf('"') + " encoding=" + String.valueOf('"') + "UTF-8" + String.valueOf('"') + "?>" 
+				   + "<root>" + nameProject + "<node>Input";
 		
 		for(int i = 0; i < fileProject.size(); i++)
 			s += "<leaf>" + new File(fileProject.get(i).readPathFile()).getName() + "<path>" + fileProject.get(i).readPathFile() + "</path>" + "</leaf>";
@@ -382,6 +381,16 @@ public class ModelProject extends Observable implements Runnable
 	 */
 	public void removeFileProject(int i)
 	{
+		if(fileProject.get(i).readPathFileUTF8() != null)
+			new File(fileProject.get(i).readPathFileUTF8()).delete();
+		
+		if(fileProject.get(i).readPathFileHTML() != null)
+			for(int j = 0; j < fileProject.get(i).readPathFileHTML().size(); j++)
+				new File(fileProject.get(i).readPathFileHTML().get(j)).delete();
+		
+		if(new File((fileProject.get(i).readPathFileUTF8().substring(0, fileProject.get(i).readPathFileUTF8().length()-4)) + ".log").exists())
+			new File((fileProject.get(i).readPathFileUTF8().substring(0, fileProject.get(i).readPathFileUTF8().length()-4)) + ".log").delete();
+		
 		fileProject.remove(i);
 		workerProject.remove(i);
 		stateProject[1] = false;
@@ -486,10 +495,10 @@ public class ModelProject extends Observable implements Runnable
 			
 			String s = "<table border=" + String.valueOf('"') + String.valueOf('2') + String.valueOf('"') + "align=" + String.valueOf('"') + "center" + String.valueOf('"') + ">";
 			
-			s += "<tr><th>n.</th><th>Commonalities Selected</th></tr>";
+			s += "<tr><th>n.</th><th>Selected Commonality</th></tr>";
 			
-			for(int i = 1; i < commonalitiesSelected.size(); i++)
-				s += "<tr><td>" + String.valueOf(i) + "</td><td>" + commonalitiesSelected.get(i) + "</td></tr>";
+			for(int i = 0; i < commonalitiesSelected.size(); i++)
+				s += "<tr><td>" + String.valueOf(i+1) + "</td><td>" + commonalitiesSelected.get(i) + "</td></tr>";
 			
 			s += "</table>";		
 			pw.print(s);
