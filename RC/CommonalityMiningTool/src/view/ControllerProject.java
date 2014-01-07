@@ -15,6 +15,8 @@ import java.awt.event.WindowListener;
 
 public class ControllerProject implements ActionListener, WindowListener, MouseListener
 {
+	private static boolean verbose=true;//variabile usata per attivare stampe nel codice
+	
 	private ViewProject viewProject = null;
 	
 	private ModelProject modelProject = null;
@@ -45,8 +47,14 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 				if(!modelProject.createProject(s))
 					viewProject.errorDialog("Project already exists");
 				
-				else
+				else{
+					
+					/* ***VERBOSE****/
+					if (verbose) System.out.println("apro il LateralPanel con s="+s);
+					/* ***VERBOSE****/
+					
 					viewProject.loadPanelLateral(s, null);
+				}
 			}
 		}	
 		else if(ae.getActionCommand().equals("Delete Project"))
@@ -73,20 +81,42 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 				modelProject.addFileProject(s[1]);
 			
 		}
+		else if(ae.getActionCommand().equals("Delete Selected File"))
+		{
+			int i = -1;
+			
+			if((i = viewProject.deleteSelectedFileDialog()) != 1)
+				modelProject.removeFileProject(i);
+		}
 		else if(ae.getActionCommand().equals("Delete File"))
 		{
 			int i = -1;
 			
-			if((i = viewProject.deleteFiledDialog()) != 1)
+			if((i = viewProject.deleteFileDialog()) != 1){
+
+				/* ***VERBOSE *** */
+				if(verbose) System.out.println("Ho ricevuto i="+i);
+
+				/* ***VERBOSE *** */
+
 				modelProject.removeFileProject(i);
+			}
 		}
-		else if(ae.getActionCommand().equals("Extract Commonality"))
+		else if(ae.getActionCommand().equals("Extract Commonalities"))
 		{
 			viewProject.extractCommonalitiesdDialog();
 		}
-		else if(ae.getActionCommand().equals("OK"))
+		else if(ae.getActionCommand().equals("Extract Variabilities"))
 		{
-			viewProject.showCommonalitiesSelected();
+			viewProject.extractVariabilitiesDialog();
+		}
+		else if(ae.getActionCommand().equals("Select Commonalities"))
+		{
+			viewProject.showFeaturesSelected(ViewPanelCentral.FeatureType.COMMONALITIES);
+		}
+		else if(ae.getActionCommand().equals("Select Variabilities"))
+		{
+			viewProject.showFeaturesSelected(ViewPanelCentral.FeatureType.VARIABILITIES);
 		}
 		else if(ae.getActionCommand().equals("Exit"))
 		{
@@ -102,8 +132,7 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 			}
 			viewProject.closeProject();
 		}
-		else
-		{}
+		else System.out.println("Unknown action: "+ae.getActionCommand());
 	}
 	
 	/** Gestisce gli eventi generati dal mouse

@@ -9,6 +9,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.SystemColor;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
@@ -31,11 +33,23 @@ import javax.swing.tree.TreeCellRenderer;
 		
 		private ArrayList <String> analysisNodeTree = new ArrayList <String> ();
 			
-		private ImageIcon folderTree = new ImageIcon("./src/DATA/Tree/folder.gif");
+		private ImageIcon folderTree = new ImageIcon(getClass().getResource("/Tree/folder.gif"));
 		
-		private ImageIcon squareRedTree = new ImageIcon("./src/DATA/Tree/squarer.gif");
+		private ImageIcon squareRedTree = new ImageIcon(getClass().getResource("/Tree/squarer.gif"));
 		
-		private ImageIcon squareGreenTree = new ImageIcon("./src/DATA/Tree/squareg.gif");
+		private ImageIcon squareGreenTree = new ImageIcon(getClass().getResource("/Tree/squareg.gif"));
+
+//		private ImageIcon folderTree = new ImageIcon("/Tree/folder.gif");
+//		
+//		private ImageIcon squareRedTree = new ImageIcon("/Tree/squarer.gif");
+//		
+//		private ImageIcon squareGreenTree = new ImageIcon("/Tree/squareg.gif");
+
+//		private ImageIcon folderTree = new ImageIcon("./src/DATA/Tree/folder.gif");
+//		
+//		private ImageIcon squareRedTree = new ImageIcon("./src/DATA/Tree/squarer.gif");
+//		
+//		private ImageIcon squareGreenTree = new ImageIcon("./src/DATA/Tree/squareg.gif");
 
 		private boolean bSelected = false;
 		
@@ -47,10 +61,24 @@ import javax.swing.tree.TreeCellRenderer;
 		}
 		
 		@Override
-		public Component getTreeCellRendererComponent( JTree tree,
-						Object value, boolean bSelected, boolean bExpanded,
-								boolean bLeaf, int iRow, boolean bHasFocus )
-		{
+		public Component getTreeCellRendererComponent( JTree tree, Object value, boolean bSelected, boolean bExpanded,
+				boolean bLeaf, int iRow, boolean bHasFocus ){
+
+			URL folderTreeURL = null;
+			URL squareRedTreeURL = null;
+			URL squareGreenTreeURL = null;
+//			try {
+			folderTreeURL = getClass().getResource("/Tree/folder.gif");
+			squareRedTreeURL = getClass().getResource("/Tree/squarer.gif");
+			squareGreenTreeURL = getClass().getResource("/Tree/squareg.gif");
+//			} catch (MalformedURLException e) {
+//				e.printStackTrace();
+//			}
+			
+			System.out.println("URL(\"/Tree/folder.gif\"): "+folderTreeURL);
+			System.out.println("URL(\"/Tree/squarer.gif\"): "+squareRedTreeURL);
+			System.out.println("URL(\"/Tree/squareg.gif\"): "+squareGreenTreeURL);
+
 			this.bSelected = bSelected;
 			
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
@@ -64,6 +92,9 @@ import javax.swing.tree.TreeCellRenderer;
 				setIcon(folderTree);
 				
 			else if( labelText.equals("Commonality"))
+				setIcon(folderTree);
+			
+			else if( labelText.equals("Variability"))
 				setIcon(folderTree);
 			
 			else 

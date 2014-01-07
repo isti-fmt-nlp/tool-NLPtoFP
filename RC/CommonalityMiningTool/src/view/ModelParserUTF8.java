@@ -14,7 +14,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +23,8 @@ import org.apache.pdfbox.util.PDFTextStripper;
 
 public class ModelParserUTF8
 {
+	private static boolean verbose=true;//variabile usata per attivare stampe nel codice
+
 	/* Stringa contenente il percorso del file */
 	private String pathFile = null;
 	
@@ -48,16 +49,32 @@ public class ModelParserUTF8
 	/** Filtra il file in modo da rendere il suo contenuto compatibile con la codifica UTF-8.
 	 * 
 	 * @return f file contenente le specifiche citate in precedenza
-	 * @return null se si è verificato un errore
+	 * @return null se si ÔøΩ verificato un errore
 	 */
 	public File filterFile()
 	{
+		/* ***VERBOSE****/
+		if (verbose){
+			System.out.println("Sono ModelParserUTF8.filterFile(): appena antrato nel metodo");
+			System.out.flush();
+		}
+		/* ***VERBOSE****/            
+		
 		File f = new File(pathFileUTF8);
         /*   
             Estrae e pulisce il contenuto del file
         */
-        if((textUTF8 = cleanString(encodeFileToStringUTF8()))==null)
-        	return null;
+        if((textUTF8 = cleanString(encodeFileToStringUTF8()))==null){
+
+    		/* ***VERBOSE****/
+    		if (verbose){
+            	System.out.println("Sono ModelParser.filterFile(): textUTF8="+textUTF8);
+    			System.out.flush();
+    		}
+    		/* ***VERBOSE****/     
+
+    		return null;
+        }
         
         try
         {
@@ -154,7 +171,7 @@ public class ModelParserUTF8
 	    {
 	    	try 
 	    	{
-	    		String s1, s2 = null;
+	    		String s1, s2 = "";
 	    		
 				BufferedReader reader =
 				        new BufferedReader(

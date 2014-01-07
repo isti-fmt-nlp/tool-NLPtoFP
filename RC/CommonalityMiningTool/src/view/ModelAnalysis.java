@@ -30,6 +30,8 @@ import java.util.regex.Pattern;
 
 public class ModelAnalysis extends ModelParserUTF8
 {
+	private static boolean verbose=true;//variabile usata per attivare stampe nel codice
+
 	/* URL da cui ottenere le analisi del file */
 	public final String URL_ANALYSIS = "http://www.ilc.cnr.it/dylanlab/index.php?page=texttools&hl=en_US&showtemplate=false";
 	
@@ -51,8 +53,8 @@ public class ModelAnalysis extends ModelParserUTF8
 	
 	/** Carica analisi del file
 	 * 
-	 * @return true caricamento dell'analisi del file è avvenuta in maniera corretta
-	 * @return false se si è verificato un errore 
+	 * @return true caricamento dell'analisi del file ÔøΩ avvenuta in maniera corretta
+	 * @return false se si ÔøΩ verificato un errore 
 	 */
 	public boolean loadAnalysisFile()
 	{
@@ -97,8 +99,8 @@ public class ModelAnalysis extends ModelParserUTF8
 	
 	/** Effettua analisi del file
 	 * 
-	 * @return true l'analisi del file è avvenuta in maniera corretta
-	 * @return false se si è verificato un errore
+	 * @return true l'analisi del file ÔøΩ avvenuta in maniera corretta
+	 * @return false se si ÔøΩ verificato un errore
 	 */
 	public boolean runAnalysisFile()
 	{
@@ -222,7 +224,7 @@ public class ModelAnalysis extends ModelParserUTF8
     /** Si connette al sito URL_ANALYSIS per effettuare l'analisi del file
      *	
      * @return url ArrayList contenenti i riferimenti alle varie analisi     
-	 * @return null se si è verificato un errore
+	 * @return null se si ÔøΩ verificato un errore
      */
 	private ArrayList <String> connectAnalysis()
 	{
@@ -265,6 +267,14 @@ public class ModelAnalysis extends ModelParserUTF8
                 return null;
             }
 
+    		/* ***VERBOSE****/
+            if (verbose){
+            	System.out.println("s1:\n"+s1);
+            	System.out.println("s3:\n"+s3);
+            	System.out.flush();
+            }
+            /* ***VERBOSE****/            
+            
             al.add((URL_ANALYSIS + s3));
             al.add((URL_ANALYSIS + s3 + "&tmid=tm_sentence_splitter"));
             al.add((URL_ANALYSIS + s3 + "&tmid=tm_term_extractor"));
@@ -302,7 +312,15 @@ public class ModelAnalysis extends ModelParserUTF8
 	{
 		int i;
 
-        String jid = "&";
+		/* ***VERBOSE****/
+		if (verbose){
+			System.out.println("ModelAnalysis.returnJid(): String s= "+s);
+			System.out.flush();
+		}
+		/* ***VERBOSE****/
+
+		
+		String jid = "&";
 
         if(s == null || s.equals(""))
            return null;
@@ -318,9 +336,9 @@ public class ModelAnalysis extends ModelParserUTF8
         return jid;
 	}
 	
-	/** Controlla se l'analisi del testo è stata completata
+	/** Controlla se l'analisi del testo ÔøΩ stata completata
 	 * 
-	 * @param s stringa da cui verificare se l'analisi è stata completata 
+	 * @param s stringa da cui verificare se l'analisi ÔøΩ stata completata 
 	 * 
 	 * @return true analisi completata
 	 * @return false analisi non completata
@@ -331,8 +349,8 @@ public class ModelAnalysis extends ModelParserUTF8
             return false;
 
 		/* 
-		   Se è presente il campo "<meta HTTP-EQUIV" 
-		   l'analisi è terminata 
+		   Se ÔøΩ presente il campo "<meta HTTP-EQUIV" 
+		   l'analisi ÔøΩ terminata 
 		 */
          if(s.indexOf("<meta HTTP-EQUIV") != -1)
             return false;
@@ -345,7 +363,7 @@ public class ModelAnalysis extends ModelParserUTF8
 	 * @param s Stringa contenente la pagina html da ripulire
 	 * 
 	 * @return p stringa pulita
-	 * @reutn null se si è verificato un errore
+	 * @reutn null se si ÔøΩ verificato un errore
 	 */
 	private String cleanHTML(String s)
 	{
@@ -370,7 +388,7 @@ public class ModelAnalysis extends ModelParserUTF8
 	 * @param f file contenente i termini rilevanti
 	 * 
 	 * @return true termini rilevanti estratti
-	 * @return false se si è verificato un errore
+	 * @return false se si ÔøΩ verificato un errore
 	 */
 	private boolean extractTermRelevant(File f)
 	{
@@ -421,15 +439,16 @@ public class ModelAnalysis extends ModelParserUTF8
 
             while(i < s3.length)
             {
+            	//cos'√® ci√≤?
                 if(!s3[i].equals("") && !s3[i].equals("\n") && !s3[i].equals(" ") && !s3[i].equals(" ")
-                   && !s3[i].trim().equals(s4[0]) && !s3[i].trim().equals(s4[1]) && !s3[i].trim().equals(s4[2])
-                  )
-                	termRelevant.add(s3[i].trim());
+                   && !s3[i].trim().equals(s4[0]) && !s3[i].trim().equals(s4[1]) && !s3[i].trim().equals(s4[2]) )
+                  if (!termRelevant.contains(s3[i].trim()) ) termRelevant.add(s3[i].trim());
                     
                 i = i + 1;
             }
             
             Collections.sort(termRelevant);
+            
             
             PrintWriter writer =
                     new PrintWriter(
