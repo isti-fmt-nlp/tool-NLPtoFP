@@ -11,6 +11,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
@@ -47,7 +48,7 @@ public class FeaturePanel extends JLayeredPane {
 
 	  AnchorPanel anchor=null;
 	  GroupPanel group=null;
-	  JPanel otherEnd=null;
+	  JComponent otherEnd=null;
 	  Line2D line=null;
 	  Rectangle2D rectangle=null;
 	  Point2D[] intersectionPoints=null;

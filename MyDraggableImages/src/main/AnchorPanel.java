@@ -1,12 +1,15 @@
 package main;
 
+import java.awt.Component;
+
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-public class AnchorPanel extends JPanel {
+public class AnchorPanel extends JComponent {
 
 	private static final long serialVersionUID = 1L;
 	
-	private JPanel otherEnd = null;
+	private JComponent otherEnd = null;
 	
 	public AnchorPanel() {
 		super();
@@ -17,7 +20,7 @@ public class AnchorPanel extends JPanel {
 	 * 
 	 * @param other - the JPanel used as other end of the connector line
 	 */
-	public AnchorPanel(JPanel other) {
+	public AnchorPanel(JComponent other) {
 		super();
 		otherEnd=other;
 	}
@@ -27,7 +30,7 @@ public class AnchorPanel extends JPanel {
 	 * 
 	 * @return the JPanel representing the other end of the connector line
 	 */
-	public JPanel getOtherEnd(){
+	public JComponent getOtherEnd(){
 	    return otherEnd;
 	}
 
@@ -36,7 +39,7 @@ public class AnchorPanel extends JPanel {
 	 * 
 	 * @param other - the JPanel representing the other end of the connector line
 	 */
-	public void setOtherEnd(JPanel other){
+	public void setOtherEnd(JComponent other){
 	    otherEnd=other;
 	}
 }

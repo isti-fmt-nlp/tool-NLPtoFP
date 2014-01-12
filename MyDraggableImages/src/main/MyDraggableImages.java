@@ -31,6 +31,7 @@ import java.util.Stack;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
@@ -90,12 +91,12 @@ public class MyDraggableImages extends JFrame{
 	/** list of all connector starting dots,
 	 *  corresponding ending dots can be found in endConnectorDots at the same index
 	 */
-	private static ArrayList<JPanel> startConnectorDots=null;
+	private static ArrayList<JComponent> startConnectorDots=null;
 	
 	/** list of all connector ending dots,
 	 *  corresponding starting dots can be found in startConnectorDots at the same index
 	 */
-	private static ArrayList<JPanel> endConnectorDots=null;
+	private static ArrayList<JComponent> endConnectorDots=null;
 	
 	//still unused
 	/** previous location of all connector starting dots, with same indexes of the lists above*/
@@ -146,7 +147,7 @@ public class MyDraggableImages extends JFrame{
 	/** the active Feature panel*/
 	private static FeaturePanel lastFeatureFocused=null;
 	/** the active Anchor panel*/
-	private static JPanel lastAnchorFocused=null;
+	private static JComponent lastAnchorFocused=null;
 //	private static boolean isDraggingFeature=false;
 	
 	/** URL of the new feature icon*/
@@ -199,8 +200,8 @@ public class MyDraggableImages extends JFrame{
 	public MyDraggableImages(){
 		OrderedListNode tmpNode=null;
 		visibleOrderDraggables = new OrderedList();
-		startConnectorDots = new ArrayList<JPanel>();
-		endConnectorDots = new ArrayList<JPanel>();
+		startConnectorDots = new ArrayList<JComponent>();
+		endConnectorDots = new ArrayList<JComponent>();
 		prevStartConnectorDotsLocation = new ArrayList<Point>();
 		prevEndConnectorDotsLocation = new ArrayList<Point>();
 		connectorDotsToRedraw = new ArrayList<Boolean>();
@@ -215,21 +216,6 @@ public class MyDraggableImages extends JFrame{
 //		frameRoot.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		
-		//icons for toolspanel
-		
-		
-		//stupid tries panels
-		JPanel tryGreen= new JPanel();
-		tryGreen.setBackground(Color.green);
-		tryGreen.setSize(50, 50);
-		JPanel tryOrange= new JPanel();
-		tryOrange.setBackground(Color.orange);
-		tryOrange.setSize(50, 50);
-		JPanel tryPink= new JPanel();
-		tryPink.setBackground(Color.pink);
-		tryPink.setSize(50, 50);
-		
 		//creating tools panel
 		toolsPanel = new JPanel();		
 		toolsPanel.setLayout(new GridLayout(0, 2, 2, 2));		
@@ -246,7 +232,7 @@ public class MyDraggableImages extends JFrame{
 		toolIconPaths.put("Connector Line", "/Connector Line.png");
 		toolIconPaths.put("Alternative Group", "/Alternative Group.png");
 		
-		JPanel iconTmpPanel=null;
+		JComponent iconTmpPanel=null;
 		for(int i=0; i<8; ++i){
 		  iconTmpPanel=getToolIcon("New Feature", true);
 		  iconTmpPanel.addMouseListener(getToolbarMouseListener());
@@ -428,7 +414,7 @@ public class MyDraggableImages extends JFrame{
 		//		g2.setStroke();
 		g2.setStroke(new BasicStroke(2.5F));  
 		g2.setColor(Color.ORANGE);
-		JPanel startPanel=null;
+		JComponent startPanel=null;
 
 		//drawing connectors
 		for (int i=0; i< connectorDotsToRedraw.size(); ++i){
@@ -440,13 +426,13 @@ public class MyDraggableImages extends JFrame{
 		//drawing groups
 		for (int i=0; i< groupPanels.size(); ++i){
 		  startPanel=groupPanels.get(i);
-		  for (JPanel endPanel : ((GroupPanel)startPanel).getMembers()){
+		  for (JComponent endPanel : ((GroupPanel)startPanel).getMembers()){
 			drawConnectionLine(g2, startPanel, endPanel);				
 		  }
 		}
 	}
 
-	private void drawConnectionLine(Graphics2D g2, JPanel startPanel, JPanel endPanel) {
+	private void drawConnectionLine(Graphics2D g2, JComponent startPanel, JComponent endPanel) {
 		start.setLocation(startPanel.getLocationOnScreen());
 		end.setLocation(endPanel.getLocationOnScreen());
 		g2.drawLine(
@@ -457,15 +443,15 @@ public class MyDraggableImages extends JFrame{
 	};
 	
 	/**
-	 * Returns a JPanel named name and containing the icon image having the path iconPath, <br>
+	 * Returns a JComponent named name and containing the icon image having the path iconPath, <br>
 	 * the method call setOpaque(backgroundVisible) on the panel containig the icon.
 	 * 
-	 * @param name - the name of the new JPanel
+	 * @param name - the name of the new JComponent
 	 * @param backgroundVisible - if true the panel will be opaque, otherwise it will be transparent.
-	 * @return - the new JPanel with the icon, or null if a problem occurrs.
+	 * @return - the new JComponent with the icon, or null if a problem occurrs.
 	 */
-	private static JPanel getToolIcon(String name, boolean backgroundVisible) {
-		JPanel iconPanel=null;
+	private static JComponent getToolIcon(String name, boolean backgroundVisible) {
+		JComponent iconPanel=null;
 		ImageIcon toolImage = getIconImage(name);
 		
 		iconPanel= new JPanel();
@@ -484,7 +470,7 @@ public class MyDraggableImages extends JFrame{
 	/**
 	 * Returns an ImageIcon named name and using image having the path iconPath.
 	 * 
-	 * @param name - the name of the new JPanel
+	 * @param name - the name of the new ImageIcon
 	 * @return - the new ImageIcon, or null if a problem occurrs.
 	 */
 	private static ImageIcon getIconImage(String name) {
@@ -492,7 +478,7 @@ public class MyDraggableImages extends JFrame{
 		
 		try{
 			toolImage = new ImageIcon(MyDraggableImages.class.getResource(toolIconPaths.get(name)));	
-			
+			toolImage.setDescription(name);
 			/* ***DEBUG*** */
 			if (debug4) System.out.println("toolImage.getDescription()"+toolImage.getDescription());
 			/* ***DEBUG*** */
@@ -525,16 +511,16 @@ public class MyDraggableImages extends JFrame{
 		  
 
 		  Component[] compList=toolsPanel.getComponents();
-		  Component comp=(Component)e.getSource();
-		  Component imageLabel=((JPanel)comp).getComponent(0);
-//		  Component imageLabel=comp.getComponentAt(new Point(e.getX(), e.getY()));
+		  JComponent comp=(JComponent)e.getSource();
+		  JComponent imageLabel=(JComponent)comp.getComponent(0);
+//		  JComponent imageLabel=comp.getComponentAt(new Point(e.getX(), e.getY()));
 		  
 		  /* ***DEBUG*** */
 		  if(debug4) System.out.println("e.getSource(): "+e.getSource()+"\nimageLabel: "+imageLabel);
 		  /* ***DEBUG*** */
 
 		  try {
-			toolDragImage = ImageIO.read(this.getClass().getResourceAsStream(toolIconPaths.get(((JPanel)comp).getName())));
+			toolDragImage = ImageIO.read(this.getClass().getResourceAsStream(toolIconPaths.get(((JComponent)comp).getName())));
 			toolDragPosition= new Point((int)imageLabel.getLocationOnScreen().getX(),
 					(int)imageLabel.getLocationOnScreen().getY());
 //			toolDragPosition= new Point((int)((JPanel)comp).getLocationOnScreen().getX(),
@@ -545,11 +531,11 @@ public class MyDraggableImages extends JFrame{
 			e2.printStackTrace();
 			return;
 		  }
-		  if (((JPanel)comp).getName()=="New Feature")
+		  if (((JComponent)comp).getName()=="New Feature")
 			  isActiveItem=activeItems.DRAGGING_TOOL_NEWFEATURE;
-		  else if (((JPanel)comp).getName()=="Connector Line")
+		  else if (((JComponent)comp).getName()=="Connector Line")
 			  isActiveItem=activeItems.DRAGGING_TOOL_CONNECTOR;
-		  else if (((JPanel)comp).getName()=="Alternative Group")
+		  else if (((JComponent)comp).getName()=="Alternative Group")
 			  isActiveItem=activeItems.DRAGGING_TOOL_ALT_GROUP;
 
 		  frameRoot.repaint();
@@ -769,7 +755,7 @@ public class MyDraggableImages extends JFrame{
 			  int featurePanelX=0, featurePanelY=0;
 			  int anchorPanelOnScreenX=0, anchorPanelOnScreenY=0;
 			  FeaturePanel featurePanel=null;
-			  Component anchorPanel=null;
+			  JComponent anchorPanel=null;
 			  String anchorPanelName;
 			  OrderedListNode tmpNode=visibleOrderDraggables.getFirst();
 			  while(tmpNode!=null){
@@ -784,7 +770,7 @@ public class MyDraggableImages extends JFrame{
 					featurePanel=(FeaturePanel)tmpNode.getElement();
 					featurePanelX=featurePanel.getX();
 					featurePanelY=featurePanel.getY();
-					anchorPanel=featurePanel.getComponentAt(e.getX()-featurePanelX, e.getY()-featurePanelY);
+					anchorPanel=(JComponent)featurePanel.getComponentAt(e.getX()-featurePanelX, e.getY()-featurePanelY);
 					anchorPanelName=anchorPanel.getName();
 					//mouse pressed on an anchor inside the feature panel
 					if(anchorPanelName!=null && anchorPanel.getClass().equals(AnchorPanel.class) &&(
@@ -792,7 +778,7 @@ public class MyDraggableImages extends JFrame{
 					   anchorPanelName.startsWith(endConnectorsNamePrefix) ) ){
 						
 					  isActiveItem=activeItems.DRAGGING_EXTERN_ANCHOR;
-					  lastAnchorFocused=(JPanel)anchorPanel;
+					  lastAnchorFocused=(JComponent)anchorPanel;
 
 					  anchorPanelOnScreenX=(int)lastAnchorFocused.getLocationOnScreen().getX();
 					  anchorPanelOnScreenY=(int)lastAnchorFocused.getLocationOnScreen().getY();
@@ -811,7 +797,7 @@ public class MyDraggableImages extends JFrame{
 					   anchorPanelName.startsWith(groupNamePrefix) ) ){
 						
 					  isActiveItem=activeItems.DRAGGING_EXTERN_GROUP;
-					  lastAnchorFocused=(JPanel)anchorPanel;
+					  lastAnchorFocused=(JComponent)anchorPanel;
 
 					  anchorPanelOnScreenX=(int)lastAnchorFocused.getLocationOnScreen().getX();
 					  anchorPanelOnScreenY=(int)lastAnchorFocused.getLocationOnScreen().getY();
@@ -924,7 +910,7 @@ public class MyDraggableImages extends JFrame{
 	 * 
 	 * @param comp - the component to move to top.
 	 */
-	private static void moveComponentToTop(Component comp) {
+	private static void moveComponentToTop(JComponent comp) {
 		int currentLayer=diagramPanel.getComponentZOrder(comp);
 
 		  /* ***DEBUG*** */
@@ -1203,11 +1189,11 @@ public class MyDraggableImages extends JFrame{
 	 * If the anchor is not visible and attached to the diagram panel, no operation is performed <br>
 	 * and false value is returned.
 	 * 
-	 * @param anchor - the JPanel object of the anchor
+	 * @param anchor - the JComponent object of the anchor
 	 * @param featurePanel - the feature panel on which the anchor will be added
 	 * @return - false if the operation is not possible, true otherwise
 	 */
-	private static boolean addAnchorToFeature(JPanel anchor, FeaturePanel featurePanel) {
+	private static boolean addAnchorToFeature(JComponent anchor, FeaturePanel featurePanel) {
 		int anchorPanelOnScreenX;
 		int anchorPanelOnScreenY;
 		
@@ -1307,7 +1293,7 @@ public class MyDraggableImages extends JFrame{
 		AnchorPanel newConnectorStartDot=null;			
 		AnchorPanel newConnectorEndDot=null;
 		FeaturePanel featurePanel = null;
-		Component underlyingPanel = null;
+		JComponent underlyingPanel = null;
 
 		
 		//the new connector must be dropped on the diagram panel for it to be added
@@ -1439,7 +1425,7 @@ public class MyDraggableImages extends JFrame{
 		GroupPanel newGroupStartDot=null;			
 		AnchorPanel newGroupEndpoint1=null, newGroupEndpoint2=null;
 		FeaturePanel featurePanel = null;
-		Component underlyingPanel = null;
+		JComponent underlyingPanel = null;
 		
 		//the new group must be dropped on the diagram panel for it to be added
 		if( diagramPanel.getLocationOnScreen().getX()>toolDragPosition.x ||
@@ -1572,15 +1558,15 @@ public class MyDraggableImages extends JFrame{
 	}
 
 	/**
-	 * Creates a JPanel containing a Connection Dot, with a sequential name given by the static variable connectorsCount. 
+	 * Creates a JComponent containing a Connection Dot, with a sequential name given by the static variable connectorsCount. 
 	 * 
 	 * @param x - x coordinate of the connection dot in the diagram panel
 	 * @param y - y coordinate of the connection dot in the diagram panel
 	 * @param incoURL - URL of the connection dot icon
-	 * @return A new JPanel representing the connection dot
+	 * @return A new JComponent representing the connection dot
 	 */
-	private static JPanel getDraggableConnectionDot(itemsTypes type, int x, int y) {
-		JPanel imagePanel=null;
+	private static JComponent getDraggableConnectionDot(itemsTypes type, int x, int y) {
+		JComponent imagePanel=null;
 
 		ImageIcon connectorIcon=null;
 		JLabel imageLabel = null;
@@ -1605,12 +1591,14 @@ public class MyDraggableImages extends JFrame{
 		}
 		
 		imageLabel = new JLabel(connectorIcon);
+		imageLabel.setBounds(0,  +2, connectorIcon.getIconWidth(), connectorIcon.getIconHeight()+5);
 		imagePanel.setBounds(x,  y, connectorIcon.getIconWidth(), connectorIcon.getIconHeight()+5);
+		imagePanel.setLayout(null);
 //		imagePanel.setBackground(Color.RED);
 		imagePanel.add(imageLabel);
 //		imagePanel.add(new JPanel());
 		imagePanel.setOpaque(false);
-//		imagePanel.setVisible(true);
+		imagePanel.setVisible(true);
 
 		/* ***DEBUG*** */
 		if(debug) System.out.println("imagePanel.getBounds(): "+imagePanel.getBounds()+
@@ -1635,26 +1623,44 @@ public class MyDraggableImages extends JFrame{
 		JPanel imagePanel=new JPanel();
 		JLabel imageLabel = new JLabel(newFeatureIcon);
 
-		imagePanel.setLayout(null);
-		
-		imageLabel.setBounds(0, 0, newFeatureIcon.getIconWidth(), newFeatureIcon.getIconHeight());
-		imagePanel.add(imageLabel);
+		//creating image		
+//		imageLabel.setBounds(0, 0, newFeatureIcon.getIconWidth(), newFeatureIcon.getIconHeight());
+//		imageLabel.setBackground(Color.BLACK);
+//		imageLabel.setOpaque(true);
+//		imageLabel.setVisible(true);
+//		imagePanel.setLayout(null);
+//		imagePanel.add(imageLabel);
+//		imagePanel.setBackground(Color.BLACK);
+//		imagePanel.setOpaque(true);
+//		imagePanel.setBounds(0+featureBorderSize/2, +featureBorderSize/2,
+//			newFeatureIcon.getIconWidth(), newFeatureIcon.getIconHeight());
+
+		imageLabel.setBounds(0+featureBorderSize/2, +featureBorderSize/2,
+				newFeatureIcon.getIconWidth(), newFeatureIcon.getIconHeight());
 		imageLabel.setBackground(Color.BLACK);
 		imageLabel.setOpaque(true);
 		imageLabel.setVisible(true);
-		imagePanel.setBackground(Color.BLACK);
-		imagePanel.setOpaque(true);
-		imagePanel.setBounds(0+featureBorderSize/2, +featureBorderSize/2,
-			newFeatureIcon.getIconWidth(), newFeatureIcon.getIconHeight());
 
-		JPanel textPanel = new JPanel();
-		JLabel textLabel=new JLabel(name);
+		//creating text
+//		JPanel textPanel = new JPanel();
+//		JLabel textLabel=new JLabel(name);
+//		textLabel.setForeground(Color.GRAY);
+//		textPanel.add(textLabel);
+//		textPanel.setBounds(0+featureBorderSize/2, newFeatureIcon.getIconHeight()+featureBorderSize/2,
+//			newFeatureIcon.getIconWidth(), 25);
+//		textPanel.setOpaque(true);
+//		textPanel.setBackground(Color.BLACK);
+
+		JLabel textLabel=new JLabel(name, SwingConstants.CENTER);
 		textLabel.setForeground(Color.GRAY);
-		textPanel.add(textLabel);
-		textPanel.setBounds(0+featureBorderSize/2, newFeatureIcon.getIconHeight()+featureBorderSize/2,
+		textLabel.setBackground(Color.BLACK);
+		textLabel.setBounds(0+featureBorderSize/2, newFeatureIcon.getIconHeight()+featureBorderSize/2,
 			newFeatureIcon.getIconWidth(), 25);
-		textPanel.setOpaque(true);
-		textPanel.setBackground(Color.BLACK);
+		textLabel.setOpaque(true);
+//		textLabel.setAlignmentX(SwingConstants.CENTER);
+//		textLabel.setAlignmentY(SwingConstants.CENTER);
+//		textLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+//		textLabel.setVerticalTextPosition(SwingConstants.CENTER);
 		
 		FeaturePanel container = new FeaturePanel(splitterPanel);
 		
@@ -1667,15 +1673,27 @@ public class MyDraggableImages extends JFrame{
 		container.setOpaque(true);
 		container.setBackground(Color.DARK_GRAY);
 		  
+		//adding the image
 		layer=container.getComponentCount();
-		container.setLayer(imagePanel, layer);
-		container.add(imagePanel);
-		container.setComponentZOrder(imagePanel, layer);
+		container.setLayer(imageLabel, layer);
+		container.add(imageLabel);
+		container.setComponentZOrder(imageLabel, layer);
 
+//		layer=container.getComponentCount();
+//		container.setLayer(imagePanel, layer);
+//		container.add(imagePanel);
+//		container.setComponentZOrder(imagePanel, layer);
+
+		//adding the text
 		layer=container.getComponentCount();
-		container.setLayer(textPanel, layer);
-		container.add(textPanel);
-		container.setComponentZOrder(textPanel, layer);
+		container.setLayer(textLabel, layer);
+		container.add(textLabel);
+		container.setComponentZOrder(textLabel, layer);
+
+//		layer=container.getComponentCount();
+//		container.setLayer(textPanel, layer);
+//		container.add(textPanel);
+//		container.setComponentZOrder(textPanel, layer);
 
 		/* ***DEBUG*** */
 		if(debug) System.out.println("container.getBounds(): "+container.getBounds());
@@ -1692,9 +1710,9 @@ public class MyDraggableImages extends JFrame{
 	 * @return - the Component found, or null if there isn't any Component, children of diagramPanel, <br>
 	 * at the specified coordinates.
 	 */
-	private static Component getUnderlyingComponent(int x, int y) {
-	  Component underlyingPanel=null;
-	  underlyingPanel = diagramPanel.getComponentAt(x, y);
+	private static JComponent getUnderlyingComponent(int x, int y) {
+	  JComponent underlyingPanel=null;
+	  underlyingPanel = (JComponent) diagramPanel.getComponentAt(x, y);
 
 	  /* ***DEBUG*** */
 	  if(debug) System.out.println("underlyingPanel="+underlyingPanel
@@ -1715,7 +1733,7 @@ public class MyDraggableImages extends JFrame{
 	 * @param newConnectorStartDot - the starting connector dot
 	 * @param newConnectorEndDot - the ending connector dot
 	 */
-	private static void addConnectorsToDrawLists(JPanel newConnectorStartDot, JPanel newConnectorEndDot) {
+	private static void addConnectorsToDrawLists(JComponent newConnectorStartDot, JComponent newConnectorEndDot) {
 		startConnectorDots.add(newConnectorStartDot);
 		prevStartConnectorDotsLocation.add(new Point());
 		endConnectorDots.add(newConnectorEndDot);
