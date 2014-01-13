@@ -260,6 +260,12 @@ public class FeaturePanel extends JLayeredPane {
 
     }
 
+    /**
+     * Returns a Point2D representing the intersection point of lineA and lineB, or null if they're parallel to each other.
+     * @param lineA - line A
+     * @param lineB - line B
+     * @return the intersection point of lineA and lineB, if any, null otherwise
+     */
     public Point2D getIntersectionPoint(Line2D lineA, Line2D lineB) {
 
 //        int x1 = (int)lineA.getX1();

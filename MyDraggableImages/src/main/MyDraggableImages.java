@@ -20,16 +20,25 @@ import java.awt.Transparency;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.geom.Arc2D;
+import java.awt.geom.Area;
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Stack;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.Box.Filler;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -48,7 +57,7 @@ public class MyDraggableImages extends JFrame{
 	/** variables used for debugging*/
 	private static boolean debug=false;
 	private static boolean debug2=false;
-	private static boolean debug3=false;
+	private static boolean debug3=true;
 	private static boolean debug4=false;
 
 
@@ -194,7 +203,7 @@ public class MyDraggableImages extends JFrame{
 	
 	private static int featureBorderSize=20;
 
-	private static Point start=new Point(), end=new Point();
+	private static Point start=new Point(), endLeft=new Point(), endRight=new Point();
 
 //	public static void main(String[] args){
 	public MyDraggableImages(){
@@ -415,7 +424,9 @@ public class MyDraggableImages extends JFrame{
 		g2.setStroke(new BasicStroke(2.5F));  
 		g2.setColor(Color.ORANGE);
 		JComponent startPanel=null;
-
+		JComponent leftMost = null, rightMost = null;
+		int minX=100000, maxX=-100000;
+		
 		//drawing connectors
 		for (int i=0; i< connectorDotsToRedraw.size(); ++i){
 		  if (connectorDotsToRedraw.get(i)){
@@ -426,21 +437,303 @@ public class MyDraggableImages extends JFrame{
 		//drawing groups
 		for (int i=0; i< groupPanels.size(); ++i){
 		  startPanel=groupPanels.get(i);
+		  leftMost = null; rightMost = null;
+		  minX=100000; maxX=-100000;
 		  for (JComponent endPanel : ((GroupPanel)startPanel).getMembers()){
+			//searching for the 2 extern anchor of the group
+			if(endPanel.getLocationOnScreen().getX()<minX){
+			  minX=(int)endPanel.getLocationOnScreen().getX();
+			  leftMost=endPanel;
+			}
+			if(endPanel.getLocationOnScreen().getX()>maxX){
+				maxX=(int)endPanel.getLocationOnScreen().getX();
+				rightMost=endPanel;
+			}
 			drawConnectionLine(g2, startPanel, endPanel);				
 		  }
+		  
+		  /* ***DEBUG*** */
+		  if(debug3) System.out.println(
+				  "\nLeftMost:"+leftMost
+				  +"\nrightMost:"+rightMost);
+		  /* ***DEBUG*** */
+
+		  //drawing thr group arc
+		  drawGroupArc(g2, startPanel, leftMost, rightMost);
 		}
 	}
 
-	private void drawConnectionLine(Graphics2D g2, JComponent startPanel, JComponent endPanel) {
-		start.setLocation(startPanel.getLocationOnScreen());
-		end.setLocation(endPanel.getLocationOnScreen());
+	/**
+	 * Draws the group arc from leftMost to rightMost anchors
+	 * 
+	 * @param g2 - the Graphics2D object used for drawing
+	 * @param startComp - start anchor of the group
+	 * @param leftMost - left-most anchor of the group
+	 * @param rightMost - right-most anchor of the group
+	 */
+	private void drawGroupArc(Graphics2D g2, JComponent startComp, JComponent leftMost, JComponent rightMost) {
+	  double lineFraction=2.5;
+	  double leftX=0, rightX=0, leftY=0, rightY=0;
+	  int leftHeight=0, rightHeight=0, leftWidth=0, rightWidth=0, leftLength=0, rightLength=0;
+	  int rectangleWidth=0, rectangleHeight=0;
+	  Line2D intersectingLine=null;
+	  Line2D leftLine=null, rightLine=null;
+	  Point2D startCenter=null, leftCenter=null, rightCenter=null;
+	  Point2D leftLineIntersectPoint=null, rightLineIntersectPoint=null;
+	  List<Point2D> intersectionPoints=null;
+	  
+	  /* ***DEBUG*** */
+	  if (debug3) System.out.println(""
+			  +"\nstart: "+startComp
+			  +"\nleftMost: "+leftMost
+			  +"\nrightMost: "+rightMost
+		);
+	  /* ***DEBUG*** */
+	  
+	  if(!startComp.isVisible()) return;
+
+	  Graphics2D tempGraphics = (Graphics2D)g2.create();
+	  
+	  //getting actual visible center points of components
+	  startCenter=getVisibleStartAnchorCenter(startComp);
+	  leftCenter=getVisibleStartAnchorCenter(leftMost);
+	  rightCenter=getVisibleStartAnchorCenter(rightMost);
+	  
+	  //getting the lenghts of the two lines
+	  leftHeight=(int)(leftCenter.getY()-startCenter.getY());
+	  leftWidth=(int)(leftCenter.getX()-startCenter.getX());
+	  leftLength=(int)Math.sqrt(leftWidth*leftWidth+leftHeight*leftHeight);
+	  rightHeight=(int)(rightCenter.getY()-startCenter.getY());
+	  rightWidth=(int)(rightCenter.getX()-startCenter.getX());
+	  rightLength=(int)Math.sqrt(rightWidth*rightWidth+rightHeight*rightHeight);
+
+	  //getting the coordinates of the two points at 1/lineFraction line length for the two lines
+	  leftX=startCenter.getX()+leftWidth/lineFraction;
+	  leftY=startCenter.getY()+leftHeight/lineFraction;
+	  rightX=startCenter.getX()+rightWidth/lineFraction;
+	  rightY=startCenter.getY()+rightHeight/lineFraction;
+
+	  //creating the lines to calculate the two actual points of the arc
+	  leftLine= new Line2D.Double(startCenter, leftCenter);
+	  rightLine= new Line2D.Double(startCenter, rightCenter);
+	  if(leftHeight<0) leftHeight*=-1;
+	  if(rightHeight<0) rightHeight*=-1;
+	  //intersecting line depends on the shortest line
+	  if(leftLength<rightLength) intersectingLine= new Line2D.Double(-3000000, leftY, +3000000, leftY);
+//	  if(leftHeight<rightHeight) intersectingLine= new Line2D.Double(-3000000, leftY, +3000000, leftY);
+	  else intersectingLine= new Line2D.Double(-3000000, rightY, +3000000, rightY);
+	  
+	  //calculating groupArc radius
+	  double groupArcRadius = (leftLength<rightLength)? leftLength/lineFraction:rightLength/lineFraction;
+
+	  //calculating actual intersection point of the arc with leftLine
+	  intersectionPoints=getCircleLineIntersectionPoints(startCenter, leftCenter, startCenter, groupArcRadius);
+	  if(leftLine.ptSegDist(intersectionPoints.get(0))==0) leftLineIntersectPoint=intersectionPoints.get(0);
+	  else leftLineIntersectPoint=intersectionPoints.get(1);
+
+	  //calculating actual intersection point of the arc with rightLine
+	  intersectionPoints=getCircleLineIntersectionPoints(startCenter, rightCenter, startCenter, groupArcRadius);
+	  if(rightLine.ptSegDist(intersectionPoints.get(0))==0) rightLineIntersectPoint=intersectionPoints.get(0);
+	  else rightLineIntersectPoint=intersectionPoints.get(1);
+
+	  //calculating the two actual points of the arc
+//	  leftIntersectionPoint=getIntersectionPoint(leftLine, intersectingLine);
+//	  rightIntersectionPoint=getIntersectionPoint(rightLine, intersectingLine);
+
+	  
+	  /* ***DEBUG*** */
+	  if (debug3) System.out.println(""
+			  +"\nleftIntersectionPoint: "+leftLineIntersectPoint
+			  +"\nrightIntersectionPoint: "+rightLineIntersectPoint
+		);
+	  /* ***DEBUG*** */
+	  
+	  if(leftLineIntersectPoint==null || rightLineIntersectPoint==null) return;
+	  //calculating width and height to draw the arc
+	  rectangleWidth=(int)(rightLineIntersectPoint.getX()-leftLineIntersectPoint.getX());
+	  rectangleHeight=(int)(leftLineIntersectPoint.getY()-startCenter.getY());
+//	  rectangleHeight=(leftHeight>rightHeight)? leftHeight:rightHeight;
+	  if (rectangleHeight<0)rectangleHeight*=-1;
+	  Rectangle2D rect2D= new Rectangle2D.Double(			  
+			  (startCenter.getX()-groupArcRadius),
+			  (startCenter.getY()-groupArcRadius),
+			  groupArcRadius*2, groupArcRadius*2);
+	  Arc2D groupArc = new Arc2D.Double(			  
+			  (startCenter.getX()-groupArcRadius),
+			  (startCenter.getY()-groupArcRadius),
+			  groupArcRadius*2, groupArcRadius*2, 0, 360, Arc2D.Double.OPEN);
+//	  Arc2D groupArc = new Arc2D.Double(			  
+//			  (startCenter.getX()-rectangleHeight),
+//			  (startCenter.getY()-rectangleHeight),
+//			  rectangleHeight*2, rectangleHeight*2, 0, 360, Arc2D.Double.OPEN);
+//	  if(rightLineIntersectPoint.getX()<leftLineIntersectPoint.getX())
+//		  groupArc.setAngles(
+//				  rightLineIntersectPoint.getX(), rightLineIntersectPoint.getY(), 
+//				  leftLineIntersectPoint.getX(), leftLineIntersectPoint.getY());
+//	  else groupArc.setAngles(
+//				  leftLineIntersectPoint.getX(), leftLineIntersectPoint.getY(),
+//				  rightLineIntersectPoint.getX(), rightLineIntersectPoint.getY());
+
+	  groupArc.setAngles(
+		  leftLineIntersectPoint.getX(), leftLineIntersectPoint.getY(),
+		  rightLineIntersectPoint.getX(), rightLineIntersectPoint.getY());
+
+	  if(groupArc.getAngleExtent()>180) groupArc.setAngles(
+		  rightLineIntersectPoint.getX(), rightLineIntersectPoint.getY(), 
+		  leftLineIntersectPoint.getX(), leftLineIntersectPoint.getY());
+	  
+	  tempGraphics.draw(groupArc);
+//	  tempGraphics.draw(rect2D);
+//	  tempGraphics.fill(arco);
+//	  tempGraphics.drawArc(
+//			  (int)(startPoint.getLocationOnScreen().getX()-splitterPanel.getLocationOnScreen().getX()-rectangleHeight),
+//			  (int)(startPoint.getLocationOnScreen().getY()-splitterPanel.getLocationOnScreen().getY()-rectangleHeight),
+//			  rectangleHeight*2, rectangleHeight*2, 0, 360);
+//	  tempGraphics.setClip(
+//			  (int)(leftPoint.getX()-splitterPanel.getLocationOnScreen().getX())-1,
+//			  (int)(leftPoint.getY()-splitterPanel.getLocationOnScreen().getY())-1,
+//			  rectangleWidth+6, rectangleHeight);
+//	  tempGraphics.drawArc(
+//			  (int)(leftPoint.getX()-splitterPanel.getLocationOnScreen().getX()),
+//			  (int)(leftPoint.getY()-splitterPanel.getLocationOnScreen().getY()-rectangleHeight),
+//			  rectangleWidth, rectangleHeight*2, 0, 360);
+////	  tempGraphics.drawRect(25, 25, 240, 120);
+//	  tempGraphics.setColor(Color.RED);
+//	  tempGraphics.fillOval((int)leftPoint.getX()-2, (int)leftPoint.getY()-2, 7, 7);
+//	  tempGraphics.fillOval((int)rightPoint.getX()-2, (int)rightPoint.getY()-2, 7, 7);
+	}
+
+	private static void drawConnectionLine(Graphics2D g2, JComponent startPanel, JComponent endPanel) {
+		start.setLocation(getVisibleStartAnchorCenter(startPanel));
+		endLeft.setLocation(getVisibleStartAnchorCenter(endPanel));
+//		start.setLocation(startPanel.getLocationOnScreen());
+//		end.setLocation(endPanel.getLocationOnScreen());
 		g2.drawLine(
-		  (int)(start.getX()-splitterPanel.getLocationOnScreen().getX()+startPanel.getWidth()/2),
-		  (int)(start.getY()-splitterPanel.getLocationOnScreen().getY()+startPanel.getHeight()/2+3),
-		  (int)(end.getX()-splitterPanel.getLocationOnScreen().getX()+endPanel.getHeight()/2-3),
-		  (int)(end.getY()-splitterPanel.getLocationOnScreen().getY()+endPanel.getHeight()/2+2) );
+//				  (int)(start.getX()-splitterPanel.getLocationOnScreen().getX()+startPanel.getWidth()/2),
+//				  (int)(start.getY()-splitterPanel.getLocationOnScreen().getY()+startPanel.getHeight()/2+3),
+//				  (int)(end.getX()-splitterPanel.getLocationOnScreen().getX()+endPanel.getHeight()/2),
+//				  (int)(end.getY()-splitterPanel.getLocationOnScreen().getY()+endPanel.getHeight()/2+3) );
+		  (int)start.getX(), (int)start.getY(), (int)endLeft.getX(), (int)endLeft.getY() );
+//		  (int)(end.getX()-splitterPanel.getLocationOnScreen().getX()+endPanel.getHeight()/2-3),
+//		  (int)(end.getY()-splitterPanel.getLocationOnScreen().getY()+endPanel.getHeight()/2+2) );
 	};
+	
+	/**
+     * Returns a Point2D representing the visible center of a starting anchor image on the splitterPanel coordinates system.
+     * 
+     * @param anchor - the JComponent representing a visible starting anchor
+     * @return the visible center point of the anchor
+     */
+    public static Point2D getVisibleStartAnchorCenter(JComponent anchor) {
+    	double x=(anchor.getLocationOnScreen().getX()-splitterPanel.getLocationOnScreen().getX()+anchor.getWidth()/2);
+    	double y=(anchor.getLocationOnScreen().getY()-splitterPanel.getLocationOnScreen().getY()+anchor.getHeight()/2+3);
+    	
+    	return new Point2D.Double(x, y);
+    }
+    
+//	/**
+//     * Returns a Point2D representing the visible center of an ending anchor image on the splitterPanel coordinates system.
+//     * 
+//     * @param anchor - the JComponent representing a visible ending anchor
+//     * @return the visible center point of the anchor
+//     */
+//    public static Point2D getVisibleEndAnchorCenter(JComponent anchor) {
+//    	double x=(anchor.getLocationOnScreen().getX()-splitterPanel.getLocationOnScreen().getX()+anchor.getWidth()/2-3);
+//    	double y=(anchor.getLocationOnScreen().getY()-splitterPanel.getLocationOnScreen().getY()+anchor.getHeight()/2+2);
+//    	
+//    	return new Point2D.Double(x, y);
+//    }
+	
+    /**
+     * 
+     * @param pointA
+     * @param pointB
+     * @param center
+     * @param radius
+     * @return
+     */
+    public static List<Point2D> getCircleLineIntersectionPoints(Point2D pointA, Point2D pointB, Point2D center, double radius) {
+        double baX = pointB.getX() - pointA.getX();
+        double baY = pointB.getY() - pointA.getY();
+        double caX = center.getX() - pointA.getX();
+        double caY = center.getY() - pointA.getY();
+
+        double a = baX * baX + baY * baY;
+        double bBy2 = baX * caX + baY * caY;
+        double c = caX * caX + caY * caY - radius * radius;
+
+        double pBy2 = bBy2 / a;
+        double q = c / a;
+
+        double disc = pBy2 * pBy2 - q;
+        if (disc < 0) {
+            return Collections.emptyList();
+        }
+        // if disc == 0 ... dealt with later
+        double tmpSqrt = Math.sqrt(disc);
+        double abScalingFactor1 = -pBy2 + tmpSqrt;
+        double abScalingFactor2 = -pBy2 - tmpSqrt;
+
+        Point2D p1 = new Point2D.Double(pointA.getX() - baX * abScalingFactor1, pointA.getY()
+                - baY * abScalingFactor1);
+        if (disc == 0) { // abScalingFactor1 == abScalingFactor2
+            return Collections.singletonList(p1);
+        }
+        Point2D p2 = new Point2D.Double(pointA.getX() - baX * abScalingFactor2, pointA.getY()
+                - baY * abScalingFactor2);
+        return Arrays.asList(p1, p2);
+    }
+    
+    /**
+     * Returns a Point2D representing the intersection point of lineA and lineB, or null if they're parallel to each other.
+     * @param lineA - line A
+     * @param lineB - line B
+     * @return the intersection point of lineA and lineB, if any, null otherwise
+     */
+    public Point2D getIntersectionPoint(Line2D lineA, Line2D lineB) {
+
+//        int x1 = (int)lineA.getX1();
+//        int y1 = (int)lineA.getY1();
+//        int x2 = (int)lineA.getX2();
+//        int y2 = (int)lineA.getY2();
+//
+//        int x3 = (int)lineB.getX1();
+//        int y3 = (int)lineB.getY1();
+//        int x4 = (int)lineB.getX2();
+//        int y4 = (int)lineB.getY2();
+
+        double x1 = lineA.getX1();
+        double y1 = lineA.getY1();
+        double x2 = lineA.getX2();
+        double y2 = lineA.getY2();
+
+        double x3 = lineB.getX1();
+        double y3 = lineB.getY1();
+        double x4 = lineB.getX2();
+        double y4 = lineB.getY2();
+
+        Point2D p = null;
+        
+//        int d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+        double d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+        if (d != 0) {//RETTE NON PARALLELE
+//        	int xi = ((x3 - x4) * (x1 * y2 - y1 * x2) - (x1 - x2) * (x3 * y4 - y3 * x4)) / d;
+//            int yi = ((y3 - y4) * (x1 * y2 - y1 * x2) - (y1 - y2) * (x3 * y4 - y3 * x4)) / d;
+            double xi = ((x3 - x4) * (x1 * y2 - y1 * x2) - (x1 - x2) * (x3 * y4 - y3 * x4)) / d;
+            double yi = ((y3 - y4) * (x1 * y2 - y1 * x2) - (y1 - y2) * (x3 * y4 - y3 * x4)) / d;
+
+            p = new Point2D.Double(xi, yi);
+
+        }
+
+        /* ***DEBUG*** */
+        if (debug2) System.out.println("Line1=(("+x1+"."+y1+"), ("+x2+"."+y2+"))"
+        							+"\nLine2=(("+x3+"."+y3+"), ("+x4+"."+y4+"))"
+        							+"\np="+p);
+        /* ***DEBUG*** */
+
+        return p;
+    }
 	
 	/**
 	 * Returns a JComponent named name and containing the icon image having the path iconPath, <br>
@@ -936,80 +1229,10 @@ public class MyDraggableImages extends JFrame{
 	 * @param e - the current MouseEvent
 	 */
 	private static void dragAnchor(MouseEvent e) {
-	  int moveX=0, moveY=0;
-	  int adjustedMoveX=0, adjustedMoveY=0;	  
-	  int newLocationX=0, newLocationY=0;
-	  boolean normalUpdateX=true, normalUpdateY=true;
-//	  int actualPositionX=(toolDragPosition.x-(int)diagramPanel.getLocationOnScreen().getX());
-//	  int actualPositionY=(toolDragPosition.y-(int)diagramPanel.getLocationOnScreen().getY());
-
 	  if(lastAnchorFocused==null) return;
-
-	  moveX = e.getX()-lastPositionX;
-	  moveY = e.getY()-lastPositionY;
-	  newLocationX=lastAnchorFocused.getX()+moveX;
-	  newLocationY=lastAnchorFocused.getY()+moveY;
-
-	  //the anchor must not be dragged beyond the borders of the diagram panel
-	  if( diagramPanel.getLocation().getX()>newLocationX ){
-		newLocationX=(int)diagramPanel.getLocation().getX()+1;
-		normalUpdateX=false;
-		adjustedMoveX=newLocationX-lastAnchorFocused.getX();
-	  }
-	  if( diagramPanel.getLocation().getX()+diagramPanel.getWidth()<=newLocationX+lastAnchorFocused.getWidth() ){
-		newLocationX=(int)diagramPanel.getLocation().getX()+diagramPanel.getWidth()-lastAnchorFocused.getWidth()-1;
-		normalUpdateX=false;
-		adjustedMoveX=newLocationX-lastAnchorFocused.getX();
-	  }
-	  if( diagramPanel.getLocation().getY()>newLocationY ){
-		newLocationY=(int)diagramPanel.getLocation().getY()+1;		  
-		normalUpdateY=false;
-		adjustedMoveY=newLocationY-lastAnchorFocused.getY();
-	  }
-	  if( diagramPanel.getLocation().getX()+diagramPanel.getHeight()<=newLocationY+lastAnchorFocused.getHeight() ){
-		newLocationY=(int)diagramPanel.getLocation().getY()+diagramPanel.getHeight()-lastAnchorFocused.getHeight()-1;
-		normalUpdateY=false;
-		adjustedMoveY=newLocationY-lastAnchorFocused.getY();
-	  }
-
-	  /* ***DEBUG*** */
-	  if (debug4){
-		  System.out.println("oldPosX: "+lastPositionX+"\toldPosY: "+lastPositionY);
-		  System.out.println("newPosX: "+e.getX()+"\tnewPosY: "+e.getY());
-		  System.out.println("moveX: "+moveX+"\tmoveY: "+moveY);
-	  }
-	  /* ***DEBUG*** */
-
-	  if(normalUpdateX) lastPositionX=e.getX();
-	  else lastPositionX=lastPositionX+adjustedMoveX;
-	  if(normalUpdateY) lastPositionY=e.getY();
-	  else lastPositionY=lastPositionY+adjustedMoveY;
-
-	  lastAnchorFocused.setLocation(newLocationX, newLocationY);
-
-	  /*
-	  JLayeredPane underlyingPanel=null;
-	  OrderedListNode tmpNode=visibleOrderDraggables.getFirst();
-	  while(tmpNode!=null){	  
-		if ( tmpNode.getElement().getClass().equals(JLayeredPane.class) &&
-			 ((Component)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY()) ){
-			underlyingPanel=(JLayeredPane)tmpNode.getElement();
-			moveComponentToTop(underlyingPanel);
-
-			lastAnchorFocused.setLocation(lastPositionX-diagramPanel.getX(), lastPositionY-diagramPanel.getY());			
-
-			diagramPanel.remove(lastAnchorFocused);
-			diagramPanel.validate();
-			underlyingPanel.setLayer(lastAnchorFocused, 0);
-			underlyingPanel.add(lastAnchorFocused);
-			underlyingPanel.setComponentZOrder(lastAnchorFocused, 0);
-		}
-		tmpNode=tmpNode.getNext();
-	  }
-	  */
-//	  diagramPanel.repaint();
-	  frameRoot.repaint();
-	}
+	  dragDiagramElement(lastAnchorFocused, e);
+//		  diagramPanel.repaint();
+	  frameRoot.repaint();	}
 
 	/**
 	 * Drags a feature panel inside the diagram panel.
@@ -1017,66 +1240,75 @@ public class MyDraggableImages extends JFrame{
 	 * @param e - the current MouseEvent
 	 */
 	private static void dragFeature(MouseEvent e) {
-	  int moveX=0, moveY=0;
-	  int adjustedMoveX=0, adjustedMoveY=0;	  
-	  int newLocationX=0, newLocationY=0;
-	  boolean normalUpdateX=true, normalUpdateY=true;
-
 	  if(lastFeatureFocused==null) return;
-
-	  moveX = e.getX()-lastPositionX;
-	  moveY = e.getY()-lastPositionY;
-	  newLocationX=lastFeatureFocused.getX()+moveX;
-	  newLocationY=lastFeatureFocused.getY()+moveY;
-	  
-	  //the feature must not be dragged beyond the borders of the diagram panel
-	  if( newLocationX<0 ){
-//		  if( diagramPanel.getLocation().getX()>newLocationX ){
-//			newLocationX=(int)diagramPanel.getLocation().getX()+1;
-		newLocationX=1;
-		normalUpdateX=false;
-		adjustedMoveX=newLocationX-lastFeatureFocused.getX();
-	  }
-	  if( diagramPanel.getWidth()<=newLocationX+lastFeatureFocused.getWidth() ){
-//		  if( diagramPanel.getLocation().getX()+diagramPanel.getWidth()<=newLocationX+lastFeatureFocused.getWidth() ){
-		newLocationX=diagramPanel.getWidth()-lastFeatureFocused.getWidth()-1;
-//			newLocationX=(int)diagramPanel.getLocation().getX()+diagramPanel.getWidth()-lastFeatureFocused.getWidth()-1;
-		normalUpdateX=false;
-		adjustedMoveX=newLocationX-lastFeatureFocused.getX();
-	  }
-	  if( newLocationY<0 ){
-//		  if( diagramPanel.getLocation().getY()>newLocationY ){
-//			newLocationY=(int)diagramPanel.getLocation().getY()+1;
-		newLocationY=1;
-		normalUpdateY=false;
-		adjustedMoveY=newLocationY-lastFeatureFocused.getY();
-	  }
-	  if( diagramPanel.getHeight()<=newLocationY+lastFeatureFocused.getHeight() ){
-//		  if( diagramPanel.getLocation().getY()+diagramPanel.getHeight()<=newLocationY+lastFeatureFocused.getHeight() ){
-		newLocationY=diagramPanel.getHeight()-lastFeatureFocused.getHeight()-1;
-//			newLocationY=(int)diagramPanel.getLocation().getY()+diagramPanel.getHeight()-lastFeatureFocused.getHeight()-1;
-		normalUpdateY=false;
-		adjustedMoveY=newLocationY-lastFeatureFocused.getY();
-	  }
-
-	  /* ***DEBUG*** */
-	  if (debug4){
-		System.out.println("oldPosX: "+lastPositionX+"\toldPosY: "+lastPositionY);
-		System.out.println("newPosX: "+e.getX()+"\tnewPosY: "+e.getY());
-		System.out.println("moveX: "+moveX+"\tmoveY: "+moveY);
-	  }
-	  /* ***DEBUG*** */
-
-	  //adjusting last drag position depending on eventual border collisions
-	  if(normalUpdateX) lastPositionX=e.getX();
-	  else lastPositionX=lastPositionX+adjustedMoveX;
-
-	  if(normalUpdateY) lastPositionY=e.getY();
-	  else lastPositionY=lastPositionY+adjustedMoveY;
-
-	  lastFeatureFocused.setLocation(newLocationX, newLocationY);
+	  dragDiagramElement(lastFeatureFocused, e);
 //	  diagramPanel.repaint();
 	  frameRoot.repaint();
+	}
+
+	/**
+	 * Drags an element inside the diagram panel.
+	 *
+	 * @param element - the element to drag
+	 * @param e - the current MouseEvent
+	 */
+	private static void dragDiagramElement(JComponent element, MouseEvent e) {
+		  int moveX=0, moveY=0;
+		  int adjustedMoveX=0, adjustedMoveY=0;	  
+		  int newLocationX=0, newLocationY=0;
+		  boolean normalUpdateX=true, normalUpdateY=true;
+
+		  moveX = e.getX()-lastPositionX;
+		  moveY = e.getY()-lastPositionY;
+		  newLocationX=element.getX()+moveX;
+		  newLocationY=element.getY()+moveY;
+		  
+		  //the feature must not be dragged beyond the borders of the diagram panel
+		  if( newLocationX<0 ){
+//		  if( diagramPanel.getLocation().getX()>newLocationX ){
+//			newLocationX=(int)diagramPanel.getLocation().getX()+1;
+			newLocationX=1;
+			normalUpdateX=false;
+			adjustedMoveX=newLocationX-element.getX();
+		  }
+		  if( diagramPanel.getWidth()<=newLocationX+element.getWidth() ){
+//		  if( diagramPanel.getLocation().getX()+diagramPanel.getWidth()<=newLocationX+lastFeatureFocused.getWidth() ){
+			newLocationX=diagramPanel.getWidth()-element.getWidth()-1;
+//			newLocationX=(int)diagramPanel.getLocation().getX()+diagramPanel.getWidth()-lastFeatureFocused.getWidth()-1;
+			normalUpdateX=false;
+			adjustedMoveX=newLocationX-element.getX();
+		  }
+		  if( newLocationY<0 ){
+//		  if( diagramPanel.getLocation().getY()>newLocationY ){
+//			newLocationY=(int)diagramPanel.getLocation().getY()+1;
+			newLocationY=1;
+			normalUpdateY=false;
+			adjustedMoveY=newLocationY-element.getY();
+		  }
+		  if( diagramPanel.getHeight()<=newLocationY+element.getHeight() ){
+//		  if( diagramPanel.getLocation().getY()+diagramPanel.getHeight()<=newLocationY+lastFeatureFocused.getHeight() ){
+			newLocationY=diagramPanel.getHeight()-element.getHeight()-1;
+//			newLocationY=(int)diagramPanel.getLocation().getY()+diagramPanel.getHeight()-lastFeatureFocused.getHeight()-1;
+			normalUpdateY=false;
+			adjustedMoveY=newLocationY-element.getY();
+		  }
+
+		  /* ***DEBUG*** */
+		  if (debug4){
+			System.out.println("oldPosX: "+lastPositionX+"\toldPosY: "+lastPositionY);
+			System.out.println("newPosX: "+e.getX()+"\tnewPosY: "+e.getY());
+			System.out.println("moveX: "+moveX+"\tmoveY: "+moveY);
+		  }
+		  /* ***DEBUG*** */
+
+		  //adjusting last drag position depending on eventual border collisions
+		  if(normalUpdateX) lastPositionX=e.getX();
+		  else lastPositionX=lastPositionX+adjustedMoveX;
+
+		  if(normalUpdateY) lastPositionY=e.getY();
+		  else lastPositionY=lastPositionY+adjustedMoveY;
+
+		  element.setLocation(newLocationX, newLocationY);
 	}
 
 	/**
@@ -1479,12 +1711,12 @@ public class MyDraggableImages extends JFrame{
 			startDotInsertedInPanel=true;
 			
 			/* ***DEBUG*** */
-			System.out.println("Placing group start dot in ("
+			if(debug3) System.out.println("Placing group start dot in ("
 					+(toolDragPosition.x-(int)underlyingPanel.getLocationOnScreen().getX())
-					+", "+(toolDragPosition.y-(int)underlyingPanel.getLocationOnScreen().getY())+")");			
-			System.out.println("Group start dot Position(feature relative): ("
-					+newGroupStartDot.getX()+", "+newGroupStartDot.getY()+")");			
-			System.out.println("Group start dot Position(screen relative): ("
+					+", "+(toolDragPosition.y-(int)underlyingPanel.getLocationOnScreen().getY())+")"
+					+"\nGroup start dot Position(feature relative): ("
+					+newGroupStartDot.getX()+", "+newGroupStartDot.getY()+")"
+					+"\nGroup start dot Position(screen relative): ("
 					+newGroupStartDot.getLocationOnScreen().getX()
 					+", "+newGroupStartDot.getLocationOnScreen().getY()+")");			
 			/* ***DEBUG*** */
@@ -1618,23 +1850,12 @@ public class MyDraggableImages extends JFrame{
 	 */
 	private static FeaturePanel getDraggableFeature(String name, int x, int y) {
 		int layer=-1;
-		ImageIcon newFeatureIcon=new ImageIcon(newFeatureIconURL);
+		JLabel imageLabel = null, textLabel = null;
+		ImageIcon newFeatureIcon = null;
 		
-		JPanel imagePanel=new JPanel();
-		JLabel imageLabel = new JLabel(newFeatureIcon);
-
 		//creating image		
-//		imageLabel.setBounds(0, 0, newFeatureIcon.getIconWidth(), newFeatureIcon.getIconHeight());
-//		imageLabel.setBackground(Color.BLACK);
-//		imageLabel.setOpaque(true);
-//		imageLabel.setVisible(true);
-//		imagePanel.setLayout(null);
-//		imagePanel.add(imageLabel);
-//		imagePanel.setBackground(Color.BLACK);
-//		imagePanel.setOpaque(true);
-//		imagePanel.setBounds(0+featureBorderSize/2, +featureBorderSize/2,
-//			newFeatureIcon.getIconWidth(), newFeatureIcon.getIconHeight());
-
+		newFeatureIcon=new ImageIcon(newFeatureIconURL);		
+		imageLabel = new JLabel(newFeatureIcon);
 		imageLabel.setBounds(0+featureBorderSize/2, +featureBorderSize/2,
 				newFeatureIcon.getIconWidth(), newFeatureIcon.getIconHeight());
 		imageLabel.setBackground(Color.BLACK);
@@ -1642,25 +1863,12 @@ public class MyDraggableImages extends JFrame{
 		imageLabel.setVisible(true);
 
 		//creating text
-//		JPanel textPanel = new JPanel();
-//		JLabel textLabel=new JLabel(name);
-//		textLabel.setForeground(Color.GRAY);
-//		textPanel.add(textLabel);
-//		textPanel.setBounds(0+featureBorderSize/2, newFeatureIcon.getIconHeight()+featureBorderSize/2,
-//			newFeatureIcon.getIconWidth(), 25);
-//		textPanel.setOpaque(true);
-//		textPanel.setBackground(Color.BLACK);
-
-		JLabel textLabel=new JLabel(name, SwingConstants.CENTER);
+		textLabel=new JLabel(name, SwingConstants.CENTER);
 		textLabel.setForeground(Color.GRAY);
 		textLabel.setBackground(Color.BLACK);
 		textLabel.setBounds(0+featureBorderSize/2, newFeatureIcon.getIconHeight()+featureBorderSize/2,
 			newFeatureIcon.getIconWidth(), 25);
 		textLabel.setOpaque(true);
-//		textLabel.setAlignmentX(SwingConstants.CENTER);
-//		textLabel.setAlignmentY(SwingConstants.CENTER);
-//		textLabel.setHorizontalTextPosition(SwingConstants.CENTER);
-//		textLabel.setVerticalTextPosition(SwingConstants.CENTER);
 		
 		FeaturePanel container = new FeaturePanel(splitterPanel);
 		
@@ -1669,7 +1877,6 @@ public class MyDraggableImages extends JFrame{
 		container.setBounds(x,  y,  newFeatureIcon.getIconWidth()+featureBorderSize,
 			newFeatureIcon.getIconHeight()+25+featureBorderSize);
 
-//		container.setOpaque(false);
 		container.setOpaque(true);
 		container.setBackground(Color.DARK_GRAY);
 		  
@@ -1679,21 +1886,11 @@ public class MyDraggableImages extends JFrame{
 		container.add(imageLabel);
 		container.setComponentZOrder(imageLabel, layer);
 
-//		layer=container.getComponentCount();
-//		container.setLayer(imagePanel, layer);
-//		container.add(imagePanel);
-//		container.setComponentZOrder(imagePanel, layer);
-
 		//adding the text
 		layer=container.getComponentCount();
 		container.setLayer(textLabel, layer);
 		container.add(textLabel);
 		container.setComponentZOrder(textLabel, layer);
-
-//		layer=container.getComponentCount();
-//		container.setLayer(textPanel, layer);
-//		container.add(textPanel);
-//		container.setComponentZOrder(textPanel, layer);
 
 		/* ***DEBUG*** */
 		if(debug) System.out.println("container.getBounds(): "+container.getBounds());
