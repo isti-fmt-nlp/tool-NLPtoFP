@@ -92,8 +92,10 @@ public class MyDraggableImages extends JFrame{
 	
 	/** current amount of connector lines in the diagram panel*/
 	private static int connectorsCount=0;
-	/** current amount of groups in the diagram panel*/
-	private static int groupsCount=0;
+	/** current amount of Alternative Groups in the diagram panel*/
+	private static int altGroupsCount=0;
+	/** current amount of Or Groups in the diagram panel*/
+	private static int orGroupsCount=0;
 	/** current amount of features in the diagram panel*/
 	private static int featuresCount=0;
 	
@@ -119,8 +121,10 @@ public class MyDraggableImages extends JFrame{
 	/** list of all connector dots that must be redrawn, with same indexes of the lists above*/
 	private static ArrayList<Boolean> connectorDotsToRedraw=null;
 	
-	/** list of all groups*/
-	private static ArrayList<GroupPanel> groupPanels=null;
+	/** list of Alternative Groups*/
+	private static ArrayList<GroupPanel> altGroupPanels=null;	
+	/** list of Or Groups*/
+	private static ArrayList<GroupPanel> orGroupPanels=null;
 	
 	/** OrderedList containing the panels children of the diagram panel*/
 	private static OrderedList visibleOrderDraggables = null;
@@ -166,11 +170,15 @@ public class MyDraggableImages extends JFrame{
 	/** URL of the connector starting dot icon*/
 	private static URL connectorStartDotIconURL=MyDraggableImages.class.getResource("/Connector Start Dot.png");
 	/** URL of the new group starting dot icon*/
-	private static URL groupDotIconURL=MyDraggableImages.class.getResource("/Group Start Dot.png");
+	private static URL ALTGroupDotIconURL=MyDraggableImages.class.getResource("/ALTGroup Start Dot.png");
+	/** URL of the new group starting dot icon*/
+	private static URL ORGroupDotIconURL=MyDraggableImages.class.getResource("/ORGroup Start Dot.png");
 	/** URL of the new connector ending dot icon*/
 	private static URL connectorEndDotIconURL=MyDraggableImages.class.getResource("/Connector End Dot.png");
-	/** URL of the line-only connector icon*/
+	/** URL of the connector line-only icon*/
 	private static URL connectorLineLengthIconURL=MyDraggableImages.class.getResource("/Connector Line Length.png");
+	/** URL of the group line-only icon*/
+	private static URL groupLineLengthIconURL=MyDraggableImages.class.getResource("/Group Line Length.png");
 	
 	/** prefix of any feature name*/
 	private static String featureNamePrefix="---FEATURE---#";
@@ -178,8 +186,10 @@ public class MyDraggableImages extends JFrame{
 	private static String startConnectorsNamePrefix="---START_CONNECTOR---#";
 	/** prefix of any connector ending dot name*/
 	private static String endConnectorsNamePrefix="---END_CONNECTOR---#";
-	/** prefix of any group starting dot name*/
-	private static String groupNamePrefix="---GROUP---#";
+	/** prefix of any group Alternative Gtarting dot name*/
+	private static String altGroupNamePrefix="---ALT_GROUP---#";
+	/** prefix of any Or Group starting dot name*/
+	private static String orGroupNamePrefix="---OR_GROUP---#";
 	/** name ofthe diagram panel*/
 	private static String diagramPanelName="---DIAGRAM_PANEL---";
 
@@ -187,12 +197,12 @@ public class MyDraggableImages extends JFrame{
 	/** enumeration of items that can become active, for instance in a drag motion*/
 	private static enum activeItems {
 		DRAGGING_FEATURE, DRAGGING_TOOL_NEWFEATURE, DRAGGING_TOOL_CONNECTOR, NO_ACTIVE_ITEM,
-		DRAGGING_EXTERN_ANCHOR, DRAGGING_TOOL_ALT_GROUP, DRAGGING_EXTERN_GROUP	
+		DRAGGING_EXTERN_ANCHOR, DRAGGING_TOOL_ALT_GROUP, DRAGGING_EXTERN_GROUP, DRAGGING_TOOL_OR_GROUP	
 	}
 
 	/** enumeration used to specify a item type through the program*/
-	private static enum itemsTypes {
-		START_CONNECTOR, END_CONNECTOR, GROUP_START_CONNECTOR
+	private static enum ItemsType {
+		START_CONNECTOR, END_CONNECTOR, ALT_GROUP_START_CONNECTOR, OR_GROUP_START_CONNECTOR
 	}
 
 	/** tells what item is interested in the current action*/
@@ -214,7 +224,8 @@ public class MyDraggableImages extends JFrame{
 		prevStartConnectorDotsLocation = new ArrayList<Point>();
 		prevEndConnectorDotsLocation = new ArrayList<Point>();
 		connectorDotsToRedraw = new ArrayList<Boolean>();
-		groupPanels = new ArrayList<GroupPanel>();
+		altGroupPanels = new ArrayList<GroupPanel>();
+		orGroupPanels = new ArrayList<GroupPanel>();
 
 		//creating root frame
 //		frameRoot=new OrderedListPaintJFrame(visibleOrderDraggables);
@@ -240,9 +251,11 @@ public class MyDraggableImages extends JFrame{
 		toolIconPaths.put("New Feature", "/New Feature2.png");
 		toolIconPaths.put("Connector Line", "/Connector Line.png");
 		toolIconPaths.put("Alternative Group", "/Alternative Group.png");
+		toolIconPaths.put("Or Group", "/Or Group.png");
+		
 		
 		JComponent iconTmpPanel=null;
-		for(int i=0; i<8; ++i){
+		for(int i=0; i<6; ++i){
 		  iconTmpPanel=getToolIcon("New Feature", true);
 		  iconTmpPanel.addMouseListener(getToolbarMouseListener());
 		  iconTmpPanel.addMouseMotionListener(getToolbarMouseMotionListener());
@@ -254,6 +267,11 @@ public class MyDraggableImages extends JFrame{
 		  toolsPanel.add(iconTmpPanel);
 
 		  iconTmpPanel=getToolIcon("Alternative Group", true);
+		  iconTmpPanel.addMouseListener(getToolbarMouseListener());
+		  iconTmpPanel.addMouseMotionListener(getToolbarMouseMotionListener());
+		  toolsPanel.add(iconTmpPanel);
+
+		  iconTmpPanel=getToolIcon("Or Group", true);
 		  iconTmpPanel.addMouseListener(getToolbarMouseListener());
 		  iconTmpPanel.addMouseMotionListener(getToolbarMouseMotionListener());
 		  toolsPanel.add(iconTmpPanel);
@@ -434,9 +452,29 @@ public class MyDraggableImages extends JFrame{
 		  }
 		}
 
-		//drawing groups
-		for (int i=0; i< groupPanels.size(); ++i){
-		  startPanel=groupPanels.get(i);
+		//drawing Alternative Groups
+		drawGroupList(g2, altGroupPanels, false);
+
+		//drawing Or Groups
+		drawGroupList(g2, orGroupPanels, true);
+	}
+
+	/**
+	 * Draws all groups of the specified list, filling the arc if filled is true, drawing only the arc boundary otherwise.
+	 * 
+	 * @param g2 - the Graphics2D object used for drawing
+	 * @param list - the list of groups to be drawn
+	 * @param filled - if true, the group arc is drawm as a filled shape, otherwise only the boundary line is drawn  
+	 */
+	private void drawGroupList(Graphics2D g2, ArrayList<GroupPanel> list,
+			boolean filled) {
+		JComponent startPanel;
+		JComponent leftMost;
+		JComponent rightMost;
+		int minX;
+		int maxX;
+		for (int i=0; i< list.size(); ++i){
+		  startPanel=list.get(i);
 		  leftMost = null; rightMost = null;
 		  minX=100000; maxX=-100000;
 		  for (JComponent endPanel : ((GroupPanel)startPanel).getMembers()){
@@ -459,7 +497,7 @@ public class MyDraggableImages extends JFrame{
 		  /* ***DEBUG*** */
 
 		  //drawing thr group arc
-		  drawGroupArc(g2, startPanel, leftMost, rightMost);
+		  drawGroupArc(g2, startPanel, leftMost, rightMost, filled);
 		}
 	}
 
@@ -470,8 +508,9 @@ public class MyDraggableImages extends JFrame{
 	 * @param startComp - start anchor of the group
 	 * @param leftMost - left-most anchor of the group
 	 * @param rightMost - right-most anchor of the group
+	 * @param filled - if true, the group arc is drawm as a filled shape, otherwise only the boundary line is drawn  
 	 */
-	private void drawGroupArc(Graphics2D g2, JComponent startComp, JComponent leftMost, JComponent rightMost) {
+	private void drawGroupArc(Graphics2D g2, JComponent startComp, JComponent leftMost, JComponent rightMost, boolean filled) {
 	  double lineFraction=2.5;
 	  double leftX=0, rightX=0, leftY=0, rightY=0;
 	  int leftHeight=0, rightHeight=0, leftWidth=0, rightWidth=0, leftLength=0, rightLength=0;
@@ -481,6 +520,7 @@ public class MyDraggableImages extends JFrame{
 	  Point2D startCenter=null, leftCenter=null, rightCenter=null;
 	  Point2D leftLineIntersectPoint=null, rightLineIntersectPoint=null;
 	  List<Point2D> intersectionPoints=null;
+	  Arc2D groupArc = null;
 	  
 	  /* ***DEBUG*** */
 	  if (debug3) System.out.println(""
@@ -554,14 +594,18 @@ public class MyDraggableImages extends JFrame{
 	  rectangleHeight=(int)(leftLineIntersectPoint.getY()-startCenter.getY());
 //	  rectangleHeight=(leftHeight>rightHeight)? leftHeight:rightHeight;
 	  if (rectangleHeight<0)rectangleHeight*=-1;
-	  Rectangle2D rect2D= new Rectangle2D.Double(			  
-			  (startCenter.getX()-groupArcRadius),
-			  (startCenter.getY()-groupArcRadius),
-			  groupArcRadius*2, groupArcRadius*2);
-	  Arc2D groupArc = new Arc2D.Double(			  
+//	  Rectangle2D rect2D= new Rectangle2D.Double(			  
+//			  (startCenter.getX()-groupArcRadius),
+//			  (startCenter.getY()-groupArcRadius),
+//			  groupArcRadius*2, groupArcRadius*2);
+	  if(!filled) groupArc = new Arc2D.Double(			  
 			  (startCenter.getX()-groupArcRadius),
 			  (startCenter.getY()-groupArcRadius),
 			  groupArcRadius*2, groupArcRadius*2, 0, 360, Arc2D.Double.OPEN);
+	  else groupArc = new Arc2D.Double(			  
+			  (startCenter.getX()-groupArcRadius),
+			  (startCenter.getY()-groupArcRadius),
+			  groupArcRadius*2, groupArcRadius*2, 0, 360, Arc2D.Double.PIE);
 //	  Arc2D groupArc = new Arc2D.Double(			  
 //			  (startCenter.getX()-rectangleHeight),
 //			  (startCenter.getY()-rectangleHeight),
@@ -582,7 +626,9 @@ public class MyDraggableImages extends JFrame{
 		  rightLineIntersectPoint.getX(), rightLineIntersectPoint.getY(), 
 		  leftLineIntersectPoint.getX(), leftLineIntersectPoint.getY());
 	  
-	  tempGraphics.draw(groupArc);
+	  if(!filled) tempGraphics.draw(groupArc);
+	  else  tempGraphics.fill(groupArc);
+
 //	  tempGraphics.draw(rect2D);
 //	  tempGraphics.fill(arco);
 //	  tempGraphics.drawArc(
@@ -736,7 +782,7 @@ public class MyDraggableImages extends JFrame{
     }
 	
 	/**
-	 * Returns a JComponent named name and containing the icon image having the path iconPath, <br>
+	 * Returns a JComponent named name and containing the corresponding icon image, <br>
 	 * the method call setOpaque(backgroundVisible) on the panel containig the icon.
 	 * 
 	 * @param name - the name of the new JComponent
@@ -761,7 +807,7 @@ public class MyDraggableImages extends JFrame{
 	}
 
 	/**
-	 * Returns an ImageIcon named name and using image having the path iconPath.
+	 * Returns an ImageIcon named name containing the image at the path given by toolIconPaths map.
 	 * 
 	 * @param name - the name of the new ImageIcon
 	 * @return - the new ImageIcon, or null if a problem occurrs.
@@ -830,6 +876,8 @@ public class MyDraggableImages extends JFrame{
 			  isActiveItem=activeItems.DRAGGING_TOOL_CONNECTOR;
 		  else if (((JComponent)comp).getName()=="Alternative Group")
 			  isActiveItem=activeItems.DRAGGING_TOOL_ALT_GROUP;
+		  else if (((JComponent)comp).getName()=="Or Group")
+			  isActiveItem=activeItems.DRAGGING_TOOL_OR_GROUP;
 
 		  frameRoot.repaint();
 			
@@ -948,6 +996,10 @@ public class MyDraggableImages extends JFrame{
 		    	addAltGroupToDiagram(e);
 		    	isActiveItem=activeItems.NO_ACTIVE_ITEM;
 		    	toolDragImage=null; break;
+		    case DRAGGING_TOOL_OR_GROUP:
+		    	addOrGroupToDiagram(e);
+		    	isActiveItem=activeItems.NO_ACTIVE_ITEM;
+		    	toolDragImage=null; break;
 		    default: break;
 		  }
 		}
@@ -982,6 +1034,7 @@ public class MyDraggableImages extends JFrame{
 			    case DRAGGING_TOOL_NEWFEATURE: dragToolNewFeature(e); break;
 			    case DRAGGING_TOOL_CONNECTOR: dragToolConnector(e); break;
 			    case DRAGGING_TOOL_ALT_GROUP: dragToolAltGroup(e); break;
+			    case DRAGGING_TOOL_OR_GROUP: dragToolOrGroup(e); break;
 			    default: break;
 			  }			  
 			}
@@ -1087,7 +1140,8 @@ public class MyDraggableImages extends JFrame{
 					}
 					//mouse pressed on a group inside the feature panel
 					else if(anchorPanelName!=null && anchorPanel.getClass().equals(GroupPanel.class) && (
-					   anchorPanelName.startsWith(groupNamePrefix) ) ){
+					   anchorPanelName.startsWith(altGroupNamePrefix) ||
+					   anchorPanelName.startsWith(orGroupNamePrefix) ) ){
 						
 					  isActiveItem=activeItems.DRAGGING_EXTERN_GROUP;
 					  lastAnchorFocused=(JComponent)anchorPanel;
@@ -1119,7 +1173,9 @@ public class MyDraggableImages extends JFrame{
 				  }
 				  //mouse pressed on a group panel in the diagram panel
 				  else if(tmpNode.getElement().getClass().equals(GroupPanel.class) &&
-						  ((GroupPanel)tmpNode.getElement()).getName().startsWith(groupNamePrefix) ){
+						  //lastAnchorFocused?
+						  ((GroupPanel)tmpNode.getElement()).getName().startsWith(altGroupNamePrefix) ||
+						  ((GroupPanel)tmpNode.getElement()).getName().startsWith(orGroupNamePrefix) ){
 					isActiveItem=activeItems.DRAGGING_EXTERN_GROUP;
 					lastAnchorFocused=(GroupPanel)((Component)tmpNode.getElement());
 					moveComponentToTop(lastAnchorFocused);
@@ -1332,7 +1388,7 @@ public class MyDraggableImages extends JFrame{
 	}
 
 	/**
-	 * Drags an AltGroup tool.
+	 * Drags an Alternative Group tool.
 	 * @param e - the MouseEvent passed by the mouseDragged() method of a listener.
 	 *
 	 *@see MouseMotionListener
@@ -1340,6 +1396,18 @@ public class MyDraggableImages extends JFrame{
 	private static void dragToolAltGroup(MouseEvent e) {
 		  dragTool(e);
 	}
+	
+	/**
+	 * Drags an Or Group tool.
+	 * @param e - the MouseEvent passed by the mouseDragged() method of a listener.
+	 *
+	 *@see MouseMotionListener
+	 */
+	private static void dragToolOrGroup(MouseEvent e) {
+		  dragTool(e);
+	}
+	
+	
 	/**
 	 * Drags a generic tool.
 	 * @param e - the MouseEvent passed by the mouseDragged() method of a listener.
@@ -1566,7 +1634,7 @@ public class MyDraggableImages extends JFrame{
 //					  !underlyingPanel.getName().startsWith(startConnectorsNamePrefix)&&
 //					  !underlyingPanel.getName().startsWith(endConnectorsNamePrefix)  ){			  
 
-			newConnectorStartDot=(AnchorPanel)getDraggableConnectionDot(itemsTypes.START_CONNECTOR, 
+			newConnectorStartDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.START_CONNECTOR, 
 				toolDragPosition.x-(int)featurePanel.getLocationOnScreen().getX(),
 				toolDragPosition.y-(int)featurePanel.getLocationOnScreen().getY()-5);			
 
@@ -1594,14 +1662,14 @@ public class MyDraggableImages extends JFrame{
 		}
 		
 		if(!startDotInsertedInPanel) 
-		  newConnectorStartDot=(AnchorPanel)getDraggableConnectionDot(itemsTypes.START_CONNECTOR,
+		  newConnectorStartDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.START_CONNECTOR,
 			  actualPositionX, actualPositionY-5);			
 		
 		ImageIcon lineLengthIcon = new ImageIcon(connectorLineLengthIconURL);
 		ImageIcon startConnectorIcon = new ImageIcon(connectorStartDotIconURL);
 
 //		newConnectorEndDot=getDraggableConnectionDot(itemsTypes.END_CONNECTOR, actualPositionX+40, actualPositionY+40);
-		newConnectorEndDot=(AnchorPanel)getDraggableConnectionDot(itemsTypes.END_CONNECTOR,
+		newConnectorEndDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.END_CONNECTOR,
 			actualPositionX+lineLengthIcon.getIconWidth()+startConnectorIcon.getIconWidth(),
 			actualPositionY-5+lineLengthIcon.getIconHeight()+startConnectorIcon.getIconHeight());
 
@@ -1644,13 +1712,34 @@ public class MyDraggableImages extends JFrame{
 		frameRoot.repaint();
 	}
 
+	private static void addOrGroupToDiagram(MouseEvent e) {
+		GroupPanel newGroupStartDot = addGroupToDiagram(e, ItemsType.OR_GROUP_START_CONNECTOR);
+		if (newGroupStartDot==null) return;
+		addOrGroupToDrawLists(newGroupStartDot);
+		++orGroupsCount;
+	}
+
 	/**
-	 * Adds a new group to the diagram. If the starting connector dot is dropped over a feature panel, <br>
+	 * Adds a new Alternative Group to the diagram. If the starting connector dot is dropped over a feature panel, <br>
 	 * it gets attached to it.
 	 * 
 	 * @param e - MouseEvent of the type Mouse Released.
 	 */
 	private static void addAltGroupToDiagram(MouseEvent e) {
+		GroupPanel newGroupStartDot = addGroupToDiagram(e, ItemsType.ALT_GROUP_START_CONNECTOR);
+		if (newGroupStartDot==null) return;
+		addAltGroupToDrawLists(newGroupStartDot);
+		++altGroupsCount;
+	}
+
+	/**
+	 * Adds a new group to the diagram. If the starting connector dot is dropped over a feature panel, <br>
+	 * it gets attached to it.
+	 * 
+	 * @param e - MouseEvent of the type Mouse Released.
+	 * @param requestedType - the type of the requested group, an ItemsType value.
+	 */
+	private static GroupPanel addGroupToDiagram(MouseEvent e, ItemsType requestedType) {
 		int actualPositionX;
 		int actualPositionY;
 		boolean startDotInsertedInPanel=false;
@@ -1672,9 +1761,14 @@ public class MyDraggableImages extends JFrame{
 			/* ***DEBUG*** */
 			if(debug4) System.out.println("Cannot drop a new group on tools panel.");
 			/* ***DEBUG*** */
-			return;
+			
+			return null;
 		}
 			
+		ImageIcon groupLineLengthIcon = new ImageIcon(groupLineLengthIconURL);
+		ImageIcon startConnectorIcon = new ImageIcon(connectorStartDotIconURL);
+		ImageIcon groupIcon = getIconImage("Alternative Group");
+
 		actualPositionX=(toolDragPosition.x-(int)diagramPanel.getLocationOnScreen().getX());
 		actualPositionY=(toolDragPosition.y-(int)diagramPanel.getLocationOnScreen().getY());
 
@@ -1697,8 +1791,9 @@ public class MyDraggableImages extends JFrame{
 //		  if (!underlyingPanel.getName().startsWith(diagramPanelName)&&
 //			  !underlyingPanel.getName().startsWith(startConnectorsNamePrefix)&&
 //			  !underlyingPanel.getName().startsWith(endConnectorsNamePrefix)  ){			  
-			newGroupStartDot=(GroupPanel)getDraggableConnectionDot(itemsTypes.GROUP_START_CONNECTOR, 
-				toolDragPosition.x-(int)featurePanel.getLocationOnScreen().getX(),
+			newGroupStartDot=(GroupPanel)getDraggableConnectionDot(requestedType, 
+				toolDragPosition.x-(int)featurePanel.getLocationOnScreen().getX()
+					+groupIcon.getIconWidth()/2-startConnectorIcon.getIconWidth()/2,
 				toolDragPosition.y-(int)featurePanel.getLocationOnScreen().getY()-5);			
 
 //			System.out.println("adding to feature: "+addAnchorToFeature(newConnectorStartDot, underlyingPanel));
@@ -1725,19 +1820,19 @@ public class MyDraggableImages extends JFrame{
 		}
 		
 		if(!startDotInsertedInPanel) 
-			newGroupStartDot=(GroupPanel)getDraggableConnectionDot(itemsTypes.GROUP_START_CONNECTOR, actualPositionX, actualPositionY-5);			
+			newGroupStartDot=(GroupPanel)getDraggableConnectionDot(requestedType,
+				actualPositionX+groupIcon.getIconWidth()/2-startConnectorIcon.getIconWidth()/2, actualPositionY-5);			
 		
-		ImageIcon lineLengthIcon = new ImageIcon(connectorLineLengthIconURL);
-		ImageIcon startConnectorIcon = new ImageIcon(connectorStartDotIconURL);
-
 //		newConnectorEndDot=getDraggableConnectionDot(itemsTypes.END_CONNECTOR, actualPositionX+40, actualPositionY+40);
-		newGroupEndpoint1=(AnchorPanel)getDraggableConnectionDot(itemsTypes.END_CONNECTOR,
-				actualPositionX+lineLengthIcon.getIconWidth()+startConnectorIcon.getIconWidth(),
-				actualPositionY-5+lineLengthIcon.getIconHeight()+startConnectorIcon.getIconHeight());
+		newGroupEndpoint1=(AnchorPanel)getDraggableConnectionDot(ItemsType.END_CONNECTOR,
+				actualPositionX+groupIcon.getIconWidth()/2-startConnectorIcon.getIconWidth()/2
+				+groupLineLengthIcon.getIconWidth(),
+				actualPositionY-5+groupLineLengthIcon.getIconHeight()+startConnectorIcon.getIconHeight());
 
-		newGroupEndpoint2=(AnchorPanel)getDraggableConnectionDot(itemsTypes.END_CONNECTOR,
-				actualPositionX-lineLengthIcon.getIconWidth(),
-				actualPositionY-5+lineLengthIcon.getIconHeight()+startConnectorIcon.getIconHeight());
+		newGroupEndpoint2=(AnchorPanel)getDraggableConnectionDot(ItemsType.END_CONNECTOR,
+				actualPositionX+groupIcon.getIconWidth()/2-startConnectorIcon.getIconWidth()/2
+				-groupLineLengthIcon.getIconWidth()/*-startConnectorIcon.getIconWidth()*/,
+				actualPositionY-5+groupLineLengthIcon.getIconHeight()+startConnectorIcon.getIconHeight());
 
 		/* ***DEBUG*** */
 		if(debug) System.out.println("Mouse released(Drag relative) on: ("+e.getX()+", "+e.getY()+")."
@@ -1781,12 +1876,7 @@ public class MyDraggableImages extends JFrame{
 
 		newGroupEndpoint1.setOtherEnd(newGroupStartDot);
 		newGroupEndpoint2.setOtherEnd(newGroupStartDot);
-		
-		addGroupToDrawLists(newGroupStartDot);
-		
-		++groupsCount;
-
-		
+		return newGroupStartDot;
 	}
 
 	/**
@@ -1797,7 +1887,7 @@ public class MyDraggableImages extends JFrame{
 	 * @param incoURL - URL of the connection dot icon
 	 * @return A new JComponent representing the connection dot
 	 */
-	private static JComponent getDraggableConnectionDot(itemsTypes type, int x, int y) {
+	private static JComponent getDraggableConnectionDot(ItemsType type, int x, int y) {
 		JComponent imagePanel=null;
 
 		ImageIcon connectorIcon=null;
@@ -1814,10 +1904,15 @@ public class MyDraggableImages extends JFrame{
 			imagePanel.setName(endConnectorsNamePrefix+connectorsCount);
 			connectorIcon = new ImageIcon(connectorEndDotIconURL);
 			break;
-		  case GROUP_START_CONNECTOR:
+		  case ALT_GROUP_START_CONNECTOR:
 			imagePanel = new GroupPanel();  
-			imagePanel.setName(groupNamePrefix+groupsCount);
-			connectorIcon = new ImageIcon(groupDotIconURL);
+			imagePanel.setName(altGroupNamePrefix+altGroupsCount);
+			connectorIcon = new ImageIcon(ALTGroupDotIconURL);
+			break;
+		  case OR_GROUP_START_CONNECTOR:
+			imagePanel = new GroupPanel();  
+			imagePanel.setName(orGroupNamePrefix+orGroupsCount);
+			connectorIcon = new ImageIcon(ORGroupDotIconURL);
 			break;
  		  default: return null;
 		}
@@ -1939,15 +2034,23 @@ public class MyDraggableImages extends JFrame{
 	}
 	
 	/**
-	 * Adds the group to the lists used to draw connectors.
+	 * Adds the Alternatibe Group to the lists used to draw connectors.
 	 * 
-	 * @param newConnectorStartDot - the starting connector dot
-	 * @param newConnectorEndDot - the ending connector dot
+	 * @param group - the GrouPanel object to be added to the lists
 	 */
-	private static void addGroupToDrawLists(GroupPanel group) {
-		groupPanels.add(group);		
+	private static void addAltGroupToDrawLists(GroupPanel group) {
+		altGroupPanels.add(group);		
 	}
-	
+
+	/**
+	 * Adds the Or Group to the lists used to draw connectors.
+	 * 
+	 * @param group - the GrouPanel object to be added to the lists
+	 */
+	private static void addOrGroupToDrawLists(GroupPanel group) {
+		orGroupPanels.add(group);		
+	}
+
 	/**
 	 * Main Method.
 	 * @param args
