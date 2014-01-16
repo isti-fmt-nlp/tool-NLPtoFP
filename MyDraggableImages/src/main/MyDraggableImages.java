@@ -17,6 +17,8 @@ import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.Toolkit;
 import java.awt.Transparency;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -44,12 +46,15 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 import javax.swing.text.LayeredHighlighter;
+import javax.xml.stream.events.StartDocument;
 
 
 
@@ -58,7 +63,7 @@ public class MyDraggableImages extends JFrame{
 	private static boolean debug=false;
 	private static boolean debug2=false;
 	private static boolean debug3=true;
-	private static boolean debug4=false;
+	private static boolean debug4=true;
 
 
 	class EditorSplitPane extends JSplitPane{
@@ -107,19 +112,19 @@ public class MyDraggableImages extends JFrame{
 	/** list of all connector ending dots,
 	 *  corresponding starting dots can be found in startConnectorDots at the same index
 	 */
-	private static ArrayList<JComponent> endConnectorDots=null;
+//	private static ArrayList<JComponent> endConnectorDots=null;
 	
 	//still unused
 	/** previous location of all connector starting dots, with same indexes of the lists above*/
-	private static ArrayList<Point> prevStartConnectorDotsLocation=null;
+//	private static ArrayList<Point> prevStartConnectorDotsLocation=null;
 	
 	//still unused
 	/** previous location of all connector ending dots, with same indexes of the lists above*/
-	private static ArrayList<Point> prevEndConnectorDotsLocation=null;
+//	private static ArrayList<Point> prevEndConnectorDotsLocation=null;
 	
 	//to revise
 	/** list of all connector dots that must be redrawn, with same indexes of the lists above*/
-	private static ArrayList<Boolean> connectorDotsToRedraw=null;
+//	private static ArrayList<Boolean> connectorDotsToRedraw=null;
 	
 	/** list of Alternative Groups*/
 	private static ArrayList<GroupPanel> altGroupPanels=null;	
@@ -215,15 +220,72 @@ public class MyDraggableImages extends JFrame{
 
 	private static Point start=new Point(), endLeft=new Point(), endRight=new Point();
 
+	/** the popup menu for all diagram panel elements*/
+	private static JPopupMenu diagramElementsMenu = null;
+	/** the element interested by the popup menu*/
+	private static JComponent popUpElement = null;
+	
+	/** popup menu items*/
+	private static JMenuItem popMenuItemDelete = null;
+	private static JMenuItem popMenuItemUngroup = null;
+	
+
 //	public static void main(String[] args){
 	public MyDraggableImages(){
+		diagramElementsMenu = new JPopupMenu();
+		diagramElementsMenu.setLightWeightPopupEnabled(false);
+
+//		diagramElementsMenu.setIgnoreRepaint(true);
+//		diagramElementsMenu.setLayout(new BorderLayout());
+		popMenuItemDelete = new JMenuItem("Delete Element");
+        popMenuItemUngroup = new JMenuItem("Ungroup Element");
+        
+        popMenuItemDelete.addActionListener(
+        		
+          new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+//              JComponent comp = (JComponent)e.getSource();
+              String elementName = null;
+              if (popUpElement!=null) elementName=popUpElement.getName();
+
+              /* ***DEBUG*** */
+              if(debug3) System.out.println("Popup Menu requested delete on "+elementName
+            		  +"\ne = "+e
+            		  /*+"\ncomp.getName()="+comp.getName()*/);
+              /* ***DEBUG*** */
+              
+              if(elementName!=null && elementName.startsWith(endConnectorsNamePrefix)){
+//              if(elementName.startsWith(startConnectorsNamePrefix)) ){
+              	deleteAnchor(popUpElement);
+              	deleteAnchor(((AnchorPanel)popUpElement).getOtherEnd());
+//            	deleteAnchor( ((AnchorPanel)popUpElement).getOtherEnd());
+              	 frameRoot.repaint();
+              }
+              popUpElement=null;
+//              diagramElementsMenu.setVisible(false);
+
+            }
+
+          });
+
+        popMenuItemUngroup.addActionListener(
+          new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              System.out.println("Detach not implemented yet! ");
+            }
+        });
+        
+//        diagramElementsMenu.add(popMenuItemDelete);
+//        diagramElementsMenu.add(popMenuItemUngroup);
+
+
 		OrderedListNode tmpNode=null;
 		visibleOrderDraggables = new OrderedList();
 		startConnectorDots = new ArrayList<JComponent>();
-		endConnectorDots = new ArrayList<JComponent>();
-		prevStartConnectorDotsLocation = new ArrayList<Point>();
-		prevEndConnectorDotsLocation = new ArrayList<Point>();
-		connectorDotsToRedraw = new ArrayList<Boolean>();
+//		endConnectorDots = new ArrayList<JComponent>();
+//		prevStartConnectorDotsLocation = new ArrayList<Point>();
+//		prevEndConnectorDotsLocation = new ArrayList<Point>();
+//		connectorDotsToRedraw = new ArrayList<Boolean>();
 		altGroupPanels = new ArrayList<GroupPanel>();
 		orGroupPanels = new ArrayList<GroupPanel>();
 
@@ -446,11 +508,17 @@ public class MyDraggableImages extends JFrame{
 		int minX=100000, maxX=-100000;
 		
 		//drawing connectors
-		for (int i=0; i< connectorDotsToRedraw.size(); ++i){
-		  if (connectorDotsToRedraw.get(i)){
-			drawConnectionLine(g2, startConnectorDots.get(i), endConnectorDots.get(i));
-		  }
+		for (int i=0; i< startConnectorDots.size(); ++i){
+		  drawConnectionLine(g2, startConnectorDots.get(i), ((AnchorPanel)startConnectorDots.get(i)).getOtherEnd());
+
 		}
+
+//		//drawing connectors
+//		for (int i=0; i< connectorDotsToRedraw.size(); ++i){
+//		  if (connectorDotsToRedraw.get(i)){
+//			drawConnectionLine(g2, startConnectorDots.get(i), endConnectorDots.get(i));
+//		  }
+//		}
 
 		//drawing Alternative Groups
 		drawGroupList(g2, altGroupPanels, false);
@@ -843,6 +911,8 @@ public class MyDraggableImages extends JFrame{
 
 		@Override
 		public void mousePressed(MouseEvent e) {
+		  diagramElementsMenu.setVisible(false);
+		  diagramElementsMenu.setEnabled(false);
 //		  lastPositionX=(int)e.getLocationOnScreen().getX();
 //		  lastPositionY=(int)e.getLocationOnScreen().getY();
 			  lastPositionX=e.getX();
@@ -1080,6 +1150,13 @@ public class MyDraggableImages extends JFrame{
 			
 			@Override
 			public void mouseReleased(MouseEvent e) {
+//			  if (e.getButton() == MouseEvent.BUTTON3) {
+//				//if (e.getButton() == MouseEvent.BUTTON1) {
+//				diagramElementsMenu.show(diagramPanel, e.getX(), e.getY());
+//				//                    diagramElementsMenu.show(e.getComponent(), e.getX(), e.getY());
+//				return;
+//			  }
+
 			  switch(isActiveItem){
 			    case DRAGGING_FEATURE:
 			      isActiveItem=activeItems.NO_ACTIVE_ITEM;
@@ -1229,9 +1306,38 @@ public class MyDraggableImages extends JFrame{
 			
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				System.out.println("Button pressed: "+e.getButton());
+				diagramElementsMenu.setEnabled(false);
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                	Component comp=diagramPanel.getComponentAt(e.getX(), e.getY());
+                	
+                	/* ***DEBUG*** */
+                	if(debug3) System.out.println("rigth clicked on: "+comp.getName());
+                	/* ***DEBUG*** */
+
+                	if(comp.getName()==null || comp.getName()==""|| comp.getName().startsWith(diagramPanelName)) return;
+
+                	popUpElement=(JComponent)comp;
+//                	popUpElement=getUnderlyingComponent(e.getX(), e.getY());
+                	diagramElementsMenu.removeAll();
+
+                	if(popUpElement.getName().startsWith(startConnectorsNamePrefix)
+                     	   || popUpElement.getName().startsWith(endConnectorsNamePrefix)){
+                      diagramElementsMenu.add(popMenuItemDelete);
+                      diagramElementsMenu.add(popMenuItemUngroup);
+                    }
+                	if(popUpElement.getName().startsWith(featureNamePrefix)){
+                	  diagramElementsMenu.add(popMenuItemDelete);
+                   	}
+
+                	diagramElementsMenu.show(diagramPanel, e.getX(), e.getY());
+//                	diagramElementsMenu.show(diagramPanel.getComponentAt(e.getX(), e.getY()),
+//                		e.getX()-diagramPanel.getComponentAt(e.getX(), e.getY()).getX(),
+//                		e.getY()-diagramPanel.getComponentAt(e.getX(), e.getY()).getY());
+                }
 
 				/* ***DEBUG *** */
-				if(debug3) System.out.println(splitterPanel.getDividerLocation());
+				if(debug) System.out.println("splitterPanel.getDividerLocation(): "+splitterPanel.getDividerLocation());
 				/* ***DEBUG *** */
 
 				  
@@ -1449,14 +1555,25 @@ public class MyDraggableImages extends JFrame{
 	  FeaturePanel underlyingPanel=null;
 	  OrderedListNode tmpNode=visibleOrderDraggables.getFirst();
 	  while(tmpNode!=null){	  
-		if ( tmpNode.getElement().getClass().equals(FeaturePanel.class) &&
-			 ((FeaturePanel)tmpNode.getElement()).getName().startsWith(featureNamePrefix) &&
-			 ((Component)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY()) ){			
-		  underlyingPanel=(FeaturePanel)tmpNode.getElement();
-		  addAnchorToFeature(lastAnchorFocused, underlyingPanel);
-//		  diagramPanel.repaint();
-		  frameRoot.repaint();
-		  break;		
+//		if ( tmpNode.getElement().getClass().equals(FeaturePanel.class) &&
+//		     ((FeaturePanel)tmpNode.getElement()).getName().startsWith(featureNamePrefix) &&
+//			 ((Component)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY()) ){			
+		if (((Component)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY()) ){	
+		  if (((Component)tmpNode.getElement()).getName().startsWith(featureNamePrefix)){
+			underlyingPanel=(FeaturePanel)tmpNode.getElement();
+			addAnchorToFeature(lastAnchorFocused, underlyingPanel);
+//			  diagramPanel.repaint();
+			frameRoot.repaint();
+			break;					  
+		  }
+		  if (lastAnchorFocused.getName().startsWith(startConnectorsNamePrefix) && 
+			   (  ((Component)tmpNode.getElement()).getName().startsWith(altGroupNamePrefix)
+			    || ((Component)tmpNode.getElement()).getName().startsWith(orGroupNamePrefix)) ){
+			addStartAnchorToGroup((AnchorPanel)lastAnchorFocused, (GroupPanel)tmpNode.getElement());
+//			  diagramPanel.repaint();
+			frameRoot.repaint();
+			break;					  
+		  }
 		}
 		tmpNode=tmpNode.getNext();
 	  }				
@@ -1496,7 +1613,9 @@ public class MyDraggableImages extends JFrame{
 	private static boolean addAnchorToFeature(JComponent anchor, FeaturePanel featurePanel) {
 		int anchorPanelOnScreenX;
 		int anchorPanelOnScreenY;
-		
+		Component comp = null;
+		AnchorPanel startAnchor = null;
+		GroupPanel group = null;
 		/* ***DEBUG*** */
 		if(debug4) System.out.println("anchor.getParent()="+anchor.getParent()
 			+"\nanchor.isDisplayable(): "+anchor.isDisplayable());
@@ -1512,12 +1631,40 @@ public class MyDraggableImages extends JFrame{
 				+"\nlastAnchorFocused.getLocationOnScreen(): "+anchor.getLocationOnScreen());
 		/* ***DEBUG*** */
 
-		anchorPanelOnScreenX=(int)anchor.getLocationOnScreen().getX();
-		anchorPanelOnScreenY=(int)anchor.getLocationOnScreen().getY();
+		
+		//if it is an ending anchor, location is set to top-middle of underlying feature
+		if(anchor.getName().startsWith(endConnectorsNamePrefix)){
+		  anchor.setLocation(featurePanel.getWidth()/2-anchor.getWidth()/2, -4);		
+		}
+		
+		//if it is a starting anchor, location is set relative to underlying feature, on the same visible location
+		else {
+		  anchorPanelOnScreenX=(int)anchor.getLocationOnScreen().getX();
+		  anchorPanelOnScreenY=(int)anchor.getLocationOnScreen().getY();
+		  anchor.setLocation((int)(anchorPanelOnScreenX-featurePanel.getLocationOnScreen().getX()),
+				  (int)(anchorPanelOnScreenY-featurePanel.getLocationOnScreen().getY()) );		
+		}
 
-		anchor.setLocation((int)(anchorPanelOnScreenX-featurePanel.getLocationOnScreen().getX()),
-				(int)(anchorPanelOnScreenY-featurePanel.getLocationOnScreen().getY()) );		
+		//checking if anchor must be added to a group
+		if(anchor.getName().startsWith(startConnectorsNamePrefix)){
+		  comp = featurePanel.getComponentAt(anchor.getLocation());
+		  if (comp.getName()!=null && (comp.getName().startsWith(altGroupNamePrefix) 
+			  || comp.getName().startsWith(orGroupNamePrefix) )){
+			startAnchor=(AnchorPanel)anchor;
+			group=(GroupPanel)comp;
 
+     		/* ***DEBUG*** */
+	        if(debug) System.out.println("Adding anchor to the group: "+group.getName());
+	        /* ***DEBUG*** */
+	        
+	        addStartAnchorToGroup(startAnchor, group);
+			return true;
+//			endConnectorDots.remove(((AnchorPanel)anchor).getOtherEnd());
+//			connectorDotsToRedraw.remove(anchor);
+		  }
+		}
+
+		//Adding anchor to the feature
 		/* ***DEBUG*** */
 		if(debug) System.out.println("Adding anchor to the feature: "+featurePanel.getName()
 				+"\nWith origin: "+featurePanel.getLocation()
@@ -1533,6 +1680,27 @@ public class MyDraggableImages extends JFrame{
 		return true;
 	}
 
+	/**
+	 * Removes a starting connector anchor from the diagram panel and attach it to a group.<br>
+	 * 
+	 * @param startAnchor - the starting connector anchor to be added
+	 * @param group - the group 
+	 */
+	private static void addStartAnchorToGroup(AnchorPanel startAnchor, GroupPanel group) {
+		group.getMembers().add(startAnchor.getOtherEnd());
+		((AnchorPanel)startAnchor.getOtherEnd()).setOtherEnd(group);
+		diagramPanel.remove(startAnchor);
+		diagramPanel.validate();
+		visibleOrderDraggables.remove(startAnchor);
+		startConnectorDots.remove(startAnchor);
+		return;
+	}
+
+	/**
+	 * Adds a new feature to the diagram panel.
+	 * 
+	 * @param e - MouseEvent of the type Mouse Released.
+	 */
 	private static void addNewFeatureToDiagram(MouseEvent e) {
 
 		//the new feature must be dropped on the diagram panel for it to be added
@@ -1560,6 +1728,8 @@ public class MyDraggableImages extends JFrame{
 		FeaturePanel newFeature=getDraggableFeature("Default Feature Name"/*featureNamePrefix+featuresCount*/,
 			toolDragPosition.x-(int)diagramPanel.getLocationOnScreen().getX(),
 			toolDragPosition.y-(int)diagramPanel.getLocationOnScreen().getY());
+		
+		newFeature.add(diagramElementsMenu);
 
 		toolDragImage=null;
 		toolDragPosition=null;
@@ -1672,6 +1842,9 @@ public class MyDraggableImages extends JFrame{
 		newConnectorEndDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.END_CONNECTOR,
 			actualPositionX+lineLengthIcon.getIconWidth()+startConnectorIcon.getIconWidth(),
 			actualPositionY-5+lineLengthIcon.getIconHeight()+startConnectorIcon.getIconHeight());
+
+		newConnectorStartDot.add(diagramElementsMenu);
+		newConnectorEndDot.add(diagramElementsMenu);
 
 		/* ***DEBUG*** */
 		if(debug) System.out.println("Mouse released(Drag relative) on: ("+e.getX()+", "+e.getY()+")."
@@ -2003,8 +2176,8 @@ public class MyDraggableImages extends JFrame{
 	 * at the specified coordinates.
 	 */
 	private static JComponent getUnderlyingComponent(int x, int y) {
-	  JComponent underlyingPanel=null;
-	  underlyingPanel = (JComponent) diagramPanel.getComponentAt(x, y);
+	  JComponent subComponent = null;
+	  JComponent underlyingPanel = (JComponent) diagramPanel.getComponentAt(x, y);
 
 	  /* ***DEBUG*** */
 	  if(debug) System.out.println("underlyingPanel="+underlyingPanel
@@ -2016,6 +2189,22 @@ public class MyDraggableImages extends JFrame{
 			&& !underlyingPanel.getClass().equals(GroupPanel.class)
 			&& !underlyingPanel.getClass().equals(FeaturePanel.class) )
 		) return null;
+	  
+	  //checking if the underlying component is a child of a feature component
+	  if(underlyingPanel.getClass().equals(FeaturePanel.class)){
+		//switching from diagramPanel coordinate system to underlyingPanel coordinate system
+		x=x+(int)(diagramPanel.getLocationOnScreen().getX()-underlyingPanel.getLocationOnScreen().getX());
+		y=y+(int)(diagramPanel.getLocationOnScreen().getY()-underlyingPanel.getLocationOnScreen().getY());
+		
+		subComponent = (JComponent) underlyingPanel.getComponentAt(x, y);
+
+		if(subComponent==null ||
+			( !subComponent.getClass().equals(AnchorPanel.class)
+						&& !subComponent.getClass().equals(GroupPanel.class) )
+		  ) return underlyingPanel;
+		else return subComponent;
+	  }
+	  
 	  return underlyingPanel;
 	}
 
@@ -2027,10 +2216,10 @@ public class MyDraggableImages extends JFrame{
 	 */
 	private static void addConnectorsToDrawLists(JComponent newConnectorStartDot, JComponent newConnectorEndDot) {
 		startConnectorDots.add(newConnectorStartDot);
-		prevStartConnectorDotsLocation.add(new Point());
-		endConnectorDots.add(newConnectorEndDot);
-		prevEndConnectorDotsLocation.add(new Point());
-		connectorDotsToRedraw.add(true);
+//		prevStartConnectorDotsLocation.add(new Point());
+//		endConnectorDots.add(newConnectorEndDot);
+//		prevEndConnectorDotsLocation.add(new Point());
+//		connectorDotsToRedraw.add(true);
 	}
 	
 	/**
@@ -2049,6 +2238,68 @@ public class MyDraggableImages extends JFrame{
 	 */
 	private static void addOrGroupToDrawLists(GroupPanel group) {
 		orGroupPanels.add(group);		
+	}
+	
+	/**
+	 * Deletes an anchor from the diagram
+	 * 
+	 * @param anchor - the anchor to delete
+	 */
+	private static void deleteAnchor(JComponent anchor) {
+		int diagramRelativeX=0;
+		int diagramRelativeY=0;
+		JComponent underlying = null;
+		String otherEndName=null;
+		
+		if(anchor==null) return;
+		
+		//getting the diagram panel-relative position of the element
+    	diagramRelativeX=(int)(anchor.getLocationOnScreen().getX()-diagramPanel.getLocationOnScreen().getX());
+    	diagramRelativeY=(int)(anchor.getLocationOnScreen().getY()-diagramPanel.getLocationOnScreen().getY());
+    	underlying=getUnderlyingComponent(diagramRelativeX, diagramRelativeY);
+    	
+    	/* ***DEBUG*** */
+    	if(debug3) System.out.println("underlying="+underlying+"\nunderlying.getName(): "+underlying.getName()
+    			+"\nanchor.getParent(): "+anchor.getParent()
+    			+"\nanchor.getParent().getName()"+anchor.getParent().getName()
+    			+"\nanchor.getParent().getParent(): "+anchor.getParent().getParent()
+    			+"\nanchor.getParent().getParent().getName()"+anchor.getParent().getParent().getName());
+    	/* ***DEBUG*** */
+    	
+        //the element is attached directly to the diagram panel
+        if(anchor.getParent().getName().startsWith(diagramPanelName)){
+    	  diagramPanel.remove(anchor);
+    	  visibleOrderDraggables.remove(anchor);
+//    	  diagramPanel.validate();
+        }
+        else if(anchor.getParent().getName().startsWith(featureNamePrefix)){
+          anchor.getParent().remove(anchor);
+      	  visibleOrderDraggables.remove(anchor);
+//          anchor.getParent().validate();
+        }
+
+        if (anchor.getName().startsWith(startConnectorsNamePrefix)) startConnectorDots.remove(anchor);
+        
+//        //deleting the other end of connector, if still present
+//        if(((AnchorPanel)anchor).getOtherEnd()!=null){
+//          if (anchor.getName().startsWith(startConnectorsNamePrefix)){
+//            ((AnchorPanel)((AnchorPanel)anchor).getOtherEnd()).setOtherEnd(null);
+//            deleteAnchor(((AnchorPanel)anchor).getOtherEnd());        	  
+//          }
+//          else{
+//        	otherEndName=((AnchorPanel)anchor).getOtherEnd().getName();
+//        	if(otherEndName.startsWith(altGroupNamePrefix) || otherEndName.startsWith(orGroupNamePrefix)){
+//        	  ((GroupPanel)((AnchorPanel)anchor).getOtherEnd()).getMembers().remove(anchor);
+//        	}
+//        	else{
+//              ((AnchorPanel)((AnchorPanel)anchor).getOtherEnd()).setOtherEnd(null);
+//              deleteAnchor(((AnchorPanel)anchor).getOtherEnd());        	  
+//        	}
+//          }
+//
+//        }
+//        
+//        if(((AnchorPanel)anchor).getOtherEnd()==null) frameRoot.repaint();
 	}
 
 	/**
