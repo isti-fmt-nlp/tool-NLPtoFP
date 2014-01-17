@@ -1,5 +1,6 @@
 package main;
 
+import java.awt.AWTException;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -13,12 +14,16 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import java.awt.MouseInfo;
 import java.awt.Point;
+import java.awt.Robot;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.Toolkit;
 import java.awt.Transparency;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -53,6 +58,8 @@ import javax.swing.JSplitPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import javax.swing.text.LayeredHighlighter;
 import javax.xml.stream.events.StartDocument;
 
@@ -62,9 +69,9 @@ public class MyDraggableImages extends JFrame{
 	/** variables used for debugging*/
 	private static boolean debug=false;
 	private static boolean debug2=false;
-	private static boolean debug3=true;
-	private static boolean debug4=true;
-
+	private static boolean debug3=false;
+	private static boolean debug4=false;
+	private static Robot eventsRobot = null;
 
 	class EditorSplitPane extends JSplitPane{
 
@@ -228,13 +235,51 @@ public class MyDraggableImages extends JFrame{
 	/** popup menu items*/
 	private static JMenuItem popMenuItemDelete = null;
 	private static JMenuItem popMenuItemUngroup = null;
+	private static int diagramElementsMenuPosX=0;
+	private static int diagramElementsMenuPosY=0;
 	
 
 //	public static void main(String[] args){
 	public MyDraggableImages(){
+		System.out.println("GraphicsEnvironment.isHeadless(): "+GraphicsEnvironment.isHeadless());
+		try {
+			eventsRobot = new Robot();
+		} catch (AWTException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		diagramElementsMenu = new JPopupMenu();
-		diagramElementsMenu.setLightWeightPopupEnabled(false);
-
+//		diagramElementsMenu.setFocusable(false);
+//		diagramElementsMenu.setLightWeightPopupEnabled(false);
+//		diagramElementsMenu.addFocusListener(new FocusListener() {
+//			@Override
+//			public void focusLost(FocusEvent e) {
+//				System.out.println("Menu Lost Focus");				
+//			}
+//			
+//			@Override
+//			public void focusGained(FocusEvent e) {
+//				System.out.println("Menu Gained Focus");								
+//			}
+//		});
+//		diagramElementsMenu.addPopupMenuListener(new PopupMenuListener() {
+//			
+//			@Override
+//			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+//				System.out.println("Menu Became Visible");
+//			}
+//			
+//			@Override
+//			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+//				System.out.println("Menu Became Invisible");
+//			}
+//			
+//			@Override
+//			public void popupMenuCanceled(PopupMenuEvent e) {
+//				System.out.println("Menu Canceled");
+//			}
+//		});
+		
 //		diagramElementsMenu.setIgnoreRepaint(true);
 //		diagramElementsMenu.setLayout(new BorderLayout());
 		popMenuItemDelete = new JMenuItem("Delete Element");
@@ -254,12 +299,28 @@ public class MyDraggableImages extends JFrame{
             		  /*+"\ncomp.getName()="+comp.getName()*/);
               /* ***DEBUG*** */
               
+              if(elementName!=null && elementName.startsWith(startConnectorsNamePrefix)){
+//                if(elementName.startsWith(startConnectorsNamePrefix)) ){
+            	deleteAnchor(popUpElement);
+            	deleteAnchor(((AnchorPanel)popUpElement).getOtherEnd());
+//                deleteAnchor( ((AnchorPanel)popUpElement).getOtherEnd());
+            	frameRoot.repaint();
+              }
               if(elementName!=null && elementName.startsWith(endConnectorsNamePrefix)){
-//              if(elementName.startsWith(startConnectorsNamePrefix)) ){
-              	deleteAnchor(popUpElement);
-              	deleteAnchor(((AnchorPanel)popUpElement).getOtherEnd());
-//            	deleteAnchor( ((AnchorPanel)popUpElement).getOtherEnd());
-              	 frameRoot.repaint();
+//                if(elementName.startsWith(startConnectorsNamePrefix)) ){
+            	if(((AnchorPanel)popUpElement).getOtherEnd().getName().startsWith(startConnectorsNamePrefix)){
+                  deleteAnchor(popUpElement);
+                  deleteAnchor(((AnchorPanel)popUpElement).getOtherEnd());            		
+            	}
+            	if( ( ((AnchorPanel)popUpElement).getOtherEnd().getName().startsWith(orGroupNamePrefix)
+            	   || ((AnchorPanel)popUpElement).getOtherEnd().getName().startsWith(altGroupNamePrefix) )
+            	   && ((GroupPanel)((AnchorPanel)popUpElement).getOtherEnd()).getMembers().size()>2 ){
+
+            		((GroupPanel)((AnchorPanel)popUpElement).getOtherEnd()).getMembers().remove(popUpElement);
+              	    deleteAnchor(popUpElement);
+            	}	
+//                deleteAnchor( ((AnchorPanel)popUpElement).getOtherEnd());
+                frameRoot.repaint();
               }
               popUpElement=null;
 //              diagramElementsMenu.setVisible(false);
@@ -454,6 +515,7 @@ public class MyDraggableImages extends JFrame{
 //            	frameRoot.setVisible(true);
 //            }
 //        });
+//		diagramPanel.add(diagramElementsMenu);
 
 	}
 
@@ -904,6 +966,17 @@ public class MyDraggableImages extends JFrame{
 
 		@Override
 		public void mouseClicked(MouseEvent e) {
+//			if(popUpElement!=null){
+//			  System.out.println("clicked! popupElement: "+popUpElement);
+//			  diagramElementsMenu.show(diagramPanel, diagramElementsMenuPosX, diagramElementsMenuPosY);
+//			  return;
+////			  popUpElement=null;				  
+////			  eventsRobot.mousePress(InputEvent.BUTTON1_MASK);
+////			  diagramElementsMenu.menuSelectionChanged(false);
+//			}
+
+//			if(popUpElement!=null) return;
+
 			/* ***DEBUG*** */
 			if (debug3) System.out.println("mouse clicked on a tool, Divider at: "+splitterPanel.getDividerLocation());
 			/* ***DEBUG*** */
@@ -911,6 +984,17 @@ public class MyDraggableImages extends JFrame{
 
 		@Override
 		public void mousePressed(MouseEvent e) {
+//		  if(popUpElement!=null){
+//			System.out.println("popupElement: "+popUpElement);
+//			diagramElementsMenu.show(diagramPanel, diagramElementsMenuPosX, diagramElementsMenuPosY);
+//			return;
+////			popUpElement=null;				  
+////			eventsRobot.mousePress(InputEvent.BUTTON1_MASK);
+////			diagramElementsMenu.menuSelectionChanged(false);
+//		  }
+
+//		  if(popUpElement!=null) return;
+
 		  diagramElementsMenu.setVisible(false);
 		  diagramElementsMenu.setEnabled(false);
 //		  lastPositionX=(int)e.getLocationOnScreen().getX();
@@ -1053,6 +1137,17 @@ public class MyDraggableImages extends JFrame{
 
 		@Override
 		public void mouseReleased(MouseEvent e) {
+//		  if(popUpElement!=null){
+//			System.out.println("popupElement: "+popUpElement);
+//			diagramElementsMenu.show(diagramPanel, diagramElementsMenuPosX, diagramElementsMenuPosY);
+//			return;
+////			popUpElement=null;				  
+////			eventsRobot.mousePress(InputEvent.BUTTON1_MASK);
+////			diagramElementsMenu.menuSelectionChanged(false);
+//		  }
+			
+//		  if(popUpElement!=null) return;
+
 		  switch(isActiveItem){
 		    case DRAGGING_TOOL_NEWFEATURE:
 		    	addNewFeatureToDiagram(e);
@@ -1150,6 +1245,12 @@ public class MyDraggableImages extends JFrame{
 			
 			@Override
 			public void mouseReleased(MouseEvent e) {
+//			  if(popUpElement!=null){
+////				eventsRobot.mousePress(InputEvent.BUTTON1_MASK);
+//				popUpElement=null;				  
+//				diagramElementsMenu.removeAll();
+//				diagramElementsMenu.menuSelectionChanged(false);
+//			  }
 //			  if (e.getButton() == MouseEvent.BUTTON3) {
 //				//if (e.getButton() == MouseEvent.BUTTON1) {
 //				diagramElementsMenu.show(diagramPanel, e.getX(), e.getY());
@@ -1175,6 +1276,12 @@ public class MyDraggableImages extends JFrame{
 			
 			@Override
 			public void mousePressed(MouseEvent e) {
+//			  if(popUpElement!=null){
+////				eventsRobot.mousePress(InputEvent.BUTTON1_MASK);
+//				popUpElement=null;				  
+//				diagramElementsMenu.removeAll();
+//				diagramElementsMenu.menuSelectionChanged(false);
+//			  }
 			  int featurePanelX=0, featurePanelY=0;
 			  int anchorPanelOnScreenX=0, anchorPanelOnScreenY=0;
 			  FeaturePanel featurePanel=null;
@@ -1307,8 +1414,12 @@ public class MyDraggableImages extends JFrame{
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				System.out.println("Button pressed: "+e.getButton());
-				diagramElementsMenu.setEnabled(false);
+            	diagramElementsMenu.removeAll();
+//				diagramElementsMenu.setEnabled(false);
                 if (e.getButton() == MouseEvent.BUTTON3) {
+//                	toolsPanel.setRequestFocusEnabled(false);
+//                	toolsPanel.setFocusable(false);
+//                	toolsPanel.setEnabled(false);
                 	Component comp=diagramPanel.getComponentAt(e.getX(), e.getY());
                 	
                 	/* ***DEBUG*** */
@@ -1319,7 +1430,6 @@ public class MyDraggableImages extends JFrame{
 
                 	popUpElement=(JComponent)comp;
 //                	popUpElement=getUnderlyingComponent(e.getX(), e.getY());
-                	diagramElementsMenu.removeAll();
 
                 	if(popUpElement.getName().startsWith(startConnectorsNamePrefix)
                      	   || popUpElement.getName().startsWith(endConnectorsNamePrefix)){
@@ -1329,8 +1439,10 @@ public class MyDraggableImages extends JFrame{
                 	if(popUpElement.getName().startsWith(featureNamePrefix)){
                 	  diagramElementsMenu.add(popMenuItemDelete);
                    	}
-
-                	diagramElementsMenu.show(diagramPanel, e.getX(), e.getY());
+                	
+                	diagramElementsMenuPosX=e.getX();
+                	diagramElementsMenuPosY=e.getY();
+                	diagramElementsMenu.show(diagramPanel, diagramElementsMenuPosX, diagramElementsMenuPosY);
 //                	diagramElementsMenu.show(diagramPanel.getComponentAt(e.getX(), e.getY()),
 //                		e.getX()-diagramPanel.getComponentAt(e.getX(), e.getY()).getX(),
 //                		e.getY()-diagramPanel.getComponentAt(e.getX(), e.getY()).getY());
@@ -1729,7 +1841,7 @@ public class MyDraggableImages extends JFrame{
 			toolDragPosition.x-(int)diagramPanel.getLocationOnScreen().getX(),
 			toolDragPosition.y-(int)diagramPanel.getLocationOnScreen().getY());
 		
-		newFeature.add(diagramElementsMenu);
+//		newFeature.add(diagramElementsMenu);
 
 		toolDragImage=null;
 		toolDragPosition=null;
@@ -1843,8 +1955,8 @@ public class MyDraggableImages extends JFrame{
 			actualPositionX+lineLengthIcon.getIconWidth()+startConnectorIcon.getIconWidth(),
 			actualPositionY-5+lineLengthIcon.getIconHeight()+startConnectorIcon.getIconHeight());
 
-		newConnectorStartDot.add(diagramElementsMenu);
-		newConnectorEndDot.add(diagramElementsMenu);
+//		newConnectorStartDot.add(diagramElementsMenu);
+//		newConnectorEndDot.add(diagramElementsMenu);
 
 		/* ***DEBUG*** */
 		if(debug) System.out.println("Mouse released(Drag relative) on: ("+e.getX()+", "+e.getY()+")."
