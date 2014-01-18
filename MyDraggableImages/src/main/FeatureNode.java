@@ -9,7 +9,9 @@ import java.util.ArrayList;
  *
  */
 public class FeatureNode {
+	/** FeatureTypes describes the possible types for a feature*/
 	private static enum FeatureTypes{COMMONALITY, VARIABILITY};
+	
 	/** The feature type*/
 	private FeatureTypes type=FeatureTypes.COMMONALITY;
 	/** The feature name*/
