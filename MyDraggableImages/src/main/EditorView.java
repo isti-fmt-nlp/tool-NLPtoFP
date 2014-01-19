@@ -235,20 +235,20 @@ public class EditorView extends JFrame{
 	/** popup menu items*/
 	private static JMenuItem popMenuItemDelete = null;
 	private static JMenuItem popMenuItemUngroup = null;
+	/** popup menu coordinates*/
 	private static int diagramElementsMenuPosX=0;
 	private static int diagramElementsMenuPosY=0;
 	
 
 //	public static void main(String[] args){
 	public EditorView(){
-		System.out.println("GraphicsEnvironment.isHeadless(): "+GraphicsEnvironment.isHeadless());
-		try {
-			eventsRobot = new Robot();
-		} catch (AWTException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		diagramElementsMenu = new JPopupMenu();
+//		System.out.println("GraphicsEnvironment.isHeadless(): "+GraphicsEnvironment.isHeadless());
+//		try {
+//			eventsRobot = new Robot();
+//		} catch (AWTException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
 //		diagramElementsMenu.setFocusable(false);
 //		diagramElementsMenu.setLightWeightPopupEnabled(false);
 //		diagramElementsMenu.addFocusListener(new FocusListener() {
@@ -282,59 +282,6 @@ public class EditorView extends JFrame{
 		
 //		diagramElementsMenu.setIgnoreRepaint(true);
 //		diagramElementsMenu.setLayout(new BorderLayout());
-		popMenuItemDelete = new JMenuItem("Delete Element");
-        popMenuItemUngroup = new JMenuItem("Ungroup Element");
-        
-        popMenuItemDelete.addActionListener(
-        		
-          new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-//              JComponent comp = (JComponent)e.getSource();
-              String elementName = null;
-              if (popUpElement!=null) elementName=popUpElement.getName();
-
-              /* ***DEBUG*** */
-              if(debug3) System.out.println("Popup Menu requested delete on "+elementName
-            		  +"\ne = "+e
-            		  /*+"\ncomp.getName()="+comp.getName()*/);
-              /* ***DEBUG*** */
-              
-              if(elementName!=null && elementName.startsWith(startConnectorsNamePrefix)){
-//                if(elementName.startsWith(startConnectorsNamePrefix)) ){
-            	deleteAnchor(popUpElement);
-            	deleteAnchor(((AnchorPanel)popUpElement).getOtherEnd());
-//                deleteAnchor( ((AnchorPanel)popUpElement).getOtherEnd());
-            	frameRoot.repaint();
-              }
-              if(elementName!=null && elementName.startsWith(endConnectorsNamePrefix)){
-//                if(elementName.startsWith(startConnectorsNamePrefix)) ){
-            	if(((AnchorPanel)popUpElement).getOtherEnd().getName().startsWith(startConnectorsNamePrefix)){
-                  deleteAnchor(popUpElement);
-                  deleteAnchor(((AnchorPanel)popUpElement).getOtherEnd());            		
-            	}
-            	if( ( ((AnchorPanel)popUpElement).getOtherEnd().getName().startsWith(orGroupNamePrefix)
-            	   || ((AnchorPanel)popUpElement).getOtherEnd().getName().startsWith(altGroupNamePrefix) )
-            	   && ((GroupPanel)((AnchorPanel)popUpElement).getOtherEnd()).getMembers().size()>2 ){
-
-            		((GroupPanel)((AnchorPanel)popUpElement).getOtherEnd()).getMembers().remove(popUpElement);
-              	    deleteAnchor(popUpElement);
-            	}	
-//                deleteAnchor( ((AnchorPanel)popUpElement).getOtherEnd());
-                frameRoot.repaint();
-              }
-              popUpElement=null;
-//              diagramElementsMenu.setVisible(false);
-
-            }
-
-          });
-
-        popMenuItemUngroup.addActionListener(
-          new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              System.out.println("Detach not implemented yet! ");
-            }
-        });
         
 //        diagramElementsMenu.add(popMenuItemDelete);
 //        diagramElementsMenu.add(popMenuItemUngroup);
@@ -510,6 +457,68 @@ public class EditorView extends JFrame{
 		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
 		addMouseListener(getToolbarMouseListener());
 		addMouseMotionListener(getToolbarMouseMotionListener());
+		
+
+		//creating diagram popup menu
+		diagramElementsMenu = new JPopupMenu();
+		popMenuItemDelete = new JMenuItem("Delete Element");
+        popMenuItemUngroup = new JMenuItem("Ungroup Element");
+
+        popMenuItemDelete.addActionListener(editorController);        
+        popMenuItemUngroup.addActionListener(editorController);        
+        
+//        popMenuItemDelete.addActionListener(
+//        		
+//          new ActionListener() {
+//            public void actionPerformed(ActionEvent e) {
+////              System.out.println("e.getSource():"+e.getSource());
+////              System.out.println("e.ActionCommand():"+e.getActionCommand());
+//              String elementName = null;
+//              if (popUpElement!=null) elementName=popUpElement.getName();
+//
+//              /* ***DEBUG*** */
+//              if(debug3) System.out.println("Popup Menu requested delete on "+elementName
+//            		  +"\ne = "+e
+//            		  /*+"\ncomp.getName()="+comp.getName()*/);
+//              /* ***DEBUG*** */
+//              
+//              if(elementName!=null && elementName.startsWith(startConnectorsNamePrefix)){
+////                if(elementName.startsWith(startConnectorsNamePrefix)) ){
+//            	deleteAnchor(popUpElement);
+//            	deleteAnchor(((AnchorPanel)popUpElement).getOtherEnd());
+////                deleteAnchor( ((AnchorPanel)popUpElement).getOtherEnd());
+//            	frameRoot.repaint();
+//              }
+//              if(elementName!=null && elementName.startsWith(endConnectorsNamePrefix)){
+////                if(elementName.startsWith(startConnectorsNamePrefix)) ){
+//            	if(((AnchorPanel)popUpElement).getOtherEnd().getName().startsWith(startConnectorsNamePrefix)){
+//                  deleteAnchor(popUpElement);
+//                  deleteAnchor(((AnchorPanel)popUpElement).getOtherEnd());            		
+//            	}
+//            	if( ( ((AnchorPanel)popUpElement).getOtherEnd().getName().startsWith(orGroupNamePrefix)
+//            	   || ((AnchorPanel)popUpElement).getOtherEnd().getName().startsWith(altGroupNamePrefix) )
+//            	   && ((GroupPanel)((AnchorPanel)popUpElement).getOtherEnd()).getMembers().size()>2 ){
+//
+//            		((GroupPanel)((AnchorPanel)popUpElement).getOtherEnd()).getMembers().remove(popUpElement);
+//              	    deleteAnchor(popUpElement);
+//            	}	
+////                deleteAnchor( ((AnchorPanel)popUpElement).getOtherEnd());
+//                frameRoot.repaint();
+//              }
+//              popUpElement=null;
+////              diagramElementsMenu.setVisible(false);
+//
+//            }
+//
+//          });
+
+
+//        popMenuItemUngroup.addActionListener(
+//          new ActionListener() {
+//            public void actionPerformed(ActionEvent e) {
+//              System.out.println("Detach not implemented yet! ");
+//            }
+//        });
 		
 		
 //		setExtendedState(MAXIMIZED_BOTH);
@@ -2368,11 +2377,10 @@ public class EditorView extends JFrame{
 	 * 
 	 * @param anchor - the anchor to delete
 	 */
-	private static void deleteAnchor(JComponent anchor) {
+	public static void deleteAnchor(JComponent anchor) {
 		int diagramRelativeX=0;
 		int diagramRelativeY=0;
 		JComponent underlying = null;
-		String otherEndName=null;
 		
 		if(anchor==null) return;
 		
@@ -2403,26 +2411,6 @@ public class EditorView extends JFrame{
 
         if (anchor.getName().startsWith(startConnectorsNamePrefix)) startConnectorDots.remove(anchor);
         
-//        //deleting the other end of connector, if still present
-//        if(((AnchorPanel)anchor).getOtherEnd()!=null){
-//          if (anchor.getName().startsWith(startConnectorsNamePrefix)){
-//            ((AnchorPanel)((AnchorPanel)anchor).getOtherEnd()).setOtherEnd(null);
-//            deleteAnchor(((AnchorPanel)anchor).getOtherEnd());        	  
-//          }
-//          else{
-//        	otherEndName=((AnchorPanel)anchor).getOtherEnd().getName();
-//        	if(otherEndName.startsWith(altGroupNamePrefix) || otherEndName.startsWith(orGroupNamePrefix)){
-//        	  ((GroupPanel)((AnchorPanel)anchor).getOtherEnd()).getMembers().remove(anchor);
-//        	}
-//        	else{
-//              ((AnchorPanel)((AnchorPanel)anchor).getOtherEnd()).setOtherEnd(null);
-//              deleteAnchor(((AnchorPanel)anchor).getOtherEnd());        	  
-//        	}
-//          }
-//
-//        }
-//        
-//        if(((AnchorPanel)anchor).getOtherEnd()==null) frameRoot.repaint();
 	}
 
 	/** Returns the popup menu for all diagram panel elements*/

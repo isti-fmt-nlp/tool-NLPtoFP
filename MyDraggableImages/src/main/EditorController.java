@@ -419,8 +419,44 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		
+	  //popup menu command: Delete Element
+      if(e.getActionCommand().equals("Delete Element")){
+        String elementName = null;
+    	JComponent popupElement=editorView.getPopUpElement();
+        if (popupElement!=null) elementName=editorView.getPopUpElement().getName();
+
+        /* ***DEBUG*** */
+        if(debug3) System.out.println("Popup Menu requested delete on "+elementName
+      		  +"\ne = "+e
+      		  /*+"\ncomp.getName()="+comp.getName()*/);
+        /* ***DEBUG*** */
+        
+        if(elementName!=null && elementName.startsWith(EditorView.startConnectorsNamePrefix)){
+      	  EditorView.deleteAnchor(popupElement);
+      	  EditorView.deleteAnchor(((AnchorPanel)popupElement).getOtherEnd());
+      	  editorView.repaintRootFrame();
+        }
+        if(elementName!=null && elementName.startsWith(EditorView.endConnectorsNamePrefix)){
+      	  if(((AnchorPanel)popupElement).getOtherEnd().getName().startsWith(EditorView.startConnectorsNamePrefix)){
+      		EditorView.deleteAnchor(popupElement);
+      		EditorView.deleteAnchor(((AnchorPanel)popupElement).getOtherEnd());            		
+      	  }
+      	  else if( ( ((AnchorPanel)popupElement).getOtherEnd().getName().startsWith(EditorView.orGroupNamePrefix)
+      	   || ((AnchorPanel)popupElement).getOtherEnd().getName().startsWith(EditorView.altGroupNamePrefix) )
+      	   && ((GroupPanel)((AnchorPanel)popupElement).getOtherEnd()).getMembers().size()>2 ){
+
+      		((GroupPanel)((AnchorPanel)popupElement).getOtherEnd()).getMembers().remove(popupElement);
+      		EditorView.deleteAnchor(popupElement);
+      	  }	
+          editorView.repaintRootFrame();
+        }
+        editorView.setPopUpElement(null);
+      }
+	  //popup menu command: Ungroup Element
+      else if(e.getActionCommand().equals("Ungroup Element")){
+        System.out.println("Ungroup not implemented yet! ");
+      }
+
 	}
 
 }
