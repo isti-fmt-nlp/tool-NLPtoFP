@@ -180,11 +180,11 @@ public class OrderedList{
 		//searching for element in the list
 		OrderedListNode tmp=first;
 		while(tmp!=null){
-		  if(element.equals(tmp.getElement())){
+		  if(element.equals(tmp.getElement())){			  
 			//the element before tmp must point to the element after tmp as next
 			tmp.getPrev().setNext(tmp.getNext());
 			//the element after tmp must point to the element before tmp as previous
-			/*if(tmp.getNext()!=null)*/  tmp.getNext().setPrev(tmp.getPrev());
+			if(tmp.getNext()!=null)  tmp.getNext().setPrev(tmp.getPrev());
 			return;
 		  }
 		  tmp=tmp.getNext();

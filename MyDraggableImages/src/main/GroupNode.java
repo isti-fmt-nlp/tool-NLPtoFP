@@ -9,12 +9,15 @@ import java.util.ArrayList;
  *
  */
 public class GroupNode {
+	
+	/** The group name*/
+	private String name="";
 	/** The group minimum cardinality*/
 	private int minCardinality=1;
 	/** The group maximum cardinality*/
 	private int maxCardinality=2;
 	/** The list of features that are members of this group*/
-	private ArrayList<FeatureNode> subFeatures= new ArrayList<FeatureNode>();
+	private ArrayList<FeatureNode> members= new ArrayList<FeatureNode>();
 
 	/**
 	 * Creates a new default GroupNode. <br>
@@ -26,17 +29,26 @@ public class GroupNode {
 	/**
 	 * Creates a new GroupNode, based on the parameters. 
 	 * 
+	 * @param name - the name of this group
 	 * @param minCardinality - group minimum cardinality
 	 * @param maxCardinality - group maximum cardinality
 	 * @param subFeatures - the features which will be member of this group.
 	 */
-	public GroupNode(int minCardinality, int maxCardinality, ArrayList<FeatureNode> subFeatures){
+	public GroupNode(String name, int minCardinality, int maxCardinality, ArrayList<FeatureNode> members){
 		this.minCardinality=minCardinality;
 		this.maxCardinality=maxCardinality;
-		this.subFeatures=subFeatures;
+		this.members=members;
+		this.name=name;
 	}
 
-	
+	/**
+	 * Returns the name of this group.
+	 * 
+	 * @return - a String representing the name of this group
+	 */
+	public String getName(){
+		return name;
+	}
 	
 	/**
 	 * Changes the cardinality of this group with the one given in the parameters.
@@ -57,5 +69,14 @@ public class GroupNode {
 	 */
 	public Point getCardinality(){
 		return new Point(minCardinality, maxCardinality);
+	}
+	
+	/**
+	 * Returns the members of this group.
+	 * 
+	 * @return - an ArrayList\<FeatureNode\> object containing the members of this group
+	 */
+	public ArrayList<FeatureNode> getMembers(){
+	  return members;
 	}
 }

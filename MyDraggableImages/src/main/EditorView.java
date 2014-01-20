@@ -41,6 +41,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Stack;
 
 import javax.imageio.ImageIO;
@@ -65,13 +67,13 @@ import javax.xml.stream.events.StartDocument;
 
 
 
-public class EditorView extends JFrame{
+public class EditorView extends JFrame implements Observer{
 	/** variables used for debugging*/
 	private static boolean debug=false;
 	private static boolean debug2=false;
 	private static boolean debug3=false;
-	private static boolean debug4=false;
-	private static Robot eventsRobot = null;
+	private static boolean debug4=true;
+//	private static Robot eventsRobot = null;
 
 	class EditorSplitPane extends JSplitPane{
 
@@ -173,6 +175,8 @@ public class EditorView extends JFrame{
 	private static FeaturePanel lastFeatureFocused=null;
 	/** the active Anchor panel*/
 	private static JComponent lastAnchorFocused=null;
+	/** the component on which a drop is about to be done*/
+	private static JComponent underlyingComponent=null;
 //	private static boolean isDraggingFeature=false;
 	
 	/** URL of the new feature icon*/
@@ -235,13 +239,19 @@ public class EditorView extends JFrame{
 	/** popup menu items*/
 	private static JMenuItem popMenuItemDelete = null;
 	private static JMenuItem popMenuItemUngroup = null;
+	private static JMenuItem popMenuItemPrintModelDebug = null;
+	
 	/** popup menu coordinates*/
 	private static int diagramElementsMenuPosX=0;
 	private static int diagramElementsMenuPosY=0;
 	
 
-//	public static void main(String[] args){
 	public EditorView(){
+		
+	}
+	
+	public boolean prepareUI(EditorController editorController){
+		if(editorController==null) return false;
 //		System.out.println("GraphicsEnvironment.isHeadless(): "+GraphicsEnvironment.isHeadless());
 //		try {
 //			eventsRobot = new Robot();
@@ -317,9 +327,6 @@ public class EditorView extends JFrame{
 //						BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)));
 		
 		
-		//creating controller
-		EditorController editorController =new EditorController(this, null);
-
 		//creating tools items
 		toolIconPaths=new HashMap<String, String>();
 		toolIconPaths.put("New Feature", "/New Feature2.png");
@@ -401,36 +408,36 @@ public class EditorView extends JFrame{
 		add(splitterPanel);
 
 		
-		//creo i draggables
-		String label[]={"Questo è un nome lungo per una Feature!", "Questo è un nome ammodo", "Corto!"};
-		for(int i=0; i<label.length; ++i){
-			visibleOrderDraggables.addToTop(getDraggableFeature(label[i], 15+i*75, 15+i*75));
-			++featuresCount;
-		}
-						
-		//aggiungo i draggables al diagram panel
-		int index=0;
-
-//		JPanel tmpPanel=null;
-		
-		tmpNode=visibleOrderDraggables.getFirst();
-		while(tmpNode!=null){
-//			((JPanel)tmpNode.getElement()).addMouseListener(getDiagramMouseListener());
-//			((JPanel)tmpNode.getElement()).addMouseMotionListener(getDiagramMouseMotionListener());
-			diagramPanel.setLayer((Component)tmpNode.getElement(), index);
-			diagramPanel.add((Component)tmpNode.getElement());
-			diagramPanel.setComponentZOrder((Component)tmpNode.getElement(), index);
-//			tmpPanel=(JPanel)tmpNode.getElement();
-//			diagramPanel.setLayer(tmpPanel, index);
-//			diagramPanel.add(tmpPanel);
-//			tmpPanel.setOpaque(false);
-//			diagramPanel.setComponentZOrder(tmpPanel, index);
-			
-			
-			
-			tmpNode=tmpNode.getNext();
-			++index;
-		}
+//		//creo i draggables
+//		String label[]={"Questo è un nome lungo per una Feature!", "Questo è un nome ammodo", "Corto!"};
+//		for(int i=0; i<label.length; ++i){
+//			visibleOrderDraggables.addToTop(getDraggableFeature(label[i], 15+i*75, 15+i*75));
+//			++featuresCount;
+//		}
+//						
+//		//aggiungo i draggables al diagram panel
+//		int index=0;
+//
+////		JPanel tmpPanel=null;
+//		
+//		tmpNode=visibleOrderDraggables.getFirst();
+//		while(tmpNode!=null){
+////			((JPanel)tmpNode.getElement()).addMouseListener(getDiagramMouseListener());
+////			((JPanel)tmpNode.getElement()).addMouseMotionListener(getDiagramMouseMotionListener());
+//			diagramPanel.setLayer((Component)tmpNode.getElement(), index);
+//			diagramPanel.add((Component)tmpNode.getElement());
+//			diagramPanel.setComponentZOrder((Component)tmpNode.getElement(), index);
+////			tmpPanel=(JPanel)tmpNode.getElement();
+////			diagramPanel.setLayer(tmpPanel, index);
+////			diagramPanel.add(tmpPanel);
+////			tmpPanel.setOpaque(false);
+////			diagramPanel.setComponentZOrder(tmpPanel, index);
+//			
+//			
+//			
+//			tmpNode=tmpNode.getNext();
+//			++index;
+//		}
 
 //		tmpNode=visibleOrderDraggables.getLast();
 //		while(tmpNode!=null){
@@ -462,10 +469,12 @@ public class EditorView extends JFrame{
 		//creating diagram popup menu
 		diagramElementsMenu = new JPopupMenu();
 		popMenuItemDelete = new JMenuItem("Delete Element");
-        popMenuItemUngroup = new JMenuItem("Ungroup Element");
+        popMenuItemUngroup = new JMenuItem("Ungroup Element");        
+        popMenuItemPrintModelDebug = new JMenuItem("Print Model[DEBUG COMMAND]");
 
         popMenuItemDelete.addActionListener(editorController);        
         popMenuItemUngroup.addActionListener(editorController);        
+        popMenuItemPrintModelDebug.addActionListener(editorController);        
         
 //        popMenuItemDelete.addActionListener(
 //        		
@@ -539,7 +548,7 @@ public class EditorView extends JFrame{
 //            }
 //        });
 //		diagramPanel.add(diagramElementsMenu);
-
+        return true;
 	}
 
 	@Override
@@ -1175,7 +1184,7 @@ public class EditorView extends JFrame{
 
 		  switch(isActiveItem){
 		    case DRAGGING_TOOL_NEWFEATURE:
-		    	addNewFeatureToDiagram(e);
+//		    	addNewFeatureToDiagram(e);
 		    	isActiveItem=activeItems.NO_ACTIVE_ITEM;
 		    	toolDragImage=null; break;
 		    case DRAGGING_TOOL_CONNECTOR:
@@ -1683,32 +1692,45 @@ public class EditorView extends JFrame{
 	 * 
 	 * @param e - MouseEvent of the type Mouse Released.
 	 */
-	public static void dropAnchorOnDiagram(MouseEvent e) {
+	public static Component dropAnchorOnDiagram(MouseEvent e) {
 	  FeaturePanel underlyingPanel=null;
 	  OrderedListNode tmpNode=visibleOrderDraggables.getFirst();
 	  while(tmpNode!=null){	  
-//		if ( tmpNode.getElement().getClass().equals(FeaturePanel.class) &&
-//		     ((FeaturePanel)tmpNode.getElement()).getName().startsWith(featureNamePrefix) &&
-//			 ((Component)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY()) ){			
 		if (((Component)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY()) ){	
+//		  if (((Component)tmpNode.getElement()).getName().startsWith(featureNamePrefix)){
+//			underlyingPanel=(FeaturePanel)tmpNode.getElement();
+//			addAnchorToFeature(lastAnchorFocused, underlyingPanel);
+//			frameRoot.repaint();
+//			break;					  
+//		  }
+//		  if (lastAnchorFocused.getName().startsWith(startConnectorsNamePrefix) && 
+//			   (  ((Component)tmpNode.getElement()).getName().startsWith(altGroupNamePrefix)
+//			    || ((Component)tmpNode.getElement()).getName().startsWith(orGroupNamePrefix)) ){
+//			addStartAnchorToGroup((AnchorPanel)lastAnchorFocused, (GroupPanel)tmpNode.getElement());
+//			frameRoot.repaint();
+//			break;					  
+//		  }
+			
 		  if (((Component)tmpNode.getElement()).getName().startsWith(featureNamePrefix)){
-			underlyingPanel=(FeaturePanel)tmpNode.getElement();
-			addAnchorToFeature(lastAnchorFocused, underlyingPanel);
-//			  diagramPanel.repaint();
-			frameRoot.repaint();
-			break;					  
+//			underlyingPanel=(FeaturePanel)tmpNode.getElement();
+			underlyingComponent=(JComponent)tmpNode.getElement();
+//			addAnchorToFeature(lastAnchorFocused, underlyingPanel);
+//			frameRoot.repaint();
+			return underlyingComponent;					  
 		  }
 		  if (lastAnchorFocused.getName().startsWith(startConnectorsNamePrefix) && 
 			   (  ((Component)tmpNode.getElement()).getName().startsWith(altGroupNamePrefix)
-			    || ((Component)tmpNode.getElement()).getName().startsWith(orGroupNamePrefix)) ){
-			addStartAnchorToGroup((AnchorPanel)lastAnchorFocused, (GroupPanel)tmpNode.getElement());
-//			  diagramPanel.repaint();
-			frameRoot.repaint();
-			break;					  
+				|| ((Component)tmpNode.getElement()).getName().startsWith(orGroupNamePrefix)) ){
+			underlyingComponent=(JComponent)tmpNode.getElement();
+//			addStartAnchorToGroup((AnchorPanel)lastAnchorFocused, (GroupPanel)tmpNode.getElement());
+//			frameRoot.repaint();
+			return underlyingComponent;					  
 		  }
+//		  else return null;
 		}
 		tmpNode=tmpNode.getNext();
-	  }				
+	  }		
+	  return null;
 	}
 
 	/**
@@ -1732,6 +1754,57 @@ public class EditorView extends JFrame{
 	    tmpNode=tmpNode.getNext();
 	  }				
 	}
+	
+
+	/**
+	NO PARAMETER VERSION, CALLED BY update()
+	 */
+	public static boolean addAnchorToFeature() {
+		int anchorPanelOnScreenX;
+		int anchorPanelOnScreenY;
+		Component comp = null;
+		AnchorPanel startAnchor = null;
+		GroupPanel group = null;
+		
+//		if(lastAnchorFocused.getParent()==null || !lastAnchorFocused.isDisplayable()) return false;
+		
+		moveComponentToTop(underlyingComponent);
+
+		//if it is an ending anchor, location is set to top-middle of underlying feature
+		if(lastAnchorFocused.getName().startsWith(endConnectorsNamePrefix)){
+			lastAnchorFocused.setLocation(underlyingComponent.getWidth()/2-lastAnchorFocused.getWidth()/2, -4);		
+		}
+		
+		//if it is a starting anchor, location is set relative to underlying feature, on the same visible location
+		else {
+		  anchorPanelOnScreenX=(int)lastAnchorFocused.getLocationOnScreen().getX();
+		  anchorPanelOnScreenY=(int)lastAnchorFocused.getLocationOnScreen().getY();
+		  lastAnchorFocused.setLocation((int)(anchorPanelOnScreenX-underlyingComponent.getLocationOnScreen().getX()),
+				  (int)(anchorPanelOnScreenY-underlyingComponent.getLocationOnScreen().getY()) );		
+		}
+
+//		//checking if anchor must be added to a group
+//		if(lastAnchorFocused.getName().startsWith(startConnectorsNamePrefix)){
+//		  comp = underlyingComponent.getComponentAt(lastAnchorFocused.getLocation());
+//		  if (comp!=null && comp.getName()!=null && (comp.getName().startsWith(altGroupNamePrefix) 
+//			  || comp.getName().startsWith(orGroupNamePrefix) )){
+//			startAnchor=(AnchorPanel)lastAnchorFocused;
+//			group=(GroupPanel)comp;
+//
+//	        addStartAnchorToGroup(startAnchor, group);
+//			return true;
+//		  }
+//		}
+
+		//Adding anchor to the feature
+		diagramPanel.remove(lastAnchorFocused);
+		diagramPanel.validate();
+		((JLayeredPane)underlyingComponent).setLayer(lastAnchorFocused, 0);
+		((JLayeredPane)underlyingComponent).add(lastAnchorFocused);
+		((JLayeredPane)underlyingComponent).setComponentZOrder(lastAnchorFocused, 0);
+
+		return true;
+	}
 
 	/**
 	 * Removes a visible anchor from the diagram panel and attach it to a feature panel.<br>
@@ -1748,8 +1821,10 @@ public class EditorView extends JFrame{
 		Component comp = null;
 		AnchorPanel startAnchor = null;
 		GroupPanel group = null;
+		
 		/* ***DEBUG*** */
-		if(debug4) System.out.println("anchor.getParent()="+anchor.getParent()
+		if(debug4) System.out.println("BEFORE ADDING ANCHOR TO FEATURE"
+			+"\nanchor.getParent()="+anchor.getParent()
 			+"\nanchor.isDisplayable(): "+anchor.isDisplayable());
 		/* ***DEBUG*** */
 
@@ -1780,7 +1855,7 @@ public class EditorView extends JFrame{
 		//checking if anchor must be added to a group
 		if(anchor.getName().startsWith(startConnectorsNamePrefix)){
 		  comp = featurePanel.getComponentAt(anchor.getLocation());
-		  if (comp.getName()!=null && (comp.getName().startsWith(altGroupNamePrefix) 
+		  if (comp!=null && comp.getName()!=null && (comp.getName().startsWith(altGroupNamePrefix) 
 			  || comp.getName().startsWith(orGroupNamePrefix) )){
 			startAnchor=(AnchorPanel)anchor;
 			group=(GroupPanel)comp;
@@ -1809,6 +1884,13 @@ public class EditorView extends JFrame{
 		featurePanel.setLayer(anchor, 0);
 		featurePanel.add(anchor);
 		featurePanel.setComponentZOrder(anchor, 0);
+		
+		/* ***DEBUG*** */
+		if(debug4) System.out.println("AFTER ADDING ANCHOR TO FEATURE"
+			+"\nanchor.getParent()="+anchor.getParent()
+			+"\nanchor.isDisplayable(): "+anchor.isDisplayable());
+		/* ***DEBUG*** */
+
 		return true;
 	}
 
@@ -1829,48 +1911,31 @@ public class EditorView extends JFrame{
 	}
 
 	/**
-	 * Adds a new feature to the diagram panel.
+	 * Adds a new feature to the diagram panel, incrementing featuresCount.
 	 * 
 	 * @param e - MouseEvent of the type Mouse Released.
 	 */
-	public static void addNewFeatureToDiagram(MouseEvent e) {
+	public static void addNewFeatureToDiagram(/*MouseEvent e*/) {
 
-		//the new feature must be dropped on the diagram panel for it to be added
-		if( diagramPanel.getLocationOnScreen().getX()>toolDragPosition.x ||
-			diagramPanel.getLocationOnScreen().getX()+diagramPanel.getWidth()<=toolDragPosition.x ||
-			diagramPanel.getLocationOnScreen().getY()>toolDragPosition.y ||
-			diagramPanel.getLocationOnScreen().getX()+diagramPanel.getHeight()<=toolDragPosition.y ){
+//		if (!checkDroppedOnDiagram()) return;
 
-			toolDragImage=null;
-			toolDragPosition=null;
-			frameRoot.repaint();
-
-			/* ***DEBUG*** */
-			if(debug4) System.out.println("Cannot drop a new feature on tools panel.");
-			/* ***DEBUG*** */
-			return;
-		}
-
-		/* ***DEBUG*** */
-		if(debug) System.out.println("Mouse rilasciato(Drag relative) su: ("+e.getX()+", "+e.getY()+")."
-		  +"\nMouse rilasciato(Screen relative) su: ("+e.getXOnScreen()+", "+e.getYOnScreen()+")."
-		  +"\nLocation dove verrà aggiunta la nuova Feature: ("+toolDragPosition.x+", "+toolDragPosition.y+").");
-		/* ***DEBUG*** */
-		
-		FeaturePanel newFeature=getDraggableFeature("Default Feature Name"/*featureNamePrefix+featuresCount*/,
+//		/* ***DEBUG*** */
+//		if(debug) System.out.println("Mouse rilasciato(Drag relative) su: ("+e.getX()+", "+e.getY()+")."
+//		  +"\nMouse rilasciato(Screen relative) su: ("+e.getXOnScreen()+", "+e.getYOnScreen()+")."
+//		  +"\nLocation dove verrà aggiunta la nuova Feature: ("+toolDragPosition.x+", "+toolDragPosition.y+").");
+//		/* ***DEBUG*** */
+//
+		FeaturePanel newFeature=getDraggableFeature(/*"Default Feature Name"*/featureNamePrefix+featuresCount,
 			toolDragPosition.x-(int)diagramPanel.getLocationOnScreen().getX(),
 			toolDragPosition.y-(int)diagramPanel.getLocationOnScreen().getY());
 		
-//		newFeature.add(diagramElementsMenu);
 
-		toolDragImage=null;
-		toolDragPosition=null;
 		visibleOrderDraggables.addToTop(newFeature);
 		diagramPanel.setLayer(newFeature, 0);
 		diagramPanel.add(newFeature);
 		diagramPanel.setComponentZOrder(newFeature, 0);
 //		diagramPanel.repaint();
-		frameRoot.repaint();
+		cancelToolDrag();
 
 		/* ***DEBUG*** */
 		if(debug) System.out.println("Actual location of the new Feature: ("+newFeature.getLocationOnScreen()
@@ -1904,9 +1969,7 @@ public class EditorView extends JFrame{
 			diagramPanel.getLocationOnScreen().getY()>toolDragPosition.y ||
 			diagramPanel.getLocationOnScreen().getX()+diagramPanel.getHeight()<=toolDragPosition.y ){
 			
-			toolDragImage=null;
-			toolDragPosition=null;
-			frameRoot.repaint();
+			cancelToolDrag();
 
 			/* ***DEBUG*** */
 			if(debug4) System.out.println("Cannot drop a new connector on tools panel.");
@@ -2010,11 +2073,7 @@ public class EditorView extends JFrame{
 		addConnectorsToDrawLists(newConnectorStartDot, newConnectorEndDot);
 		++connectorsCount;
 
-		toolDragImage=null;
-		toolDragPosition=null;
-
-//		diagramPanel.repaint();
-		frameRoot.repaint();
+		cancelToolDrag();
 	}
 
 	public static void addOrGroupToDiagram(MouseEvent e) {
@@ -2059,9 +2118,7 @@ public class EditorView extends JFrame{
 			diagramPanel.getLocationOnScreen().getY()>toolDragPosition.y ||
 			diagramPanel.getLocationOnScreen().getX()+diagramPanel.getHeight()<=toolDragPosition.y ){
 			
-			toolDragImage=null;
-			toolDragPosition=null;
-			frameRoot.repaint();
+			cancelToolDrag();
 
 			/* ***DEBUG*** */
 			if(debug4) System.out.println("Cannot drop a new group on tools panel.");
@@ -2163,11 +2220,7 @@ public class EditorView extends JFrame{
 		diagramPanel.add(newGroupEndpoint2);
 		diagramPanel.setComponentZOrder(newGroupEndpoint2, 0);
 
-		toolDragImage=null;
-		toolDragPosition=null;
-
-//		diagramPanel.repaint();
-		frameRoot.repaint();
+		cancelToolDrag();
 
 		/* ***DEBUG*** */
 		if(debug) System.out.println("Actual location of Group start: ("+newGroupStartDot.getLocationOnScreen()
@@ -2437,6 +2490,11 @@ public class EditorView extends JFrame{
 	public JMenuItem getPopMenuItemUngroup(){
 		return popMenuItemUngroup;
 	};
+	
+	/** Returns the 'Print Model[DEBUG COMMAND]' popup menu item */
+	public JMenuItem getPopMenuItemPrintModelDebug(){
+		return popMenuItemPrintModelDebug;
+	};
 
 	/** Returns the popup menu X coordinate on the diagram*/
 	public int getDiagramElementsMenuPosX(){
@@ -2552,7 +2610,42 @@ public class EditorView extends JFrame{
 	/** Returns a String containing the resource name of the requested tool image */
 	public String getToolIconPath(String toolName){
 		return toolIconPaths.get(toolName);
+	}	
+	
+	/** Returns the number of features added to the diagram */
+	public int getFeaturesCount(){
+		return featuresCount;
+	}	
+	
+
+	/**
+	 * Checks whether the dragged tool has been dropped on the diagram panel or not.
+	 * 
+	 * @return true if tool has been dropped on the diagram panel, false otherwise
+	 */
+	public static boolean checkDroppedOnDiagram() {
+		//the new feature must be dropped on the diagram panel for it to be added
+		if( diagramPanel.getLocationOnScreen().getX()>toolDragPosition.x ||
+			diagramPanel.getLocationOnScreen().getX()+diagramPanel.getWidth()<=toolDragPosition.x ||
+			diagramPanel.getLocationOnScreen().getY()>toolDragPosition.y ||
+			diagramPanel.getLocationOnScreen().getX()+diagramPanel.getHeight()<=toolDragPosition.y ){
+
+			cancelToolDrag();
+
+			/* ***DEBUG*** */
+			if(debug4) System.out.println("Cannot drop a new feature on tools panel.");
+			/* ***DEBUG*** */
+			
+			return false;
+		}
+		else return true;
 	}
+
+	private static void cancelToolDrag() {
+		toolDragImage=null;
+		toolDragPosition=null;
+		frameRoot.repaint();
+	}	
 
 	/** shows the popup menu on the diagram, at the clicked location*/
 	public void showDiagramElementsMenu(){
@@ -2563,18 +2656,46 @@ public class EditorView extends JFrame{
 	public void repaintRootFrame(){
 		frameRoot.repaint();		
 	}
-	
+
+	@Override
+	public void update(Observable o, Object arg) {
+		System.out.println("Message received: "+arg);
+		if(arg.equals("New Feature Correctly Added")){
+			addNewFeatureToDiagram();			
+		}
+		else if(arg.equals("Grouped a Feature")
+			     || arg.equals("Two Features Directly Linked")){
+			addAnchorToFeature();
+		}
+		else if(arg.equals("Not Grouped a Feature")
+			     || arg.equals("Two Features Not Linked")){
+			System.out.println("Operation would create a cycle and it has been aborted!");
+		}
+		
+	}
+
 	/**
 	 * Main Method.
 	 * @param args
 	 */
 	public static void main(String[] args){
-		EditorView editor= new EditorView();
-		editor.setVisible(true);
+		//creating model
+		EditorModel editorModel= new EditorModel();
+		//creating view
+		EditorView editorView= new EditorView();
+		//creating controller
+		EditorController editorController =new EditorController(editorView, editorModel);
+		//adding the view as observer to the model
+		editorModel.addObserver(editorView);
+
+		if( !editorView.prepareUI(editorController) ) System.out.println("Controller not set. Closing...");
+		else editorView.setVisible(true);
 //		editor.setResizable(false);
-		editor.setExtendedState(editor.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+		editorView.setExtendedState(editorView.getExtendedState() | JFrame.MAXIMIZED_BOTH);
 		System.out.println("Ready! frameRoot.getLocationOnScreen(): "+frameRoot.getLocationOnScreen());
+		
 
 
 	}
+
 }

@@ -10,6 +10,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
@@ -26,16 +27,16 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 		
 	private EditorView editorView = null;
 		
-	private FeatureNode featureModelRoot = null;
+	private EditorModel editorModel = null;
 		
 		/** Costruttore
 		 * 
 		 * @param viewProject
 		 * @param modelProject
 		 */
-	public EditorController(EditorView editorView, FeatureNode featureModelRoot) {
+	public EditorController(EditorView editorView, EditorModel featureModel) {
 			this.editorView = editorView;
-			this.featureModelRoot = featureModelRoot;
+			this.editorModel = featureModel;
 		}
 	
 	@Override
@@ -75,35 +76,45 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 	  //event originated from the diagram panel
       if( ((Component)e.getSource()).getName().startsWith(EditorView.diagramPanelName) ){
 		
-		System.out.println("Button pressed: "+e.getButton());
-		System.out.println("Source e: "+e.getSource());
-		System.out.println("Source e.getName(): "+((Component)e.getSource()).getName());
-    	editorView.getDiagramElementsMenu().removeAll();
+
+    	/* ***DEBUG*** */
+    	if(debug2) System.out.println("Button pressed: "+e.getButton()
+    				+"Source e: "+e.getSource()
+    				+"Source e.getName(): "+((Component)e.getSource()).getName());
+    	/* ***DEBUG*** */
+
+		editorView.getDiagramElementsMenu().removeAll();
         if (e.getButton() == MouseEvent.BUTTON3) {
-        	Component comp=editorView.getDiagramPanel().getComponentAt(e.getX(), e.getY());
+          Component comp=editorView.getDiagramPanel().getComponentAt(e.getX(), e.getY());
         	
-        	/* ***DEBUG*** */
-        	if(debug3) System.out.println("rigth clicked on: "+comp.getName());
-        	/* ***DEBUG*** */
+          /* ***DEBUG*** */
+          if(debug3) System.out.println("rigth clicked on: "+comp.getName());
+          /* ***DEBUG*** */
 
-        	if(comp.getName()==null || comp.getName()==""|| comp.getName().startsWith(EditorView.diagramPanelName)) return;
+          if(comp.getName()==null || comp.getName()==""|| comp.getName().startsWith(EditorView.diagramPanelName)){
+        	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemPrintModelDebug());
+              editorView.setDiagramElementsMenuPosX(e.getX());
+              editorView.setDiagramElementsMenuPosY(e.getY());
+              editorView.showDiagramElementsMenu();
+        	  return;
+          }
 
-        	editorView.setPopUpElement((JComponent)comp);
-        	popupElement=editorView.getPopUpElement();
-//        	popUpElement=getUnderlyingComponent(e.getX(), e.getY());
+          editorView.setPopUpElement((JComponent)comp);
+          popupElement=editorView.getPopUpElement();
+          //        	popUpElement=getUnderlyingComponent(e.getX(), e.getY());
 
-        	if(popupElement.getName().startsWith(EditorView.startConnectorsNamePrefix)
-             	   || popupElement.getName().startsWith(EditorView.endConnectorsNamePrefix)){
-              editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemDelete());
-              editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemUngroup());
-            }
-        	if(popupElement.getName().startsWith(EditorView.featureNamePrefix)){
-        		editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemDelete());
-           	}
-        	
-        	editorView.setDiagramElementsMenuPosX(e.getX());
-        	editorView.setDiagramElementsMenuPosY(e.getY());
-        	editorView.showDiagramElementsMenu();
+          if(popupElement.getName().startsWith(EditorView.startConnectorsNamePrefix)
+        		  || popupElement.getName().startsWith(EditorView.endConnectorsNamePrefix)){
+        	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemDelete());
+        	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemUngroup());
+          }
+          if(popupElement.getName().startsWith(EditorView.featureNamePrefix)){
+        	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemDelete());
+          }
+
+          editorView.setDiagramElementsMenuPosX(e.getX());
+          editorView.setDiagramElementsMenuPosY(e.getY());
+          editorView.showDiagramElementsMenu();
         }
 
 		/* ***DEBUG *** */
@@ -316,6 +327,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
 			  editorView.setLastFeatureFocused(null); break;
 		  case DRAGGING_EXTERN_ANCHOR:
+			  dropsAnchor(e);
 			  EditorView.dropAnchorOnDiagram(e);
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
 			  editorView.setLastAnchorFocused(null); break;
@@ -330,7 +342,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 	  else 
 		switch(editorView.getActiveItem()){
 	      case DRAGGING_TOOL_NEWFEATURE:
-	    	  EditorView.addNewFeatureToDiagram(e);
+	    	  addNewFeature(e);
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
 	    	  editorView.setToolDragImage(null); break;
 	      case DRAGGING_TOOL_CONNECTOR:
@@ -456,7 +468,80 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
       else if(e.getActionCommand().equals("Ungroup Element")){
         System.out.println("Ungroup not implemented yet! ");
       }
+      else if(e.getActionCommand().equals("Print Model[DEBUG COMMAND]")){
+  		System.out.println("\n\nPRINTING UNROOTED FEATURES");
+    	for(Map.Entry<String,FeatureNode> feature : editorModel.getUnrootedFeatures().entrySet()){
+    		System.out.println("---"+feature.getValue().getName());
+    	}
+      }
 
 	}
 
+	/**
+	 * Adds a new unrooted feature to the diagram.
+	 * 
+	 * @param e - MouseEvent of the type Mouse Released.
+	 */
+	private void addNewFeature(MouseEvent e) {
+	  if (!EditorView.checkDroppedOnDiagram()) return;
+	  else{
+
+		/* ***DEBUG*** */
+		if(debug) System.out.println("Mouse rilasciato(Drag relative) su: ("+e.getX()+", "+e.getY()+")."
+				+"\nMouse rilasciato(Screen relative) su: ("+e.getXOnScreen()+", "+e.getYOnScreen()+")."
+				+"\nLocation dove verrà aggiunta la nuova Feature: "+editorView.getToolDragPosition());
+		/* ***DEBUG*** */
+
+		editorView.setLastPositionX(e.getX());
+		editorView.setLastPositionY(e.getY());
+		editorModel.addUnrootedFeature(EditorView.featureNamePrefix+editorView.getFeaturesCount());
+	  }
+	}
+
+	/**
+	 * Drops an anchor on the diagram.
+	 * 
+	 * @param e - MouseEvent of the type Mouse Released.
+	 */
+	private void dropsAnchor(MouseEvent e) {
+		Component comp=EditorView.dropAnchorOnDiagram(e);
+		if (comp!=null) System.out.println("comp= "+comp.getName());
+		JComponent anchor=editorView.getLastAnchorFocused();
+		JComponent otherEnd=((AnchorPanel)anchor).getOtherEnd();
+		//anchor dropped directly on the diagram panel
+		if (comp==null) return;
+		//anchor dropped on a feature inside the diagram panel
+		else if (comp.getName().startsWith(EditorView.featureNamePrefix)){
+			
+		  //the other end of the ocnnector is not anchored to anything
+		  if (otherEnd.getParent().getName().startsWith(EditorView.diagramPanelName) ){
+			EditorView.addAnchorToFeature(); return;
+		  }
+		  if (anchor.getName().startsWith(EditorView.startConnectorsNamePrefix)
+			  && otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix)){
+			//about to link 2 features by a connector
+			editorModel.addMandatoryLink( ((AnchorPanel)anchor).getParent().getName(), otherEnd.getParent().getName() );
+			return;
+		  }
+	      if(anchor.getName().startsWith(EditorView.endConnectorsNamePrefix)){
+	        if( otherEnd.getName().startsWith(EditorView.startConnectorsNamePrefix) &&
+	        	otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix)){
+	          //about to link 2 features by a connector
+	          editorModel.addMandatoryLink( otherEnd.getParent().getName(), ((AnchorPanel)anchor).getParent().getName() );
+	          return;
+	        }
+	        else if( ( otherEnd.getName().startsWith(EditorView.orGroupNamePrefix)
+	        		|| otherEnd.getName().startsWith(EditorView.altGroupNamePrefix) )
+	        		&& ((GroupPanel)otherEnd).getParent().getName().startsWith(EditorView.featureNamePrefix)){
+		      //about to link 2 features by a connector
+	          editorModel.addFeatureToGroup( otherEnd.getParent().getName(), ((AnchorPanel)anchor).getParent().getName(), 
+	        		  						 otherEnd.getName());
+	        }	
+	      }
+
+		}
+	}
+
+
+	
 }

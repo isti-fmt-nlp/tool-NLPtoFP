@@ -10,7 +10,7 @@ import java.util.ArrayList;
  */
 public class FeatureNode {
 	/** FeatureTypes describes the possible types for a feature*/
-	private static enum FeatureTypes{COMMONALITY, VARIABILITY};
+	public static enum FeatureTypes{COMMONALITY, VARIABILITY};
 	
 	/** The feature type*/
 	private FeatureTypes type=FeatureTypes.COMMONALITY;
@@ -24,6 +24,8 @@ public class FeatureNode {
 	private ArrayList<FeatureNode> subFeatures= new ArrayList<FeatureNode>();
 	/** The list of feature groups linked to this feature*/
 	private ArrayList<GroupNode> subGroups= new ArrayList<GroupNode>();
+	/** Tells if this feature is a top-level feature(true) or it is a sub-feature or a member of a group(false)*/
+	private boolean hasparent = true;
 	
 	/**
 	 * Creates a new default FeatureNode. <br>
@@ -47,7 +49,16 @@ public class FeatureNode {
 		this.maxCardinality=maxCardinality;
 	}
 	
-	
+
+	/**
+	 * Returns the cardinality of this feature in the form of a Point object, <br>
+	 * where the x coordinate represents the minimum cardinality and the y coordinate represents the maximum cardinality.
+	 * 
+	 * @return a Point object representing the cardinality of this feature.
+	 */
+	public Point getCardinality(){
+		return new Point(minCardinality, maxCardinality);
+	}
 	
 	/**
 	 * Changes the cardinality of this feature with the one given in the parameters.
@@ -61,12 +72,38 @@ public class FeatureNode {
 	}
 
 	/**
-	 * Returns the cardinality of this feature in the form of a Point object, <br>
-	 * where the x coordinate represents the minimum cardinality and the y coordinate represents the maximum cardinality.
+	 * Returns the name of this feature node.
 	 * 
-	 * @return a Point object representing the cardinality of this feature.
+	 * @return - a String containing the name.
 	 */
-	public Point getCardinality(){
-		return new Point(minCardinality, maxCardinality);
+	public String getName(){
+		return name;
+	}
+	
+	/**
+	 * Sets the name of this feature node.
+	 * 
+	 * @param name - a String containing the name.
+	 */
+	public void setName(String name){
+		this.name=name;
+	}
+	
+	/**
+	 * Returns the sub features of this features.
+	 * 
+	 * @return - an ArrayList\<FeatureNode\> object containing the sub features of this feature
+	 */
+	public ArrayList<FeatureNode> getSubFeatures(){
+		return subFeatures;
+	}
+	
+	/**
+	 * Returns the sub groups of this features.
+	 * 
+	 * @return - an ArrayList\<GroupNode\> object containing the sub groups of this feature
+	 */
+	public ArrayList<GroupNode> getSubGroups(){
+		return subGroups;
 	}
 }
