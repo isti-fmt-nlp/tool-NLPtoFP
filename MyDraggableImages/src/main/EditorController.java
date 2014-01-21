@@ -212,8 +212,13 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 				editorView.setActiveItem(activeItems.DRAGGING_EXTERN_GROUP);
 				editorView.setLastAnchorFocused(anchorPanel);
 				editorView.setLastFeatureFocused(featurePanel);
-				editorView.detachAnchor();
-				break;
+				
+				//the group has no members
+				if(((GroupPanel)anchorPanel).getMembers().size()==0){ editorView.detachAnchor(); break;}
+				//the group has members				
+				else{ editorModel.removeGroupFromFeature(featurePanel.getName(), anchorPanel.getName()); break;}
+
+				
 			  }
 			  //mouse directly pressed on a feature panel, not on an inner anchor
 			  editorView.setActiveItem(activeItems.DRAGGING_FEATURE);
@@ -322,12 +327,13 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
 			  editorView.setLastFeatureFocused(null); break;
 		  case DRAGGING_EXTERN_ANCHOR:
-			  dropsAnchor(e);
-			  EditorView.dropAnchorOnDiagram(e);
+			  dropAnchor(e);
+//			  EditorView.dropAnchorOnDiagram(e);
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
 			  editorView.setLastAnchorFocused(null); break;
 		  case DRAGGING_EXTERN_GROUP:
-			  EditorView.dropGroupOnDiagram(e);
+			  dropGroup(e);
+//			  EditorView.dropGroupOnDiagram(e);
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
 			  editorView.setLastAnchorFocused(null); break;
 		  default: break;
@@ -464,12 +470,35 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
         System.out.println("Ungroup not implemented yet! ");
       }
       else if(e.getActionCommand().equals("Print Model[DEBUG COMMAND]")){
-  		System.out.println("\n\nPRINTING UNROOTED FEATURES");
+    	System.out.println("\n\nPRINTING TREES");
     	for(Map.Entry<String,FeatureNode> feature : editorModel.getUnrootedFeatures().entrySet()){
-    		System.out.println("---"+feature.getValue().getName());
+    	  if(!feature.getValue().hasParent()) treePrint(feature.getValue(), "*R*");
     	}
+    	
+    	  
+    	  
+    	  
+//  		System.out.println("\n\nPRINTING UNROOTED FEATURES");
+//    	for(Map.Entry<String,FeatureNode> feature : editorModel.getUnrootedFeatures().entrySet()){
+//    		System.out.println("---"+feature.getValue().getName());
+//    	}
       }
 
+	}
+
+
+	/**
+	 * Recursively print the feature model rooted in feature, indenting the lower levels.
+	 * 
+	 * @param indent - String printed before the name of root element, for the lower leves <br>
+	 * it will be printed a number of times equals to 1+depth.
+	 */
+	private void treePrint(FeatureNode feature, String indent) {
+		System.out.println(indent+feature.getName());
+		for(FeatureNode child : feature.getSubFeatures()) treePrint(child, indent+">");
+		for(GroupNode group : feature.getSubGroups()) 
+		  for(FeatureNode member : group.getMembers()) 
+		  treePrint(member, indent+"|"); 
 	}
 
 	/**
@@ -498,7 +527,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 	 * 
 	 * @param e - MouseEvent of the type Mouse Released.
 	 */
-	private void dropsAnchor(MouseEvent e) {
+	private void dropAnchor(MouseEvent e) {
 		Component comp=EditorView.dropAnchorOnDiagram(e);
 		if (comp!=null) System.out.println("comp= "+comp.getName());
 		JComponent anchor=editorView.getLastAnchorFocused();
@@ -508,35 +537,68 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 		//anchor dropped on a feature inside the diagram panel
 		else if (comp.getName().startsWith(EditorView.featureNamePrefix)){
 			
-		  //the other end of the connector is not anchored to anything
-		  if (otherEnd.getParent().getName().startsWith(EditorView.diagramPanelName) ){
-			EditorView.addAnchorToFeature(); return;
+		  if(anchor.getName().startsWith(EditorView.endConnectorsNamePrefix)){
+			if( otherEnd.getName().startsWith(EditorView.startConnectorsNamePrefix) 
+				&& otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix)){
+		      //about to link 2 features by a connector
+			  System.out.println("about to link 2 features by a connector_R");
+			  editorModel.addMandatoryLink( otherEnd.getParent().getName(), comp.getName() );
+			  return;
+			}
+			else if( otherEnd.getName().startsWith(EditorView.orGroupNamePrefix)
+					 || otherEnd.getName().startsWith(EditorView.altGroupNamePrefix) ){
+			  //about to add a feature to a group
+			  System.out.println("about to add a feature to a group");
+			  if ( ((GroupPanel)otherEnd).getParent().getName().startsWith(EditorView.featureNamePrefix))
+				editorModel.addFeatureToGroup( otherEnd.getParent().getName(), comp.getName(), otherEnd.getName());
+			  else
+				editorModel.addFeatureToGroup( null, comp.getName(), otherEnd.getName());
+			  return;
+			}	
 		  }
 		  if (anchor.getName().startsWith(EditorView.startConnectorsNamePrefix)
-			  /*&& otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix)*/){
+			  && otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix)){
 			//about to link 2 features by a connector
+			System.out.println("about to link 2 features by a connector");
 			editorModel.addMandatoryLink( comp.getName(), otherEnd.getParent().getName() );
 			return;
 		  }
-	      if(anchor.getName().startsWith(EditorView.endConnectorsNamePrefix)){
-	        if( otherEnd.getName().startsWith(EditorView.startConnectorsNamePrefix)/* &&
-	        	otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix)*/){
-	          //about to link 2 features by a connector
-	          System.out.println("about to link 2 features by a connector");
-	          editorModel.addMandatoryLink( otherEnd.getParent().getName(), comp.getName() );
-	          return;
-	        }
-	        else if( ( otherEnd.getName().startsWith(EditorView.orGroupNamePrefix)
-	        		|| otherEnd.getName().startsWith(EditorView.altGroupNamePrefix) )
-	        		&& ((GroupPanel)otherEnd).getParent().getName().startsWith(EditorView.featureNamePrefix)){
-		      //about to link 2 features by a group connector
-	          System.out.println("about to link 2 features by a group connector");
-	          editorModel.addFeatureToGroup( otherEnd.getParent().getName(), comp.getName(), 
-	        		  						 otherEnd.getName());
-	        }	
-	      }
+		  //the other end of the connector is not anchored to anything
+		  if (otherEnd.getParent().getName().startsWith(EditorView.diagramPanelName) ){
+			System.out.println("about to add an ending anchor to a feature");
+			EditorView.addAnchorToFeature(); return;
+		  }
 
 		}
+	}
+
+	/**
+	 * Drops an anchor on the diagram, attaching it to the underlying component, if any.
+	 * 
+	 * @param e - MouseEvent of the type Mouse Released.
+	 */
+	private void dropGroup(MouseEvent e) {
+	  Component comp=EditorView.dropGroupOnDiagram(e);
+	  if (comp!=null) System.out.println("comp= "+comp.getName());
+	  GroupPanel group=(GroupPanel)editorView.getLastAnchorFocused();
+	  
+	  //anchor dropped directly on the diagram panel
+	  if (comp==null) return;
+	  //anchor dropped on a feature inside the diagram panel
+	  else if (comp.getName().startsWith(EditorView.featureNamePrefix)){
+		  
+		//the group has no members
+		if (group.getMembers().size()==0 ){
+		  EditorView.addAnchorToFeature(); return;
+		}
+		else{
+		  //about to add group to the feature comp
+		  System.out.println("about to add a group to a feature");
+		  editorModel.addGroupToFeature( comp.getName(), group.getName() );
+		  return;
+			
+		}
+	  }
 	}
 
 	/**

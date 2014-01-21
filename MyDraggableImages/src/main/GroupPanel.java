@@ -8,13 +8,13 @@ import javax.swing.JPanel;
 
 public class GroupPanel extends JComponent{
 	
-	private ArrayList<JComponent> members=null;
+	private ArrayList<AnchorPanel> members=null;
 
 	private static final long serialVersionUID = 1L;
 
 	public GroupPanel(){
 		super();
-		members = new ArrayList<JComponent>();
+		members = new ArrayList<AnchorPanel>();
 	}
 
 	/**
@@ -22,7 +22,7 @@ public class GroupPanel extends JComponent{
 	 * 
 	 * @return - this group's members list
 	 */
-	public ArrayList<JComponent> getMembers(){
+	public ArrayList<AnchorPanel> getMembers(){
 		return members;
 	}
 }

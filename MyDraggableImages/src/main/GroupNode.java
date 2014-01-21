@@ -15,7 +15,7 @@ public class GroupNode {
 	/** The group minimum cardinality*/
 	private int minCardinality=1;
 	/** The group maximum cardinality*/
-	private int maxCardinality=2;
+	private int maxCardinality=1;
 	/** The list of features that are members of this group*/
 	private ArrayList<FeatureNode> members= new ArrayList<FeatureNode>();
 

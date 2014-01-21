@@ -1693,7 +1693,6 @@ public class EditorView extends JFrame implements Observer{
 	 * @param e - MouseEvent of the type Mouse Released.
 	 */
 	public static Component dropAnchorOnDiagram(MouseEvent e) {
-	  FeaturePanel underlyingPanel=null;
 	  OrderedListNode tmpNode=visibleOrderDraggables.getFirst();
 	  while(tmpNode!=null){	  
 		if (((Component)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY()) ){	
@@ -1738,21 +1737,21 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @param e - MouseEvent of the type Mouse Released.
 	 */
-	public static void dropGroupOnDiagram(MouseEvent e) {
-	  FeaturePanel underlyingPanel=null;
+	public static Component dropGroupOnDiagram(MouseEvent e) {
 	  OrderedListNode tmpNode=visibleOrderDraggables.getFirst();
 	  while(tmpNode!=null){	  
 	    if ( tmpNode.getElement().getClass().equals(FeaturePanel.class) &&
 			 ((FeaturePanel)tmpNode.getElement()).getName().startsWith(featureNamePrefix) &&
 		     ((Component)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY()) ){			
-		  underlyingPanel=(FeaturePanel)tmpNode.getElement();
-		  addAnchorToFeature(lastAnchorFocused, underlyingPanel);
-		  //			  diagramPanel.repaint();
-		  frameRoot.repaint();
-		  break;		
+	      underlyingComponent=(JComponent)tmpNode.getElement();
+	      return underlyingComponent;
+//		  addAnchorToFeature(lastAnchorFocused, underlyingPanel);
+//		  frameRoot.repaint();
+//		  break;		
 	    }
 	    tmpNode=tmpNode.getNext();
 	  }				
+	  return null;
 	}
 	
 
@@ -1901,7 +1900,7 @@ public class EditorView extends JFrame implements Observer{
 	 * @param group - the group 
 	 */
 	private static void addStartAnchorToGroup(AnchorPanel startAnchor, GroupPanel group) {
-		group.getMembers().add(startAnchor.getOtherEnd());
+		group.getMembers().add((AnchorPanel)startAnchor.getOtherEnd());
 		((AnchorPanel)startAnchor.getOtherEnd()).setOtherEnd(group);
 		diagramPanel.remove(startAnchor);
 		diagramPanel.validate();
@@ -2704,11 +2703,24 @@ public class EditorView extends JFrame implements Observer{
 			     || arg.equals("Two Features Directly Linked")){
 			addAnchorToFeature();
 		}
+		else if(arg.equals("Group Added To Feature") ) addAnchorToFeature();
+		else if(arg.equals("Group Not Added To Feature") )
+			System.out.println("Operation would create a cycle and it has been aborted!");
+		
+		
+
 		else if(arg.equals("Not Grouped a Feature")
 			     || arg.equals("Two Features Not Linked")){
 			System.out.println("Operation would create a cycle and it has been aborted!");
 		}
-		else if(arg.equals("Direct Link Destroyed") ) detachAnchor();
+		else if(arg.equals("Direct Link Destroyed")
+				|| arg.equals("Group Removed From Feature")){
+			detachAnchor();
+		}
+		else if(arg.equals("Direct Link Not Destroyed")
+				|| arg.equals("Group Not Removed From Feature")){
+			resetActiveItems();
+		}
 		else if(arg.equals("Direct Link Not Destroyed") ) resetActiveItems();
 		
 	}
