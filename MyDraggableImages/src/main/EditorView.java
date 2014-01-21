@@ -72,7 +72,7 @@ public class EditorView extends JFrame implements Observer{
 	private static boolean debug=false;
 	private static boolean debug2=false;
 	private static boolean debug3=false;
-	private static boolean debug4=true;
+	private static boolean debug4=false;
 //	private static Robot eventsRobot = null;
 
 	class EditorSplitPane extends JSplitPane{
@@ -2656,6 +2656,43 @@ public class EditorView extends JFrame implements Observer{
 	public void repaintRootFrame(){
 		frameRoot.repaint();		
 	}
+	
+	
+	/**
+	 * Detach an anchor or group from the feature featurePanel, attaching it to the diagram.
+	 * 
+	 * @param feature - the feature from wich the anchor must be detached
+	 * @param anchor - the anchor to detach
+	 */
+	public void detachAnchor(/*FeaturePanel feature, JComponent anchor*/) {
+		int anchorPanelOnScreenX;
+		int anchorPanelOnScreenY;
+//		lastAnchorFocused=(JComponent)anchor;
+		
+		anchorPanelOnScreenX=(int)lastAnchorFocused.getLocationOnScreen().getX();
+		anchorPanelOnScreenY=(int)lastAnchorFocused.getLocationOnScreen().getY();
+//		feature.remove(lastAnchorFocused);
+//		feature.validate();
+		System.out.println("lastFeatureFocused="+lastFeatureFocused);
+		System.out.println("lastAnchorFocused="+lastAnchorFocused);
+		lastFeatureFocused.remove(lastAnchorFocused);
+		lastFeatureFocused.validate();
+		
+		lastAnchorFocused.setLocation(
+		  (int)(anchorPanelOnScreenX-diagramPanel.getLocationOnScreen().getX()),
+		  (int)(anchorPanelOnScreenY-diagramPanel.getLocationOnScreen().getY()));
+		diagramPanel.setLayer(lastAnchorFocused, 0);
+		diagramPanel.add(lastAnchorFocused);
+		diagramPanel.setComponentZOrder(lastAnchorFocused, 0);
+		EditorView.moveComponentToTop(lastAnchorFocused);
+	}
+	
+	private void resetActiveItems(){
+		isActiveItem=activeItems.NO_ACTIVE_ITEM;
+		lastAnchorFocused=null;
+		lastFeatureFocused=null;
+	}
+
 
 	@Override
 	public void update(Observable o, Object arg) {
@@ -2671,6 +2708,8 @@ public class EditorView extends JFrame implements Observer{
 			     || arg.equals("Two Features Not Linked")){
 			System.out.println("Operation would create a cycle and it has been aborted!");
 		}
+		else if(arg.equals("Direct Link Destroyed") ) detachAnchor();
+		else if(arg.equals("Direct Link Not Destroyed") ) resetActiveItems();
 		
 	}
 

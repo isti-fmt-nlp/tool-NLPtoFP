@@ -24,8 +24,8 @@ public class FeatureNode {
 	private ArrayList<FeatureNode> subFeatures= new ArrayList<FeatureNode>();
 	/** The list of feature groups linked to this feature*/
 	private ArrayList<GroupNode> subGroups= new ArrayList<GroupNode>();
-	/** Tells if this feature is a top-level feature(true) or it is a sub-feature or a member of a group(false)*/
-	private boolean hasparent = true;
+	/** Tells if this feature is a top-level feature(false) or it is a sub-feature or a member of a group(true)*/
+	private boolean hasParent = false;
 	
 	/**
 	 * Creates a new default FeatureNode. <br>
@@ -105,5 +105,23 @@ public class FeatureNode {
 	 */
 	public ArrayList<GroupNode> getSubGroups(){
 		return subGroups;
+	}
+	
+	/**
+	 * Tells whether or not this feature is a sub-feature or member of a group owned by another feature.
+	 * 
+	 * @return true if this feature is a sub-feature or member of a group owned by another feature, false otherwisse
+	 */
+	public boolean hasParent(){
+		return hasParent;
+	}
+	
+	/**
+	 * Set the hasParent field, that tells whether or not this feature is a sub-feature or member of a group owned by another feature.
+	 * 
+	 * @param hasParent - false value means that this feature has no parent feature, true means the opposite
+	 */
+	public void setHasParent(boolean hasParent){
+		this.hasParent=hasParent;
 	}
 }

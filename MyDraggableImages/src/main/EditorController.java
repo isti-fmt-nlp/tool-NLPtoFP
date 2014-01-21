@@ -157,6 +157,8 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 		int featurePanelX=0, featurePanelY=0;
 		int anchorPanelOnScreenX=0, anchorPanelOnScreenY=0;
 		FeaturePanel featurePanel=null;
+		JComponent otherEnd=null;
+		JComponent otherEndFeaturePanel=null;
 		JComponent anchorPanel=null;
 		String anchorPanelName;
 		OrderedListNode tmpNode=editorView.getVisibleOrderDraggables().getFirst();
@@ -180,21 +182,26 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 					  anchorPanelName.startsWith(EditorView.endConnectorsNamePrefix) ) ){
 
 				editorView.setActiveItem(activeItems.DRAGGING_EXTERN_ANCHOR);
-				anchorFocused=(JComponent)anchorPanel;
-				editorView.setLastAnchorFocused(anchorFocused);
-
-				anchorPanelOnScreenX=(int)anchorFocused.getLocationOnScreen().getX();
-				anchorPanelOnScreenY=(int)anchorFocused.getLocationOnScreen().getY();
-				featurePanel.remove(anchorFocused);
-				featurePanel.validate();
+				editorView.setLastAnchorFocused(anchorPanel);
+				editorView.setLastFeatureFocused(featurePanel);
 				
-				editorView.getLastAnchorFocused().setLocation(
-				  (int)(anchorPanelOnScreenX-editorView.getDiagramPanel().getLocationOnScreen().getX()),
-				  (int)(anchorPanelOnScreenY-editorView.getDiagramPanel().getLocationOnScreen().getY()));
-				editorView.getDiagramPanel().setLayer(editorView.getLastAnchorFocused(), 0);
-				editorView.getDiagramPanel().add(editorView.getLastAnchorFocused());
-				editorView.getDiagramPanel().setComponentZOrder(editorView.getLastAnchorFocused(), 0);
-				EditorView.moveComponentToTop(editorView.getLastAnchorFocused());
+				otherEnd=((AnchorPanel)anchorPanel).getOtherEnd();
+				otherEndFeaturePanel=(JComponent)otherEnd.getParent();
+				
+				//the other end is attached to a feature
+				if(otherEndFeaturePanel.getName().startsWith(EditorView.featureNamePrefix) ){
+				  if(anchorPanelName.startsWith(EditorView.startConnectorsNamePrefix) )
+					editorModel.removeLink(featurePanel.getName(), otherEndFeaturePanel.getName());
+				  if(anchorPanelName.startsWith(EditorView.endConnectorsNamePrefix) ){
+					if (otherEnd.getName().startsWith(EditorView.startConnectorsNamePrefix))
+					  editorModel.removeLink(otherEndFeaturePanel.getName(), featurePanel.getName());
+					if (otherEnd.getName().startsWith(EditorView.altGroupNamePrefix)
+					    || otherEnd.getName().startsWith(EditorView.orGroupNamePrefix))
+					  editorModel.removeFeatureFromGroup(otherEndFeaturePanel.getName(), featurePanel.getName(), otherEnd.getName());
+				  }
+				}
+				//the other end is not attached to any feature
+				else editorView.detachAnchor();
 				break;
 			  }
 			  //mouse pressed on a group inside the feature panel
@@ -202,30 +209,18 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 				anchorPanelName.startsWith(EditorView.altGroupNamePrefix) ||
 				anchorPanelName.startsWith(EditorView.orGroupNamePrefix) ) ){
 
-				  editorView.setActiveItem(activeItems.DRAGGING_EXTERN_GROUP);
-				  anchorFocused=(JComponent)anchorPanel;
-				  editorView.setLastAnchorFocused(anchorFocused);
-
-				  anchorPanelOnScreenX=(int)anchorFocused.getLocationOnScreen().getX();
-				  anchorPanelOnScreenY=(int)anchorFocused.getLocationOnScreen().getY();
-				  featurePanel.remove(anchorFocused);
-				  featurePanel.validate();
-				  
-				  editorView.getLastAnchorFocused().setLocation(
-					(int)(anchorPanelOnScreenX-editorView.getDiagramPanel().getLocationOnScreen().getX()),
-					(int)(anchorPanelOnScreenY-editorView.getDiagramPanel().getLocationOnScreen().getY()));
-				  editorView.getDiagramPanel().setLayer(editorView.getLastAnchorFocused(), 0);
-				  editorView.getDiagramPanel().add(editorView.getLastAnchorFocused());
-				  editorView.getDiagramPanel().setComponentZOrder(editorView.getLastAnchorFocused(), 0);
-				  EditorView.moveComponentToTop(editorView.getLastAnchorFocused());
-				  break;
+				editorView.setActiveItem(activeItems.DRAGGING_EXTERN_GROUP);
+				editorView.setLastAnchorFocused(anchorPanel);
+				editorView.setLastFeatureFocused(featurePanel);
+				editorView.detachAnchor();
+				break;
 			  }
 			  //mouse directly pressed on a feature panel, not on an inner anchor
 			  editorView.setActiveItem(activeItems.DRAGGING_FEATURE);
 			  editorView.setLastFeatureFocused((FeaturePanel)tmpNode.getElement());   
 			  EditorView.moveComponentToTop(editorView.getLastFeatureFocused());
 			}
-			//mouse pressed on an anchor panel in the diagram panel
+			//mouse directly pressed on an anchor panel in the diagram panel
 			else if(tmpNode.getElement().getClass().equals(AnchorPanel.class) &&(
 					((AnchorPanel)tmpNode.getElement()).getName().startsWith(EditorView.startConnectorsNamePrefix) ||
 					((AnchorPanel)tmpNode.getElement()).getName().startsWith(EditorView.endConnectorsNamePrefix) ) ){
@@ -233,7 +228,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 			  editorView.setLastAnchorFocused((AnchorPanel)tmpNode.getElement());
 			  EditorView.moveComponentToTop(editorView.getLastAnchorFocused());
 			}
-			//mouse pressed on a group panel in the diagram panel
+			//mouse directly pressed on a group panel in the diagram panel
 			else if(tmpNode.getElement().getClass().equals(GroupPanel.class) &&
 					//lastAnchorFocused?
 					((GroupPanel)tmpNode.getElement()).getName().startsWith(EditorView.altGroupNamePrefix) ||
@@ -499,7 +494,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 	}
 
 	/**
-	 * Drops an anchor on the diagram.
+	 * Drops an anchor on the diagram, attaching it to the underlying component, if any.
 	 * 
 	 * @param e - MouseEvent of the type Mouse Released.
 	 */
@@ -513,33 +508,62 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 		//anchor dropped on a feature inside the diagram panel
 		else if (comp.getName().startsWith(EditorView.featureNamePrefix)){
 			
-		  //the other end of the ocnnector is not anchored to anything
+		  //the other end of the connector is not anchored to anything
 		  if (otherEnd.getParent().getName().startsWith(EditorView.diagramPanelName) ){
 			EditorView.addAnchorToFeature(); return;
 		  }
 		  if (anchor.getName().startsWith(EditorView.startConnectorsNamePrefix)
-			  && otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix)){
+			  /*&& otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix)*/){
 			//about to link 2 features by a connector
-			editorModel.addMandatoryLink( ((AnchorPanel)anchor).getParent().getName(), otherEnd.getParent().getName() );
+			editorModel.addMandatoryLink( comp.getName(), otherEnd.getParent().getName() );
 			return;
 		  }
 	      if(anchor.getName().startsWith(EditorView.endConnectorsNamePrefix)){
-	        if( otherEnd.getName().startsWith(EditorView.startConnectorsNamePrefix) &&
-	        	otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix)){
+	        if( otherEnd.getName().startsWith(EditorView.startConnectorsNamePrefix)/* &&
+	        	otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix)*/){
 	          //about to link 2 features by a connector
-	          editorModel.addMandatoryLink( otherEnd.getParent().getName(), ((AnchorPanel)anchor).getParent().getName() );
+	          System.out.println("about to link 2 features by a connector");
+	          editorModel.addMandatoryLink( otherEnd.getParent().getName(), comp.getName() );
 	          return;
 	        }
 	        else if( ( otherEnd.getName().startsWith(EditorView.orGroupNamePrefix)
 	        		|| otherEnd.getName().startsWith(EditorView.altGroupNamePrefix) )
 	        		&& ((GroupPanel)otherEnd).getParent().getName().startsWith(EditorView.featureNamePrefix)){
-		      //about to link 2 features by a connector
-	          editorModel.addFeatureToGroup( otherEnd.getParent().getName(), ((AnchorPanel)anchor).getParent().getName(), 
+		      //about to link 2 features by a group connector
+	          System.out.println("about to link 2 features by a group connector");
+	          editorModel.addFeatureToGroup( otherEnd.getParent().getName(), comp.getName(), 
 	        		  						 otherEnd.getName());
 	        }	
 	      }
 
 		}
+	}
+
+	/**
+	 * Detach an anchor or group from the feature featurePanel, attaching it to the diagram.
+	 * 
+	 * @param feature - the feature from wich the anchor must be detached
+	 * @param anchor - the anchor to detach
+	 */
+	private void detachAnchor(FeaturePanel feature, JComponent anchor) {
+		JComponent anchorFocused;
+		int anchorPanelOnScreenX;
+		int anchorPanelOnScreenY;
+		anchorFocused=(JComponent)anchor;
+		editorView.setLastAnchorFocused(anchorFocused);
+
+		anchorPanelOnScreenX=(int)anchorFocused.getLocationOnScreen().getX();
+		anchorPanelOnScreenY=(int)anchorFocused.getLocationOnScreen().getY();
+		feature.remove(anchorFocused);
+		feature.validate();
+		
+		editorView.getLastAnchorFocused().setLocation(
+		  (int)(anchorPanelOnScreenX-editorView.getDiagramPanel().getLocationOnScreen().getX()),
+		  (int)(anchorPanelOnScreenY-editorView.getDiagramPanel().getLocationOnScreen().getY()));
+		editorView.getDiagramPanel().setLayer(editorView.getLastAnchorFocused(), 0);
+		editorView.getDiagramPanel().add(editorView.getLastAnchorFocused());
+		editorView.getDiagramPanel().setComponentZOrder(editorView.getLastAnchorFocused(), 0);
+		EditorView.moveComponentToTop(editorView.getLastAnchorFocused());
 	}
 
 
