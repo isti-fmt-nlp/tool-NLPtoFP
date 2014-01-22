@@ -200,6 +200,11 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 					  editorModel.removeFeatureFromGroup(otherEndFeaturePanel.getName(), featurePanel.getName(), otherEnd.getName());
 				  }
 				}
+				//the other end is attached to a group not owned by a feature
+				else if (otherEnd.getName().startsWith(EditorView.altGroupNamePrefix)
+					|| otherEnd.getName().startsWith(EditorView.orGroupNamePrefix))
+				  editorModel.removeFeatureFromGroup(null, featurePanel.getName(), otherEnd.getName());
+
 				//the other end is not attached to any feature
 				else editorView.detachAnchor();
 				break;
@@ -534,7 +539,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 		JComponent otherEnd=((AnchorPanel)anchor).getOtherEnd();
 		//anchor dropped directly on the diagram panel
 		if (comp==null) return;
-		//anchor dropped on a feature inside the diagram panel
+		//anchor directly dropped on a feature inside the diagram panel
 		else if (comp.getName().startsWith(EditorView.featureNamePrefix)){
 			
 		  if(anchor.getName().startsWith(EditorView.endConnectorsNamePrefix)){
@@ -565,10 +570,19 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 		  }
 		  //the other end of the connector is not anchored to anything
 		  if (otherEnd.getParent().getName().startsWith(EditorView.diagramPanelName) ){
-			System.out.println("about to add an ending anchor to a feature");
+			System.out.println("about to add an anchor to a feature");
 			EditorView.addAnchorToFeature(); return;
 		  }
-
+		}
+		
+		else if (comp.getName().startsWith(EditorView.altGroupNamePrefix)
+				 || comp.getName().startsWith(EditorView.orGroupNamePrefix)){
+		  //about to merge a connector with a group
+		  System.out.println("about to merge a connector with a group");
+		  if(comp.getParent().getName()==null || comp.getParent().getName().startsWith(EditorView.diagramPanelName))
+			  editorModel.mergeConnectorWithGroup( null, otherEnd.getParent().getName(), comp.getName());
+		  else editorModel.mergeConnectorWithGroup( comp.getParent().getName(), otherEnd.getParent().getName(), comp.getName());
+		  return;		  
 		}
 	}
 

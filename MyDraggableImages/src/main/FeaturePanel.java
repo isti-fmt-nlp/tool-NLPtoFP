@@ -33,6 +33,8 @@ public class FeaturePanel extends JLayeredPane {
 	
 	/** the parent component*/
 	private static Component splitterPanel = null;
+	
+	private static boolean hasParentLink = false;
 
 	
 	public FeaturePanel(Component parent){

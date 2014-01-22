@@ -1693,6 +1693,10 @@ public class EditorView extends JFrame implements Observer{
 	 * @param e - MouseEvent of the type Mouse Released.
 	 */
 	public static Component dropAnchorOnDiagram(MouseEvent e) {
+	  Component comp = null;
+	  int anchorPanelOnScreenX =0;
+	  int anchorPanelOnScreenY =0;
+	  Point relativePosition=null;
 	  OrderedListNode tmpNode=visibleOrderDraggables.getFirst();
 	  while(tmpNode!=null){	  
 		if (((Component)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY()) ){	
@@ -1710,13 +1714,43 @@ public class EditorView extends JFrame implements Observer{
 //			break;					  
 //		  }
 			
+		  //anchor dropped over a feature panel
 		  if (((Component)tmpNode.getElement()).getName().startsWith(featureNamePrefix)){
+
+//			//checking if an ending anchor has been dropped over a feature that already owns an ending anchor
+//			if(lastAnchorFocused.getName().startsWith(endConnectorsNamePrefix)){
+//			  for( Component child : ((FeaturePanel)tmpNode.getElement()).getComponents())
+//				if (child.getName()!=null && child.getName().startsWith(endConnectorsNamePrefix)) return null;				
+//			}
+			
 //			underlyingPanel=(FeaturePanel)tmpNode.getElement();
-			underlyingComponent=(JComponent)tmpNode.getElement();
+			underlyingComponent=(JComponent)tmpNode.getElement();			  
+
+			//checking if anchor must be added to a group
+			anchorPanelOnScreenX=(int)lastAnchorFocused.getLocationOnScreen().getX();
+			anchorPanelOnScreenY=(int)lastAnchorFocused.getLocationOnScreen().getY();
+			relativePosition = new Point((int)(anchorPanelOnScreenX-underlyingComponent.getLocationOnScreen().getX()),
+					(int)(anchorPanelOnScreenY-underlyingComponent.getLocationOnScreen().getY()) );	
+			  
+			if(lastAnchorFocused.getName().startsWith(startConnectorsNamePrefix)){
+			  comp = underlyingComponent.getComponentAt(relativePosition);
+			  if (comp!=null && comp.getName()!=null && (comp.getName().startsWith(altGroupNamePrefix) 
+				  || comp.getName().startsWith(orGroupNamePrefix) )){
+//			    startAnchor=(AnchorPanel)lastAnchorFocused;
+//			    group=(GroupPanel)comp;
+				underlyingComponent=(JComponent)comp;
+//				return underlyingComponent;
+//				addStartAnchorToGroup(startAnchor, group);
+//			    return true;
+			  }
+			}			  
+			  
+			  
 //			addAnchorToFeature(lastAnchorFocused, underlyingPanel);
 //			frameRoot.repaint();
 			return underlyingComponent;					  
 		  }
+		  //anchor dropped directly over the diagram panel
 		  if (lastAnchorFocused.getName().startsWith(startConnectorsNamePrefix) && 
 			   (  ((Component)tmpNode.getElement()).getName().startsWith(altGroupNamePrefix)
 				|| ((Component)tmpNode.getElement()).getName().startsWith(orGroupNamePrefix)) ){
@@ -1761,9 +1795,6 @@ public class EditorView extends JFrame implements Observer{
 	public static boolean addAnchorToFeature() {
 		int anchorPanelOnScreenX;
 		int anchorPanelOnScreenY;
-		Component comp = null;
-		AnchorPanel startAnchor = null;
-		GroupPanel group = null;
 		
 //		if(lastAnchorFocused.getParent()==null || !lastAnchorFocused.isDisplayable()) return false;
 		
@@ -1781,19 +1812,6 @@ public class EditorView extends JFrame implements Observer{
 		  lastAnchorFocused.setLocation((int)(anchorPanelOnScreenX-underlyingComponent.getLocationOnScreen().getX()),
 				  (int)(anchorPanelOnScreenY-underlyingComponent.getLocationOnScreen().getY()) );		
 		}
-
-//		//checking if anchor must be added to a group
-//		if(lastAnchorFocused.getName().startsWith(startConnectorsNamePrefix)){
-//		  comp = underlyingComponent.getComponentAt(lastAnchorFocused.getLocation());
-//		  if (comp!=null && comp.getName()!=null && (comp.getName().startsWith(altGroupNamePrefix) 
-//			  || comp.getName().startsWith(orGroupNamePrefix) )){
-//			startAnchor=(AnchorPanel)lastAnchorFocused;
-//			group=(GroupPanel)comp;
-//
-//	        addStartAnchorToGroup(startAnchor, group);
-//			return true;
-//		  }
-//		}
 
 		//Adding anchor to the feature
 		diagramPanel.remove(lastAnchorFocused);
@@ -1891,6 +1909,20 @@ public class EditorView extends JFrame implements Observer{
 		/* ***DEBUG*** */
 
 		return true;
+	}
+
+	/**
+	NO PARAMETER VERSION, CALLED BY update()
+	 */
+	private static void addStartAnchorToGroup() {
+		((GroupPanel)underlyingComponent).getMembers().add((AnchorPanel)((AnchorPanel)lastAnchorFocused).getOtherEnd());
+		((AnchorPanel)((AnchorPanel)lastAnchorFocused).getOtherEnd()).setOtherEnd(underlyingComponent);
+		diagramPanel.remove(lastAnchorFocused);
+		diagramPanel.validate();
+		visibleOrderDraggables.remove(lastAnchorFocused);
+		startConnectorDots.remove(lastAnchorFocused);
+		frameRoot.repaint();
+		return;
 	}
 
 	/**
@@ -2703,14 +2735,12 @@ public class EditorView extends JFrame implements Observer{
 			     || arg.equals("Two Features Directly Linked")){
 			addAnchorToFeature();
 		}
-		else if(arg.equals("Group Added To Feature") ) addAnchorToFeature();
-		else if(arg.equals("Group Not Added To Feature") )
-			System.out.println("Operation would create a cycle and it has been aborted!");
-		
-		
-
+		else if(arg.equals("Group Added To Feature") ) addAnchorToFeature();	
+		else if(arg.equals("Merged a Connector") ) addStartAnchorToGroup();
 		else if(arg.equals("Not Grouped a Feature")
-			     || arg.equals("Two Features Not Linked")){
+			     || arg.equals("Two Features Not Linked")
+			     || arg.equals("Group Not Added To Feature")
+			     || arg.equals("Not Merged a Connector")){
 			System.out.println("Operation would create a cycle and it has been aborted!");
 		}
 		else if(arg.equals("Direct Link Destroyed")
@@ -2722,6 +2752,10 @@ public class EditorView extends JFrame implements Observer{
 			resetActiveItems();
 		}
 		else if(arg.equals("Direct Link Not Destroyed") ) resetActiveItems();
+		
+		
+		
+//		addStartAnchorToGroup
 		
 	}
 
