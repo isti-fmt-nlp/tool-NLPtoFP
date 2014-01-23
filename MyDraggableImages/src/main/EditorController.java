@@ -108,8 +108,12 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
           if(popupElement.getName().startsWith(EditorView.startConnectorsNamePrefix)
         		  || popupElement.getName().startsWith(EditorView.endConnectorsNamePrefix)){
         	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemDelete());
-        	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemUngroup());
           }
+		  if(popupElement.getName().startsWith(EditorView.endConnectorsNamePrefix)
+				  && ( ((AnchorPanel)popupElement).getOtherEnd().getName().startsWith(EditorView.altGroupNamePrefix)
+					   || ((AnchorPanel)popupElement).getOtherEnd().getName().startsWith(EditorView.orGroupNamePrefix) ) ){
+	    	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemUngroup());			  
+		  }
           if(popupElement.getName().startsWith(EditorView.featureNamePrefix)){
         	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemDelete());
           }
@@ -439,10 +443,10 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+	  JComponent popupElement=editorView.getPopUpElement();
 	  //popup menu command: Delete Element
       if(e.getActionCommand().equals("Delete Element")){
         String elementName = null;
-    	JComponent popupElement=editorView.getPopUpElement();
         if (popupElement!=null) elementName=editorView.getPopUpElement().getName();
 
         /* ***DEBUG*** */
@@ -477,7 +481,9 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
       }
 	  //popup menu command: Ungroup Element
       else if(e.getActionCommand().equals("Ungroup Element")){
-        System.out.println("Ungroup not implemented yet! ");
+    	EditorView.ungroupAnchor((AnchorPanel)popupElement);
+        editorView.repaintRootFrame();
+//        System.out.println("Ungroup not implemented yet! ");
       }
       else if(e.getActionCommand().equals("Print Model[DEBUG COMMAND]")){
     	System.out.println("\n\nPRINTING TREES");

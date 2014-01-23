@@ -1947,6 +1947,20 @@ public class EditorView extends JFrame implements Observer{
 	 * @param e - MouseEvent of the type Mouse Released.
 	 */
 	public static void addNewFeatureToDiagram(/*MouseEvent e*/) {
+		
+		//the new feature must be dropped on the diagram panel for it to be added
+		if( diagramPanel.getLocationOnScreen().getX()>toolDragPosition.x ||
+			diagramPanel.getLocationOnScreen().getX()+diagramPanel.getWidth()<=toolDragPosition.x ||
+			diagramPanel.getLocationOnScreen().getY()>toolDragPosition.y ||
+			diagramPanel.getLocationOnScreen().getX()+diagramPanel.getHeight()<=toolDragPosition.y ){
+			
+			cancelToolDrag();
+
+			/* ***DEBUG*** */
+			if(debug4) System.out.println("Cannot drop a new feature on tools panel.");
+			/* ***DEBUG*** */
+			return;
+		}
 
 //		if (!checkDroppedOnDiagram()) return;
 
@@ -2273,7 +2287,6 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @param x - x coordinate of the connection dot in the diagram panel
 	 * @param y - y coordinate of the connection dot in the diagram panel
-	 * @param incoURL - URL of the connection dot icon
 	 * @return A new JComponent representing the connection dot
 	 */
 	private static JComponent getDraggableConnectionDot(ItemsType type, int x, int y) {
@@ -2474,6 +2487,48 @@ public class EditorView extends JFrame implements Observer{
   	  diagramPanel.remove(feature);
   	  visibleOrderDraggables.remove(feature);		
 	}	
+	
+	/**
+	 * Ungroups an ending anchor from his group, then connects it with a starting anchor <br>
+	 * attached to the diagram and named accordingly.
+	 * 
+	 * @param anchor - the anchor to ungroup
+	 */ 
+	public static void ungroupAnchor(AnchorPanel anchor) {
+	  int startDotlocationX=0;
+	  int startDotlocationY=0;
+	  GroupPanel group = (GroupPanel)anchor.getOtherEnd();
+	  System.out.println("Group size: "+group.getMembers().size());
+	  if(group.getMembers().size()<=2){
+		System.out.println("Ungroup is not possible, this group is already minimal.");
+		return;
+	  }
+	  AnchorPanel startConnectorDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.START_CONNECTOR, 0, 0);
+	  startDotlocationX=(int)(anchor.getLocationOnScreen().getX()-diagramPanel.getLocationOnScreen().getX());
+	  startDotlocationY=(int)(anchor.getLocationOnScreen().getY()-diagramPanel.getLocationOnScreen().getY());
+	  group.getMembers().remove(anchor);
+	  if(startDotlocationX-(anchor.getWidth()*2)>0)
+		  startDotlocationX=startDotlocationX-(anchor.getWidth()*2);
+	  else startDotlocationX=startDotlocationX+(anchor.getWidth()*2);
+//	  if(startDotlocationX>=diagramPanel.getWidth()-startConnectorDot.getWidth())
+//		  startDotlocationX=diagramPanel.getWidth()-startConnectorDot.getWidth();
+	  if(startDotlocationY-(anchor.getHeight()*2)>0)
+		  startDotlocationY=startDotlocationY-(anchor.getHeight()*2);
+	  else startDotlocationY=startDotlocationY+(anchor.getHeight()*2);
+//	  if(startDotlocationY>=diagramPanel.getHeight()-startConnectorDot.getHeight())
+//		  startDotlocationY=diagramPanel.getHeight()-startConnectorDot.getHeight();
+	  
+	  startConnectorDot.setLocation(startDotlocationX, startDotlocationY);
+	  startConnectorDot.setName(startConnectorsNamePrefix+anchor.getName().substring(anchor.getName().indexOf("#")+1));
+	  startConnectorDot.setOtherEnd(anchor);
+	  anchor.setOtherEnd(startConnectorDot);
+	  visibleOrderDraggables.addToTop(startConnectorDot);
+	  startConnectorDots.add(startConnectorDot);
+	  
+	  diagramPanel.setLayer(startConnectorDot, 0);
+	  diagramPanel.add(startConnectorDot);
+	  diagramPanel.setComponentZOrder(startConnectorDot, 0);
+	}
 	
 	/**
 	 * Detach an anchor or group from the feature featurePanel, attaching it to the diagram.
@@ -2775,11 +2830,6 @@ public class EditorView extends JFrame implements Observer{
 			resetActiveItems();
 		}
 		else if(arg.equals("Direct Link Not Destroyed") ) resetActiveItems();
-		
-		
-		
-//		addStartAnchorToGroup
-		
 	}
 
 	/**
