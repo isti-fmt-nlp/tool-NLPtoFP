@@ -25,7 +25,10 @@ public class FeatureNode {
 	/** The list of feature groups linked to this feature*/
 	private ArrayList<GroupNode> subGroups= new ArrayList<GroupNode>();
 	/** Tells if this feature is a top-level feature(false) or it is a sub-feature or a member of a group(true)*/
-	private boolean hasParent = false;
+	private Object parent = null;
+//	/** Parent of this feature. If this feature has no parent, it is null*/
+//	private Object parent = null;
+	
 	
 	/**
 	 * Creates a new default FeatureNode. <br>
@@ -108,20 +111,31 @@ public class FeatureNode {
 	}
 	
 	/**
-	 * Tells whether or not this feature is a sub-feature or member of a group owned by another feature.
+	 * Returns the parent of this feature, that can be a FeatureNode or a GroupNode.
 	 * 
-	 * @return true if this feature is a sub-feature or member of a group owned by another feature, false otherwisse
+	 * @return an Object which is the parent of this feature, or null if there is no parent
 	 */
-	public boolean hasParent(){
-		return hasParent;
+	public Object getParent(){
+		return parent;
 	}
 	
 	/**
-	 * Set the hasParent field, that tells whether or not this feature is a sub-feature or member of a group owned by another feature.
+	 * Sets the parent of this feature as an Object. Current actual types supported are FeatureNode and GroupNode.
 	 * 
-	 * @param hasParent - false value means that this feature has no parent feature, true means the opposite
+	 * @param parent - an Object which is the parent of this feature, or null to set no parent
+	 * @throws java.lang.ClassCastException - if the actual type of parent is not supported.
 	 */
-	public void setHasParent(boolean hasParent){
-		this.hasParent=hasParent;
+	public void setParent(Object parent){
+		boolean castSucceded=false;
+		try{
+		  this.parent=(FeatureNode)parent;			
+		  castSucceded=true;
+		}catch(ClassCastException e){}
+		if(castSucceded) return;
+		try{
+		  this.parent=(GroupNode)parent;			
+		  castSucceded=true;
+		}catch(ClassCastException e){}
+		if (!castSucceded) throw new ClassCastException(parent.getClass()+" type is not supported as parent");
 	}
 }

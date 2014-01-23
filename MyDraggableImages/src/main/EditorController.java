@@ -101,6 +101,8 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 
           editorView.setPopUpElement((JComponent)comp);
           popupElement=editorView.getPopUpElement();
+		  System.out.println("clicked! popupElement: "+popupElement.getName());
+
           //        	popUpElement=getUnderlyingComponent(e.getX(), e.getY());
 
           if(popupElement.getName().startsWith(EditorView.startConnectorsNamePrefix)
@@ -206,7 +208,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 				  editorModel.removeFeatureFromGroup(null, featurePanel.getName(), otherEnd.getName());
 
 				//the other end is not attached to any feature
-				else editorView.detachAnchor();
+				else EditorView.detachAnchor(featurePanel, anchorPanel);
 				break;
 			  }
 			  //mouse pressed on a group inside the feature panel
@@ -219,7 +221,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 				editorView.setLastFeatureFocused(featurePanel);
 				
 				//the group has no members
-				if(((GroupPanel)anchorPanel).getMembers().size()==0){ editorView.detachAnchor(); break;}
+				if(((GroupPanel)anchorPanel).getMembers().size()==0){ EditorView.detachAnchor(featurePanel, anchorPanel); break;}
 				//the group has members				
 				else{ editorModel.removeGroupFromFeature(featurePanel.getName(), anchorPanel.getName()); break;}
 
@@ -450,11 +452,10 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
         /* ***DEBUG*** */
         
         if(elementName!=null && elementName.startsWith(EditorView.startConnectorsNamePrefix)){
-      	  EditorView.deleteAnchor(popupElement);
       	  EditorView.deleteAnchor(((AnchorPanel)popupElement).getOtherEnd());
       	  editorView.repaintRootFrame();
         }
-        if(elementName!=null && elementName.startsWith(EditorView.endConnectorsNamePrefix)){
+        else if(elementName!=null && elementName.startsWith(EditorView.endConnectorsNamePrefix)){
       	  if(((AnchorPanel)popupElement).getOtherEnd().getName().startsWith(EditorView.startConnectorsNamePrefix)){
       		EditorView.deleteAnchor(popupElement);
       		EditorView.deleteAnchor(((AnchorPanel)popupElement).getOtherEnd());            		
@@ -468,6 +469,10 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
       	  }	
           editorView.repaintRootFrame();
         }
+        else if(elementName!=null && elementName.startsWith(EditorView.featureNamePrefix)){
+      	  editorModel.deleteFeature(editorView.getPopUpElement().getName());
+          editorView.repaintRootFrame();
+        }
         editorView.setPopUpElement(null);
       }
 	  //popup menu command: Ungroup Element
@@ -477,7 +482,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
       else if(e.getActionCommand().equals("Print Model[DEBUG COMMAND]")){
     	System.out.println("\n\nPRINTING TREES");
     	for(Map.Entry<String,FeatureNode> feature : editorModel.getUnrootedFeatures().entrySet()){
-    	  if(!feature.getValue().hasParent()) treePrint(feature.getValue(), "*R*");
+    	  if(feature.getValue().getParent()==null) treePrint(feature.getValue(), "*R*");
     	}
     	
     	  

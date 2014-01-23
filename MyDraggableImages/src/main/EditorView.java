@@ -1717,11 +1717,11 @@ public class EditorView extends JFrame implements Observer{
 		  //anchor dropped over a feature panel
 		  if (((Component)tmpNode.getElement()).getName().startsWith(featureNamePrefix)){
 
-//			//checking if an ending anchor has been dropped over a feature that already owns an ending anchor
-//			if(lastAnchorFocused.getName().startsWith(endConnectorsNamePrefix)){
-//			  for( Component child : ((FeaturePanel)tmpNode.getElement()).getComponents())
-//				if (child.getName()!=null && child.getName().startsWith(endConnectorsNamePrefix)) return null;				
-//			}
+			//checking if an ending anchor has been dropped over a feature that already owns an ending anchor
+			if(lastAnchorFocused.getName().startsWith(endConnectorsNamePrefix)){
+			  for( Component child : ((FeaturePanel)tmpNode.getElement()).getComponents())
+				if (child.getName()!=null && child.getName().startsWith(endConnectorsNamePrefix)) return null;				
+			}
 			
 //			underlyingPanel=(FeaturePanel)tmpNode.getElement();
 			underlyingComponent=(JComponent)tmpNode.getElement();			  
@@ -2457,7 +2457,65 @@ public class EditorView extends JFrame implements Observer{
 	}
 	
 	/**
-	 * Deletes an anchor from the diagram
+	 * Deletes a feature from the diagram.
+	 * 
+	 * @param feature - the feature to delete
+	 */
+	public static void deleteFeature(JComponent feature) {
+	  //attaching all feature anchors to the diagram
+  	  for(Component comp : feature.getComponents())
+  		if(comp.getName()!=null 
+  		   && ( comp.getName().startsWith(altGroupNamePrefix) || comp.getName().startsWith(orGroupNamePrefix) 
+  				|| comp.getName().startsWith(endConnectorsNamePrefix) 
+  				|| comp.getName().startsWith(startConnectorsNamePrefix)
+  			  ) ){
+  		  detachAnchor((FeaturePanel)feature, (JComponent)comp);
+  		}
+  	  diagramPanel.remove(feature);
+  	  visibleOrderDraggables.remove(feature);		
+	}	
+	
+	/**
+	 * Detach an anchor or group from the feature featurePanel, attaching it to the diagram.
+	 * 
+	 * @param feature - the feature from wich the anchor must be detached
+	 * @param anchor - the anchor to detach
+	 */
+	public static void detachAnchor(FeaturePanel feature, JComponent anchor) {
+		int anchorPanelOnScreenX;
+		int anchorPanelOnScreenY;
+		
+		anchorPanelOnScreenX=(int)anchor.getLocationOnScreen().getX();
+		anchorPanelOnScreenY=(int)anchor.getLocationOnScreen().getY();
+		feature.remove(anchor);
+		feature.validate();
+		System.out.println("feature="+feature.getName());
+		System.out.println("anchor="+anchor.getName());
+//		System.out.println("lastFeatureFocused="+lastFeatureFocused);
+//		System.out.println("lastAnchorFocused="+lastAnchorFocused);
+//		lastFeatureFocused.remove(lastAnchorFocused);
+//		lastFeatureFocused.validate();
+		
+		anchor.setLocation(
+		  (int)(anchorPanelOnScreenX-diagramPanel.getLocationOnScreen().getX()),
+		  (int)(anchorPanelOnScreenY-diagramPanel.getLocationOnScreen().getY()));
+		diagramPanel.setLayer(anchor, 0);
+		diagramPanel.add(anchor);
+		diagramPanel.setComponentZOrder(anchor, 0);
+		EditorView.moveComponentToTop(anchor);
+	}
+	
+	/**
+	 * Resets the static variables used during drag operations.
+	 */
+	private void resetActiveItems(){
+		isActiveItem=activeItems.NO_ACTIVE_ITEM;
+		lastAnchorFocused=null;
+		lastFeatureFocused=null;
+	}
+	
+	/**
+	 * Deletes an anchor from the diagram.
 	 * 
 	 * @param anchor - the anchor to delete
 	 */
@@ -2687,50 +2745,15 @@ public class EditorView extends JFrame implements Observer{
 	public void repaintRootFrame(){
 		frameRoot.repaint();		
 	}
-	
-	
-	/**
-	 * Detach an anchor or group from the feature featurePanel, attaching it to the diagram.
-	 * 
-	 * @param feature - the feature from wich the anchor must be detached
-	 * @param anchor - the anchor to detach
-	 */
-	public void detachAnchor(/*FeaturePanel feature, JComponent anchor*/) {
-		int anchorPanelOnScreenX;
-		int anchorPanelOnScreenY;
-//		lastAnchorFocused=(JComponent)anchor;
-		
-		anchorPanelOnScreenX=(int)lastAnchorFocused.getLocationOnScreen().getX();
-		anchorPanelOnScreenY=(int)lastAnchorFocused.getLocationOnScreen().getY();
-//		feature.remove(lastAnchorFocused);
-//		feature.validate();
-		System.out.println("lastFeatureFocused="+lastFeatureFocused);
-		System.out.println("lastAnchorFocused="+lastAnchorFocused);
-		lastFeatureFocused.remove(lastAnchorFocused);
-		lastFeatureFocused.validate();
-		
-		lastAnchorFocused.setLocation(
-		  (int)(anchorPanelOnScreenX-diagramPanel.getLocationOnScreen().getX()),
-		  (int)(anchorPanelOnScreenY-diagramPanel.getLocationOnScreen().getY()));
-		diagramPanel.setLayer(lastAnchorFocused, 0);
-		diagramPanel.add(lastAnchorFocused);
-		diagramPanel.setComponentZOrder(lastAnchorFocused, 0);
-		EditorView.moveComponentToTop(lastAnchorFocused);
-	}
-	
-	private void resetActiveItems(){
-		isActiveItem=activeItems.NO_ACTIVE_ITEM;
-		lastAnchorFocused=null;
-		lastFeatureFocused=null;
-	}
 
 
 	@Override
 	public void update(Observable o, Object arg) {
 		System.out.println("Message received: "+arg);
-		if(arg.equals("New Feature Correctly Added")){
-			addNewFeatureToDiagram();			
-		}
+		if(arg.equals("New Feature Correctly Added")) addNewFeatureToDiagram();			
+		else if(arg.equals("Feature Deleted")) deleteFeature(popUpElement);
+		else if(arg.equals("Feature Not Deleted"))
+			System.out.println("Cannot delete this feature!");
 		else if(arg.equals("Grouped a Feature")
 			     || arg.equals("Two Features Directly Linked")){
 			addAnchorToFeature();
@@ -2745,7 +2768,7 @@ public class EditorView extends JFrame implements Observer{
 		}
 		else if(arg.equals("Direct Link Destroyed")
 				|| arg.equals("Group Removed From Feature")){
-			detachAnchor();
+			detachAnchor(lastFeatureFocused, lastAnchorFocused);
 		}
 		else if(arg.equals("Direct Link Not Destroyed")
 				|| arg.equals("Group Not Removed From Feature")){
