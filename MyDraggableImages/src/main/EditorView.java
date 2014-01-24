@@ -638,7 +638,7 @@ public class EditorView extends JFrame implements Observer{
 //		  leftMost = null; rightMost = null;
 //		  minX=100000; maxX=-100000;
 		  for (JComponent member : startPanel.getMembers()){
-			//searching for the 2 extern anchor of the group
+//			//searching for the 2 extern anchor of the group
 //			if(member.getLocationOnScreen().getX()<minX){
 //			  minX=(int)member.getLocationOnScreen().getX();
 //			  leftMost=member;
@@ -717,10 +717,15 @@ public class EditorView extends JFrame implements Observer{
 		//sorting the array
 		SortUtils.recQuickSort(angles, 0, angles.length-1);
 
-		System.out.println("!!!PRINTING SORTED ANGLES!!!");
-		for(int angle : angles){
-		  System.out.println("***"+angle);
+		/* ***DEBUG*** */
+		if(debug3) {
+		  System.out.println("!!!PRINTING SORTED ANGLES!!!");
+		  for(int angle : angles){
+			System.out.println("***"+angle);
+		  }
 		}
+		/* ***DEBUG*** */
+		
 		//searching for the maximum degree gap between two subsequent points
 		for(index=0; index<angles.length-1; ++index)
 		  if (angles[index+1]-angles[index] > angleGap){
@@ -734,9 +739,17 @@ public class EditorView extends JFrame implements Observer{
 		}
 		
 		//creating circle
-		groupArc = new Arc2D.Double(startCenter.getX()-radius, startCenter.getY()-radius,
-									radius*2, radius*2, 0, 360, Arc2D.Double.OPEN);
-		System.out.println("!!!AngleStart: "+arcStartPoint+"\tAngleExtent!!!"+(360-angleGap));
+//		groupArc = new Arc2D.Double(startCenter.getX()-radius, startCenter.getY()-radius,
+//				radius*2, radius*2, 0, 360, Arc2D.Double.OPEN);
+		groupArc = new Arc2D.Double(startCenter.getX()-radius/3, startCenter.getY()-radius/3,
+				radius*2/3, radius*2/3, 0, 360, Arc2D.Double.OPEN);
+
+		/* ***DEBUG*** */
+		if(debug3) {
+		  System.out.println("!!!AngleStart: "+arcStartPoint+"\tAngleExtent!!!"+(360-angleGap));			
+		}
+		/* ***DEBUG*** */
+
 		groupArc.setAngleStart(arcStartPoint);
 		groupArc.setAngleExtent(360-angleGap);
 		
@@ -760,13 +773,24 @@ public class EditorView extends JFrame implements Observer{
 		double acos = Math.acos(cosin);
 		double asin = Math.asin(sin);
 
+//		//using acos and asin calculated values to get actual angle in degree
+//		if(asin==0) return 0;
+//		if(asin>0) return (int)Math.toDegrees(acos);
+//		else{
+//		  if(acos<Math.PI/2) return (int)Math.toDegrees(Math.PI+asin);
+//		  else return (int)Math.toDegrees(Math.PI/2-asin);
+//		}
+
+		asin*=-1;
 		//using acos and asin calculated values to get actual angle in degree
-		if(asin==0) return 0;
+//		if(asin==0) return 0;
 		if(asin>0) return (int)Math.toDegrees(acos);
 		else{
-		  if(acos<Math.PI/2) return (int)Math.toDegrees(Math.PI+asin);
-		  else return (int)Math.toDegrees(Math.PI/2-asin);
+		  if(acos<Math.PI/2) return (int)Math.toDegrees(2*Math.PI+asin);
+		  else return (int)Math.toDegrees(Math.PI-asin);
 		}
+	
+	
 	}
 
 	/**
