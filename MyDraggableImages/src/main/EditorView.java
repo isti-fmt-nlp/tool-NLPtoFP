@@ -597,22 +597,12 @@ public class EditorView extends JFrame implements Observer{
 		//		g2.setStroke();
 		g2.setStroke(new BasicStroke(2.5F));  
 		g2.setColor(Color.ORANGE);
-		JComponent startPanel=null;
-		JComponent leftMost = null, rightMost = null;
-		int minX=100000, maxX=-100000;
-		
+
 		//drawing connectors
 		for (int i=0; i< startConnectorDots.size(); ++i){
 		  drawConnectionLine(g2, startConnectorDots.get(i), ((AnchorPanel)startConnectorDots.get(i)).getOtherEnd());
 
 		}
-
-//		//drawing connectors
-//		for (int i=0; i< connectorDotsToRedraw.size(); ++i){
-//		  if (connectorDotsToRedraw.get(i)){
-//			drawConnectionLine(g2, startConnectorDots.get(i), endConnectorDots.get(i));
-//		  }
-//		}
 
 		//drawing Alternative Groups
 		drawGroupList(g2, altGroupPanels, false);
@@ -628,28 +618,36 @@ public class EditorView extends JFrame implements Observer{
 	 * @param list - the list of groups to be drawn
 	 * @param filled - if true, the group arc is drawm as a filled shape, otherwise only the boundary line is drawn  
 	 */
-	private void drawGroupList(Graphics2D g2, ArrayList<GroupPanel> list,
-			boolean filled) {
-		JComponent startPanel;
-		JComponent leftMost;
-		JComponent rightMost;
+	private void drawGroupList(Graphics2D g2, ArrayList<GroupPanel> list, boolean filled) {
+		GroupPanel startPanel=null;
+		JComponent leftMost=null;
+		JComponent rightMost=null;
+		int[] orderedAnglesList=null;
 		int minX;
 		int maxX;
+		Arc2D groupArc=null;
+		
+		Graphics2D tempGraphics = (Graphics2D)g2.create();
+
+		  
 		for (int i=0; i< list.size(); ++i){
 		  startPanel=list.get(i);
-		  leftMost = null; rightMost = null;
-		  minX=100000; maxX=-100000;
-		  for (JComponent endPanel : ((GroupPanel)startPanel).getMembers()){
+
+		  groupArc=getGroupArc(startPanel, startPanel.getMembers());
+		  
+//		  leftMost = null; rightMost = null;
+//		  minX=100000; maxX=-100000;
+		  for (JComponent member : startPanel.getMembers()){
 			//searching for the 2 extern anchor of the group
-			if(endPanel.getLocationOnScreen().getX()<minX){
-			  minX=(int)endPanel.getLocationOnScreen().getX();
-			  leftMost=endPanel;
-			}
-			if(endPanel.getLocationOnScreen().getX()>maxX){
-				maxX=(int)endPanel.getLocationOnScreen().getX();
-				rightMost=endPanel;
-			}
-			drawConnectionLine(g2, startPanel, endPanel);				
+//			if(member.getLocationOnScreen().getX()<minX){
+//			  minX=(int)member.getLocationOnScreen().getX();
+//			  leftMost=member;
+//			}
+//			if(member.getLocationOnScreen().getX()>maxX){
+//			  maxX=(int)member.getLocationOnScreen().getX();
+//			  rightMost=member;
+//			}
+			drawConnectionLine(g2, startPanel, member);				
 		  }
 		  
 		  /* ***DEBUG*** */
@@ -658,8 +656,116 @@ public class EditorView extends JFrame implements Observer{
 				  +"\nrightMost:"+rightMost);
 		  /* ***DEBUG*** */
 
-		  //drawing thr group arc
-		  drawGroupArc(g2, startPanel, leftMost, rightMost, filled);
+		  
+		  //drawing the group arc
+		  if(!filled){
+			  groupArc.setArcType(Arc2D.Double.OPEN);
+			  tempGraphics.draw(groupArc);
+		  }
+		  else{
+			  groupArc.setArcType(Arc2D.Double.PIE);
+			  tempGraphics.fill(groupArc);
+		  }
+		  
+//		  //drawing the group arc
+//		  drawGroupArc(g2, startPanel, leftMost, rightMost, filled);
+		}
+	}
+
+	/**
+	 * Returns an Arc2D object that intersects each connector lines of the group.<br>
+	 * The arc is calculated using the angles corresponding to connector lines.
+	 * 
+	 * @param groupPanel - the GroupPanel of the group in the diagram panel
+	 * @param members - ArrayList containing the AnchorPanel objects of group members
+	 * @return - an Arc2D object that intersects each connector lines 
+	 */
+	private Arc2D getGroupArc(GroupPanel groupPanel, ArrayList<AnchorPanel> members) {
+		int[] angles= new int[members.size()];
+		Point2D startCenter=getVisibleStartAnchorCenter(groupPanel);
+		Point2D childCenter=null;
+		double centreX=startCenter.getX();
+		double centreY=startCenter.getY();
+		double radius=1000000;
+		double lineLength=0;
+		Arc2D groupArc=null;
+		int index=0;
+		int angleGap=0;
+		int arcStartPoint=0;
+
+		//calculating arc minimum radius and intersection points angles
+		for(AnchorPanel groupChild : members){
+		  childCenter=getVisibleStartAnchorCenter(groupChild);
+
+		  //getting line length
+		  lineLength=Math.sqrt(Math.pow(childCenter.getX()-startCenter.getX(), 2)
+				  			   +Math.pow(childCenter.getY()-startCenter.getY(), 2));
+		  if(lineLength<radius) radius=lineLength;
+
+//		  //getting intersection point
+//		  intersectionPoints = getCircleLineIntersectionPoints(startCenter, childCenter, startCenter, 100);
+//		  if(new Line2D.Double(startCenter, childCenter).ptSegDist(intersectionPoints.get(0))==0)
+//			intersectionPoint=intersectionPoints.get(0);
+//		  else intersectionPoint=intersectionPoints.get(1);
+
+		  //adding the corresponding angle to angles array
+		  angles[index++]=getDegreeAngle(centreX, centreY, childCenter.getX(), childCenter.getY(), lineLength);
+//		  angles[index++]=getDegreeAngle(centreX, centreY, intersectionPoint.getX(), intersectionPoint.getY(), lineLength);
+		  
+		}
+		
+		//sorting the array
+		SortUtils.recQuickSort(angles, 0, angles.length-1);
+
+		System.out.println("!!!PRINTING SORTED ANGLES!!!");
+		for(int angle : angles){
+		  System.out.println("***"+angle);
+		}
+		//searching for the maximum degree gap between two subsequent points
+		for(index=0; index<angles.length-1; ++index)
+		  if (angles[index+1]-angles[index] > angleGap){
+			angleGap=angles[index+1]-angles[index];
+			arcStartPoint=angles[index+1];
+		  }
+		//checking gap between first and last points
+		if ((360-angles[angles.length-1])+angles[0] > angleGap){
+			angleGap=(360-angles[angles.length-1])+angles[0];
+			arcStartPoint=angles[0];
+		}
+		
+		//creating circle
+		groupArc = new Arc2D.Double(startCenter.getX()-radius, startCenter.getY()-radius,
+									radius*2, radius*2, 0, 360, Arc2D.Double.OPEN);
+		System.out.println("!!!AngleStart: "+arcStartPoint+"\tAngleExtent!!!"+(360-angleGap));
+		groupArc.setAngleStart(arcStartPoint);
+		groupArc.setAngleExtent(360-angleGap);
+		
+		return groupArc;
+	}
+
+	/**
+	 * Returns the angle(in degree metric) corresponding to the line from the specified centre to the point.
+	 * 
+	 * @param centreX - the X coordinate of the centre
+	 * @param centreY - the Y coordinate of the centre
+	 * @param pointX - the X coordinate of the point
+	 * @param pointY - the Y coordinate of the point
+	 * @param radius - the distance from centre to point
+	 * 
+	 * @return - the corresponding angle, in degree metric
+	 */
+	private int getDegreeAngle(double centreX, double centreY, double pointX, double pointY, double radius) {
+		double cosin=(pointX-centreX)/radius;
+		double sin=(pointY-centreY)/radius;
+		double acos = Math.acos(cosin);
+		double asin = Math.asin(sin);
+
+		//using acos and asin calculated values to get actual angle in degree
+		if(asin==0) return 0;
+		if(asin>0) return (int)Math.toDegrees(acos);
+		else{
+		  if(acos<Math.PI/2) return (int)Math.toDegrees(Math.PI+asin);
+		  else return (int)Math.toDegrees(Math.PI/2-asin);
 		}
 	}
 
