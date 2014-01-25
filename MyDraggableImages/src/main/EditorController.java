@@ -84,7 +84,8 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
     	/* ***DEBUG*** */
 
 		editorView.getDiagramElementsMenu().removeAll();
-        if (e.getButton() == MouseEvent.BUTTON3) {
+		
+        if (e.getButton() == MouseEvent.BUTTON3) {//user asked for the popup menu
           Component comp=editorView.getDiagramPanel().getComponentAt(e.getX(), e.getY());
         	
           /* ***DEBUG*** */
@@ -105,17 +106,26 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 
           //        	popUpElement=getUnderlyingComponent(e.getX(), e.getY());
 
+//          if(popupElement.getName().startsWith(EditorView.startConnectorsNamePrefix)
+//        		  || popupElement.getName().startsWith(EditorView.endConnectorsNamePrefix)){
+//        	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemDelete());
+//          }
+
           if(popupElement.getName().startsWith(EditorView.startConnectorsNamePrefix)
-        		  || popupElement.getName().startsWith(EditorView.endConnectorsNamePrefix)){
-        	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemDelete());
+        	 || popupElement.getName().startsWith(EditorView.endConnectorsNamePrefix)){
+        	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemDeleteConnector());
           }
-		  if(popupElement.getName().startsWith(EditorView.endConnectorsNamePrefix)
+          if(popupElement.getName().startsWith(EditorView.endConnectorsNamePrefix)
 				  && ( ((AnchorPanel)popupElement).getOtherEnd().getName().startsWith(EditorView.altGroupNamePrefix)
 					   || ((AnchorPanel)popupElement).getOtherEnd().getName().startsWith(EditorView.orGroupNamePrefix) ) ){
 	    	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemUngroup());			  
 		  }
           if(popupElement.getName().startsWith(EditorView.featureNamePrefix)){
-        	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemDelete());
+        	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemDeleteFeature());
+          }
+          if(popupElement.getName().startsWith(EditorView.altGroupNamePrefix)
+        	 || popupElement.getName().startsWith(EditorView.orGroupNamePrefix)){
+        	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemDeleteGroup());
           }
 
           editorView.setDiagramElementsMenuPosX(e.getX());
@@ -447,7 +457,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 	  //popup menu command: Delete Element
       if(e.getActionCommand().equals("Delete Element")){
         String elementName = null;
-        if (popupElement!=null) elementName=editorView.getPopUpElement().getName();
+        if (popupElement!=null) elementName=popupElement.getName();
 
         /* ***DEBUG*** */
         if(debug3) System.out.println("Popup Menu requested delete on "+elementName
@@ -456,6 +466,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
         /* ***DEBUG*** */
         
         if(elementName!=null && elementName.startsWith(EditorView.startConnectorsNamePrefix)){
+      	  EditorView.deleteAnchor(popupElement);
       	  EditorView.deleteAnchor(((AnchorPanel)popupElement).getOtherEnd());
       	  editorView.repaintRootFrame();
         }
@@ -473,6 +484,11 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
       	  }	
           editorView.repaintRootFrame();
         }
+        else if(elementName!=null && elementName.startsWith(EditorView.altGroupNamePrefix)
+        		|| elementName.startsWith(EditorView.orGroupNamePrefix)){
+          editorModel.deleteUnattachedGroup(editorView.getPopUpElement().getName());
+          editorView.repaintRootFrame();
+        }
         else if(elementName!=null && elementName.startsWith(EditorView.featureNamePrefix)){
       	  editorModel.deleteFeature(editorView.getPopUpElement().getName());
           editorView.repaintRootFrame();
@@ -480,10 +496,11 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
         editorView.setPopUpElement(null);
       }
 	  //popup menu command: Ungroup Element
-      else if(e.getActionCommand().equals("Ungroup Element")){
+      else if(e.getActionCommand().equals("Ungroup")){
+        System.out.println("Ungrouping: "+popupElement.getName());
+        System.out.println("Other end: "+((AnchorPanel)popupElement).getOtherEnd().getName());
     	EditorView.ungroupAnchor((AnchorPanel)popupElement);
         editorView.repaintRootFrame();
-//        System.out.println("Ungroup not implemented yet! ");
       }
       else if(e.getActionCommand().equals("Print Model[DEBUG COMMAND]")){
     	System.out.println("\n\nPRINTING TREES");

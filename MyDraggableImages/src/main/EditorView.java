@@ -160,15 +160,12 @@ public class EditorView extends JFrame implements Observer{
 	
 	
 	/**the panel containing the diagram */
-//	private static JPanel diagramPanel=null;
-//	private static OrderedListPaintJPanel diagramPanel=null;
 	private static JLayeredPane diagramPanel=null;
 
 	/**the panel containing the tools */
 	private static JPanel toolsPanel=null;
 	
 	/** the splitter panel containing diagramPanel and toolsPanel*/
-//	private static JSplitPane splitterPanel=null;
 	private static EditorSplitPane splitterPanel=null;
 	
 	/** the active Feature panel*/
@@ -232,14 +229,23 @@ public class EditorView extends JFrame implements Observer{
 	private static Point start=new Point(), endLeft=new Point(), endRight=new Point();
 
 	/** the popup menu for all diagram panel elements*/
-	private static JPopupMenu diagramElementsMenu = null;
+//	private static JPopupMenu diagramElementsMenu = null;
+	private static JPopupMenu diagramElementsMenu = new JPopupMenu();
 	/** the element interested by the popup menu*/
 	private static JComponent popUpElement = null;
 	
 	/** popup menu items*/
-	private static JMenuItem popMenuItemDelete = null;
-	private static JMenuItem popMenuItemUngroup = null;
-	private static JMenuItem popMenuItemPrintModelDebug = null;
+//	private static JMenuItem popMenuItemDelete = null;
+//	private static JMenuItem popMenuItemUngroup = null;
+//	private static JMenuItem popMenuItemPrintModelDebug = null;
+
+	private static JMenuItem popMenuItemDelete = new JMenuItem("Delete Element");
+	private static JMenuItem popMenuItemDeleteFeature = new JMenuItem("Delete Feature");
+	private static JMenuItem popMenuItemDeleteConnector = new JMenuItem("Delete Connector");
+	private static JMenuItem popMenuItemDeleteGroup = new JMenuItem("Delete Group");
+	private static JMenuItem popMenuItemUngroup = new JMenuItem("Ungroup");
+	private static JMenuItem popMenuItemPrintModelDebug = new JMenuItem("Print Model[DEBUG COMMAND]");
+
 	
 	/** popup menu coordinates*/
 	private static int diagramElementsMenuPosX=0;
@@ -252,6 +258,22 @@ public class EditorView extends JFrame implements Observer{
 	
 	public boolean prepareUI(EditorController editorController){
 		if(editorController==null) return false;
+
+		//initializing diagram popup menu
+		popMenuItemDeleteFeature.setText("Delete Feature");
+		popMenuItemDeleteFeature.setActionCommand("Delete Element");
+		popMenuItemDeleteFeature.addActionListener(editorController);
+		popMenuItemDeleteConnector.setText("Delete Connector");
+		popMenuItemDeleteConnector.setActionCommand("Delete Element");
+		popMenuItemDeleteConnector.addActionListener(editorController);
+		popMenuItemDeleteGroup.setText("Delete Group");
+		popMenuItemDeleteGroup.setActionCommand("Delete Element");
+		popMenuItemDeleteGroup.addActionListener(editorController);
+		
+		popMenuItemDelete.addActionListener(editorController);        
+        popMenuItemUngroup.addActionListener(editorController);        
+        popMenuItemPrintModelDebug.addActionListener(editorController);        
+
 //		System.out.println("GraphicsEnvironment.isHeadless(): "+GraphicsEnvironment.isHeadless());
 //		try {
 //			eventsRobot = new Robot();
@@ -467,14 +489,11 @@ public class EditorView extends JFrame implements Observer{
 		
 
 		//creating diagram popup menu
-		diagramElementsMenu = new JPopupMenu();
-		popMenuItemDelete = new JMenuItem("Delete Element");
-        popMenuItemUngroup = new JMenuItem("Ungroup Element");        
-        popMenuItemPrintModelDebug = new JMenuItem("Print Model[DEBUG COMMAND]");
+//		diagramElementsMenu = new JPopupMenu();
+//		popMenuItemDelete = new JMenuItem("Delete Element");
+//        popMenuItemUngroup = new JMenuItem("Ungroup Element");        
+//        popMenuItemPrintModelDebug = new JMenuItem("Print Model[DEBUG COMMAND]");
 
-        popMenuItemDelete.addActionListener(editorController);        
-        popMenuItemUngroup.addActionListener(editorController);        
-        popMenuItemPrintModelDebug.addActionListener(editorController);        
         
 //        popMenuItemDelete.addActionListener(
 //        		
@@ -2619,6 +2638,19 @@ public class EditorView extends JFrame implements Observer{
 	}	
 	
 	/**
+	 * Deletes a group from the diagram.
+	 * 
+	 * @param group - the group to delete
+	 */
+	private void deleteGroup(JComponent group) {
+	  for(AnchorPanel member : ((GroupPanel)group).getMembers()) deleteAnchor(member);
+	  diagramPanel.remove(group);
+	  visibleOrderDraggables.remove(group);
+	  if(group.getName().startsWith(altGroupNamePrefix)) altGroupPanels.remove(group);
+	  if(group.getName().startsWith(orGroupNamePrefix)) orGroupPanels.remove(group);
+	}
+	
+	/**
 	 * Ungroups an ending anchor from his group, then connects it with a starting anchor <br>
 	 * attached to the diagram and named accordingly.
 	 * 
@@ -2691,15 +2723,6 @@ public class EditorView extends JFrame implements Observer{
 	}
 	
 	/**
-	 * Resets the static variables used during drag operations.
-	 */
-	private void resetActiveItems(){
-		isActiveItem=activeItems.NO_ACTIVE_ITEM;
-		lastAnchorFocused=null;
-		lastFeatureFocused=null;
-	}
-	
-	/**
 	 * Deletes an anchor from the diagram.
 	 * 
 	 * @param anchor - the anchor to delete
@@ -2760,6 +2783,21 @@ public class EditorView extends JFrame implements Observer{
 		return popMenuItemDelete;
 	};
 	
+	/** Returns the 'Delete Feature' popup menu item */
+	public JMenuItem getPopMenuItemDeleteFeature(){
+		return popMenuItemDeleteFeature;
+	};
+	
+	/** Returns the 'Delete Connector' popup menu item */
+	public JMenuItem getPopMenuItemDeleteConnector(){
+		return popMenuItemDeleteConnector;
+	};
+	
+	/** Returns the 'Delete Group' popup menu item */
+	public JMenuItem getPopMenuItemDeleteGroup(){
+		return popMenuItemDeleteGroup;
+	};
+	
 	/** Returns the 'Ungroup Element' popup menu item */
 	public JMenuItem getPopMenuItemUngroup(){
 		return popMenuItemUngroup;
@@ -2799,6 +2837,15 @@ public class EditorView extends JFrame implements Observer{
 	public void setActiveItem(activeItems item){
 		isActiveItem=item;
 	};
+	
+	/**
+	 * Resets the static variables used during drag operations.
+	 */
+	private void resetActiveItems(){
+		isActiveItem=activeItems.NO_ACTIVE_ITEM;
+		lastAnchorFocused=null;
+		lastFeatureFocused=null;
+	}
 	
 	/** Returns the last anchor component focused*/
 	public JComponent getLastAnchorFocused(){
@@ -2859,7 +2906,14 @@ public class EditorView extends JFrame implements Observer{
 	public void setToolDragPosition(Point p){
 		toolDragPosition=p;
 	}
-	
+
+	/**
+	 * Reset item used for dragging tools.*/
+	private static void cancelToolDrag() {
+		toolDragImage=null;
+		toolDragPosition=null;
+		frameRoot.repaint();
+	}		
 
 	/** Returns the Z-ordered list of visible draggable components on the diagram panel*/
 	public OrderedList getVisibleOrderDraggables(){
@@ -2915,28 +2969,22 @@ public class EditorView extends JFrame implements Observer{
 		else return true;
 	}
 
-	private static void cancelToolDrag() {
-		toolDragImage=null;
-		toolDragPosition=null;
-		frameRoot.repaint();
-	}	
-
-	/** shows the popup menu on the diagram, at the clicked location*/
+	/** shows the popup menu on the diagram, at the clicked location.*/
 	public void showDiagramElementsMenu(){
 	    diagramElementsMenu.show(diagramPanel, diagramElementsMenuPosX, diagramElementsMenuPosY);		
 	}
 
-	/** Repaints frameRoot*/
+	/** Repaints frameRoot.*/
 	public void repaintRootFrame(){
 		frameRoot.repaint();		
 	}
-
 
 	@Override
 	public void update(Observable o, Object arg) {
 		System.out.println("Message received: "+arg);
 		if(arg.equals("New Feature Correctly Added")) addNewFeatureToDiagram();			
 		else if(arg.equals("Feature Deleted")) deleteFeature(popUpElement);
+		else if(arg.equals("Group Deleted")) deleteGroup(popUpElement);
 		else if(arg.equals("Feature Not Deleted"))
 			System.out.println("Cannot delete this feature!");
 		else if(arg.equals("Grouped a Feature")
