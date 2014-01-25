@@ -50,6 +50,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 	      case DRAGGING_FEATURE: EditorView.dragFeature(e); break;
 	      case DRAGGING_EXTERN_ANCHOR: EditorView.dragAnchor(e); break;
 	      case DRAGGING_EXTERN_GROUP: EditorView.dragAnchor(e); break;
+	      case DRAGGING_SELECTION_RECT: EditorView.dragSelectionRect(e); break;
 	      default: break;
 		}		
 	  //event originated from the toolbar
@@ -182,7 +183,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 		  if (((Component)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY())){
 			editorView.setLastPositionX(e.getX());
 			editorView.setLastPositionY(e.getY());
-
+			
 			//mouse pressed on a feature panel in the diagram panel
 			if(tmpNode.getElement().getClass().equals(FeaturePanel.class) &&
 					((FeaturePanel)tmpNode.getElement()).getName().startsWith(EditorView.featureNamePrefix) ){
@@ -276,17 +277,20 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 			}
 			/* ***DEBUG*** */
 
-			break;
+			return;
 		  }
-
-		  /* ***DEBUG*** */
-		  if (debug2){
-			  System.out.println("Current Panel: "+((Component)tmpNode.getElement()).getName());
-		  }
-		  /* ***DEBUG*** */
-
 		  tmpNode=tmpNode.getNext();
 		}
+
+		//mouse directly pressed on the diagram panel
+		editorView.setStartSelectionRect(e.getLocationOnScreen().getLocation());
+//		editorView.setEndSelectionRect(e.getLocationOnScreen().getLocation());
+
+		editorView.getSelectionRect().setFrameFromDiagonal(e.getLocationOnScreen().getLocation(),
+				e.getLocationOnScreen().getLocation());  	  
+
+		editorView.setActiveItem(activeItems.DRAGGING_SELECTION_RECT);
+//		System.out.println("Mouse pressed on: "+((Component)e.getSource()).getName());
 
       }
 	  //event originated from the toolbar
@@ -357,6 +361,10 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 //			  EditorView.dropGroupOnDiagram(e);
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
 			  editorView.setLastAnchorFocused(null); break;
+		  case DRAGGING_SELECTION_RECT:
+//			  EditorView.dropGroupOnDiagram(e);
+			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+			  /*editorView.setLastAnchorFocused(null);*/ break;
 		  default: break;
 	    }
 

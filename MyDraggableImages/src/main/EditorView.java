@@ -14,6 +14,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import java.awt.MouseInfo;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Shape;
 import java.awt.Stroke;
@@ -172,6 +173,9 @@ public class EditorView extends JFrame implements Observer{
 	private static FeaturePanel lastFeatureFocused=null;
 	/** the active Anchor panel*/
 	private static JComponent lastAnchorFocused=null;
+	/** list of active elements selected as group by the user*/
+	private static ArrayList<JComponent> selectionGroupFocused=null;
+	
 	/** the component on which a drop is about to be done*/
 	private static JComponent underlyingComponent=null;
 //	private static boolean isDraggingFeature=false;
@@ -209,8 +213,8 @@ public class EditorView extends JFrame implements Observer{
 
 	/** enumeration of items that can become active, for instance in a drag motion*/
 	public static enum activeItems {
-		DRAGGING_FEATURE, DRAGGING_TOOL_NEWFEATURE, DRAGGING_TOOL_CONNECTOR, NO_ACTIVE_ITEM,
-		DRAGGING_EXTERN_ANCHOR, DRAGGING_TOOL_ALT_GROUP, DRAGGING_EXTERN_GROUP, DRAGGING_TOOL_OR_GROUP	
+		NO_ACTIVE_ITEM, DRAGGING_FEATURE, DRAGGING_EXTERN_ANCHOR, DRAGGING_EXTERN_GROUP, DRAGGING_SELECTION_RECT, 
+		DRAGGING_TOOL_NEWFEATURE, DRAGGING_TOOL_CONNECTOR, DRAGGING_TOOL_ALT_GROUP, DRAGGING_TOOL_OR_GROUP	
 	}
 
 	/** enumeration used to specify a item type through the program*/
@@ -226,8 +230,16 @@ public class EditorView extends JFrame implements Observer{
 	
 	private static int featureBorderSize=20;
 
-	private static Point start=new Point(), endLeft=new Point(), endRight=new Point();
+	/** variable used to draw lines on the diagram */
+	private static Point lineStart=new Point(), lineEnd=new Point();
+	/** variable used to draw selection rectangle on the diagram */
+	private static Point startSelectionRect=new Point(), endSelectionRect=new Point();
 
+	/** variable used to draw selection rectangle on the diagram */
+	private static Rectangle selectionRect=new Rectangle();
+
+	
+	
 	/** the popup menu for all diagram panel elements*/
 //	private static JPopupMenu diagramElementsMenu = null;
 	private static JPopupMenu diagramElementsMenu = new JPopupMenu();
@@ -319,7 +331,6 @@ public class EditorView extends JFrame implements Observer{
 //        diagramElementsMenu.add(popMenuItemUngroup);
 
 
-		OrderedListNode tmpNode=null;
 		visibleOrderDraggables = new OrderedList();
 		startConnectorDots = new ArrayList<JComponent>();
 //		endConnectorDots = new ArrayList<JComponent>();
@@ -329,6 +340,9 @@ public class EditorView extends JFrame implements Observer{
 		altGroupPanels = new ArrayList<GroupPanel>();
 		orGroupPanels = new ArrayList<GroupPanel>();
 
+		selectionGroupFocused = new ArrayList<JComponent>();
+		
+		
 		//creating root frame
 //		frameRoot=new OrderedListPaintJFrame(visibleOrderDraggables);
 		frameRoot=this;
@@ -572,6 +586,7 @@ public class EditorView extends JFrame implements Observer{
 
 	@Override
 	public void paint(java.awt.Graphics g) {
+		int rectX=0, rectY=0, rectWidth=0, rectHeight=0;
 		super.paint(g);
 
 		Graphics2D g2 = (Graphics2D)g.create();
@@ -584,11 +599,24 @@ public class EditorView extends JFrame implements Observer{
 		/* ***DEBUG*** */
 		if(debug3) System.out.println("Mi han chiamato, son la paint()");
 		/* ***DEBUG*** */
+		System.out.println("PAINT: isActiveItem="+isActiveItem);
 
-		if(toolDragImage==null) return;
-		
-//		   Graphics2D g2 = (Graphics2D) g;
-		   g2.drawImage(toolDragImage, toolDragPosition.x+1, toolDragPosition.y+4, null);
+		if(toolDragImage!=null) 
+			g2.drawImage(toolDragImage, toolDragPosition.x+1, toolDragPosition.y+4, null);
+		if(isActiveItem==activeItems.DRAGGING_SELECTION_RECT){
+			System.out.println("Disegno il rect");
+//			rectX=(int)(startSelectionRect.getX()+diagramPanel.getX());
+//			rectY=(int)(startSelectionRect.getY()+diagramPanel.getY());
+
+//			rectX=(int)(startSelectionRect.getX());
+//			rectY=(int)(startSelectionRect.getY());
+//			rectWidth=(int)(endSelectionRect.getX()-startSelectionRect.getX());
+//			rectHeight=(int)(endSelectionRect.getY()-startSelectionRect.getY());			
+//			g2.drawRect(rectX, rectY, rectWidth, rectHeight);
+			g2.setColor(Color.BLUE);
+			g2.draw(selectionRect);
+			
+		}
 //		   g2.finalize();
 
 		    //		BufferedImage image=null;
@@ -961,8 +989,8 @@ public class EditorView extends JFrame implements Observer{
 	}
 
 	private static void drawConnectionLine(Graphics2D g2, JComponent startPanel, JComponent endPanel) {
-		start.setLocation(getVisibleStartAnchorCenter(startPanel));
-		endLeft.setLocation(getVisibleStartAnchorCenter(endPanel));
+		lineStart.setLocation(getVisibleStartAnchorCenter(startPanel));
+		lineEnd.setLocation(getVisibleStartAnchorCenter(endPanel));
 //		start.setLocation(startPanel.getLocationOnScreen());
 //		end.setLocation(endPanel.getLocationOnScreen());
 		g2.drawLine(
@@ -970,7 +998,7 @@ public class EditorView extends JFrame implements Observer{
 //				  (int)(start.getY()-splitterPanel.getLocationOnScreen().getY()+startPanel.getHeight()/2+3),
 //				  (int)(end.getX()-splitterPanel.getLocationOnScreen().getX()+endPanel.getHeight()/2),
 //				  (int)(end.getY()-splitterPanel.getLocationOnScreen().getY()+endPanel.getHeight()/2+3) );
-		  (int)start.getX(), (int)start.getY(), (int)endLeft.getX(), (int)endLeft.getY() );
+		  (int)lineStart.getX(), (int)lineStart.getY(), (int)lineEnd.getX(), (int)lineEnd.getY() );
 //		  (int)(end.getX()-splitterPanel.getLocationOnScreen().getX()+endPanel.getHeight()/2-3),
 //		  (int)(end.getY()-splitterPanel.getLocationOnScreen().getY()+endPanel.getHeight()/2+2) );
 	};
@@ -1684,7 +1712,8 @@ public class EditorView extends JFrame implements Observer{
 	  if(lastAnchorFocused==null) return;
 	  dragDiagramElement(lastAnchorFocused, e);
 //		  diagramPanel.repaint();
-	  frameRoot.repaint();	}
+	  frameRoot.repaint();	
+	}
 
 	/**
 	 * Drags a feature panel inside the diagram panel.
@@ -1696,6 +1725,21 @@ public class EditorView extends JFrame implements Observer{
 	  dragDiagramElement(lastFeatureFocused, e);
 //	  diagramPanel.repaint();
 	  frameRoot.repaint();
+	}
+
+	/**
+	 * Drags the selection rectangle, updating the two defining points.
+	 *
+	 * @param e - the current MouseEvent
+	 */
+	public static void dragSelectionRect(MouseEvent e) {
+	  System.out.println("start: "+startSelectionRect+"\tend: "+e.getLocationOnScreen().getLocation());
+//	  endSelectionRect=e.getLocationOnScreen().getLocation();
+
+
+	  selectionRect.setFrameFromDiagonal(startSelectionRect, e.getLocationOnScreen().getLocation());  	  
+	  
+	  frameRoot.repaint();	
 	}
 
 	/**
@@ -2885,6 +2929,36 @@ public class EditorView extends JFrame implements Observer{
 	/** Sets the last Y coordinate on the diagram of the component being dragged*/
 	public void setLastPositionY(int yPos){
 		lastPositionY=yPos;
+	};
+	
+	/** Returns the starting point on the diagram of the selection rectangle*/
+	public Point getStartSelectionRect(){
+		return startSelectionRect;
+	};
+	
+	/** Sets the starting point on the diagram of the selection rectangle*/
+	public void setStartSelectionRect(Point p){
+		startSelectionRect=p;
+	};	
+	
+	/** Returns the ending point on the diagram of the selection rectangle*/
+	public Point getEndSelectionRect(){
+		return endSelectionRect;
+	};
+	
+	/** Sets the ending point on the diagram of the selection rectangle*/
+	public void setEndSelectionRect(Point p){
+		endSelectionRect=p;
+	};	
+	
+	/** Returns the selection rectangle*/
+	public Rectangle getSelectionRect(){
+		return selectionRect;
+	};
+	
+	/** Sets the selection rectangle*/
+	public void setSelectionRect(Rectangle p){
+		selectionRect=p;
 	};	
 	
 	/** Returns the tool image being dragged*/
@@ -2943,9 +3017,9 @@ public class EditorView extends JFrame implements Observer{
 	/** Returns the number of features added to the diagram */
 	public int getFeaturesCount(){
 		return featuresCount;
-	}	
-	
+	}
 
+	
 	/**
 	 * Checks whether the dragged tool has been dropped on the diagram panel or not.
 	 * 
