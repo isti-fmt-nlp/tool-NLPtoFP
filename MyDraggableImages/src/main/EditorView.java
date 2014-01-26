@@ -213,7 +213,8 @@ public class EditorView extends JFrame implements Observer{
 
 	/** enumeration of items that can become active, for instance in a drag motion*/
 	public static enum activeItems {
-		NO_ACTIVE_ITEM, DRAGGING_FEATURE, DRAGGING_EXTERN_ANCHOR, DRAGGING_EXTERN_GROUP, DRAGGING_SELECTION_RECT, 
+		NO_ACTIVE_ITEM, DRAGGING_FEATURE, DRAGGING_EXTERN_ANCHOR, DRAGGING_EXTERN_GROUP,
+		DRAGGING_SELECTION_RECT, DRAGGING_SELECTION_GROUP, 
 		DRAGGING_TOOL_NEWFEATURE, DRAGGING_TOOL_CONNECTOR, DRAGGING_TOOL_ALT_GROUP, DRAGGING_TOOL_OR_GROUP	
 	}
 
@@ -372,7 +373,7 @@ public class EditorView extends JFrame implements Observer{
 		
 		
 		JComponent iconTmpPanel=null;
-		for(int i=0; i<6; ++i){
+		for(int i=0; i<4; ++i){
 		  iconTmpPanel=getToolIcon("New Feature", true);
 //		  iconTmpPanel.addMouseListener(getToolbarMouseListener());
 //		  iconTmpPanel.addMouseMotionListener(getToolbarMouseMotionListener());
@@ -605,6 +606,7 @@ public class EditorView extends JFrame implements Observer{
 			g2.drawImage(toolDragImage, toolDragPosition.x+1, toolDragPosition.y+4, null);
 		if(isActiveItem==activeItems.DRAGGING_SELECTION_RECT){
 			System.out.println("Disegno il rect");
+			g2.setColor(Color.BLUE);
 //			rectX=(int)(startSelectionRect.getX()+diagramPanel.getX());
 //			rectY=(int)(startSelectionRect.getY()+diagramPanel.getY());
 
@@ -616,6 +618,22 @@ public class EditorView extends JFrame implements Observer{
 			g2.setColor(Color.BLUE);
 			g2.draw(selectionRect);
 			
+		}
+		if(selectionGroupFocused.size()>0){
+		  g2.setColor(Color.BLUE);
+		  Rectangle elementSelectionFrame=new Rectangle();
+		  for(Object selectedElement : selectionGroupFocused.toArray()){
+			  System.out.println("selected element: "+((JComponent)selectedElement).getName()
+					  +"coords: "+((JComponent)selectedElement).getLocationOnScreen());
+			/*elementSelectionframe=*/((JComponent)selectedElement).getBounds(elementSelectionFrame);
+			elementSelectionFrame.setLocation(
+					(int)(elementSelectionFrame.getX()+diagramPanel.getLocationOnScreen().getX()-2 ),
+					(int)(elementSelectionFrame.getY()+diagramPanel.getLocationOnScreen().getY() ));
+			elementSelectionFrame.setSize(
+					(int)elementSelectionFrame.getWidth()+6,
+					(int)elementSelectionFrame.getHeight()+6);
+			g2.draw(elementSelectionFrame);
+		  }
 		}
 //		   g2.finalize();
 
@@ -1704,6 +1722,14 @@ public class EditorView extends JFrame implements Observer{
 	}
 
 	/**
+	 * Moves all components in the selection group to the top layer of diagram panel.
+	 * 
+	 */
+	public static void moveSelectionGroupToTop() {
+	  for(JComponent element : selectionGroupFocused) moveComponentToTop(element);
+	}
+
+	/**
 	 * Drags an anchor panel inside the diagram panel.
 	 *
 	 * @param e - the current MouseEvent
@@ -1740,6 +1766,60 @@ public class EditorView extends JFrame implements Observer{
 	  selectionRect.setFrameFromDiagonal(startSelectionRect, e.getLocationOnScreen().getLocation());  	  
 	  
 	  frameRoot.repaint();	
+	}
+
+	/**
+	 * Drags all components in the selection group inside the diagram panel.
+	 *
+	 * @param e - the current MouseEvent
+	 */
+	public static void dragSelectionGroup(MouseEvent e) {
+		  int moveX=0, moveY=0;
+		  int adjustedMoveX=0, adjustedMoveY=0;	  
+		  int newLocationX=0, newLocationY=0;
+		  boolean normalUpdateX=true, normalUpdateY=true;
+
+		  moveX = e.getX()-lastPositionX;
+		  moveY = e.getY()-lastPositionY;
+		  
+
+		for(JComponent element : selectionGroupFocused){		  
+		  newLocationX=element.getX()+moveX;
+		  newLocationY=element.getY()+moveY;
+		  
+		  //the feature must not be dragged beyond the borders of the diagram panel
+		  if( newLocationX<0 ){
+			newLocationX=1;
+			normalUpdateX=false;
+			adjustedMoveX=newLocationX-element.getX();
+		  }
+		  if( diagramPanel.getWidth()<=newLocationX+element.getWidth() ){
+			newLocationX=diagramPanel.getWidth()-element.getWidth()-1;
+			normalUpdateX=false;
+			adjustedMoveX=newLocationX-element.getX();
+		  }
+		  if( newLocationY<0 ){
+			newLocationY=1;
+			normalUpdateY=false;
+			adjustedMoveY=newLocationY-element.getY();
+		  }
+		  if( diagramPanel.getHeight()<=newLocationY+element.getHeight() ){
+			newLocationY=diagramPanel.getHeight()-element.getHeight()-1;
+			normalUpdateY=false;
+			adjustedMoveY=newLocationY-element.getY();
+		  }
+
+		  //adjusting last drag position depending on eventual border collisions
+		  if(normalUpdateX) lastPositionX=e.getX();
+		  else lastPositionX=lastPositionX+adjustedMoveX;
+
+		  if(normalUpdateY) lastPositionY=e.getY();
+		  else lastPositionY=lastPositionY+adjustedMoveY;
+
+		  element.setLocation(newLocationX, newLocationY);
+		}
+		frameRoot.repaint();	
+		
 	}
 
 	/**
@@ -2014,6 +2094,22 @@ public class EditorView extends JFrame implements Observer{
 		((JLayeredPane)underlyingComponent).setComponentZOrder(lastAnchorFocused, 0);
 
 		return true;
+	}
+
+	/**
+	 * Check each draggable element in the diagram panel and adds it to the <br>
+	 * selection list if it's inside the selection rectangle.
+	 * 
+	 * @param e
+	 */
+	public void createSelectionGroup(MouseEvent e) {
+	  OrderedListNode tmpNode=visibleOrderDraggables.getFirst();
+	  while(tmpNode!=null){
+		if(selectionRect.contains(((Component)tmpNode.getElement()).getLocationOnScreen()))
+		  selectionGroupFocused.add((JComponent) tmpNode.getElement());
+		  tmpNode=tmpNode.getNext();
+	  }
+	  frameRoot.repaint();
 	}
 
 	/**
@@ -2960,6 +3056,11 @@ public class EditorView extends JFrame implements Observer{
 	public void setSelectionRect(Rectangle p){
 		selectionRect=p;
 	};	
+	
+	/** Returns the selection group*/
+	public ArrayList<JComponent> getSelectionGroup(){
+		return selectionGroupFocused;
+	};
 	
 	/** Returns the tool image being dragged*/
 	public BufferedImage getToolDragImage(){

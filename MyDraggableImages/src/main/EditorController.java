@@ -50,7 +50,10 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 	      case DRAGGING_FEATURE: EditorView.dragFeature(e); break;
 	      case DRAGGING_EXTERN_ANCHOR: EditorView.dragAnchor(e); break;
 	      case DRAGGING_EXTERN_GROUP: EditorView.dragAnchor(e); break;
-	      case DRAGGING_SELECTION_RECT: EditorView.dragSelectionRect(e); break;
+	      case DRAGGING_SELECTION_RECT:  EditorView.dragSelectionRect(e); break;
+	      case DRAGGING_SELECTION_GROUP: 
+			  System.out.println("dragging group!");
+			  EditorView.dragSelectionGroup(e); break;
 	      default: break;
 		}		
 	  //event originated from the toolbar
@@ -168,11 +171,9 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-	  JComponent anchorFocused=null;
 	  //event originated from the diagram panel
       if( ((Component)e.getSource()).getName().startsWith(EditorView.diagramPanelName) ){
 		int featurePanelX=0, featurePanelY=0;
-		int anchorPanelOnScreenX=0, anchorPanelOnScreenY=0;
 		FeaturePanel featurePanel=null;
 		JComponent otherEnd=null;
 		JComponent otherEndFeaturePanel=null;
@@ -183,6 +184,18 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 		  if (((Component)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY())){
 			editorView.setLastPositionX(e.getX());
 			editorView.setLastPositionY(e.getY());
+			
+			//mouse pressed on an element of the group selection
+			if(editorView.getSelectionGroup().contains(tmpNode.getElement())){
+			  System.out.println("Mouse Pressed on a selection group element!");
+			  editorView.setActiveItem(activeItems.DRAGGING_SELECTION_GROUP);
+			  EditorView.moveSelectionGroupToTop();					
+			  return;
+			}
+			else{//mouse pressed out of an element of the group selection			
+			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+			  if (editorView.getSelectionGroup().size()>0) editorView.getSelectionGroup().clear();	
+			}
 			
 			//mouse pressed on a feature panel in the diagram panel
 			if(tmpNode.getElement().getClass().equals(FeaturePanel.class) &&
@@ -224,7 +237,6 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 
 				//the other end is not attached to any feature
 				else EditorView.detachAnchor(featurePanel, anchorPanel);
-				break;
 			  }
 			  //mouse pressed on a group inside the feature panel
 			  else if(anchorPanelName!=null && anchorPanel.getClass().equals(GroupPanel.class) && (
@@ -236,16 +248,16 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 				editorView.setLastFeatureFocused(featurePanel);
 				
 				//the group has no members
-				if(((GroupPanel)anchorPanel).getMembers().size()==0){ EditorView.detachAnchor(featurePanel, anchorPanel); break;}
+				if(((GroupPanel)anchorPanel).getMembers().size()==0)EditorView.detachAnchor(featurePanel, anchorPanel);
 				//the group has members				
-				else{ editorModel.removeGroupFromFeature(featurePanel.getName(), anchorPanel.getName()); break;}
-
-				
+				else editorModel.removeGroupFromFeature(featurePanel.getName(), anchorPanel.getName());
 			  }
 			  //mouse directly pressed on a feature panel, not on an inner anchor
-			  editorView.setActiveItem(activeItems.DRAGGING_FEATURE);
-			  editorView.setLastFeatureFocused((FeaturePanel)tmpNode.getElement());   
-			  EditorView.moveComponentToTop(editorView.getLastFeatureFocused());
+			  else{
+				editorView.setActiveItem(activeItems.DRAGGING_FEATURE);
+				editorView.setLastFeatureFocused((FeaturePanel)tmpNode.getElement());   
+				EditorView.moveComponentToTop(editorView.getLastFeatureFocused());
+			  }
 			}
 			//mouse directly pressed on an anchor panel in the diagram panel
 			else if(tmpNode.getElement().getClass().equals(AnchorPanel.class) &&(
@@ -283,6 +295,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 		}
 
 		//mouse directly pressed on the diagram panel
+		if (editorView.getSelectionGroup().size()>0) editorView.getSelectionGroup().clear();	
 		editorView.setStartSelectionRect(e.getLocationOnScreen().getLocation());
 //		editorView.setEndSelectionRect(e.getLocationOnScreen().getLocation());
 
@@ -362,9 +375,15 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
 			  editorView.setLastAnchorFocused(null); break;
 		  case DRAGGING_SELECTION_RECT:
+			  dropSelectionRectangle(e);
 //			  EditorView.dropGroupOnDiagram(e);
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
 			  /*editorView.setLastAnchorFocused(null);*/ break;
+		  case DRAGGING_SELECTION_GROUP:
+			  System.out.println("released group drag!");
+			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+			  if(editorView.getSelectionGroup().size()>0) editorView.getSelectionGroup().clear();
+			  break;
 		  default: break;
 	    }
 
@@ -649,6 +668,15 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 			
 		}
 	  }
+	}
+
+	/**
+	 * Drops the selection rectangle on the diagram, selecting a group of elements.
+	 * 
+	 * @param e - MouseEvent of the type Mouse Released.
+	 */
+	private void dropSelectionRectangle(MouseEvent e) {
+	    editorView.createSelectionGroup(e);
 	}
 
 	/**
