@@ -10,7 +10,7 @@ import main.GroupNode;
 
 /**
  * INVARIANTS: 
- * - a groupNode exists only when is size() is > 0
+ * - a groupNode exists only when its size() is > 0
  * - names of FeaturePanel objects correspond to name of corresponding FeatureNode objects
  * - names of GroupPanel objects correspond to name of corresponding GroupNode objects
  */

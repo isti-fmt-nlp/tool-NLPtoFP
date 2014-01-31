@@ -14,7 +14,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Observable;
+import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -48,13 +51,13 @@ public class ModelProject extends Observable implements Runnable
 	private Thread handlerProject = null;
 	
 	/* Stringa contenente il percorso delle commonalities candidates */
-	private String pathCommanalitiesCandidates = null;
+	private String pathCommonalitiesCandidates = null;
 	
 	/* Stringa contenente il percorso delle commonalities selected */
-	private String pathCommanalitiesSelected = null;
+	private String pathCommonalitiesSelected = null;
 	
 	/* Stringa contenente il percorso della pagina HTML delle commonalities selected */
-	private String pathCommanalitiesSelectedHTML = null;
+	private String pathCommonalitiesSelectedHTML = null;
 	
 	/* Stringa contenente il percorso delle variabilities candidates */
 	private String pathVariabilitiesCandidates = null;
@@ -67,18 +70,23 @@ public class ModelProject extends Observable implements Runnable
 	
 	/*(MANUEL M.) insieme dei termini rilevanti, ad ognuno corrisponde una lista di file di input
 	 e ad ogni file corrisponde una lista di indici di caratteri, le occorrenze del termine*/
+	/** Relevant terms set. For each, there is a corresponding input file names list, and for each file
+	 * there is a corresponding list of integers, the indexes of term occurrence in that file*/
 	private HashMap<String, HashMap<String, ArrayList<Integer>>> relevantTerms=null;
 	
-	/* ArrayList contenente le commonalities candidates */
+	/** String representing the path of variabilities selected HTML page*/
+	private String pathRelevantTerms = null;
+	
+	/** ArrayList containing the commonalities candidates */
 	private ArrayList <String> commonalitiesCandidates = null;
 	
-	/* ArrayList contenente le commonalities selected */
+	/** ArrayList containing the commonalities selected */
 	private ArrayList <String> commonalitiesSelected = null;
 	
-	/* ArrayList contenente le commonalities candidates */
+	/** ArrayList containing the commonalities candidates */
 	private ArrayList <String> variabilitiesCandidates = null;
 	
-	/* ArrayList contenente le commonalities selected */
+	/** ArrayList containing the commonalities selected */
 	private ArrayList <String> variabilitiesSelected = null;
 	
 	/* boolean contenente lo stato del progetto */
@@ -295,13 +303,15 @@ public class ModelProject extends Observable implements Runnable
 		nameProject = s;
 		pathProject = "./" + s;
 		pathXML = pathProject + "/" + s + ".xml"; 
-		pathCommanalitiesCandidates = pathProject + "/CommanalitiesC.log";
-		pathCommanalitiesSelected = pathProject + "/CommanalitiesS.log";
-		pathCommanalitiesSelectedHTML = pathProject + "/CommanalitiesS.html";
+		pathCommonalitiesCandidates = pathProject + "/CommanalitiesC.log";
+		pathCommonalitiesSelected = pathProject + "/CommanalitiesS.log";
+		pathCommonalitiesSelectedHTML = pathProject + "/CommanalitiesS.html";
 
 		pathVariabilitiesCandidates = pathProject + "/VariabilitiesC.log";
 		pathVariabilitiesSelected = pathProject + "/VariabilitiesS.log";
 		pathVariabilitiesSelectedHTML = pathProject + "/VariabilitiesS.html";
+		
+		pathRelevantTerms = pathProject + "/RelevantTerms.log";
 		stateProject[0] = true;
 		stateProject[1] = true;
 		
@@ -339,9 +349,9 @@ public class ModelProject extends Observable implements Runnable
 			nameProject = s.substring(0, s.length() - 4);
 			pathProject = "./" + nameProject;
 			pathXML = pathProject + "/" + nameProject + ".xml"; 
-			pathCommanalitiesCandidates = pathProject + "/CommanalitiesC.log";
-			pathCommanalitiesSelected = pathProject + "/CommanalitiesS.log";
-			pathCommanalitiesSelectedHTML = pathProject + "/CommanalitiesS.html";
+			pathCommonalitiesCandidates = pathProject + "/CommanalitiesC.log";
+			pathCommonalitiesSelected = pathProject + "/CommanalitiesS.log";
+			pathCommonalitiesSelectedHTML = pathProject + "/CommanalitiesS.html";
 			
 			SAXParser parser = spf.newSAXParser();
 			parser.parse(pathXML, parserXML);
@@ -366,14 +376,14 @@ public class ModelProject extends Observable implements Runnable
 			
 			BufferedReader br1 =
             		new BufferedReader(
-            				new FileReader(pathCommanalitiesCandidates));
+            				new FileReader(pathCommonalitiesCandidates));
 
             while( (s1 = br1.readLine()) != null )
                 commonalitiesCandidates.add(s1);
             
             BufferedReader br2 =
             		new BufferedReader(
-            				new FileReader(pathCommanalitiesSelected));
+            				new FileReader(pathCommonalitiesSelected));
 
             while( (s1 = br2.readLine()) != null )
                 commonalitiesSelected.add(s1);
@@ -400,77 +410,125 @@ public class ModelProject extends Observable implements Runnable
 		} 
 	}
 	
-	/** Salva il progetto
+	/** Saves the project.
 	 * 
-	 * @return f file xml contenente il salvataggio del progetto
+	 * @return an xml file containing the project saved informations
 	 */
-	public File saveProject()
-	{		
-		String s ="<?xml version=" + String.valueOf('"') + "1.0" + String.valueOf('"') + " encoding=" + String.valueOf('"') + "UTF-8" + String.valueOf('"') + "?>" 
-				   + "<root>" + nameProject + "<node>Input";
+	public File saveProject(){		
+		String s ="<+?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" + nameProject + "<node>Input";
 		
 		for(int i = 0; i < fileProject.size(); i++)
-			s += "<leaf>" + new File(fileProject.get(i).readPathFile()).getName() + "<path>" + fileProject.get(i).readPathFile() + "</path>" + "</leaf>";
+			s +=  "<leaf>" + new File(fileProject.get(i).readPathFile()).getName()
+				  + "<path>" + fileProject.get(i).readPathFile() + "</path>" 
+			    + "</leaf>";
 		
 		s += "</node><node>Commonalities</node></root>";
 		
-		try 
-		{
+		try{
 			PrintWriter pw1 =
 			        new PrintWriter(
 			        		new BufferedWriter(
 			        				new FileWriter(pathXML)));
 			pw1.print(s);
-			
-			
-			PrintWriter pw2 =
-			        new PrintWriter(
-			        		new BufferedWriter(
-			        				new FileWriter(pathCommanalitiesCandidates)));
-			
-			if(commonalitiesCandidates != null)
-				for(int i = 0; i < commonalitiesCandidates.size(); i++)
-					pw2.print(commonalitiesCandidates.get(i) + "\n");
-			
-			PrintWriter pw3 =
-			        new PrintWriter(
-			        		new BufferedWriter(
-			        				new FileWriter(pathCommanalitiesSelected)));
-			
-			if(commonalitiesSelected != null)
-				for(int i = 0; i < commonalitiesSelected.size(); i++)
-					pw3.print(commonalitiesSelected.get(i) + "\n");
-		
-			PrintWriter pw4 = new PrintWriter(
-					new BufferedWriter(
-							new FileWriter(pathCommanalitiesSelectedHTML)));
-			
-			if(commonalitiesSelected != null)
-			{
-				s = "<table border=" + String.valueOf('"') + String.valueOf('2') + String.valueOf('"') + "align=" + String.valueOf('"') + "center" + String.valueOf('"') + ">";
-				
-				s += "<tr><th>n.</th><th>Commonalities Selected</th></tr>";
-				
-				for(int i = 0; i < commonalitiesSelected.size(); i++)
-					s += "<tr><td>" + String.valueOf(i) + "</td><td>" + commonalitiesSelected.get(i) + "</td></tr>";
-				
-				s += "</table>";		
-				pw4.print(s);	
-			}
-			
 			pw1.close();
-			pw2.close();
-			pw3.close();
-			pw4.close();
+			
+			//saving feature lists on files
+			saveFeaturesList(commonalitiesCandidates, pathCommonalitiesCandidates);
+			saveFeaturesList(commonalitiesSelected, pathCommonalitiesSelected);
+			saveFeaturesList(variabilitiesCandidates, pathVariabilitiesCandidates);
+			saveFeaturesList(variabilitiesSelected, pathVariabilitiesSelected);
+			//saving selected feature lists on html tables	
+			saveSelectedFeaturesHTML(commonalitiesSelected, pathCommonalitiesSelectedHTML, "Commonalities Selected");
+			saveSelectedFeaturesHTML(variabilitiesSelected, pathVariabilitiesSelectedHTML, "Variabilities Selected");			
+
+			saveProjectRelevantTerms();
+
 			stateProject[0] = false;
 			stateProject[1] = false;
 		} 
-		catch (IOException e) 
-		{
+		catch (IOException e){
 			System.out.println("Exception saveProject: " + e.getMessage());
 			return null;
 		}
 		return new File(pathXML);
+	}
+
+	/**
+	 * Saves occurrences of relevant terms in every input files in a file, one term per line.
+	 * 
+	 * @throws IOException
+	 */
+	private void saveProjectRelevantTerms() throws IOException {
+		String tmpLine="";
+		HashMap<String, ArrayList<Integer>> tmpMap=null;
+		Iterator<Entry<String, HashMap<String, ArrayList<Integer>>>> termIter=null;
+		Entry<String, HashMap<String, ArrayList<Integer>>> termEntry=null;
+		Iterator<Entry<String, ArrayList<Integer>>> fileIter=null;
+		Entry<String, ArrayList<Integer>> fileEntry=null;
+		
+		PrintWriter pw2 = new PrintWriter(new BufferedWriter(new FileWriter(pathRelevantTerms)));
+		
+		if(relevantTerms != null){
+		  termIter=relevantTerms.entrySet().iterator();
+		  while(termIter.hasNext()){
+			termEntry=termIter.next();
+			
+			tmpLine=termEntry.getKey()+" ";
+			tmpMap=termEntry.getValue();
+			fileIter=tmpMap.entrySet().iterator();
+			while(fileIter.hasNext()){
+			  fileEntry=fileIter.next();
+			  
+			  tmpLine+="f: "+fileEntry.getKey()+" i: ";
+			  for(int index : fileEntry.getValue()) tmpLine+=index+" ";		
+			}
+			pw2.print(tmpLine+"\n");
+			
+		  }
+		}
+		pw2.close();
+		return;
+	}	
+
+	/**
+	 * Stores a list of features in a file, one per line.
+	 * 
+	 * @param features - the feature list to be stored
+	 * @param path - the path of the file  to be used
+	 * @throws IOException
+	 */
+	private void saveFeaturesList(ArrayList<String> features, String path) throws IOException {
+		PrintWriter pw2 = new PrintWriter(new BufferedWriter(new FileWriter(path)));
+		if(features != null) 
+		  for(int i = 0; i < features.size(); i++) pw2.print(features.get(i) + "\n");
+		pw2.close();
+		return;
+	}
+
+	/**
+	 * Saves a list of selected features in a table of an HTML file.
+	 * 
+	 * @param features - the feature list to be stored
+	 * @param path - the path of the file  to be used
+	 * @param tableHeader - string used as table header
+	 * @throws IOException
+	 */
+	private void saveSelectedFeaturesHTML(ArrayList<String> features, String path, String tableHeader) throws IOException {
+		String s=null;
+		PrintWriter pw4 = new PrintWriter(new BufferedWriter(new FileWriter(path)));
+		
+		if(features != null){
+			s = "<table border=\"2\" align=\"center\">";
+//			s = "<table border=" + String.valueOf('"') + String.valueOf('2') + String.valueOf('"') + "align=" + String.valueOf('"') + "center" + String.valueOf('"') + ">";
+			s += "<tr><th>n.</th><th>"+tableHeader+"</th></tr>";
+			
+			for(int i = 0; i < features.size(); i++)
+				s += "<tr><td>" +i+ "</td><td>" + features.get(i) + "</td></tr>";
+			
+			s += "</table>";		
+			pw4.print(s);	
+			pw4.close();
+		}
 	}
 	
 	/** Cancella il progetto
@@ -486,6 +544,10 @@ public class ModelProject extends Observable implements Runnable
 			f2[i].delete();
 		
 		f1.delete();
+		
+		stateProject[0] = false;
+		stateProject[1] = false;
+
 	}
 	
 	/** Analizza il progetto
@@ -610,7 +672,8 @@ public class ModelProject extends Observable implements Runnable
 		
 		fileProject.remove(i);
 		workerProject.remove(i);
-		stateProject[1] = false;
+//		stateProject[1] = false;
+		stateProject[1] = true;
 	}
 	
 	/* -= FUNZIONI lettura parametri =- */
@@ -701,14 +764,14 @@ public class ModelProject extends Observable implements Runnable
 		return variabilitiesSelected;
 	}
 	
-	/** Legge la stringa contenente il percorso della pagina HTML delle commonalities selected
-	 * 
-	 * @return pathCommanalitiesSelectedHTML
-	 */
-	public String readPathCommanalitiesSelectedHTML()
-	{
-		return pathCommanalitiesSelectedHTML;
-	}
+//	/** Legge la stringa contenente il percorso della pagina HTML delle commonalities selected
+//	 * 
+//	 * @return pathCommanalitiesSelectedHTML
+//	 */
+//	public String readPathCommonalitiesSelectedHTML()
+//	{
+//		return pathCommonalitiesSelectedHTML;
+//	}
 	
 	/** Legge la stringa contenente il percorso della pagina HTML delle commonalities selected
 	 * 
@@ -737,7 +800,7 @@ public class ModelProject extends Observable implements Runnable
 
 		try {
 			if(type==ViewPanelCentral.FeatureType.COMMONALITIES)
-				pw = new PrintWriter(new BufferedWriter(new FileWriter(pathCommanalitiesSelectedHTML)));
+				pw = new PrintWriter(new BufferedWriter(new FileWriter(pathCommonalitiesSelectedHTML)));
 			else
 				pw = new PrintWriter(new BufferedWriter(new FileWriter(pathVariabilitiesSelectedHTML)));
 			
@@ -773,7 +836,7 @@ public class ModelProject extends Observable implements Runnable
 	 */
 	public String readPathCommonalitiesSelectedHTML()
 	{
-		return pathCommanalitiesSelectedHTML;
+		return pathCommonalitiesSelectedHTML;
 	}
 	
 	/** Legge lo stato del progetto
