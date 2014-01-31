@@ -13,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -541,8 +542,11 @@ public class ViewPanelCentral{
 		JCheckBox checkBoxTmp=null;//temporary variable for CheckBoxes creation
 		JPanel checkBoxIconPanelTmp=null;//temporary variable for CheckBoxes panels creation
 		
-		ImageIcon icon = new ImageIcon(getClass().getResource("/Search/magnifier glasses-min2.png"));
-		JButton fileSearchButton = null;
+//		ImageIcon icon = new ImageIcon(getClass().getResource("/Search/magnifier glasses-min2.png"));
+		ImageIcon icon = new ImageIcon(getClass().getResource("/Search/magnifier glasses-min3.png"));
+		JLabel iconLabel = null;
+
+//		JButton fileSearchButton = null;
 
 		jpG = new JPanel();
 		jpG.setBackground(Color.WHITE);
@@ -568,17 +572,26 @@ public class ViewPanelCentral{
 				checkBoxTmp=new JCheckBox(alFeaturesCand.get(i));
 				checkBoxTmp.setSelected(true);
 
-				fileSearchButton = new JButton(icon);
-				fileSearchButton.setBackground(Color.WHITE);
-				fileSearchButton.setSize(icon.getIconWidth(), icon.getIconHeight());
+//				fileSearchButton = new JButton(icon);
+//				fileSearchButton.setBackground(Color.WHITE);
+//				fileSearchButton.setOpaque(false);
+//				fileSearchButton.setSize(icon.getIconWidth(), icon.getIconHeight());
+				
+				iconLabel = new JLabel(icon);
+				iconLabel.setOpaque(false);
+				
 				checkBoxIconPanelTmp = new JPanel();
 				checkBoxIconPanelTmp.setLayout(new BoxLayout(checkBoxIconPanelTmp, BoxLayout.X_AXIS));
 				checkBoxIconPanelTmp.add(checkBoxTmp);
-				checkBoxIconPanelTmp.add(fileSearchButton);
+//				checkBoxIconPanelTmp.add(fileSearchButton);
 
-				fileSearchButton.addActionListener(getTermSearchButtonListener("Extracted", alFeaturesCand.get(i),
-							alFeaturesToHighlight));
-//				checkBoxTmp.addMouseListener(getCheckBoxMouseListener("CommExtracted"));
+				checkBoxIconPanelTmp.add(iconLabel);
+				
+				iconLabel.addMouseListener(getTermSearchIconListener("Extracted", alFeaturesCand.get(i), alFeaturesToHighlight));
+
+//				fileSearchButton.addActionListener(getTermSearchButtonListener("Extracted", alFeaturesCand.get(i),
+//							alFeaturesToHighlight));
+
 				checkBoxFeatures.add(checkBoxTmp);	panelFeatures.add(checkBoxIconPanelTmp);
 			}
 		}
@@ -588,17 +601,24 @@ public class ViewPanelCentral{
 				if(alFeaturesSel.contains(alFeaturesCand.get(i))) checkBoxTmp.setSelected(true);
 				else checkBoxTmp.setSelected(false);
 
-				fileSearchButton = new JButton(icon);
-				fileSearchButton.setBackground(Color.WHITE);
-				fileSearchButton.setSize(icon.getIconWidth(), icon.getIconHeight());
+//				fileSearchButton = new JButton(icon);
+//				fileSearchButton.setBackground(Color.WHITE);
+//				fileSearchButton.setSize(icon.getIconWidth(), icon.getIconHeight());
+
+				iconLabel = new JLabel(icon);
+				iconLabel.setOpaque(false);
+				
 				checkBoxIconPanelTmp = new JPanel();
 				checkBoxIconPanelTmp.setLayout(new BoxLayout(checkBoxIconPanelTmp, BoxLayout.X_AXIS));
 				checkBoxIconPanelTmp.add(checkBoxTmp);
-				checkBoxIconPanelTmp.add(fileSearchButton);
+//				checkBoxIconPanelTmp.add(fileSearchButton);
+				
+				checkBoxIconPanelTmp.add(iconLabel);
+				
+				iconLabel.addMouseListener(getTermSearchIconListener("Extracted", alFeaturesCand.get(i), alFeaturesToHighlight));
 
-				fileSearchButton.addActionListener(getTermSearchButtonListener("Extracted", alFeaturesCand.get(i),
-							alFeaturesToHighlight));
-//				checkBoxTmp.addMouseListener(getCheckBoxMouseListener("CommExtracted"));
+//				fileSearchButton.addActionListener(getTermSearchButtonListener("Extracted", alFeaturesCand.get(i),
+//							alFeaturesToHighlight));
 				checkBoxFeatures.add(checkBoxTmp); panelFeatures.add(checkBoxIconPanelTmp);
 			}
 			
@@ -608,17 +628,24 @@ public class ViewPanelCentral{
 					checkBoxTmp.setSelected(true);
 					checkBoxTmp.setForeground(Color.RED);
 
-					fileSearchButton = new JButton(icon);
-					fileSearchButton.setBackground(Color.WHITE);
-					fileSearchButton.setSize(icon.getIconWidth(), icon.getIconHeight());
+//					fileSearchButton = new JButton(icon);
+//					fileSearchButton.setBackground(Color.WHITE);
+//					fileSearchButton.setSize(icon.getIconWidth(), icon.getIconHeight());
+
+					iconLabel = new JLabel(icon);
+					iconLabel.setOpaque(false);
+					
 					checkBoxIconPanelTmp = new JPanel();
 					checkBoxIconPanelTmp.setLayout(new BoxLayout(checkBoxIconPanelTmp, BoxLayout.X_AXIS));
 					checkBoxIconPanelTmp.add(checkBoxTmp);
-					checkBoxIconPanelTmp.add(fileSearchButton);
+//					checkBoxIconPanelTmp.add(fileSearchButton);
+					
+					checkBoxIconPanelTmp.add(iconLabel);
+					
+					iconLabel.addMouseListener(getTermSearchIconListener("Extracted", alFeaturesCand.get(i), alFeaturesToHighlight));
 
-					fileSearchButton.addActionListener(getTermSearchButtonListener("Inserted",
-							alFeaturesSel.get(i), alFeaturesToHighlight));
-//					checkBoxTmp.addMouseListener(getCheckBoxMouseListener("CommInserted"));
+//					fileSearchButton.addActionListener(getTermSearchButtonListener("Inserted",
+//							alFeaturesSel.get(i), alFeaturesToHighlight));
 					checkBoxFeatures.add(checkBoxTmp); panelFeatures.add(checkBoxIconPanelTmp);
 				}
 			}
@@ -766,7 +793,8 @@ public class ViewPanelCentral{
 //			  int index=0;
 			  
 			  Iterator filesIterator = null;
-			  Map.Entry occurrencesList = null;//			  ArrayList<String> termArrListTmp = null;//temporary array to call getTabTextString method
+			  Map.Entry occurrencesList = null;
+//			  ArrayList<String> termArrListTmp = null;//temporary array to call getTabTextString method
 //			  int index=0;
 
 			  
@@ -900,6 +928,118 @@ public class ViewPanelCentral{
 		else return null;
 	
 	}
+
+	/**
+	 * (Manuel M.) Returns a new ActionListener for features view buttons. The behaviour changes based on the parameter.
+	 * 
+	 * @param type - String representing the required behaviour type
+	 * @param term - String representing the name of the feature candidate
+	 * @param alFeaturesToHighlight - if not null, the terms in alFeaturesToHighlight will be highlighted 
+	 * @return the new ActionListener
+	 */
+//	private MouseAdapter getCheckBoxMouseListener(String type) {
+	private MouseListener getTermSearchIconListener(String type, final String term, final ArrayList<String> alFeaturesToHighlight) {
+		
+	  if (type=="Extracted") return new MouseAdapter(){			
+			
+		@SuppressWarnings({ "rawtypes" })
+		@Override
+		public void mouseClicked(MouseEvent me){				
+			
+		  //creation of occurrences navigation panel
+		  occursTabbedPane.removeAll();
+		  textTabs.clear();
+		  HashMap<String, ArrayList<Integer>> filesListTmp = null;//files list for a term
+
+		  Iterator filesIterator = null;
+		  Map.Entry occurrencesList = null;
+
+		  //variables used to remember last selected tab for each relevant term
+		  Component[] compArrTmp = null;
+		  String tabTitle = null;
+
+		  currentSelectedCheckBox=term;
+
+		  /* ***DEBUG*** */
+		  if (debug) System.out.println("\nCLICCATO SU UN TERMINE!()\nTerm="+term);
+		  /* ***DEBUG*** */
+
+		  /* ***DEBUG*** */
+		  if (debug) System.out.println("relevantTerms.get(term)="+relevantTerms.get(term));
+		  /* ***DEBUG*** */
+
+		  filesListTmp = relevantTerms.get(term);
+
+		  /* ***DEBUG*** */
+		  if (debug) System.out.println("filesListTmp.entrySet().iterator()="+filesListTmp.entrySet().iterator());
+		  /* ***DEBUG*** */
+
+		  filesIterator = filesListTmp.entrySet().iterator();
+
+
+		  while (filesIterator.hasNext()) {//for each file a JScrollPane is added
+
+			occurrencesList = (Map.Entry)filesIterator.next();
+
+			JScrollPane jScrP = getRegisteredTabTextFile(term, 
+					(String)occurrencesList.getKey(), alFeaturesToHighlight/*termArrListTmp*/);
+
+			occursTabbedPane.addTab((String)occurrencesList.getKey(), jScrP);
+
+			/* ***VERBOSE****/
+			if (verbose) System.out.println("\n***\nNumero di componenti di jScrP: "+jScrP.getComponentCount());
+			for (int h=0; h<jScrP.getComponentCount(); h++){
+			  System.out.println("Classe del componente "+h+": "+jScrP.getComponent(h).getClass());
+			}
+			System.out.println("Classe del ViewPort: "+jScrP.getViewport().getClass());
+			/* ***VERBOSE****/
+
+		  }
+
+		  //adding occurences navigation controls
+		  jpG.add(nextOccurrButton);
+		  nextOccurrButton.setVisible(true);
+		  jpG.add(prevOccurrButton);
+		  prevOccurrButton.setVisible(true);
+		  jpG.add(XForwardOccurrButton);
+		  XForwardOccurrButton.setVisible(true);
+		  jpG.add(XBackwardOccurrButton);
+		  XBackwardOccurrButton.setVisible(true);
+		  jpG.add(occurrsLabelPanel);
+		  occurrsLabelPanel.setVisible(true);
+		  //				  jpG.validate();
+		  jpG.repaint();
+
+		  //restoring previous occurences panel state, if any.
+		  if (!currentFiles.containsKey(term)) currentFiles.put(term, 
+				  ( (JScrollPane)occursTabbedPane.getSelectedComponent() ).getName());
+
+		  else {
+			tabTitle = currentFiles.get(term);
+			compArrTmp = occursTabbedPane.getComponents();
+			for (int k=0; k< compArrTmp.length; ++k)
+				if (compArrTmp[k].getName()==tabTitle) occursTabbedPane.setSelectedComponent(compArrTmp[k]);
+		  }
+
+		  selectCurrentOccurrence(currentSelectedCheckBox, term);
+
+		  occursTabbedPane.addMouseListener(
+			new MouseAdapter(){
+			  @Override
+			  public void mouseClicked(MouseEvent me){						
+			    selectCurrentOccurrence(currentSelectedCheckBox,
+					((JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
+			    currentFiles.put(currentSelectedCheckBox, ((JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
+			  }
+			}
+		  );
+		  
+		}
+
+	  };	
+	  else return null;
+
+	}	
 	
 	/**
 	 * Returns an ActionListener used for occurrences navigation buttons. 
