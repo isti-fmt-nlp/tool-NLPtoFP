@@ -1,0 +1,140 @@
+Sono ModelProject.run(): inizio a stampare le occorrenze delle communalitiesCandidates
+***[pu]***
+----File: ./Test1/server_web.txt
+	line: 538
+	line: 734
+	line: 1415
+	line: 1611
+	line: 2292
+	line: 2488
+	line: 3169
+	line: 3365
+----File: ./Test1/servlet.txt
+	line: 694
+	line: 909
+	line: 2331
+	line: 2546
+	line: 3968
+	line: 4183
+	line: 5676
+	line: 5891
+***[server]***
+----File: ./Test1/server_web.txt
+	line: 85
+	line: 357
+	line: 490
+	line: 755
+	line: 962
+	line: 1234
+	line: 1367
+	line: 1632
+	line: 1839
+	line: 2111
+	line: 2244
+	line: 2509
+	line: 2716
+	line: 2988
+	line: 3121
+	line: 3386
+----File: ./Test1/servlet.txt
+	line: 143
+	line: 269
+	line: 632
+	line: 1568
+	line: 1780
+	line: 1906
+	line: 2269
+	line: 3205
+	line: 3417
+	line: 3543
+	line: 3906
+	line: 4913
+	line: 5125
+	line: 5251
+	line: 5614
+	line: 6550
+***[si]***
+----File: ./Test1/server_web.txt
+	line: 105
+	line: 731
+	line: 982
+	line: 1608
+	line: 1859
+	line: 2485
+	line: 2736
+	line: 3362
+----File: ./Test1/servlet.txt
+	line: 253
+	line: 906
+	line: 1156
+	line: 1890
+	line: 2543
+	line: 2793
+	line: 3527
+	line: 4180
+	line: 4430
+	line: 5235
+	line: 5888
+	line: 6138
+***[un]***
+----File: ./Test1/server_web.txt
+	line: 116
+	line: 483
+	line: 748
+	line: 993
+	line: 1360
+	line: 1625
+	line: 1870
+	line: 2237
+	line: 2502
+	line: 2747
+	line: 3114
+	line: 3379
+----File: ./Test1/servlet.txt
+	line: 140
+	line: 236
+	line: 1092
+	line: 1418
+	line: 1777
+	line: 1873
+	line: 2729
+	line: 3055
+	line: 3414
+	line: 3510
+	line: 4366
+	line: 4763
+	line: 5122
+	line: 5218
+	line: 6074
+	line: 6400
+***[web]***
+----File: ./Test1/server_web.txt
+	line: 81
+	line: 353
+	line: 486
+	line: 751
+	line: 958
+	line: 1230
+	line: 1363
+	line: 1628
+	line: 1835
+	line: 2107
+	line: 2240
+	line: 2505
+	line: 2712
+	line: 2984
+	line: 3117
+	line: 3382
+----File: ./Test1/servlet.txt
+	line: 276
+	line: 567
+	line: 1575
+	line: 1913
+	line: 2204
+	line: 3212
+	line: 3550
+	line: 3841
+	line: 4920
+	line: 5258
+	line: 5549
+	line: 6557

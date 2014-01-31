@@ -1,0 +1,17 @@
+The class 'ModelProject' contains a boolean Array named 'stateProject' with 2 elements(i will refer them as 'never-saved' and 'modified').
+Here is a list of observed bugs, errors and wrong/missing behaviours(toghether with some correct parts in order to give a glimpse of the structure).
+
+A)Inside 'ModelProject' Code:
+1) elements are set to <false, false> at program opening(CORRECT)
+2) elements are set to <false, false> at project save(CORRECT)
+3) elements are set to <true, true> at project creation, even if it fails!(UNCORRECT)
+4) stateProject[1] is set to 'true' after adding a file(CORRECT)
+5) stateProject[1] is set to 'false' after removing a file!!! It should be the opposite...(UNCORRECT)
+6) elements are not set to <false, false> after loading a saved project!(UNCORRECT)
+7) elements are not set to <false, false> after deleting a project!(UNCORRECT)
+8) elements are not checked before loading a saved project!(UNCORRECT)
+
+B)Project Menagement on File System:
+1) at project creation the corresponding folder is created, and it will remain toghether with its contents even if you don't save the project, unless explicitly deleted.(UNCORRECT)
+2) because of (A-8) if you load a saved project after leaving a never-saved project, the folder and contents of the latter will remain and they will be unusable.(UNCORRECT)
+3) because of (A-7) if after deleting current project the elements values still are set to <true, true> and you try to close the program, you will be asked if you want to save(but there is nothing to save). If you click 'Yes' the program will try to access the deleted folder and fails printing an error on standard output.(UNCORRECT)

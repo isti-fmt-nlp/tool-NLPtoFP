@@ -1,0 +1,17 @@
+1) Array di 2 booleani 'stateProject'[saved, modified]:
+a* impostati a <false, false> all'apertura del programma(OK)
+b* impostati a <false, false> al salvataggio del progetto(OK)
+c* impostati a <true, true> alla creazione di un progetto, anche se fallisce!(NON-OK)
+d* stateProject[1] impostato a true dopo aver aggiunto un file(OK)
+e* stateProject[1] impostato a false dopo aver rimosso un file!!! Dovrebbe essere il contrario...(NON-OK)
+
+f* non reimpostati a <false, false> dopo aver caricato un progetto salvato!(NON-OK)
+g* non reimpostati a <false, false> dopo aver cancellato un progetto!(NON-OK)
+h* non controllati al caricamento di un progetto salvato!(NON-OK)
+
+2)Gestione progetti sul File System:
+a* alla creazione di un progetto viene creata la cartella corrsipondente, che rimane anche se non verrà salvato.
+b* alla chiusura del progetto resta tutto lì(probabilmente) anche se non si è mai salvato.
+d* alla cancellazione del progetto viene cancellata la cartella e il suo contenuto, anche se il progetto non era mai stato salvato.
+c* a causa di (1-g) se dopo la cancellazione i booleani sono ancora <true, true> alla chiusura chiede se si vuole salvare.
+   Se si risponde si tenta il salvataggio sui path della cartella cancellata e fallisce stampando un errore sullo standard_output.
