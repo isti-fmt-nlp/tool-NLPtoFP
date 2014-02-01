@@ -8,6 +8,7 @@ package view;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -95,6 +96,8 @@ public class ModelProject extends Observable implements Runnable
 	private static boolean verbose=false;//variabile usata per attivare stampe nel codice
 	
 	private static boolean verbose2=false;//variabile usata per attivare stampe nel codice
+	
+	private static boolean verbose3=true;//variabile usata per attivare stampe nel codice
 	
 	/** Thread: Attende la terminazione dei thread workerProject e calcala i commonalities candidates
 	 * 
@@ -312,6 +315,7 @@ public class ModelProject extends Observable implements Runnable
 		pathVariabilitiesSelectedHTML = pathProject + "/VariabilitiesS.html";
 		
 		pathRelevantTerms = pathProject + "/RelevantTerms.log";
+		
 		stateProject[0] = true;
 		stateProject[1] = true;
 		
@@ -331,8 +335,7 @@ public class ModelProject extends Observable implements Runnable
 	 * 
 	 * @return al ArrayList contenenti i nomi dei file del progetto
 	 */
-	public ArrayList <String> loadProject(String s)
-	{
+	public ArrayList <String> loadProject(String s){
 		if(s == null)
 			return null;
 
@@ -340,8 +343,7 @@ public class ModelProject extends Observable implements Runnable
 		
 		SAXParserFactory spf = SAXParserFactory.newInstance();
 		
-		try 
-		{
+		try{
 			fileProject = new ArrayList <ModelFile> ();
 			
 			workerProject = new ArrayList <Thread> ();
@@ -352,14 +354,19 @@ public class ModelProject extends Observable implements Runnable
 			pathCommonalitiesCandidates = pathProject + "/CommanalitiesC.log";
 			pathCommonalitiesSelected = pathProject + "/CommanalitiesS.log";
 			pathCommonalitiesSelectedHTML = pathProject + "/CommanalitiesS.html";
+
+			pathVariabilitiesCandidates = pathProject + "/VariabilitiesC.log";
+			pathVariabilitiesSelected = pathProject + "/VariabilitiesS.log";
+			pathVariabilitiesSelectedHTML = pathProject + "/VariabilitiesS.html";
+			
+			pathRelevantTerms = pathProject + "/RelevantTerms.log";
 			
 			SAXParser parser = spf.newSAXParser();
 			parser.parse(pathXML, parserXML);
 			
 			fileProject = new ArrayList <ModelFile> ();
 			
-			for(int i = 0; i < parserXML.readPathInput().size(); i++)
-			{		
+			for(int i = 0; i < parserXML.readPathInput().size(); i++){		
 				fileProject.add(
 						new ModelFile(
 								parserXML.readPathInput().get(i), pathProject));
@@ -369,27 +376,16 @@ public class ModelProject extends Observable implements Runnable
 			}	
 			
 			commonalitiesCandidates = new ArrayList <String> ();
-			
 			commonalitiesSelected = new ArrayList <String> ();
+			variabilitiesCandidates = new ArrayList <String> ();
+			variabilitiesSelected = new ArrayList <String> ();
 			
-			String s1;
+			loadFeaturesList(commonalitiesCandidates, pathCommonalitiesCandidates);
+			loadFeaturesList(commonalitiesSelected, pathCommonalitiesSelected);
+			loadFeaturesList(variabilitiesCandidates, pathVariabilitiesCandidates);
+			loadFeaturesList(variabilitiesSelected, pathVariabilitiesSelected);
 			
-			BufferedReader br1 =
-            		new BufferedReader(
-            				new FileReader(pathCommonalitiesCandidates));
-
-            while( (s1 = br1.readLine()) != null )
-                commonalitiesCandidates.add(s1);
-            
-            BufferedReader br2 =
-            		new BufferedReader(
-            				new FileReader(pathCommonalitiesSelected));
-
-            while( (s1 = br2.readLine()) != null )
-                commonalitiesSelected.add(s1);
-            
-            br1.close();
-            br2.close();
+			if(!loadProjectRelevantTerms()) System.out.println("Project files corrupted!");
             
 			return parserXML.readNameFile();
 		} 
@@ -409,13 +405,30 @@ public class ModelProject extends Observable implements Runnable
 			return null;
 		} 
 	}
+
+	/**
+	 * Loads a list of features from a file, one per line.
+	 * 
+	 * @param features - the feature list to be loaded
+	 * @param path - the path of the file to be used
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	private void loadFeaturesList(ArrayList<String> features, String path)
+			throws FileNotFoundException, IOException {
+		String s1=null;		
+		BufferedReader br1 = new BufferedReader(new FileReader(path));
+		while( (s1 = br1.readLine()) != null ) features.add(s1);
+		br1.close();
+		return;
+	}
 	
 	/** Saves the project.
 	 * 
 	 * @return an xml file containing the project saved informations
 	 */
 	public File saveProject(){		
-		String s ="<+?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" + nameProject + "<node>Input";
+		String s ="<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" + nameProject + "<node>Input";
 		
 		for(int i = 0; i < fileProject.size(); i++)
 			s +=  "<leaf>" + new File(fileProject.get(i).readPathFile()).getName()
@@ -491,10 +504,68 @@ public class ModelProject extends Observable implements Runnable
 	}	
 
 	/**
+	 * Loads occurrences of relevant terms for every input files from a file, one term per line.
+	 * 
+	 * @throws IOException
+	 */
+	private boolean loadProjectRelevantTerms() throws IOException {
+		String termName=null;
+		String fileName=null;
+		String[] tokens=null;
+		HashMap<String, ArrayList<Integer>> fileMap=null;
+		ArrayList<Integer> occurrences=null;
+		BufferedReader br1 =null;
+		
+		String s1=null;		
+		
+		try{
+		  br1 = new BufferedReader(new FileReader(pathRelevantTerms));			
+		}catch(FileNotFoundException e){ return true;}
+		relevantTerms=new HashMap<String, HashMap<String,ArrayList<Integer>>>();
+		
+		while( (s1 = br1.readLine()) != null ){
+		  fileMap=new HashMap<String, ArrayList<Integer>>();
+		  tokens=s1.split(" ");
+		  System.out.println("Stampo i tokens!");
+		  if(verbose3) for(String str:tokens) System.out.println(str);
+		  termName=tokens[0];
+		  if(verbose3) System.out.println("Trovato termine: "+termName);
+		  for(int i=1;i<tokens.length; ++i){
+			//a new file name has been found
+			if(tokens[i].compareTo("f:")==0){ 
+			  occurrences=new ArrayList<Integer>();
+			  ++i; fileName=tokens[i]; ++i;
+			  if(verbose3) System.out.println("\tTrovato file: "+fileName);
+			  if(tokens[i].compareTo("i:")!=0){
+				  if(verbose3) System.out.println("Uncorrect format for relevant terms file");
+				  br1.close();
+				  return false;
+			  }
+			  else ++i;
+			  //loading occurrence indexes of this file
+			  for(; i<tokens.length; ++i){
+				if(verbose3) System.out.println("***Token: "+tokens[i]);
+				if(tokens[i].compareTo("f:")==0){
+				  fileMap.put(fileName, occurrences);
+				  break;
+				}
+				occurrences.add(Integer.valueOf(tokens[i]));
+				if(verbose3) System.out.println("\t\tTrovata occorrenza: "+tokens[i]);
+			  }
+			}
+			fileMap.put(fileName, occurrences);
+		  }
+		  relevantTerms.put(termName, fileMap);
+		}
+		br1.close();
+		return true;
+	}	
+
+	/**
 	 * Stores a list of features in a file, one per line.
 	 * 
 	 * @param features - the feature list to be stored
-	 * @param path - the path of the file  to be used
+	 * @param path - the path of the file to be used
 	 * @throws IOException
 	 */
 	private void saveFeaturesList(ArrayList<String> features, String path) throws IOException {

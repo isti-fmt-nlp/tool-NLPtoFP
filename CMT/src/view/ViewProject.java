@@ -254,11 +254,11 @@ public class ViewProject implements Observer, Runnable
 		/*MenuDiagram*/
 		menuDiagram=new JMenu("Diagram");
 
-		menuDiagramOpen = new JMenuItem("Open Diagram");
+		menuDiagramOpen = new JMenuItem("New Diagram");
 		menuDiagramOpen.addActionListener(controllerProject);
 		menuDiagramOpen.setEnabled(false);
 		
-		menuDiagramRestart = new JMenuItem("Restart Diagram");
+		menuDiagramRestart = new JMenuItem("Open Diagram");
 		menuDiagramRestart.addActionListener(controllerProject);
 		menuDiagramRestart.setEnabled(false);
 		
