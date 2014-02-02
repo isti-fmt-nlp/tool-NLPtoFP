@@ -606,7 +606,7 @@ public class EditorView extends JFrame implements Observer{
 			g2.drawImage(toolDragImage, toolDragPosition.x+1, toolDragPosition.y+4, null);
 		if(isActiveItem==activeItems.DRAGGING_SELECTION_RECT){
 			System.out.println("Disegno il rect");
-			g2.setColor(Color.BLUE);
+//			g2.setColor(Color.BLUE);
 //			rectX=(int)(startSelectionRect.getX()+diagramPanel.getX());
 //			rectY=(int)(startSelectionRect.getY()+diagramPanel.getY());
 
@@ -635,7 +635,7 @@ public class EditorView extends JFrame implements Observer{
 			g2.draw(elementSelectionFrame);
 		  }
 		}
-//		   g2.finalize();
+		g2.finalize();
 
 		    //		BufferedImage image=null;
 //		try {
@@ -1815,7 +1815,8 @@ public class EditorView extends JFrame implements Observer{
 
 		  if(normalUpdateY) lastPositionY=e.getY();
 		  else lastPositionY=lastPositionY+adjustedMoveY;
-
+		  
+		  if(!normalUpdateX&&normalUpdateY) break;
 		  element.setLocation(newLocationX, newLocationY);
 		}
 		frameRoot.repaint();	
@@ -2103,12 +2104,38 @@ public class EditorView extends JFrame implements Observer{
 	 * @param e
 	 */
 	public void createSelectionGroup(MouseEvent e) {
+	  Component comp=null;
 	  OrderedListNode tmpNode=visibleOrderDraggables.getFirst();
+	  Point locOnScreen=null;
 	  while(tmpNode!=null){
-		if(selectionRect.contains(((Component)tmpNode.getElement()).getLocationOnScreen()))
+		locOnScreen=((Component)tmpNode.getElement()).getLocationOnScreen();
+		if(selectionRect.contains(locOnScreen)){
+
+		  //if it's not a feature panel, we check that it's not anchored to a feature panel
+		  if (!((Component)tmpNode.getElement()).getName().startsWith(featureNamePrefix)){
+
+			  comp = (JComponent) diagramPanel.getComponentAt(				
+				(int)(locOnScreen.getX()-diagramPanel.getLocationOnScreen().getX()), 
+				(int)(locOnScreen.getY()-diagramPanel.getLocationOnScreen().getY()) );
+			  
+//			  comp=getUnderlyingComponent(
+//				(int)(locOnScreen.getX()-diagramPanel.getLocationOnScreen().getX()), 
+//				(int)(locOnScreen.getY()-diagramPanel.getLocationOnScreen().getY()) );
+
+			System.out.println("Underlying comp: "+comp.getName());
+			if(comp!=null && comp.getName().startsWith(featureNamePrefix)){
+			  tmpNode=tmpNode.getNext(); continue;
+			}
+		  }
+		  
+		  System.out.println("About to add to group: "+((Component)tmpNode.getElement()).getName());
+		  //if it's not anchored to a feature, or it's a feature, it gets added to group
 		  selectionGroupFocused.add((JComponent) tmpNode.getElement());
-		  tmpNode=tmpNode.getNext();
+		}
+		tmpNode=tmpNode.getNext();						
 	  }
+	  System.out.println("Selected Group Elements:\n");
+	  for(JComponent elem : selectionGroupFocused) System.out.println(elem.getName());
 	  frameRoot.repaint();
 	}
 

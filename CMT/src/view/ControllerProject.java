@@ -13,6 +13,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
+import javax.swing.JFrame;
+
 public class ControllerProject implements ActionListener, WindowListener, MouseListener
 {
 	private static boolean verbose=true;//variabile usata per attivare stampe nel codice
@@ -104,7 +106,20 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 			viewProject.showFeaturesSelected(ViewPanelCentral.FeatureType.VARIABILITIES);
 	  }
 	  else if(ae.getActionCommand().equals("New Diagram")){
+		//creating model
+		EditorModel editorModel= new EditorModel();
+		//creating view
+		EditorView editorView= new EditorView();
+		//creating controller
+		EditorController editorController =new EditorController(editorView, editorModel);
+		//adding the view as observer to the model
+		editorModel.addObserver(editorView);
 
+		if( !editorView.prepareUI(editorController) ) System.out.println("Controller not set. Closing...");
+		else editorView.setVisible(true);
+//		editor.setResizable(false);
+		editorView.setExtendedState(editorView.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+		
 	  }
 	  else if(ae.getActionCommand().equals("Open Diagram")){
 

@@ -181,7 +181,9 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 		String anchorPanelName;
 		OrderedListNode tmpNode=editorView.getVisibleOrderDraggables().getFirst();
 		while(tmpNode!=null){
+		  System.out.println("Testing for pressed element: "+((Component)tmpNode.getElement()).getName());
 		  if (((Component)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY())){
+			System.out.println("Pressed point got by element: "+((Component)tmpNode.getElement()).getName());
 			editorView.setLastPositionX(e.getX());
 			editorView.setLastPositionY(e.getY());
 			
@@ -296,6 +298,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 
 		//mouse directly pressed on the diagram panel
 		if (editorView.getSelectionGroup().size()>0) editorView.getSelectionGroup().clear();	
+		System.out.println("editorView.getSelectionGroup().size(): "+editorView.getSelectionGroup().size());
 		editorView.setStartSelectionRect(e.getLocationOnScreen().getLocation());
 //		editorView.setEndSelectionRect(e.getLocationOnScreen().getLocation());
 
@@ -303,7 +306,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 				e.getLocationOnScreen().getLocation());  	  
 
 		editorView.setActiveItem(activeItems.DRAGGING_SELECTION_RECT);
-//		System.out.println("Mouse pressed on: "+((Component)e.getSource()).getName());
+		System.out.println("Mouse pressed on: "+((Component)e.getSource()).getName());
 
       }
 	  //event originated from the toolbar
@@ -366,23 +369,21 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 			  editorView.setLastFeatureFocused(null); break;
 		  case DRAGGING_EXTERN_ANCHOR:
 			  dropAnchor(e);
-//			  EditorView.dropAnchorOnDiagram(e);
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
 			  editorView.setLastAnchorFocused(null); break;
 		  case DRAGGING_EXTERN_GROUP:
 			  dropGroup(e);
-//			  EditorView.dropGroupOnDiagram(e);
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
 			  editorView.setLastAnchorFocused(null); break;
 		  case DRAGGING_SELECTION_RECT:
 			  dropSelectionRectangle(e);
-//			  EditorView.dropGroupOnDiagram(e);
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
 			  /*editorView.setLastAnchorFocused(null);*/ break;
 		  case DRAGGING_SELECTION_GROUP:
 			  System.out.println("released group drag!");
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
 			  if(editorView.getSelectionGroup().size()>0) editorView.getSelectionGroup().clear();
+			  editorView.repaintRootFrame();
 			  break;
 		  default: break;
 	    }
