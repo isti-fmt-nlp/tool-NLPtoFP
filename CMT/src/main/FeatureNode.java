@@ -32,7 +32,7 @@ public class FeatureNode {
 	
 	/**
 	 * Creates a new default FeatureNode. <br>
-	 * The Default is a mandatory nameless commonality without sub-features or sub-groups.
+	 * The Default is a mandatory, not clonable, nameless commonality.
 	 * 
 	 */
 	public FeatureNode(){}

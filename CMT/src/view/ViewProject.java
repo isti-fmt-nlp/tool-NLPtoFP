@@ -102,8 +102,8 @@ public class ViewProject implements Observer, Runnable
 		
 		/* Creazione JFrame */
 		frameProject.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frameProject.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		frameProject.setLocationRelativeTo(null);
+//		frameProject.setExtendedState(JFrame.MAXIMIZED_BOTH);
+//		frameProject.setLocationRelativeTo(null);
 		frameProject.setLayout(null);		
 		frameProject.setSize(Toolkit.getDefaultToolkit().getScreenSize());
 		frameProject.setLocation(0,  0);
@@ -325,6 +325,8 @@ public class ViewProject implements Observer, Runnable
 		
 		frameProject.addWindowListener(controllerProject);
 		frameProject.setVisible(true);
+
+		frameProject.setExtendedState(frameProject.getExtendedState() | JFrame.MAXIMIZED_BOTH);
 	}
 	
 	/** 

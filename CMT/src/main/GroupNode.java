@@ -21,7 +21,7 @@ public class GroupNode {
 
 	/**
 	 * Creates a new default GroupNode. <br>
-	 * The Default is an OR group with a maximum of 2 members and it is created without members.
+	 * The Default is a XOR group created without members.
 	 * 
 	 */
 	public GroupNode(){}

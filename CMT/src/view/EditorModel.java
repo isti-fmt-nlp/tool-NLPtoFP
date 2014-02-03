@@ -32,13 +32,45 @@ public class EditorModel extends Observable{
 	private HashMap<String, GroupNode> groups= new HashMap<String, GroupNode>();
 
 	/**
+	 * Creates an editor model and adds to it the features contained in commonalities and variabilities lists.
+	 * 
+	 * @param commonalitiesSelected - list of commonality names
+	 * @param variabilitiesSelected - list of variabilities names
+	 */
+	public EditorModel(ArrayList<String> commonalitiesSelected,
+					   ArrayList<String> variabilitiesSelected) {
+	  for(String name : commonalitiesSelected) addUnrootedFeature(name, FeatureTypes.COMMONALITY);
+	  for(String name : variabilitiesSelected) addUnrootedFeature(name, FeatureTypes.VARIABILITY);
+	}
+
+	/**
 	 * Adds a newly created Commonality feature named name to the unrooted features.
 	 * 
 	 * @param name - String containing the name of the new features
 	 */
-	public void addUnrootedFeature(String name){
-		System.out.println("Creating new featureNode");
-		FeatureNode newFeature = new FeatureNode(FeatureTypes.COMMONALITY, name, 1, 1);
+	public void addUnrootedCommonality(String name){
+		System.out.println("Creating new commonality: "+name);
+		addUnrootedFeature(name, FeatureTypes.COMMONALITY);
+	}
+
+	/**
+	 * Adds a newly created Variability feature named name to the unrooted features.
+	 * 
+	 * @param name - String containing the name of the new features
+	 */
+	public void addUnrootedVariabilities(String name){
+		System.out.println("Creating new variability: "+name);
+		addUnrootedFeature(name, FeatureTypes.VARIABILITY);
+	}
+
+	/**
+	 * Adds a newly created feature named name of the specified type to the unrooted features.
+	 * 
+	 * @param name - String containing the name of the new features
+	 * @param type - type of the feature to create, a value from the FeatureTypes enum type
+	 */
+	private void addUnrootedFeature(String name, FeatureTypes type) {
+		FeatureNode newFeature = new FeatureNode(type, name, 1, 1);
 		unrootedFeatures.put(name, newFeature);
 		setChanged();
 		notifyObservers("New Feature Correctly Added");
@@ -74,7 +106,8 @@ public class EditorModel extends Observable{
 	  if(groupOwner!=null) parent=searchFeature(groupOwner);
 		  
 	  //if the candidate member is not found, operation is aborted
-	  if (sub==null || sub.getParent()!=null){ 
+	  if (sub==null){ 
+//		  if (sub==null || sub.getParent()!=null){ 
 		setChanged();
 		notifyObservers("Not Grouped a Feature");
 		return;
@@ -105,10 +138,10 @@ public class EditorModel extends Observable{
 	/**
 	 * Merges a connector with a group.<br>
 	 * This method is called when a starting anchor must be merged with a group, <br>
-	 * to drop an anchor on a feature see addFeatureToGroup(String, String, String).
+	 * to drop a group ending anchor on a feature see addFeatureToGroup(String, String, String).
 	 * 
-	 * @param groupOwner - the feature owner of the group
-	 * @param groupMember - the feature to be grouped
+	 * @param groupOwner - the feature owner of the group, or null if the group is not owned by a feature
+	 * @param groupMember - the feature to be grouped, or null if only an anchor must be grouped
 	 * @param groupName - the name of the group	 
 	 * 
 	 * @see {@link EditorModel#addFeatureToGroup(String, String, String)}
@@ -203,6 +236,7 @@ public class EditorModel extends Observable{
 		notifyObservers("Group Not Added To Feature");			
 		return;
 	  };
+	  //if the operation would induce a cycle in the diagram, it is aborted
 	  if (groupNode!=null){
 		for(FeatureNode member : groupNode.getMembers())
 		  if (member==featureNode || isDescendantOf(featureNode, member) || isDescendantOf(member, featureNode)){
@@ -261,7 +295,6 @@ public class EditorModel extends Observable{
 	  FeatureNode parent= searchFeature(parentFeature);
 	  FeatureNode sub= searchFeature(subFeature);
 	  if (parent!=null && sub!=null){
-		System.out.println("parent.getSubFeatures().contains(sub)="+parent.getSubFeatures().contains(sub));
 		if (parent.getSubFeatures().contains(sub)){
 		  parent.getSubFeatures().remove(sub);
 		  sub.setParent(null);
@@ -300,7 +333,6 @@ public class EditorModel extends Observable{
 		  System.out.println("featureGroup.getName()="+featureGroup.getName());
 		  if(featureGroup.getName().equals(groupName) )
 			if (featureGroup.getMembers().contains(sub)){
-			  System.out.println("Si, c'è_1");
 			  featureGroup.getMembers().remove(sub);
 			  sub.setParent(null);
 			  //if the group size is 0, it gets removed form the model
@@ -327,7 +359,6 @@ public class EditorModel extends Observable{
 	  //the group was not owned by any feature
 	  else{
 		if (group.getMembers().contains(sub)){
-		  System.out.println("Si, c'è_2");
 		  group.getMembers().remove(sub);
 //		  sub.setHasParent(false);
 		  //if the group size is 0, it gets removed form the model
@@ -351,8 +382,8 @@ public class EditorModel extends Observable{
 	 * @param name - the name of the feature to be deleted
 	 */
 	public void deleteFeature(String name) {
-	  FeatureNode parentFeature=null;
-	  GroupNode parentGroup=null;	  
+//	  FeatureNode parentFeature=null;
+//	  GroupNode parentGroup=null;	  
 	  FeatureNode featurefound=unrootedFeatures.get(name);
 	  if (featurefound==null) featurefound=rootLinkedFeatures.get(name);
 	  if (featurefound==null){
@@ -361,14 +392,28 @@ public class EditorModel extends Observable{
 		return;
 	  }
 	  //removing the feature from the parent, if any
-	  if(featurefound.getParent()!=null){
-		if(featurefound.getParent().getClass().equals(FeatureNode.class)) 
-		  parentFeature=(FeatureNode)featurefound.getParent();
-		if(featurefound.getParent().getClass().equals(GroupNode.class)) 
-		  parentGroup=(GroupNode)featurefound.getParent();
+	  if(featurefound.getParent()!=null){//NO, parent is always a FeatureNode, or null....
+//		if(featurefound.getParent().getClass().equals(FeatureNode.class)) 
+//		  parentFeature=(FeatureNode)featurefound.getParent();
+//		if(featurefound.getParent().getClass().equals(GroupNode.class)) 
+//		  parentGroup=(GroupNode)featurefound.getParent();
+//	  }
+		//the parent feature is diretly linked
+	    if(((FeatureNode)featurefound.getParent()).getSubFeatures().contains(featurefound)){
+		  System.out.println("The feature: "+featurefound+" has a direct parent feature: "+
+				  ((FeatureNode)featurefound.getParent()).getName());
+		  ((FeatureNode)featurefound.getParent()).getSubFeatures().remove(featurefound);
+	    }
+		//the parent feature is linked through a group
+	    else{
+	      for(GroupNode group : ((FeatureNode)featurefound.getParent()).getSubGroups())
+	    	if(group.getMembers().contains(featurefound)){
+	  		  System.out.println("The feature: "+featurefound.getName()+" has a parent feature: "+
+					  ((FeatureNode)featurefound.getParent()).getName()+" through the group: "+group.getName());
+	    	  group.getMembers().remove(featurefound);
+	    	}	      
+	    }
 	  }
-	  if(parentFeature!=null) parentFeature.getSubFeatures().remove(featurefound);
-	  if(parentGroup!=null) parentGroup.getMembers().remove(featurefound);
 
 	  //setting parent attribute of this feature childs to null
 	  for(GroupNode group : featurefound.getSubGroups())

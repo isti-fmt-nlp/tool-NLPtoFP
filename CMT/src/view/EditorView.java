@@ -49,14 +49,20 @@ import java.util.Stack;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Box.Filler;
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JRadioButton;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSplitPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -73,10 +79,28 @@ import main.SortUtils;
 
 
 public class EditorView extends JFrame implements Observer{
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
+
+	private JMenuBar menu = new JMenuBar();
+	
+	private JMenu menuFiles;//Diagram Files Management Menu
+	private JMenu menuView=null;//Diagram View Management Menu
+	private JMenu menuModify=null;//Diagram Properties Management Menu
+	
+	//Files Management Menu items
+	private JMenuItem menuFilesSave=null, 	   menuFilesOpen=null,
+					  menuFilesExportXML=null, menuFilesDelete=null, menuFilesExit=null;
+	
+	//View Management Menu items
+	private JMenuItem menuViewColored=null, menuViewCommsOrVars=null, 
+					  menuViewExtrOrInsert=null, menuViewFields=null,
+					  menuViewVisibleConstraints=null;
+	
+	//Properties Management Menu items
+	private JMenuItem menuModifyBasicFM=null, menuModifyAdvancedFM=null;
+	
+	
 	/** variables used for debugging*/
 	private static boolean debug=false;
 	private static boolean debug2=false;
@@ -122,11 +146,6 @@ public class EditorView extends JFrame implements Observer{
 	/** current amount of features in the diagram panel*/
 	private static int featuresCount=0;
 	
-	/** list of all connector starting dots,
-	 *  corresponding ending dots can be found in endConnectorDots at the same index
-	 */
-	private static ArrayList<JComponent> startConnectorDots=null;
-	
 	/** list of all connector ending dots,
 	 *  corresponding starting dots can be found in startConnectorDots at the same index
 	 */
@@ -144,10 +163,19 @@ public class EditorView extends JFrame implements Observer{
 	/** list of all connector dots that must be redrawn, with same indexes of the lists above*/
 //	private static ArrayList<Boolean> connectorDotsToRedraw=null;
 	
+	/** list of all connector starting dots,
+	 *  corresponding ending dots can be found in endConnectorDots at the same index
+	 */
+	private static ArrayList<JComponent> startConnectorDots=null;
 	/** list of Alternative Groups*/
 	private static ArrayList<GroupPanel> altGroupPanels=null;	
 	/** list of Or Groups*/
 	private static ArrayList<GroupPanel> orGroupPanels=null;
+	
+	/** List of starting commonalities selected by the user */
+	private ArrayList<String> startingCommonalities=new ArrayList<String>();
+	/** List of starting commonalities and variabilities selected by the user */
+	private ArrayList<String> startingVariabilities=new ArrayList<String>();
 	
 	/** OrderedList containing the panels children of the diagram panel*/
 	private static OrderedList visibleOrderDraggables = null;
@@ -273,12 +301,85 @@ public class EditorView extends JFrame implements Observer{
 	private static int diagramElementsMenuPosY=0;
 	
 
-	public EditorView(){
-		
-	}
+	public EditorView(){}
 	
+	public EditorView(ArrayList<String> commonalitiesSelected,
+			   		  ArrayList<String> variabilitiesSelected) {
+	  for(String name : commonalitiesSelected) startingCommonalities.add(name);
+	  for(String name : variabilitiesSelected) startingVariabilities.add(name);
+	}
+
 	public boolean prepareUI(EditorController editorController){
 		if(editorController==null) return false;
+
+		/* initializing JMenuBar */		
+		menuFiles = new JMenu("Files");
+		menuView = new JMenu("View");
+		menuModify = new JMenu("Modify");
+
+		/*Menu Files items*/
+		menuFilesSave = new JMenuItem("Save Diagram");
+		menuFilesSave.addActionListener(editorController);
+		
+		menuFilesOpen = new JMenuItem("Open Diagram");
+		menuFilesOpen.addActionListener(editorController);
+		
+		menuFilesExportXML = new JMenuItem("Export model to XML");
+		menuFilesExportXML.addActionListener(editorController);
+		
+		menuFilesDelete = new JMenuItem("Delete Diagram");
+		menuFilesDelete.addActionListener(editorController);
+		
+		menuFilesExit = new JMenuItem("Exit");
+		menuFilesExit.addActionListener(editorController);
+		
+		menuFiles.add(menuFilesSave);
+		menuFiles.add(menuFilesOpen);
+		menuFiles.add(menuFilesExportXML);
+		menuFiles.add(menuFilesDelete);
+		menuFiles.add(menuFilesExit);
+
+		/*Menu View items*/
+		menuViewColored = new JCheckBoxMenuItem("Colour 'near' Features", false);
+		menuViewColored.addActionListener(editorController);
+		
+		menuViewCommsOrVars = new JMenuItem("View Commonality/Variability");
+		menuViewCommsOrVars.addActionListener(editorController);
+		
+		menuViewExtrOrInsert = new JMenuItem("View Extracted/Inserted");
+		menuViewExtrOrInsert.addActionListener(editorController);
+		
+		menuViewFields = new JMenuItem("View Feature's Fields");
+		menuViewFields.addActionListener(editorController);
+		
+		menuViewVisibleConstraints = new JMenuItem("View Diagram Constraints");
+		menuViewVisibleConstraints.addActionListener(editorController);
+		
+		menuView.add(menuViewColored);
+		menuView.add(menuViewCommsOrVars);
+		menuView.add(menuViewExtrOrInsert);
+		menuView.add(menuViewFields);
+		menuView.add(menuViewVisibleConstraints);
+
+		/*Menu Modify items*/
+		menuModifyBasicFM = new JRadioButtonMenuItem("Basic Feature Model");
+		menuModifyBasicFM.addActionListener(editorController);
+		
+		menuModifyAdvancedFM = new JRadioButtonMenuItem("Advanced Feature Model");
+		menuModifyAdvancedFM.addActionListener(editorController);	
+		
+		ButtonGroup basicExtendedGroup = new ButtonGroup();
+		basicExtendedGroup.add(menuModifyBasicFM);
+		basicExtendedGroup.add(menuModifyAdvancedFM);
+		
+		menuModify.add(menuModifyBasicFM);
+		menuModify.add(menuModifyAdvancedFM);
+		
+		menu.add(menuFiles);
+		menu.add(menuView);
+		menu.add(menuModify);
+		
+		setJMenuBar(menu);
 
 		//initializing diagram popup menu
 		popMenuItemDeleteFeature.setText("Delete Feature");
@@ -453,6 +554,7 @@ public class EditorView extends JFrame implements Observer{
 //		frameRoot.add(splitterPanel);
 		add(splitterPanel);
 
+
 		
 //		//creo i draggables
 //		String label[]={"Questo è un nome lungo per una Feature!", "Questo è un nome ammodo", "Corto!"};
@@ -506,10 +608,11 @@ public class EditorView extends JFrame implements Observer{
 //		toolsPanel.addMouseMotionListener(getToolbarMouseMotionListener());
 
 		setSize(Toolkit.getDefaultToolkit().getScreenSize());
+		setVisible(true);
 		setLocation(0, 0);
 		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
-		addMouseListener(getToolbarMouseListener());
-		addMouseMotionListener(getToolbarMouseMotionListener());
+//		addMouseListener(getToolbarMouseListener());
+//		addMouseMotionListener(getToolbarMouseMotionListener());
 		
 
 		//creating diagram popup menu
@@ -591,6 +694,29 @@ public class EditorView extends JFrame implements Observer{
 //            }
 //        });
 //		diagramPanel.add(diagramElementsMenu);
+		
+		//adding starting commonalities and variabilities
+		int i=10, j=10;
+		for(String name : startingCommonalities){
+		  System.out.println("diagramPanel.getWidth(): "+diagramPanel.getWidth());
+		  if(i>=diagramPanel.getWidth()){ i=10; j+=70;}
+		  FeaturePanel newFeature=getDraggableFeature(name, i, j);
+		  visibleOrderDraggables.addToTop(newFeature);
+		  diagramPanel.setLayer(newFeature, 0);
+		  diagramPanel.add(newFeature);
+		  diagramPanel.setComponentZOrder(newFeature, 0);
+		  ++featuresCount; i+=70;
+		}
+		for(String name : startingVariabilities){
+		  if(i>=diagramPanel.getWidth()){ i=10; j+=55;}
+		  FeaturePanel newFeature=getDraggableFeature(name, i, j);
+		  visibleOrderDraggables.addToTop(newFeature);
+		  diagramPanel.setLayer(newFeature, 0);
+		  diagramPanel.add(newFeature);
+		  diagramPanel.setComponentZOrder(newFeature, 0);
+		  ++featuresCount; i+=70;
+		}
+		
         return true;
 	}
 
@@ -2694,7 +2820,7 @@ public class EditorView extends JFrame implements Observer{
 		textLabel.setOpaque(true);
 		
 		FeaturePanel container = new FeaturePanel(splitterPanel);
-		
+		container.setLabelName(name);
 		container.setName(featureNamePrefix+featuresCount);
 		container.setLayout(null);
 		container.setBounds(x,  y,  newFeatureIcon.getIconWidth()+featureBorderSize,
