@@ -117,6 +117,8 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 
 		//creating controller
 		EditorController editorController =new EditorController(editorView, editorModel);
+		editorController.setSavePath(modelProject.getPathProject());
+		
 		//adding the view as observer to the model
 		editorModel.addObserver(editorView);
 

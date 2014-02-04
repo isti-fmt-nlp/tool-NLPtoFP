@@ -29,6 +29,9 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 	private EditorView editorView = null;
 		
 	private EditorModel editorModel = null;
+	
+	/* Stringa contenente il percorso del progetto */
+	private String pathProject = null;
 		
 		/** Costruttore
 		 * 
@@ -48,13 +51,18 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 	  //event originated from the diagram panel
 	  if( ((Component)e.getSource()).getName().startsWith(EditorView.diagramPanelName) )
 		switch(editorView.getActiveItem()){
-	      case DRAGGING_FEATURE: EditorView.dragFeature(e); break;
-	      case DRAGGING_EXTERN_ANCHOR: EditorView.dragAnchor(e); break;
-	      case DRAGGING_EXTERN_GROUP: EditorView.dragAnchor(e); break;
-	      case DRAGGING_SELECTION_RECT:  EditorView.dragSelectionRect(e); break;
+//	      case DRAGGING_FEATURE: EditorView.dragFeature(e); break;
+//	      case DRAGGING_EXTERN_ANCHOR: EditorView.dragAnchor(e); break;
+//	      case DRAGGING_EXTERN_GROUP: EditorView.dragAnchor(e); break;
+//	      case DRAGGING_SELECTION_RECT:  EditorView.dragSelectionRect(e); break;
+	      case DRAGGING_FEATURE: editorView.dragFeature(e); break;
+	      case DRAGGING_EXTERN_ANCHOR: editorView.dragAnchor(e); break;
+	      case DRAGGING_EXTERN_GROUP: editorView.dragAnchor(e); break;
+	      case DRAGGING_SELECTION_RECT:  editorView.dragSelectionRect(e); break;
 	      case DRAGGING_SELECTION_GROUP: 
 			  System.out.println("dragging group!");
-			  EditorView.dragSelectionGroup(e); break;
+//			  EditorView.dragSelectionGroup(e); break;
+			  editorView.dragSelectionGroup(e); break;
 	      default: break;
 		}		
 	  //event originated from the toolbar
@@ -65,10 +73,14 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 		/* ***DEBUG*** */
 
 		switch(editorView.getActiveItem()){
-		  case DRAGGING_TOOL_NEWFEATURE: EditorView.dragToolNewFeature(e); break;
-		  case DRAGGING_TOOL_CONNECTOR: EditorView.dragToolConnector(e); break;
-		  case DRAGGING_TOOL_ALT_GROUP: EditorView.dragToolAltGroup(e); break;
-		  case DRAGGING_TOOL_OR_GROUP: EditorView.dragToolOrGroup(e); break;
+//		  case DRAGGING_TOOL_NEWFEATURE: EditorView.dragToolNewFeature(e); break;
+//		  case DRAGGING_TOOL_CONNECTOR: EditorView.dragToolConnector(e); break;
+//		  case DRAGGING_TOOL_ALT_GROUP: EditorView.dragToolAltGroup(e); break;
+//		  case DRAGGING_TOOL_OR_GROUP: EditorView.dragToolOrGroup(e); break;
+		  case DRAGGING_TOOL_NEWFEATURE: editorView.dragToolNewFeature(e); break;
+		  case DRAGGING_TOOL_CONNECTOR: editorView.dragToolConnector(e); break;
+		  case DRAGGING_TOOL_ALT_GROUP: editorView.dragToolAltGroup(e); break;
+		  case DRAGGING_TOOL_OR_GROUP: editorView.dragToolOrGroup(e); break;
 		  default: break;
 		}			  
 
@@ -192,7 +204,8 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 			if(editorView.getSelectionGroup().contains(tmpNode.getElement())){
 			  System.out.println("Mouse Pressed on a selection group element!");
 			  editorView.setActiveItem(activeItems.DRAGGING_SELECTION_GROUP);
-			  EditorView.moveSelectionGroupToTop();					
+//			  EditorView.moveSelectionGroupToTop();			
+			  editorView.moveSelectionGroupToTop();					
 			  return;
 			}
 			else{//mouse pressed out of an element of the group selection			
@@ -244,7 +257,8 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 				  editorModel.removeFeatureFromGroup(null, featurePanel.getLabelName(), otherEnd.getName());
 
 				//the other end is not attached to any feature
-				else EditorView.detachAnchor(featurePanel, anchorPanel);
+//				else EditorView.detachAnchor(featurePanel, anchorPanel);
+				else editorView.detachAnchor(featurePanel, anchorPanel);
 			  }
 			  //mouse pressed on a group inside the feature panel
 			  else if(anchorPanelName!=null && anchorPanel.getClass().equals(GroupPanel.class) && (
@@ -256,7 +270,8 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 				editorView.setLastFeatureFocused(featurePanel);
 				
 				//the group has no members
-				if(((GroupPanel)anchorPanel).getMembers().size()==0)EditorView.detachAnchor(featurePanel, anchorPanel);
+//				if(((GroupPanel)anchorPanel).getMembers().size()==0)EditorView.detachAnchor(featurePanel, anchorPanel);
+				if(((GroupPanel)anchorPanel).getMembers().size()==0) editorView.detachAnchor(featurePanel, anchorPanel);
 				//the group has members				
 //				else editorModel.removeGroupFromFeature(featurePanel.getName(), anchorPanel.getName());
 				else editorModel.removeGroupFromFeature(featurePanel.getLabelName(), anchorPanel.getName());
@@ -265,7 +280,8 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 			  else{
 				editorView.setActiveItem(activeItems.DRAGGING_FEATURE);
 				editorView.setLastFeatureFocused((FeaturePanel)tmpNode.getElement());   
-				EditorView.moveComponentToTop(editorView.getLastFeatureFocused());
+//				EditorView.moveComponentToTop(editorView.getLastFeatureFocused());
+				editorView.moveComponentToTop(editorView.getLastFeatureFocused());
 			  }
 			}
 			//mouse directly pressed on an anchor panel in the diagram panel
@@ -274,7 +290,8 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 					((AnchorPanel)tmpNode.getElement()).getName().startsWith(EditorView.endConnectorsNamePrefix) ) ){
 			  editorView.setActiveItem(activeItems.DRAGGING_EXTERN_ANCHOR);
 			  editorView.setLastAnchorFocused((AnchorPanel)tmpNode.getElement());
-			  EditorView.moveComponentToTop(editorView.getLastAnchorFocused());
+//			  EditorView.moveComponentToTop(editorView.getLastAnchorFocused());
+			  editorView.moveComponentToTop(editorView.getLastAnchorFocused());
 			}
 			//mouse directly pressed on a group panel in the diagram panel
 			else if(tmpNode.getElement().getClass().equals(GroupPanel.class) &&
@@ -283,7 +300,8 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 					((GroupPanel)tmpNode.getElement()).getName().startsWith(EditorView.orGroupNamePrefix) ){
 			  editorView.setActiveItem(activeItems.DRAGGING_EXTERN_GROUP);
 			  editorView.setLastAnchorFocused((GroupPanel)tmpNode.getElement());
-			  EditorView.moveComponentToTop(editorView.getLastAnchorFocused());
+//			  EditorView.moveComponentToTop(editorView.getLastAnchorFocused());
+			  editorView.moveComponentToTop(editorView.getLastAnchorFocused());
 			}
 
 			/* ***DEBUG*** */
@@ -406,15 +424,18 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
 	    	  editorView.setToolDragImage(null); break;
 	      case DRAGGING_TOOL_CONNECTOR:
-	    	  EditorView.addConnectorToDiagram(e);
+//	    	  EditorView.addConnectorToDiagram(e);
+	    	  editorView.addConnectorToDiagram(e);
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
 	    	  editorView.setToolDragImage(null); break;
 	      case DRAGGING_TOOL_ALT_GROUP:
-	    	  EditorView.addAltGroupToDiagram(e);
+//	    	  EditorView.addAltGroupToDiagram(e);
+	    	  editorView.addAltGroupToDiagram(e);
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
 	    	  editorView.setToolDragImage(null); break;
 	      case DRAGGING_TOOL_OR_GROUP:
-	    	  EditorView.addOrGroupToDiagram(e);
+//	    	  EditorView.addOrGroupToDiagram(e);
+	    	  editorView.addOrGroupToDiagram(e);
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
 	    	  editorView.setToolDragImage(null); break;
 	      default: break;
@@ -491,6 +512,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+	  //commands from diagram popup menu
 	  JComponent popupElement=editorView.getPopUpElement();
 	  //popup menu command: Delete Element
       if(e.getActionCommand().equals("Delete Element")){
@@ -504,21 +526,26 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
         /* ***DEBUG*** */
         
         if(elementName!=null && elementName.startsWith(EditorView.startConnectorsNamePrefix)){
-      	  EditorView.deleteAnchor(popupElement);
-      	  EditorView.deleteAnchor(((AnchorPanel)popupElement).getOtherEnd());
+//        	  EditorView.deleteAnchor(popupElement);
+//          	  EditorView.deleteAnchor(((AnchorPanel)popupElement).getOtherEnd());
+          editorView.deleteAnchor(popupElement);
+          editorView.deleteAnchor(((AnchorPanel)popupElement).getOtherEnd());
       	  editorView.repaintRootFrame();
         }
         else if(elementName!=null && elementName.startsWith(EditorView.endConnectorsNamePrefix)){
       	  if(((AnchorPanel)popupElement).getOtherEnd().getName().startsWith(EditorView.startConnectorsNamePrefix)){
-      		EditorView.deleteAnchor(popupElement);
-      		EditorView.deleteAnchor(((AnchorPanel)popupElement).getOtherEnd());            		
+//        		EditorView.deleteAnchor(popupElement);
+//          		EditorView.deleteAnchor(((AnchorPanel)popupElement).getOtherEnd());            		
+      		editorView.deleteAnchor(popupElement);
+      		editorView.deleteAnchor(((AnchorPanel)popupElement).getOtherEnd());            		
       	  }
       	  else if( ( ((AnchorPanel)popupElement).getOtherEnd().getName().startsWith(EditorView.orGroupNamePrefix)
       	   || ((AnchorPanel)popupElement).getOtherEnd().getName().startsWith(EditorView.altGroupNamePrefix) )
       	   && ((GroupPanel)((AnchorPanel)popupElement).getOtherEnd()).getMembers().size()>2 ){
 
       		((GroupPanel)((AnchorPanel)popupElement).getOtherEnd()).getMembers().remove(popupElement);
-      		EditorView.deleteAnchor(popupElement);
+//      		EditorView.deleteAnchor(popupElement);
+      		editorView.deleteAnchor(popupElement);
       	  }	
           editorView.repaintRootFrame();
         }
@@ -538,7 +565,8 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
       else if(e.getActionCommand().equals("Ungroup")){
         System.out.println("Ungrouping: "+popupElement.getName());
         System.out.println("Other end: "+((AnchorPanel)popupElement).getOtherEnd().getName());
-    	EditorView.ungroupAnchor((AnchorPanel)popupElement);
+//    	EditorView.ungroupAnchor((AnchorPanel)popupElement);
+    	editorView.ungroupAnchor((AnchorPanel)popupElement);
         editorView.repaintRootFrame();
       }
       else if(e.getActionCommand().equals("Print Model[DEBUG COMMAND]")){
@@ -555,6 +583,27 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
     	  drag=drag.getNext();
     	}
     	
+      }
+	  //commands from editor menu bar
+      else if(e.getActionCommand().equals("Save Diagram")){
+  		String s = null;			
+  		if((s = editorView.assignNameDiagramDialog()) != null){
+  		  editorView.saveDiagram(pathProject, s);
+  		  editorModel.saveModel(pathProject, s);
+  		}
+    	  
+      }
+      else if(e.getActionCommand().equals("Open Diagram")){
+    	  
+      }
+      else if(e.getActionCommand().equals("Export model to XML")){
+    	  
+      }
+      else if(e.getActionCommand().equals("Delete Diagram")){
+    	  
+      }
+      else if(e.getActionCommand().equals("Exit")){
+    	  
       }
 
 	}
@@ -580,7 +629,8 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 	 * @param e - MouseEvent of the type Mouse Released.
 	 */
 	private void addNewFeature(MouseEvent e) {
-	  if (!EditorView.checkDroppedOnDiagram()) return;
+//	  if (!EditorView.checkDroppedOnDiagram()) return;
+	  if (!editorView.checkDroppedOnDiagram()) return;
 	  else{
 
 		/* ***DEBUG*** */
@@ -601,7 +651,8 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 	 * @param e - MouseEvent of the type Mouse Released.
 	 */
 	private void dropAnchor(MouseEvent e) {
-		Component comp=EditorView.dropAnchorOnDiagram(e);
+//		Component comp=EditorView.dropAnchorOnDiagram(e);
+		Component comp=editorView.dropAnchorOnDiagram(e);
 		if (comp!=null) System.out.println("comp= "+comp.getName());
 		JComponent anchor=editorView.getLastAnchorFocused();
 		JComponent otherEnd=((AnchorPanel)anchor).getOtherEnd();
@@ -646,7 +697,8 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 		  //the other end of the connector is not anchored to anything
 		  if (otherEnd.getParent().getName().startsWith(EditorView.diagramPanelName) ){
 			System.out.println("about to add an anchor to a feature");
-			EditorView.addAnchorToFeature(); return;
+//			EditorView.addAnchorToFeature(); return;
+			editorView.addAnchorToFeature(); return;
 		  }
 		}
 		
@@ -684,7 +736,8 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 	 * @param e - MouseEvent of the type Mouse Released.
 	 */
 	private void dropGroup(MouseEvent e) {
-	  Component comp=EditorView.dropGroupOnDiagram(e);
+//		  Component comp=EditorView.dropGroupOnDiagram(e);
+		  Component comp=editorView.dropGroupOnDiagram(e);
 	  if (comp!=null) System.out.println("comp= "+comp.getName());
 	  GroupPanel group=(GroupPanel)editorView.getLastAnchorFocused();
 	  
@@ -695,7 +748,8 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 		  
 		//the group has no members
 		if (group.getMembers().size()==0 ){
-		  EditorView.addAnchorToFeature(); return;
+//			  EditorView.addAnchorToFeature(); return;
+		  editorView.addAnchorToFeature(); return;
 		}
 		else{
 		  //about to add group to the feature comp
@@ -741,9 +795,16 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 		editorView.getDiagramPanel().setLayer(editorView.getLastAnchorFocused(), 0);
 		editorView.getDiagramPanel().add(editorView.getLastAnchorFocused());
 		editorView.getDiagramPanel().setComponentZOrder(editorView.getLastAnchorFocused(), 0);
-		EditorView.moveComponentToTop(editorView.getLastAnchorFocused());
+//		EditorView.moveComponentToTop(editorView.getLastAnchorFocused());
+		editorView.moveComponentToTop(editorView.getLastAnchorFocused());
 	}
 
-
+	/**
+	 * Sets the path used for saving the project.
+	 * @param pathProject - the path used for saving the project
+	 */
+	public void setSavePath(String pathProject) {
+		this.pathProject=pathProject;		
+	}
 	
 }

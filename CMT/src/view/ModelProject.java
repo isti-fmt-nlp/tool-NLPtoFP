@@ -956,4 +956,12 @@ public class ModelProject extends Observable implements Runnable
 	public HashMap<String, HashMap<String, ArrayList<Integer>>> getRelevantTerms() {		
 		return relevantTerms;
 	}
+
+	/**
+	 * Returns the path used for saving the project.
+	 * @return - the path used for saving the project
+	 */
+	public String getPathProject() {
+		return pathProject;
+	}
 }

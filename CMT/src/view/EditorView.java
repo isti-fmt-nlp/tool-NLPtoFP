@@ -34,8 +34,11 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,11 +62,13 @@ import javax.swing.JLayeredPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSplitPane;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
@@ -77,29 +82,7 @@ import main.OrderedListNode;
 import main.SortUtils;
 
 
-
 public class EditorView extends JFrame implements Observer{
-
-	private static final long serialVersionUID = 1L;
-
-	private JMenuBar menu = new JMenuBar();
-	
-	private JMenu menuFiles;//Diagram Files Management Menu
-	private JMenu menuView=null;//Diagram View Management Menu
-	private JMenu menuModify=null;//Diagram Properties Management Menu
-	
-	//Files Management Menu items
-	private JMenuItem menuFilesSave=null, 	   menuFilesOpen=null,
-					  menuFilesExportXML=null, menuFilesDelete=null, menuFilesExit=null;
-	
-	//View Management Menu items
-	private JMenuItem menuViewColored=null, menuViewCommsOrVars=null, 
-					  menuViewExtrOrInsert=null, menuViewFields=null,
-					  menuViewVisibleConstraints=null;
-	
-	//Properties Management Menu items
-	private JMenuItem menuModifyBasicFM=null, menuModifyAdvancedFM=null;
-	
 	
 	/** variables used for debugging*/
 	private static boolean debug=false;
@@ -107,13 +90,12 @@ public class EditorView extends JFrame implements Observer{
 	private static boolean debug3=false;
 	private static boolean debug4=false;
 //	private static Robot eventsRobot = null;
+	
+	private static final long serialVersionUID = 1L;
 
 	class EditorSplitPane extends JSplitPane{
 
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
+		public static final long serialVersionUID = 1L;
 
 		public EditorSplitPane(int horizontalSplit) {
 			super(horizontalSplit);
@@ -123,103 +105,17 @@ public class EditorView extends JFrame implements Observer{
 		public void paint(Graphics g){
 //			System.out.println("getParent().getParent().getParent().getParent(): "+getParent().getParent().getParent().getParent());
 			Graphics2D g2 = (Graphics2D)g.create();		
-
 			paintComponent(g);
 			paintBorder(g);
 //			paintChildren(g);//panels in the diagram panel are drawn over lines
 			drawAllConnectors(g2);
 			paintChildren(g);//panels in the diagram panel are drawn below lines
-//			super.paint(g);
-			
-			
-		}
-		
+//			super.paint(g);	
+		}		
 	}
-
-	
-	/** current amount of connector lines in the diagram panel*/
-	private static int connectorsCount=0;
-	/** current amount of Alternative Groups in the diagram panel*/
-	private static int altGroupsCount=0;
-	/** current amount of Or Groups in the diagram panel*/
-	private static int orGroupsCount=0;
-	/** current amount of features in the diagram panel*/
-	private static int featuresCount=0;
-	
-	/** list of all connector ending dots,
-	 *  corresponding starting dots can be found in startConnectorDots at the same index
-	 */
-//	private static ArrayList<JComponent> endConnectorDots=null;
-	
-	//still unused
-	/** previous location of all connector starting dots, with same indexes of the lists above*/
-//	private static ArrayList<Point> prevStartConnectorDotsLocation=null;
-	
-	//still unused
-	/** previous location of all connector ending dots, with same indexes of the lists above*/
-//	private static ArrayList<Point> prevEndConnectorDotsLocation=null;
-	
-	//to revise
-	/** list of all connector dots that must be redrawn, with same indexes of the lists above*/
-//	private static ArrayList<Boolean> connectorDotsToRedraw=null;
-	
-	/** list of all connector starting dots,
-	 *  corresponding ending dots can be found in endConnectorDots at the same index
-	 */
-	private static ArrayList<JComponent> startConnectorDots=null;
-	/** list of Alternative Groups*/
-	private static ArrayList<GroupPanel> altGroupPanels=null;	
-	/** list of Or Groups*/
-	private static ArrayList<GroupPanel> orGroupPanels=null;
-	
-	/** List of starting commonalities selected by the user */
-	private ArrayList<String> startingCommonalities=new ArrayList<String>();
-	/** List of starting commonalities and variabilities selected by the user */
-	private ArrayList<String> startingVariabilities=new ArrayList<String>();
-	
-	/** OrderedList containing the panels children of the diagram panel*/
-	private static OrderedList visibleOrderDraggables = null;
-	
-	/** X coordinate of last mouse pression*/
-	private static int lastPositionX=-1;
-	/** Y coordinate of last mouse pression*/
-	private static int lastPositionY=-1;
-	
-	/**top level frame*/
-	private static JFrame frameRoot = null;//frame root		
-	
-//	private static JFrame toolDragPanel = null;//temporary frame used to drag tools
-	/**image used to drag tools*/
-	private static BufferedImage toolDragImage = null;
-	/**position of the dragged image*/
-	private static Point toolDragPosition = null;
-	
-	
-	
-	/**the panel containing the diagram */
-	private static JLayeredPane diagramPanel=null;
-
-	/**the panel containing the tools */
-	private static JPanel toolsPanel=null;
-	
-	/** the splitter panel containing diagramPanel and toolsPanel*/
-	private static EditorSplitPane splitterPanel=null;
-	
-	/** the active Feature panel*/
-	private static FeaturePanel lastFeatureFocused=null;
-	/** the active Anchor panel*/
-	private static JComponent lastAnchorFocused=null;
-	/** list of active elements selected as group by the user*/
-	private static ArrayList<JComponent> selectionGroupFocused=null;
-	
-	/** the component on which a drop is about to be done*/
-	private static JComponent underlyingComponent=null;
-//	private static boolean isDraggingFeature=false;
 	
 	/** URL of the new feature icon*/
 	private static URL newFeatureIconURL=EditorView.class.getResource("/feature rectangle2.png");
-//	private static URL newFeatureIconURL=MyDraggableImages.class.getResource("/feature rectangle.png");
-//	private static URL newFeatureIconURL=MyDraggableImages.class.getResource("/balzac.jpg");
 	/** URL of the connector starting dot icon*/
 	private static URL connectorStartDotIconURL=EditorView.class.getResource("/Connector Start Dot.png");
 	/** URL of the new group starting dot icon*/
@@ -246,6 +142,10 @@ public class EditorView extends JFrame implements Observer{
 	/** name ofthe diagram panel*/
 	public static String diagramPanelName="---DIAGRAM_PANEL---";
 
+	/** maps tool names in the corresponding icon resource path*/
+	private static HashMap<String, String> toolIconPaths=null;
+	
+	private static int featureBorderSize=20;
 
 	/** enumeration of items that can become active, for instance in a drag motion*/
 	public static enum activeItems {
@@ -258,47 +158,136 @@ public class EditorView extends JFrame implements Observer{
 	public static enum ItemsType {
 		START_CONNECTOR, END_CONNECTOR, ALT_GROUP_START_CONNECTOR, OR_GROUP_START_CONNECTOR
 	}
-
-	/** tells what item is interested in the current action*/
-	private static activeItems isActiveItem=activeItems.NO_ACTIVE_ITEM;
-
-	/** maps tool names in the corresponding icon resource path*/
-	private static HashMap<String, String> toolIconPaths=null;
 	
-	private static int featureBorderSize=20;
-
-	/** variable used to draw lines on the diagram */
-	private static Point lineStart=new Point(), lineEnd=new Point();
-	/** variable used to draw selection rectangle on the diagram */
-	private static Point startSelectionRect=new Point(), endSelectionRect=new Point();
-
-	/** variable used to draw selection rectangle on the diagram */
-	private static Rectangle selectionRect=new Rectangle();
-
+	/** Tells if the diagram has been modified after last save*/
+	private boolean modified=false;
+	
+	/** The popup menu for all diagram panel elements*/
+	private JPopupMenu diagramElementsMenu = new JPopupMenu();
+	/** The element interested by the popup menu*/
+	private JComponent popUpElement = null;
+	
+	/** Popup menu items*/
+	private JMenuItem popMenuItemDelete = new JMenuItem("Delete Element");
+	private JMenuItem popMenuItemDeleteFeature = new JMenuItem("Delete Feature");
+	private JMenuItem popMenuItemDeleteConnector = new JMenuItem("Delete Connector");
+	private JMenuItem popMenuItemDeleteGroup = new JMenuItem("Delete Group");
+	private JMenuItem popMenuItemUngroup = new JMenuItem("Ungroup");
+	private JMenuItem popMenuItemPrintModelDebug = new JMenuItem("Print Model[DEBUG COMMAND]");
+	
+	/** Popup menu coordinates*/
+	private int diagramElementsMenuPosX=0;
+	private int diagramElementsMenuPosY=0;
 	
 	
-	/** the popup menu for all diagram panel elements*/
-//	private static JPopupMenu diagramElementsMenu = null;
-	private static JPopupMenu diagramElementsMenu = new JPopupMenu();
-	/** the element interested by the popup menu*/
-	private static JComponent popUpElement = null;
+	/** The editor menu bar*/
+	private JMenuBar menu = new JMenuBar();
 	
-	/** popup menu items*/
-//	private static JMenuItem popMenuItemDelete = null;
-//	private static JMenuItem popMenuItemUngroup = null;
-//	private static JMenuItem popMenuItemPrintModelDebug = null;
-
-	private static JMenuItem popMenuItemDelete = new JMenuItem("Delete Element");
-	private static JMenuItem popMenuItemDeleteFeature = new JMenuItem("Delete Feature");
-	private static JMenuItem popMenuItemDeleteConnector = new JMenuItem("Delete Connector");
-	private static JMenuItem popMenuItemDeleteGroup = new JMenuItem("Delete Group");
-	private static JMenuItem popMenuItemUngroup = new JMenuItem("Ungroup");
-	private static JMenuItem popMenuItemPrintModelDebug = new JMenuItem("Print Model[DEBUG COMMAND]");
-
+	/** The menus in the menu bar*/
+	private JMenu menuFiles;//Diagram Files Management Menu
+	private JMenu menuView=null;//Diagram View Management Menu
+	private JMenu menuModify=null;//Diagram Properties Management Menu
 	
-	/** popup menu coordinates*/
-	private static int diagramElementsMenuPosX=0;
-	private static int diagramElementsMenuPosY=0;
+	/** Files Menu items*/
+	private JMenuItem menuFilesSave=null, 	   menuFilesOpen=null,
+					  menuFilesExportXML=null, menuFilesDelete=null, menuFilesExit=null;
+	
+	/** View Menu items*/
+	private JMenuItem menuViewColored=null, menuViewCommsOrVars=null, 
+					  menuViewExtrOrInsert=null, menuViewFields=null,
+					  menuViewVisibleConstraints=null;
+	
+	/** Modify Menu items*/
+	private JMenuItem menuModifyBasicFM=null, menuModifyAdvancedFM=null;
+		
+	
+	/** Current amount of connector lines in the diagram panel*/
+	private int connectorsCount=0;
+	/** Current amount of Alternative Groups in the diagram panel*/
+	private int altGroupsCount=0;
+	/** Current amount of Or Groups in the diagram panel*/
+	private int orGroupsCount=0;
+	/** Current amount of features in the diagram panel*/
+	private int featuresCount=0;
+	
+	/** List of all connector ending dots,
+	 *  corresponding starting dots can be found in startConnectorDots at the same index
+	 */
+//	private static ArrayList<JComponent> endConnectorDots=null;
+	
+	//still unused
+	/** Previous location of all connector starting dots, with same indexes of the lists above*/
+//	private static ArrayList<Point> prevStartConnectorDotsLocation=null;
+	
+	//still unused
+	/** Previous location of all connector ending dots, with same indexes of the lists above*/
+//	private static ArrayList<Point> prevEndConnectorDotsLocation=null;
+	
+	//to revise
+	/** List of all connector dots that must be redrawn, with same indexes of the lists above*/
+//	private static ArrayList<Boolean> connectorDotsToRedraw=null;
+	
+	/** List of all connector starting dots,
+	 *  corresponding ending dots can be found in endConnectorDots at the same index
+	 */
+	private ArrayList<JComponent> startConnectorDots=null;
+	/** List of Alternative Groups*/
+	private ArrayList<GroupPanel> altGroupPanels=null;	
+	/** List of Or Groups*/
+	private ArrayList<GroupPanel> orGroupPanels=null;
+	
+	/** List of starting commonalities selected by the user */
+	private ArrayList<String> startingCommonalities=new ArrayList<String>();
+	/** List of starting commonalities and variabilities selected by the user */
+	private ArrayList<String> startingVariabilities=new ArrayList<String>();
+	
+	/** OrderedList containing the panels children of the diagram panel*/
+	private OrderedList visibleOrderDraggables = null;
+	
+	/** X coordinate of last mouse pression*/
+	private int lastPositionX=-1;
+	/** Y coordinate of last mouse pression*/
+	private int lastPositionY=-1;
+	
+	/** Top level frame*/
+	private JFrame frameRoot = null;//frame root		
+	
+//	private static JFrame toolDragPanel = null;//temporary frame used to drag tools
+	/** Image used to drag tools*/
+	private BufferedImage toolDragImage = null;
+	/** Position of the dragged image*/
+	private Point toolDragPosition = null;
+	
+	
+	/** The panel containing the diagram */
+	private JLayeredPane diagramPanel=null;
+
+	/** The panel containing the tools */
+	private JPanel toolsPanel=null;
+	
+	/** The splitter panel containing diagramPanel and toolsPanel*/
+	private EditorSplitPane splitterPanel=null;
+	
+	/** The active Feature panel*/
+	private FeaturePanel lastFeatureFocused=null;
+	/** The active Anchor panel*/
+	private JComponent lastAnchorFocused=null;
+	/** List of active elements selected as group by the user*/
+	private ArrayList<JComponent> selectionGroupFocused=null;
+	
+	/** The component on which a drop is about to be done*/
+	private JComponent underlyingComponent=null;
+//	private static boolean isDraggingFeature=false;
+
+	/** Tells what item is interested in the current action*/
+	private activeItems isActiveItem=activeItems.NO_ACTIVE_ITEM;
+
+	/** Variable used to draw lines on the diagram */
+	private Point lineStart=new Point(), lineEnd=new Point();
+	/** Variable used to draw selection rectangle on the diagram */
+	private Point startSelectionRect=new Point(), endSelectionRect=new Point();
+	/** Variable used to draw selection rectangle on the diagram */
+	private Rectangle selectionRect=new Rectangle();
 	
 
 	public EditorView(){}
@@ -309,6 +298,11 @@ public class EditorView extends JFrame implements Observer{
 	  for(String name : variabilitiesSelected) startingVariabilities.add(name);
 	}
 
+	/**
+	 * Initializes editor UI.
+	 * @param editorController - the EditorController for this editor
+	 * @return - false if editorController is null, true otherwise.
+	 */
 	public boolean prepareUI(EditorController editorController){
 		if(editorController==null) return false;
 
@@ -324,7 +318,7 @@ public class EditorView extends JFrame implements Observer{
 		menuFilesOpen = new JMenuItem("Open Diagram");
 		menuFilesOpen.addActionListener(editorController);
 		
-		menuFilesExportXML = new JMenuItem("Export model to XML");
+		menuFilesExportXML = new JMenuItem("Export as SXFM");
 		menuFilesExportXML.addActionListener(editorController);
 		
 		menuFilesDelete = new JMenuItem("Delete Diagram");
@@ -1141,7 +1135,7 @@ public class EditorView extends JFrame implements Observer{
 //	  tempGraphics.fillOval((int)rightPoint.getX()-2, (int)rightPoint.getY()-2, 7, 7);
 	}
 
-	private static void drawConnectionLine(Graphics2D g2, JComponent startPanel, JComponent endPanel) {
+	private void drawConnectionLine(Graphics2D g2, JComponent startPanel, JComponent endPanel) {
 		lineStart.setLocation(getVisibleStartAnchorCenter(startPanel));
 		lineEnd.setLocation(getVisibleStartAnchorCenter(endPanel));
 //		start.setLocation(startPanel.getLocationOnScreen());
@@ -1162,7 +1156,7 @@ public class EditorView extends JFrame implements Observer{
      * @param anchor - the JComponent representing a visible starting anchor
      * @return the visible center point of the anchor
      */
-    public static Point2D getVisibleStartAnchorCenter(JComponent anchor) {
+    public Point2D getVisibleStartAnchorCenter(JComponent anchor) {
     	double x=(anchor.getLocationOnScreen().getX()-splitterPanel.getLocationOnScreen().getX()+anchor.getWidth()/2);
     	double y=(anchor.getLocationOnScreen().getY()-splitterPanel.getLocationOnScreen().getY()+anchor.getHeight()/2+3);
     	
@@ -1322,521 +1316,12 @@ public class EditorView extends JFrame implements Observer{
 		return toolImage;
 	}
 
-	
-	private static MouseListener getToolbarMouseListener() {
-	  MouseListener listener= new MouseListener() {
-
-		@Override
-		public void mouseClicked(MouseEvent e) {
-			System.out.println("Source e: "+e.getSource());
-			System.out.println("Source e.getName(): "+((Component)e.getSource()).getName());
-//			if(popUpElement!=null){
-//			  System.out.println("clicked! popupElement: "+popUpElement);
-//			  diagramElementsMenu.show(diagramPanel, diagramElementsMenuPosX, diagramElementsMenuPosY);
-//			  return;
-////			  popUpElement=null;				  
-////			  eventsRobot.mousePress(InputEvent.BUTTON1_MASK);
-////			  diagramElementsMenu.menuSelectionChanged(false);
-//			}
-
-//			if(popUpElement!=null) return;
-
-			/* ***DEBUG*** */
-			if (debug3) System.out.println("mouse clicked on a tool, Divider at: "+splitterPanel.getDividerLocation());
-			/* ***DEBUG*** */
-		}
-
-		@Override
-		public void mousePressed(MouseEvent e) {
-//		  if(popUpElement!=null){
-//			System.out.println("popupElement: "+popUpElement);
-//			diagramElementsMenu.show(diagramPanel, diagramElementsMenuPosX, diagramElementsMenuPosY);
-//			return;
-////			popUpElement=null;				  
-////			eventsRobot.mousePress(InputEvent.BUTTON1_MASK);
-////			diagramElementsMenu.menuSelectionChanged(false);
-//		  }
-
-//		  if(popUpElement!=null) return;
-
-		  diagramElementsMenu.setVisible(false);
-		  diagramElementsMenu.setEnabled(false);
-//		  lastPositionX=(int)e.getLocationOnScreen().getX();
-//		  lastPositionY=(int)e.getLocationOnScreen().getY();
-			  lastPositionX=e.getX();
-			  lastPositionY=e.getY();
-		  
-
-		  Component[] compList=toolsPanel.getComponents();
-		  JComponent comp=(JComponent)e.getSource();
-		  JComponent imageLabel=(JComponent)comp.getComponent(0);
-//		  JComponent imageLabel=comp.getComponentAt(new Point(e.getX(), e.getY()));
-		  
-		  /* ***DEBUG*** */
-		  if(debug4) System.out.println("e.getSource(): "+e.getSource()+"\nimageLabel: "+imageLabel);
-		  /* ***DEBUG*** */
-
-		  try {
-			toolDragImage = ImageIO.read(this.getClass().getResourceAsStream(toolIconPaths.get(((JComponent)comp).getName())));
-			toolDragPosition= new Point((int)imageLabel.getLocationOnScreen().getX(),
-					(int)imageLabel.getLocationOnScreen().getY());
-//			toolDragPosition= new Point((int)((JPanel)comp).getLocationOnScreen().getX(),
-//					(int)((JPanel)comp).getLocationOnScreen().getY());
-			
-		  } catch (IOException e2) {
-			System.out.println("toolDragImage is null");
-			e2.printStackTrace();
-			return;
-		  }
-		  if (((JComponent)comp).getName()=="New Feature")
-			  isActiveItem=activeItems.DRAGGING_TOOL_NEWFEATURE;
-		  else if (((JComponent)comp).getName()=="Connector Line")
-			  isActiveItem=activeItems.DRAGGING_TOOL_CONNECTOR;
-		  else if (((JComponent)comp).getName()=="Alternative Group")
-			  isActiveItem=activeItems.DRAGGING_TOOL_ALT_GROUP;
-		  else if (((JComponent)comp).getName()=="Or Group")
-			  isActiveItem=activeItems.DRAGGING_TOOL_OR_GROUP;
-
-		  frameRoot.repaint();
-			
-		  /* ***DEBUG*** */
-		  if (debug) System.out.println("mousePressed on: "+toolDragPosition);
-		  /* ***DEBUG*** */
-
-		  /* ***DEBUG*** */
-		  if (debug3) System.out.println("mousePressed, components are "+compList.length);
-		  /* ***DEBUG*** */
-
-//		  for(int i=0; i< compList.length; ++i){
-//
-//			  /* ***DEBUG*** */
-//			  if (debug3) System.out.println("mousePressed: iteration "+i+"...");
-//			  /* ***DEBUG*** */
-//
-//			  if (compList[i].getBounds().contains(e.getX(), e.getY())){
-//				try {
-////					  toolDragImage = ImageIO.read(this.getClass().getResourceAsStream(toolIconPaths.get(((JPanel)compList[i]).getName())));
-//
-//					  BufferedImage buffy = ImageIO.read(this.getClass().getResourceAsStream(toolIconPaths.get(((JPanel)compList[i]).getName())));
-//					  GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
-//					  GraphicsDevice device = env.getDefaultScreenDevice();
-//					  GraphicsConfiguration config = device.getDefaultConfiguration();
-//					  toolDragImage = config.createCompatibleImage(buffy.getWidth(), buffy.getHeight(), Transparency.TRANSLUCENT);
-//					  toolDragImage.setData(buffy.getData());
-//
-//				  /* ***DEBUG*** */
-//				  if (debug3) System.out.println("name: "+((JPanel)compList[i]).getName()
-//						  +"\nURL: "+this.getClass().getResourceAsStream(toolIconPaths.get(((JPanel)compList[i]).getName()))
-//						  +"\ntoolDragImage="+toolDragImage);
-//				  /* ***DEBUG*** */
-//
-//				  //						toolDragPosition= new Point(e.getX(), e.getY());
-////				  toolDragPosition= new Point((int)MouseInfo.getPointerInfo().getLocation().getX(), 
-////						  (int)MouseInfo.getPointerInfo().getLocation().getY());
-//				  
-//				  toolDragPosition= new Point((int)((JPanel)compList[i]).getLocationOnScreen().getX(),
-//						  (int)((JPanel)compList[i]).getLocationOnScreen().getY());
-//				} catch (IOException e1) {
-//					System.out.println("toolDragImage is null");
-//					e1.printStackTrace();
-//					return;
-//				}
-//
-//				//					splitterPanel.getParent().repaint();
-//
-//				if (((JPanel)compList[i]).getName()=="New Feature")
-//					isActiveItem=activeItems.DRAGGING_TOOL_NEWFEATURE;
-//				else if (((JPanel)compList[i]).getName()=="Connector Line")
-//					isActiveItem=activeItems.DRAGGING_TOOL_CONNECTOR;
-//
-//
-//				frameRoot.repaint();
-//				
-//				/* ***DEBUG****/
-//				if(debug3){
-//				  System.out.println("splitterPanel.getParent(): "+splitterPanel.getParent());
-//				  System.out.println("splitterPanel.getParent().isLightweight()? "+splitterPanel.getParent().isLightweight());
-//				  System.out.println("splitterPanel.getParent().getClass(): "+splitterPanel.getParent().getClass());
-//				  System.out.println("splitterPanel.getParent().getParent().getClass(): "+splitterPanel.getParent().getParent().getClass());
-//				  System.out.println("MyDraggableImages.class: "+MyDraggableImages.class);
-//				}
-//				/* ***DEBUG****/
-//
-//				//					   Graphics2D g2 = GraphicsEnvironment.getLocalGraphicsEnvironment().createGraphics(image);
-//				////					   Graphics2D g2 = (Graphics2D) g;
-//				//			//
-//				////					    BufferedImage img1 = (BufferedImage) Toolkit.getDefaultToolkit().getImage("yourFile.gif");
-//				//					    g2.drawImage(image, 10, 10, frameRoot);
-//				//					    g2.finalize();
-//
-//
-//
-//				//				  toolImage=getIconImage(((JPanel)compList[i]).getName());
-//				////				  toolDragPanel= getToolIcon(((JPanel)compList[i]).getName(), false);
-//				//				  toolDragPanel= new JFrame();
-//				//				  
-//				//				  toolDragPanel.add(getToolIcon(((JPanel)compList[i]).getName(), false));
-//				//				  toolDragPanel.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-//				////				  toolDragPanel.setLocation(Toolkit.getDefaultToolkit().getScreenSize().width/2,
-//				////					  Toolkit.getDefaultToolkit().getScreenSize().height/2);
-//				////				  toolDragPanel.setLocation(((JPanel)compList[i]).getLocationOnScreen());
-//				//				  toolDragPanel.setLocation((int)MouseInfo.getPointerInfo().getLocation().getX()-5, 
-//				//						  (int)MouseInfo.getPointerInfo().getLocation().getY()-5);
-//				//				  
-//				////				  toolDragPanel.setSize(((JPanel)compList[i]).getSize());
-//				//				  toolDragPanel.setSize(toolImage.getIconWidth(), toolImage.getIconHeight());
-//				//				  toolDragPanel.setUndecorated(true);
-//				//				  toolDragPanel.setVisible(true);
-//
-//				/* ***DEBUG*** */
-//				if (debug3) System.out.println("Mouse pressed on: "+((JPanel)compList[i]).getName()
-//						+""+(((JLabel)((JPanel)compList[i]).getComponent(0))).toString());
-//				/* ***DEBUG*** */
-//
-//
-//				break;
-//			  }
-//		  }
-		}
-
-		@Override
-		public void mouseReleased(MouseEvent e) {
-//		  if(popUpElement!=null){
-//			System.out.println("popupElement: "+popUpElement);
-//			diagramElementsMenu.show(diagramPanel, diagramElementsMenuPosX, diagramElementsMenuPosY);
-//			return;
-////			popUpElement=null;				  
-////			eventsRobot.mousePress(InputEvent.BUTTON1_MASK);
-////			diagramElementsMenu.menuSelectionChanged(false);
-//		  }
-			
-//		  if(popUpElement!=null) return;
-
-		  switch(isActiveItem){
-		    case DRAGGING_TOOL_NEWFEATURE:
-//		    	addNewFeatureToDiagram(e);
-		    	isActiveItem=activeItems.NO_ACTIVE_ITEM;
-		    	toolDragImage=null; break;
-		    case DRAGGING_TOOL_CONNECTOR:
-		    	addConnectorToDiagram(e);
-		    	isActiveItem=activeItems.NO_ACTIVE_ITEM;
-		    	toolDragImage=null; break;
-		    case DRAGGING_TOOL_ALT_GROUP:
-		    	addAltGroupToDiagram(e);
-		    	isActiveItem=activeItems.NO_ACTIVE_ITEM;
-		    	toolDragImage=null; break;
-		    case DRAGGING_TOOL_OR_GROUP:
-		    	addOrGroupToDiagram(e);
-		    	isActiveItem=activeItems.NO_ACTIVE_ITEM;
-		    	toolDragImage=null; break;
-		    default: break;
-		  }
-		}
-
-		@Override
-		public void mouseEntered(MouseEvent e) {}
-
-		@Override
-		public void mouseExited(MouseEvent e) {}
-
-	  };
-	  return listener;
-	}
-			
-	private static MouseMotionListener getToolbarMouseMotionListener() {
-		MouseMotionListener list= new MouseMotionListener() {
-
-			@Override
-			public void mouseDragged(MouseEvent e) {
-			  
-			  /* ***DEBUG*** */
-			  if(debug3) System.out.println("Evento Drag, isActiveItem= "+isActiveItem);
-			  /* ***DEBUG*** */
-
-			  switch(isActiveItem){
-			    case DRAGGING_TOOL_NEWFEATURE: dragToolNewFeature(e); break;
-			    case DRAGGING_TOOL_CONNECTOR: dragToolConnector(e); break;
-			    case DRAGGING_TOOL_ALT_GROUP: dragToolAltGroup(e); break;
-			    case DRAGGING_TOOL_OR_GROUP: dragToolOrGroup(e); break;
-			    default: break;
-			  }			  
-			}
-
-
-			@Override
-			public void mouseMoved(MouseEvent e) {}
-			
-		};
-		
-		return list;
-	}
-		
-	/**
-	 * Return the MouseMotionListener for the diagram panel.
-	 * 
-	 * @return list - the listener.
-	 */
-	private static MouseMotionListener getDiagramMouseMotionListener() {
-		MouseMotionListener list= new MouseMotionListener() {
-			
-			@Override
-			public void mouseMoved(MouseEvent e) {}
-			
-			@Override
-			public void mouseDragged(MouseEvent e) {
-			  switch(isActiveItem){
-			    case DRAGGING_FEATURE: dragFeature(e); break;
-			    case DRAGGING_EXTERN_ANCHOR: dragAnchor(e); break;
-			    case DRAGGING_EXTERN_GROUP: dragAnchor(e); break;
-			    default: break;
-			  }			  
-			}
-
-		};
-		
-		return list;
-	}
-
-	private static MouseListener getDiagramMouseListener() {
-		MouseListener listener= new MouseListener() {
-			
-			@Override
-			public void mouseReleased(MouseEvent e) {
-//			  if(popUpElement!=null){
-////				eventsRobot.mousePress(InputEvent.BUTTON1_MASK);
-//				popUpElement=null;				  
-//				diagramElementsMenu.removeAll();
-//				diagramElementsMenu.menuSelectionChanged(false);
-//			  }
-//			  if (e.getButton() == MouseEvent.BUTTON3) {
-//				//if (e.getButton() == MouseEvent.BUTTON1) {
-//				diagramElementsMenu.show(diagramPanel, e.getX(), e.getY());
-//				//                    diagramElementsMenu.show(e.getComponent(), e.getX(), e.getY());
-//				return;
-//			  }
-
-			  switch(isActiveItem){
-			    case DRAGGING_FEATURE:
-			      isActiveItem=activeItems.NO_ACTIVE_ITEM;
-			      lastFeatureFocused=null; break;
-			    case DRAGGING_EXTERN_ANCHOR:
-				      dropAnchorOnDiagram(e);
-				      isActiveItem=activeItems.NO_ACTIVE_ITEM;
-				      lastAnchorFocused=null; break;
-			    case DRAGGING_EXTERN_GROUP:
-				      dropGroupOnDiagram(e);
-				      isActiveItem=activeItems.NO_ACTIVE_ITEM;
-				      lastAnchorFocused=null; break;
-			    default: break;
-			  }
-			}
-			
-			@Override
-			public void mousePressed(MouseEvent e) {
-//			  if(popUpElement!=null){
-////				eventsRobot.mousePress(InputEvent.BUTTON1_MASK);
-//				popUpElement=null;				  
-//				diagramElementsMenu.removeAll();
-//				diagramElementsMenu.menuSelectionChanged(false);
-//			  }
-			  int featurePanelX=0, featurePanelY=0;
-			  int anchorPanelOnScreenX=0, anchorPanelOnScreenY=0;
-			  FeaturePanel featurePanel=null;
-			  JComponent anchorPanel=null;
-			  String anchorPanelName;
-			  OrderedListNode tmpNode=visibleOrderDraggables.getFirst();
-			  while(tmpNode!=null){
-				if (((Component)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY())){
-				  lastPositionX=e.getX();
-				  lastPositionY=e.getY();
-
-				  //mouse pressed on a feature panel in the diagram panel
-				  if(tmpNode.getElement().getClass().equals(FeaturePanel.class) &&
-					 ((FeaturePanel)tmpNode.getElement()).getName().startsWith(featureNamePrefix) ){
-					  
-					featurePanel=(FeaturePanel)tmpNode.getElement();
-					featurePanelX=featurePanel.getX();
-					featurePanelY=featurePanel.getY();
-					anchorPanel=(JComponent)featurePanel.getComponentAt(e.getX()-featurePanelX, e.getY()-featurePanelY);
-					anchorPanelName=anchorPanel.getName();
-					//mouse pressed on an anchor inside the feature panel
-					if(anchorPanelName!=null && anchorPanel.getClass().equals(AnchorPanel.class) &&(
-					   anchorPanelName.startsWith(startConnectorsNamePrefix) ||
-					   anchorPanelName.startsWith(endConnectorsNamePrefix) ) ){
-						
-					  isActiveItem=activeItems.DRAGGING_EXTERN_ANCHOR;
-					  lastAnchorFocused=(JComponent)anchorPanel;
-
-					  anchorPanelOnScreenX=(int)lastAnchorFocused.getLocationOnScreen().getX();
-					  anchorPanelOnScreenY=(int)lastAnchorFocused.getLocationOnScreen().getY();
-					  featurePanel.remove(lastAnchorFocused);
-					  featurePanel.validate();
-					  lastAnchorFocused.setLocation((int)(anchorPanelOnScreenX-diagramPanel.getLocationOnScreen().getX()),
-						(int)(anchorPanelOnScreenY-diagramPanel.getLocationOnScreen().getY()));
-					  diagramPanel.setLayer(lastAnchorFocused, 0);
-					  diagramPanel.add(lastAnchorFocused);
-					  diagramPanel.setComponentZOrder(lastAnchorFocused, 0);
-					  moveComponentToTop(lastAnchorFocused);
-					  break;
-					}
-					//mouse pressed on a group inside the feature panel
-					else if(anchorPanelName!=null && anchorPanel.getClass().equals(GroupPanel.class) && (
-					   anchorPanelName.startsWith(altGroupNamePrefix) ||
-					   anchorPanelName.startsWith(orGroupNamePrefix) ) ){
-						
-					  isActiveItem=activeItems.DRAGGING_EXTERN_GROUP;
-					  lastAnchorFocused=(JComponent)anchorPanel;
-
-					  anchorPanelOnScreenX=(int)lastAnchorFocused.getLocationOnScreen().getX();
-					  anchorPanelOnScreenY=(int)lastAnchorFocused.getLocationOnScreen().getY();
-					  featurePanel.remove(lastAnchorFocused);
-					  featurePanel.validate();
-					  lastAnchorFocused.setLocation((int)(anchorPanelOnScreenX-diagramPanel.getLocationOnScreen().getX()),
-						(int)(anchorPanelOnScreenY-diagramPanel.getLocationOnScreen().getY()));
-					  diagramPanel.setLayer(lastAnchorFocused, 0);
-					  diagramPanel.add(lastAnchorFocused);
-					  diagramPanel.setComponentZOrder(lastAnchorFocused, 0);
-					  moveComponentToTop(lastAnchorFocused);
-					  break;
-					}
-					//mouse directly pressed on a feature panel, not on an inner anchor
-					isActiveItem=activeItems.DRAGGING_FEATURE;
-					lastFeatureFocused=(FeaturePanel)((Component)tmpNode.getElement());   
-					moveComponentToTop(lastFeatureFocused);
-				  }
-				  //mouse pressed on an anchor panel in the diagram panel
-				  else if(tmpNode.getElement().getClass().equals(AnchorPanel.class) &&(
-						  ((AnchorPanel)tmpNode.getElement()).getName().startsWith(startConnectorsNamePrefix) ||
-						  ((AnchorPanel)tmpNode.getElement()).getName().startsWith(endConnectorsNamePrefix) ) ){
-					isActiveItem=activeItems.DRAGGING_EXTERN_ANCHOR;
-					lastAnchorFocused=(AnchorPanel)((Component)tmpNode.getElement());
-					moveComponentToTop(lastAnchorFocused);
-				  }
-				  //mouse pressed on a group panel in the diagram panel
-				  else if(tmpNode.getElement().getClass().equals(GroupPanel.class) &&
-						  //lastAnchorFocused?
-						  ((GroupPanel)tmpNode.getElement()).getName().startsWith(altGroupNamePrefix) ||
-						  ((GroupPanel)tmpNode.getElement()).getName().startsWith(orGroupNamePrefix) ){
-					isActiveItem=activeItems.DRAGGING_EXTERN_GROUP;
-					lastAnchorFocused=(GroupPanel)((Component)tmpNode.getElement());
-					moveComponentToTop(lastAnchorFocused);
-				  }
-
-				  /* ***DEBUG*** */
-				  if (debug2){
-					  System.out.println("Source dell'evento: "+e.getSource());
-					  OrderedListNode printTmp=visibleOrderDraggables.getFirst();
-					  System.out.println("Stampo l'ordine attuale nella lista, partendo da first.");
-					  while(printTmp!=null){
-						  System.out.println("-"+((Component)printTmp.getElement()).getName());							  
-						  printTmp=printTmp.getNext();
-					  }
-				  }
-				  /* ***DEBUG*** */
-
-				  break;
-				}
-				
-				/* ***DEBUG*** */
-				if (debug2){
-				  System.out.println("Current Panel: "+((Component)tmpNode.getElement()).getName());
-				}
-				/* ***DEBUG*** */
-				
-				tmpNode=tmpNode.getNext();
-			  }
-			}
-			
-			@Override
-			public void mouseExited(MouseEvent e) {}
-			
-			@Override
-			public void mouseEntered(MouseEvent e) {
-
-			    /* ***DEBUG *** */
-				if (debug2){
-				  OrderedListNode tmpNode=visibleOrderDraggables.getFirst();
-				  while(tmpNode!=null){
-					if (((Component)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY())){
-					  System.out.println("Sei passato su "+((Component)tmpNode.getElement()).getName()+"!");
-					  return;
-					}
-					tmpNode=tmpNode.getNext();
-				  }
-				}
-				/* ***DEBUG *** */
-
-			}
-			
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				System.out.println("Button pressed: "+e.getButton());
-				System.out.println("Source e: "+e.getSource());
-				System.out.println("Source e.getName(): "+((Component)e.getSource()).getName());
-            	diagramElementsMenu.removeAll();
-//				diagramElementsMenu.setEnabled(false);
-                if (e.getButton() == MouseEvent.BUTTON3) {
-//                	toolsPanel.setRequestFocusEnabled(false);
-//                	toolsPanel.setFocusable(false);
-//                	toolsPanel.setEnabled(false);
-                	Component comp=diagramPanel.getComponentAt(e.getX(), e.getY());
-                	
-                	/* ***DEBUG*** */
-                	if(debug3) System.out.println("rigth clicked on: "+comp.getName());
-                	/* ***DEBUG*** */
-
-                	if(comp.getName()==null || comp.getName()==""|| comp.getName().startsWith(diagramPanelName)) return;
-
-                	popUpElement=(JComponent)comp;
-//                	popUpElement=getUnderlyingComponent(e.getX(), e.getY());
-
-                	if(popUpElement.getName().startsWith(startConnectorsNamePrefix)
-                     	   || popUpElement.getName().startsWith(endConnectorsNamePrefix)){
-                      diagramElementsMenu.add(popMenuItemDelete);
-                      diagramElementsMenu.add(popMenuItemUngroup);
-                    }
-                	if(popUpElement.getName().startsWith(featureNamePrefix)){
-                	  diagramElementsMenu.add(popMenuItemDelete);
-                   	}
-                	
-                	diagramElementsMenuPosX=e.getX();
-                	diagramElementsMenuPosY=e.getY();
-                	diagramElementsMenu.show(diagramPanel, diagramElementsMenuPosX, diagramElementsMenuPosY);
-//                	diagramElementsMenu.show(diagramPanel.getComponentAt(e.getX(), e.getY()),
-//                		e.getX()-diagramPanel.getComponentAt(e.getX(), e.getY()).getX(),
-//                		e.getY()-diagramPanel.getComponentAt(e.getX(), e.getY()).getY());
-                }
-
-				/* ***DEBUG *** */
-				if(debug) System.out.println("splitterPanel.getDividerLocation(): "+splitterPanel.getDividerLocation());
-				/* ***DEBUG *** */
-
-				  
-				/* ***DEBUG *** */
-				if (!debug) return;
-				OrderedListNode tmpNode=visibleOrderDraggables.getFirst();
-				while(tmpNode!=null){
-					if (((Component)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY())){
-						System.out.println("Hai cliccato su "+((Component)tmpNode.getElement()).getName()+"!"+
-							"\nLocation: "+((Component)tmpNode.getElement()).getLocationOnScreen()+"!");						
-						return;
-					}
-					tmpNode=tmpNode.getNext();
-				}
-				/* ***DEBUG *** */
-
-			}
-		};
-		
-		return listener;
-	}
-
 	/**
 	 * Moves a component in the diagram panel to the top layer.
 	 * 
 	 * @param comp - the component to move to top.
 	 */
-	public static void moveComponentToTop(JComponent comp) {
+	public void moveComponentToTop(JComponent comp) {
 		int currentLayer=diagramPanel.getComponentZOrder(comp);
 
 		  /* ***DEBUG*** */
@@ -1860,7 +1345,7 @@ public class EditorView extends JFrame implements Observer{
 	 * Moves all components in the selection group to the top layer of diagram panel.
 	 * 
 	 */
-	public static void moveSelectionGroupToTop() {
+	public void moveSelectionGroupToTop() {
 	  for(JComponent element : selectionGroupFocused) moveComponentToTop(element);
 	}
 
@@ -1869,7 +1354,7 @@ public class EditorView extends JFrame implements Observer{
 	 *
 	 * @param e - the current MouseEvent
 	 */
-	public static void dragAnchor(MouseEvent e) {
+	public void dragAnchor(MouseEvent e) {
 	  if(lastAnchorFocused==null) return;
 	  dragDiagramElement(lastAnchorFocused, e);
 //		  diagramPanel.repaint();
@@ -1881,7 +1366,7 @@ public class EditorView extends JFrame implements Observer{
 	 *
 	 * @param e - the current MouseEvent
 	 */
-	public static void dragFeature(MouseEvent e) {
+	public void dragFeature(MouseEvent e) {
 	  if(lastFeatureFocused==null) return;
 	  dragDiagramElement(lastFeatureFocused, e);
 //	  diagramPanel.repaint();
@@ -1893,7 +1378,7 @@ public class EditorView extends JFrame implements Observer{
 	 *
 	 * @param e - the current MouseEvent
 	 */
-	public static void dragSelectionRect(MouseEvent e) {
+	public void dragSelectionRect(MouseEvent e) {
 	  System.out.println("start: "+startSelectionRect+"\tend: "+e.getLocationOnScreen().getLocation());
 //	  endSelectionRect=e.getLocationOnScreen().getLocation();
 
@@ -1908,7 +1393,7 @@ public class EditorView extends JFrame implements Observer{
 	 *
 	 * @param e - the current MouseEvent
 	 */
-	public static void dragSelectionGroup(MouseEvent e) {
+	public void dragSelectionGroup(MouseEvent e) {
 		  int moveX=0, moveY=0;
 		  int adjustedMoveX=0, adjustedMoveY=0;	  
 		  int newLocationX=0, newLocationY=0;
@@ -1964,7 +1449,7 @@ public class EditorView extends JFrame implements Observer{
 	 * @param element - the element to drag
 	 * @param e - the current MouseEvent
 	 */
-	private static void dragDiagramElement(JComponent element, MouseEvent e) {
+	private void dragDiagramElement(JComponent element, MouseEvent e) {
 		  int moveX=0, moveY=0;
 		  int adjustedMoveX=0, adjustedMoveY=0;	  
 		  int newLocationX=0, newLocationY=0;
@@ -2029,7 +1514,7 @@ public class EditorView extends JFrame implements Observer{
 	 *
 	 *@see MouseMotionListener
 	 */
-	public static void dragToolConnector(MouseEvent e) {
+	public void dragToolConnector(MouseEvent e) {
 		  dragTool(e);
 	}
 
@@ -2039,7 +1524,7 @@ public class EditorView extends JFrame implements Observer{
 	 *
 	 *@see MouseMotionListener
 	 */
-	public static void dragToolNewFeature(MouseEvent e) {
+	public void dragToolNewFeature(MouseEvent e) {
 		  dragTool(e);
 	}
 
@@ -2049,7 +1534,7 @@ public class EditorView extends JFrame implements Observer{
 	 *
 	 *@see MouseMotionListener
 	 */
-	public static void dragToolAltGroup(MouseEvent e) {
+	public void dragToolAltGroup(MouseEvent e) {
 		  dragTool(e);
 	}
 	
@@ -2059,7 +1544,7 @@ public class EditorView extends JFrame implements Observer{
 	 *
 	 *@see MouseMotionListener
 	 */
-	public static void dragToolOrGroup(MouseEvent e) {
+	public void dragToolOrGroup(MouseEvent e) {
 		  dragTool(e);
 	}
 	
@@ -2070,7 +1555,7 @@ public class EditorView extends JFrame implements Observer{
 	 *
 	 *@see MouseMotionListener
 	 */
-	private static void dragTool(MouseEvent e) {
+	private void dragTool(MouseEvent e) {
 		int moveX=0, moveY=0;
 
 //		  moveX = (int)e.getLocationOnScreen().getX()-lastPositionX;
@@ -2101,7 +1586,7 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @param e - MouseEvent of the type Mouse Released.
 	 */
-	public static Component dropAnchorOnDiagram(MouseEvent e) {
+	public Component dropAnchorOnDiagram(MouseEvent e) {
 	  Component comp = null;
 	  int anchorPanelOnScreenX =0;
 	  int anchorPanelOnScreenY =0;
@@ -2180,7 +1665,7 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @param e - MouseEvent of the type Mouse Released.
 	 */
-	public static Component dropGroupOnDiagram(MouseEvent e) {
+	public Component dropGroupOnDiagram(MouseEvent e) {
 	  OrderedListNode tmpNode=visibleOrderDraggables.getFirst();
 	  while(tmpNode!=null){	  
 	    if ( tmpNode.getElement().getClass().equals(FeaturePanel.class) &&
@@ -2198,10 +1683,14 @@ public class EditorView extends JFrame implements Observer{
 	}
 	
 
+
+
 	/**
-	NO PARAMETER VERSION, CALLED BY update()
+	 * Removes a visible anchor from the diagram panel and attach it to a feature panel.<br>
+	 * 
+	 * @return - false if the operation is not possible, true otherwise
 	 */
-	public static boolean addAnchorToFeature() {
+	public void addAnchorToFeature() {
 		int anchorPanelOnScreenX;
 		int anchorPanelOnScreenY;
 		
@@ -2211,7 +1700,7 @@ public class EditorView extends JFrame implements Observer{
 
 		//if it is an ending anchor, location is set to top-middle of underlying feature
 		if(lastAnchorFocused.getName().startsWith(endConnectorsNamePrefix)){
-			lastAnchorFocused.setLocation(underlyingComponent.getWidth()/2-lastAnchorFocused.getWidth()/2, 0);		
+		  lastAnchorFocused.setLocation(underlyingComponent.getWidth()/2-lastAnchorFocused.getWidth()/2, 0);		
 		}
 		
 		//if it is a starting anchor, location is set relative to underlying feature, on the same visible location
@@ -2229,7 +1718,7 @@ public class EditorView extends JFrame implements Observer{
 		((JLayeredPane)underlyingComponent).add(lastAnchorFocused);
 		((JLayeredPane)underlyingComponent).setComponentZOrder(lastAnchorFocused, 0);
 
-		return true;
+		return;
 	}
 
 	/**
@@ -2276,97 +1765,9 @@ public class EditorView extends JFrame implements Observer{
 	}
 
 	/**
-	 * Removes a visible anchor from the diagram panel and attach it to a feature panel.<br>
-	 * If the anchor is not visible and attached to the diagram panel, no operation is performed <br>
-	 * and false value is returned.
-	 * 
-	 * @param anchor - the JComponent object of the anchor
-	 * @param featurePanel - the feature panel on which the anchor will be added
-	 * @return - false if the operation is not possible, true otherwise
+	 * Removes a starting connector anchor from the diagram panel and attach it to a group.
 	 */
-	private static boolean addAnchorToFeature(JComponent anchor, FeaturePanel featurePanel) {
-		int anchorPanelOnScreenX;
-		int anchorPanelOnScreenY;
-		Component comp = null;
-		AnchorPanel startAnchor = null;
-		GroupPanel group = null;
-		
-		/* ***DEBUG*** */
-		if(debug4) System.out.println("BEFORE ADDING ANCHOR TO FEATURE"
-			+"\nanchor.getParent()="+anchor.getParent()
-			+"\nanchor.isDisplayable(): "+anchor.isDisplayable());
-		/* ***DEBUG*** */
-
-		if(anchor.getParent()==null || !anchor.isDisplayable()) return false;
-		
-		moveComponentToTop(featurePanel);
-
-		/* ***DEBUG*** */
-		if(debug) System.out.println("Adding anchor to the feature: "+featurePanel.getName()
-				+"\nunderlyingPanel.getLocationOnScreen(): "+featurePanel.getLocationOnScreen()
-				+"\nlastAnchorFocused.getLocationOnScreen(): "+anchor.getLocationOnScreen());
-		/* ***DEBUG*** */
-
-		
-		//if it is an ending anchor, location is set to top-middle of underlying feature
-		if(anchor.getName().startsWith(endConnectorsNamePrefix)){
-		  anchor.setLocation(featurePanel.getWidth()/2-anchor.getWidth()/2, -4);		
-		}
-		
-		//if it is a starting anchor, location is set relative to underlying feature, on the same visible location
-		else {
-		  anchorPanelOnScreenX=(int)anchor.getLocationOnScreen().getX();
-		  anchorPanelOnScreenY=(int)anchor.getLocationOnScreen().getY();
-		  anchor.setLocation((int)(anchorPanelOnScreenX-featurePanel.getLocationOnScreen().getX()),
-				  (int)(anchorPanelOnScreenY-featurePanel.getLocationOnScreen().getY()) );		
-		}
-
-		//checking if anchor must be added to a group
-		if(anchor.getName().startsWith(startConnectorsNamePrefix)){
-		  comp = featurePanel.getComponentAt(anchor.getLocation());
-		  if (comp!=null && comp.getName()!=null && (comp.getName().startsWith(altGroupNamePrefix) 
-			  || comp.getName().startsWith(orGroupNamePrefix) )){
-			startAnchor=(AnchorPanel)anchor;
-			group=(GroupPanel)comp;
-
-     		/* ***DEBUG*** */
-	        if(debug) System.out.println("Adding anchor to the group: "+group.getName());
-	        /* ***DEBUG*** */
-	        
-	        addStartAnchorToGroup(startAnchor, group);
-			return true;
-//			endConnectorDots.remove(((AnchorPanel)anchor).getOtherEnd());
-//			connectorDotsToRedraw.remove(anchor);
-		  }
-		}
-
-		//Adding anchor to the feature
-		/* ***DEBUG*** */
-		if(debug) System.out.println("Adding anchor to the feature: "+featurePanel.getName()
-				+"\nWith origin: "+featurePanel.getLocation()
-				+"\nIn the position: "+anchor.getLocation());
-		/* ***DEBUG*** */
-
-//		visibleOrderDraggables.
-		diagramPanel.remove(anchor);
-		diagramPanel.validate();
-		featurePanel.setLayer(anchor, 0);
-		featurePanel.add(anchor);
-		featurePanel.setComponentZOrder(anchor, 0);
-		
-		/* ***DEBUG*** */
-		if(debug4) System.out.println("AFTER ADDING ANCHOR TO FEATURE"
-			+"\nanchor.getParent()="+anchor.getParent()
-			+"\nanchor.isDisplayable(): "+anchor.isDisplayable());
-		/* ***DEBUG*** */
-
-		return true;
-	}
-
-	/**
-	NO PARAMETER VERSION, CALLED BY update()
-	 */
-	private static void addStartAnchorToGroup() {
+	private void addStartAnchorToGroup() {
 		((GroupPanel)underlyingComponent).getMembers().add((AnchorPanel)((AnchorPanel)lastAnchorFocused).getOtherEnd());
 		((AnchorPanel)((AnchorPanel)lastAnchorFocused).getOtherEnd()).setOtherEnd(underlyingComponent);
 		diagramPanel.remove(lastAnchorFocused);
@@ -2377,28 +1778,28 @@ public class EditorView extends JFrame implements Observer{
 		return;
 	}
 
-	/**
-	 * Removes a starting connector anchor from the diagram panel and attach it to a group.<br>
-	 * 
-	 * @param startAnchor - the starting connector anchor to be added
-	 * @param group - the group 
-	 */
-	private static void addStartAnchorToGroup(AnchorPanel startAnchor, GroupPanel group) {
-		group.getMembers().add((AnchorPanel)startAnchor.getOtherEnd());
-		((AnchorPanel)startAnchor.getOtherEnd()).setOtherEnd(group);
-		diagramPanel.remove(startAnchor);
-		diagramPanel.validate();
-		visibleOrderDraggables.remove(startAnchor);
-		startConnectorDots.remove(startAnchor);
-		return;
-	}
+//	/**
+//	 * Removes a starting connector anchor from the diagram panel and attach it to a group.<br>
+//	 * 
+//	 * @param startAnchor - the starting connector anchor to be added
+//	 * @param group - the group 
+//	 */
+//	private static void addStartAnchorToGroup(AnchorPanel startAnchor, GroupPanel group) {
+//		group.getMembers().add((AnchorPanel)startAnchor.getOtherEnd());
+//		((AnchorPanel)startAnchor.getOtherEnd()).setOtherEnd(group);
+//		diagramPanel.remove(startAnchor);
+//		diagramPanel.validate();
+//		visibleOrderDraggables.remove(startAnchor);
+//		startConnectorDots.remove(startAnchor);
+//		return;
+//	}
 
 	/**
 	 * Adds a new feature to the diagram panel, incrementing featuresCount.
 	 * 
 	 * @param e - MouseEvent of the type Mouse Released.
 	 */
-	public static void addNewFeatureToDiagram(/*MouseEvent e*/) {
+	public void addNewFeatureToDiagram(/*MouseEvent e*/) {
 		
 		//the new feature must be dropped on the diagram panel for it to be added
 		if( diagramPanel.getLocationOnScreen().getX()>toolDragPosition.x ||
@@ -2448,7 +1849,7 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @param e - MouseEvent of the type Mouse Released.
 	 */
-	public static void addConnectorToDiagram(MouseEvent e) {
+	public void addConnectorToDiagram(MouseEvent e) {
 //		int actualPositionX=((int)(e.getLocationOnScreen().getX()-diagramPanel.getLocationOnScreen().getX()));
 //		int actualPositionY=((int)(e.getLocationOnScreen().getY()-diagramPanel.getLocationOnScreen().getY()));
 		int actualPositionX;
@@ -2573,7 +1974,7 @@ public class EditorView extends JFrame implements Observer{
 		cancelToolDrag();
 	}
 
-	public static void addOrGroupToDiagram(MouseEvent e) {
+	public void addOrGroupToDiagram(MouseEvent e) {
 		GroupPanel newGroupStartDot = addGroupToDiagram(e, ItemsType.OR_GROUP_START_CONNECTOR);
 		if (newGroupStartDot==null) return;
 		addOrGroupToDrawLists(newGroupStartDot);
@@ -2586,7 +1987,7 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @param e - MouseEvent of the type Mouse Released.
 	 */
-	public static void addAltGroupToDiagram(MouseEvent e) {
+	public void addAltGroupToDiagram(MouseEvent e) {
 		GroupPanel newGroupStartDot = addGroupToDiagram(e, ItemsType.ALT_GROUP_START_CONNECTOR);
 		if (newGroupStartDot==null) return;
 		addAltGroupToDrawLists(newGroupStartDot);
@@ -2600,7 +2001,7 @@ public class EditorView extends JFrame implements Observer{
 	 * @param e - MouseEvent of the type Mouse Released.
 	 * @param requestedType - the type of the requested group, an ItemsType value.
 	 */
-	private static GroupPanel addGroupToDiagram(MouseEvent e, ItemsType requestedType) {
+	private GroupPanel addGroupToDiagram(MouseEvent e, ItemsType requestedType) {
 		int actualPositionX;
 		int actualPositionY;
 		boolean startDotInsertedInPanel=false;
@@ -2741,7 +2142,7 @@ public class EditorView extends JFrame implements Observer{
 	 * @param y - y coordinate of the connection dot in the diagram panel
 	 * @return A new JComponent representing the connection dot
 	 */
-	private static JComponent getDraggableConnectionDot(ItemsType type, int x, int y) {
+	private JComponent getDraggableConnectionDot(ItemsType type, int x, int y) {
 		JComponent imagePanel=null;
 
 		ImageIcon connectorIcon=null;
@@ -2797,7 +2198,7 @@ public class EditorView extends JFrame implements Observer{
 	 * @param y - y coordinate of the feature in the diagram panel
 	 * @return A new JPanel representing the feature
 	 */
-	private static FeaturePanel getDraggableFeature(String name, int x, int y) {
+	private FeaturePanel getDraggableFeature(String name, int x, int y) {
 		int layer=-1;
 		JLabel imageLabel = null, textLabel = null;
 		ImageIcon newFeatureIcon = null;
@@ -2856,7 +2257,7 @@ public class EditorView extends JFrame implements Observer{
 	 * @return - the Component found, or null if there isn't any Component, children of diagramPanel, <br>
 	 * at the specified coordinates.
 	 */
-	private static JComponent getUnderlyingComponent(int x, int y) {
+	private JComponent getUnderlyingComponent(int x, int y) {
 	  JComponent subComponent = null;
 	  JComponent underlyingPanel = (JComponent) diagramPanel.getComponentAt(x, y);
 
@@ -2895,7 +2296,7 @@ public class EditorView extends JFrame implements Observer{
 	 * @param newConnectorStartDot - the starting connector dot
 	 * @param newConnectorEndDot - the ending connector dot
 	 */
-	private static void addConnectorsToDrawLists(JComponent newConnectorStartDot, JComponent newConnectorEndDot) {
+	private void addConnectorsToDrawLists(JComponent newConnectorStartDot, JComponent newConnectorEndDot) {
 		startConnectorDots.add(newConnectorStartDot);
 //		prevStartConnectorDotsLocation.add(new Point());
 //		endConnectorDots.add(newConnectorEndDot);
@@ -2908,7 +2309,7 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @param group - the GrouPanel object to be added to the lists
 	 */
-	private static void addAltGroupToDrawLists(GroupPanel group) {
+	private void addAltGroupToDrawLists(GroupPanel group) {
 		altGroupPanels.add(group);		
 	}
 
@@ -2917,7 +2318,7 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @param group - the GrouPanel object to be added to the lists
 	 */
-	private static void addOrGroupToDrawLists(GroupPanel group) {
+	private void addOrGroupToDrawLists(GroupPanel group) {
 		orGroupPanels.add(group);		
 	}
 	
@@ -2926,7 +2327,7 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @param feature - the feature to delete
 	 */
-	public static void deleteFeature(JComponent feature) {
+	public void deleteFeature(JComponent feature) {
 	  //attaching all feature anchors to the diagram
   	  for(Component comp : feature.getComponents())
   		if(comp.getName()!=null 
@@ -2959,7 +2360,7 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @param anchor - the anchor to ungroup
 	 */ 
-	public static void ungroupAnchor(AnchorPanel anchor) {
+	public void ungroupAnchor(AnchorPanel anchor) {
 	  int startDotlocationX=0;
 	  int startDotlocationY=0;
 	  GroupPanel group = (GroupPanel)anchor.getOtherEnd();
@@ -3001,7 +2402,7 @@ public class EditorView extends JFrame implements Observer{
 	 * @param feature - the feature from wich the anchor must be detached
 	 * @param anchor - the anchor to detach
 	 */
-	public static void detachAnchor(FeaturePanel feature, JComponent anchor) {
+	public void detachAnchor(FeaturePanel feature, JComponent anchor) {
 		int anchorPanelOnScreenX;
 		int anchorPanelOnScreenY;
 		
@@ -3022,7 +2423,8 @@ public class EditorView extends JFrame implements Observer{
 		diagramPanel.setLayer(anchor, 0);
 		diagramPanel.add(anchor);
 		diagramPanel.setComponentZOrder(anchor, 0);
-		EditorView.moveComponentToTop(anchor);
+//		EditorView.moveComponentToTop(anchor);
+		moveComponentToTop(anchor);
 	}
 	
 	/**
@@ -3030,7 +2432,7 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @param anchor - the anchor to delete
 	 */
-	public static void deleteAnchor(JComponent anchor) {
+	public void deleteAnchor(JComponent anchor) {
 		int diagramRelativeX=0;
 		int diagramRelativeY=0;
 		JComponent underlying = null;
@@ -3247,7 +2649,7 @@ public class EditorView extends JFrame implements Observer{
 
 	/**
 	 * Reset item used for dragging tools.*/
-	private static void cancelToolDrag() {
+	private void cancelToolDrag() {
 		toolDragImage=null;
 		toolDragPosition=null;
 		frameRoot.repaint();
@@ -3289,7 +2691,7 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @return true if tool has been dropped on the diagram panel, false otherwise
 	 */
-	public static boolean checkDroppedOnDiagram() {
+	public boolean checkDroppedOnDiagram() {
 		//the new feature must be dropped on the diagram panel for it to be added
 		if( diagramPanel.getLocationOnScreen().getX()>toolDragPosition.x ||
 			diagramPanel.getLocationOnScreen().getX()+diagramPanel.getWidth()<=toolDragPosition.x ||
@@ -3374,4 +2776,164 @@ public class EditorView extends JFrame implements Observer{
 
 	}*/
 
+	
+	/** 
+	 * Assigns a name to the diagram to be saved.
+	 * 
+	 * @return s - String representing the diagram name, or null if dialog has been aborted
+	 */
+	public String assignNameDiagramDialog(){				
+	  String s = null;			
+	  JTextField jtf = new JTextField();
+		 	
+	  Object[] o1 = {"Diagram name: ", jtf};
+	  Object[] o2 = { "Cancel", "OK" };
+		    
+	  int i = JOptionPane.showOptionDialog(new JFrame("Save Diagram"), o1, "",
+			  JOptionPane.YES_NO_OPTION, JOptionPane.DEFAULT_OPTION, null, o2, o2[1]);
+		    
+	  if(i == JOptionPane.NO_OPTION){
+		if((s = jtf.getText()) != null){
+		  if(!s.trim().equals("")) return s;
+		  else{
+			errorDialog("Invalid name");
+			return null;
+		  }
+		}
+		else{
+		  errorDialog("Invalid name");
+		  return null;
+		}
+	  }		    		      
+	  else return null;	  
+	}
+	
+	/** 
+	 * Shows a message when the user makes an error.
+	 * 
+	 * @param s - the error message
+	 */
+	public void errorDialog(String s){
+		JFrame f = new JFrame("Error");
+    	Object[] options = {"OK"};			
+		
+		JOptionPane.showOptionDialog(f, s, "Error", 
+				JOptionPane.OK_OPTION, JOptionPane.NO_OPTION, null, options, options[0]);
+	}
+
+	public void saveDiagram(String pathProject, String s) {
+		OrderedListNode tmp = null;
+		String xml = null;
+		FeaturePanel featTmp=null;
+		AnchorPanel anchTmp=null;
+		AnchorPanel endTmp=null;
+		String startOwner=null;
+		String endOwner=null;
+		String savePath = pathProject + "/" + s + "_DiagView.xml"; 
+
+		
+		xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+				+"<name>" + s + "</name>"
+				+"<features>";
+		
+		tmp = visibleOrderDraggables.getLast();
+		while(tmp!=null){
+		  if(((JComponent)tmp.getElement()).getName().startsWith(featureNamePrefix)){
+			featTmp = (FeaturePanel)tmp.getElement();
+			xml+="Name="+featTmp.getLabelName()+" ContName="+featTmp.getName()
+			    +" Loc="+featTmp.getX()+"."+featTmp.getY()
+			    +" Size="+featTmp.getWidth()+"."+featTmp.getHeight()+"\n";
+		  }
+		  tmp=tmp.getPrev();
+		}
+
+		xml+=	 "</features>"
+			    +"<connectors>";
+		
+		for(JComponent anchor : startConnectorDots){
+		  anchTmp=(AnchorPanel)anchor;
+		  endTmp=(AnchorPanel)anchTmp.getOtherEnd();
+		  if(anchTmp.getParent().getName().startsWith(featureNamePrefix)) 
+			startOwner=anchTmp.getParent().getName();
+		  else startOwner="";
+		  if(endTmp.getParent().getName().startsWith(featureNamePrefix))
+			endOwner=endTmp.getParent().getName()+"\n";
+		  else endOwner="\n";
+		  
+		  xml+="StartName="+anchTmp.getName()+" Loc="+anchTmp.getX()+"."+anchTmp.getY()+" StartOwner="+startOwner
+		      +" EndName="+endTmp.getName()+" Loc="+endTmp.getX()+"."+endTmp.getY()+" EndOwner="+endOwner;		  
+		}
+
+		xml+=	 "</connectors>"
+			    +"<groups>";
+
+		for(GroupPanel group : altGroupPanels){
+		  if(group.getParent().getName().startsWith(featureNamePrefix)) 
+			startOwner=group.getParent().getName();
+		  else startOwner="";
+			  
+		  xml+="GroupName="+group.getName()+" type=ALT"+" Loc="+group.getX()+"."+group.getY()+" StartOwner="+startOwner;
+
+		  for(AnchorPanel member : group.getMembers()){
+			if(member.getParent().getName().startsWith(featureNamePrefix)) 
+			  endOwner=member.getParent().getName();
+			else endOwner="";
+			  
+			xml+=" MemberName="+member.getName()+" Loc="+member.getX()+"."+member.getY()+" EndOwner="+endOwner;		  
+		  }
+		  xml+="\n";
+		}
+
+		for(GroupPanel group : orGroupPanels){
+		  if(group.getParent().getName().startsWith(featureNamePrefix)) 
+			startOwner=group.getParent().getName();
+		  else startOwner="";
+			  
+		  xml+="GroupName="+group.getName()+" type=OR"+" Loc="+group.getX()+"."+group.getY()+" StartOwner="+startOwner;
+
+		  for(AnchorPanel member : group.getMembers()){
+			if(member.getParent().getName().startsWith(featureNamePrefix)) 
+			  endOwner=member.getParent().getName();
+			else endOwner="";
+			  
+			xml+=" MemberName="+member.getName()+" Loc="+member.getX()+"."+member.getY()+" EndOwner="+endOwner;		  
+		  }
+		  xml+="\n";
+		  
+		}
+		
+		xml+=	 "</groups>"
+			    +"<misc>"
+				+"connectorsCount="+connectorsCount+" altGroupsCount="+altGroupsCount
+				+" orGroupsCount="+orGroupsCount+" featuresCount="+featuresCount
+			    +"</misc>"
+			    +"<startingCommonalities>";
+		
+		for(String name : startingCommonalities){
+		  xml+=name+" ";
+		}
+
+		xml+=	 "</startingCommonalities>"
+			    +"<startingVariabilities>";
+		
+		for(String name : startingVariabilities){
+		  xml+=name+" ";
+		}		
+
+		xml+=	 "</startingVariabilities>";
+		
+		//saving xml string on file
+		try{
+		  PrintWriter pw1 = new PrintWriter(new BufferedWriter(new FileWriter(savePath)));
+		  pw1.print(xml);
+		  pw1.close();
+			
+		  modified = false;
+		} 
+		catch (IOException e){
+			System.out.println("Exception saveDiagram: " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+	
 }

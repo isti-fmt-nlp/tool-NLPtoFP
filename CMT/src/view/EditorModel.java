@@ -497,4 +497,8 @@ public class EditorModel extends Observable{
 	  }
 	  return false;	
 	}
+
+	public void saveModel(String pathProject, String s) {
+		
+	}
 }
