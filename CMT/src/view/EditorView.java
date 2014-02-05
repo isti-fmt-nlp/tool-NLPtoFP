@@ -2833,7 +2833,7 @@ public class EditorView extends JFrame implements Observer{
 
 		
 		xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-				+"<name>" + s + "</name>"
+			  +"<Diagram name=\"" + s + "\">"
 				+"<features>";
 		
 		tmp = visibleOrderDraggables.getLast();
@@ -2920,7 +2920,8 @@ public class EditorView extends JFrame implements Observer{
 		  xml+=name+" ";
 		}		
 
-		xml+=	 "</startingVariabilities>";
+		xml+=	 "</startingVariabilities>"
+			  +"</Diagram>";
 		
 		//saving xml string on file
 		try{

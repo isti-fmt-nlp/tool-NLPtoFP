@@ -1,10 +1,17 @@
 package view;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Observable;
 
 import main.FeatureNode;
+import main.OrderedListNode;
 import main.FeatureNode.FeatureTypes;
 import main.GroupNode;
 
@@ -499,6 +506,135 @@ public class EditorModel extends Observable{
 	}
 
 	public void saveModel(String pathProject, String s) {
+		String xml = null;
+		String savePathPrefix = pathProject + "/" + s + "_DiagModel"; 
+		String savePathSuffix= ".xml";
+		String date=null;
 		
+		//calculating save time in a 'yyyyy-mm-dd hh:mm' format
+		Calendar cal= Calendar.getInstance();
+		date=cal.get(Calendar.YEAR)+"-"+cal.get(Calendar.MONTH)+"-"+cal.get(Calendar.MONTH)
+			+"-"+cal.get(Calendar.DAY_OF_MONTH)+" "+cal.get(Calendar.HOUR_OF_DAY)+":"+cal.get(Calendar.MINUTE);
+		
+    	for(Map.Entry<String,FeatureNode> feature : unrootedFeatures.entrySet()){
+    	  //skipping features that have a parent feature
+    	  if(feature.getValue().getParent()!=null) continue;
+		
+		  xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+			    +"<feature_model name=\""+s+"_"+feature.getValue().getName()+"\">"
+				  +"<meta>"
+			      +"<data name=\"date\">"+date+"</data>"
+				  +"</meta>"
+				  +"<feature_tree>";
+		
+		  xml+=":r "+feature.getKey()+" ("+feature.getKey()+") ["
+		  +feature.getValue().getMinCardinality()+"."+feature.getValue().getMaxCardinality()+"]"
+		  +recursiveXMLTreeBuilder(feature.getValue(), 1);
+		  
+		  xml+=	   "</feature_tree>"
+				  +"<constraints>";
+		  
+		  /*
+		   * CONSTRAINT PART IS STILL TO BE ADDED...
+		   */
+		  
+		  xml+=	   "</constraints>"
+				+"</feature_model>";
+		  
+		  //saving xml string on file
+		  try{
+			PrintWriter pw1 = new PrintWriter(new BufferedWriter(
+					new FileWriter(savePathPrefix+feature.getValue().getName()+savePathSuffix) ));
+			pw1.print(xml);
+			pw1.close();
+		  } 
+		  catch (IOException e){
+			System.out.println("Exception saveModel: " + e.getMessage());
+			e.printStackTrace();
+		  }		  
+
+    	}
+		
+		
+		
+		
+/*		
+<feature_model name="My feature model">     <-- feature model start tag and name attribute (mandatory)
+  <meta>                                                                  <-- Optional
+  <data name="description">Model description</data>                 <-- Optional
+  <data name="creator">Model's creator</data>                       <-- Optional
+  <data name="email">Model creator's email</data>                   <-- Optional
+  <data name="date">Model creation date</data>                      <-- Optional
+  <data name="department">Model creator's department</data>         <-- Optional
+  <data name="organization">Model creator's organization</data>     <-- Optional
+  <data name="address">Model creator's address</data>               <-- Optional
+  <data name="phone">Model creator's phone</data>                   <-- Optional
+  <data name="website">Model creator's website</data>               <-- Optional
+  <data name="reference">Model's related publication</data>         <-- Optional
+  </meta>
+  <feature_tree>                <-- feature tree start tag
+    :r root (root_id)                 <-- root feature named 'root' with unique ID 'root_id'   						
+      :o opt1 (id_opt1)               <-- an optional feature named opt1 with unique id id_opt1
+      :o opt2 (id_opt2)               <-- an optional feature named opt2, child of opt1 with unique id id_opt2
+      :m man1                         <-- an mandatory feature named man1 with unique id id_man1
+        :g [1,*]                      <-- an inclusive-OR feature group with cardinality [1..*] ([1..3] also allowed)
+          : a (id_a)                  <-- a grouped feature name a with ID id_a
+          : b (id_b)                  <-- a grouped feature name b with ID id_b
+            :o opt3 (id_opt3)         <-- an optional feature opt3 child of b with unique id id_opt3
+          : c (id_c)                  <-- a grouped feature name c with ID id_c
+        :g [1,1]                      <-- an exclusive-OR feature group with cardinality [1..1]
+          : d (id_d)                  <-- a grouped feature name d with ID id_d
+          : e (id_e)                  <-- a grouped feature name e with ID id_e
+            :g [2,3]                      <-- a feature group with cardinality [2..3] children of feature e
+              : f (id_f)                  <-- a grouped feature name f with ID id_f
+              : g (id_g)                  <-- a grouped feature name g with ID id_g
+              : h (id_h)                  <-- a grouped feature name h with ID id_h
+  </feature_tree>               <-- feature tree end tag (mandatory)
+  <constraints>                 <-- extra constraints start tag (mandatory)
+    c1: ~id_a or id_opt2        <-- extra constraint named c1: id_a implies id_opt2 (must be a CNF clause)
+    c2: ~id_c or ~id_e          <-- extra constraint named c2: id_c excludes id_e (must be a CNF clause)
+  </constraints>                <-- extra constraint end tag (mandatory)
+</feature_model>                <-- feature model end tag  (mandatory)	
+
+	
+	
+	
+	
+	DOVE LE INDENTAZIONI SONO TABS!(\t)
+*/		
+	}
+
+	/**
+	 * Recursevely visits all features and groups in the feature tree <br>
+	 * rooted in featureRoot, creating the xml string of the tree.
+	 * 
+	 * @param featureRoot - the root feature from which to build the xml string
+	 * @param depth - the current tree level depth 
+	 * @return - the xml string representing the tree rooted in featureRoot
+	 */
+	private String recursiveXMLTreeBuilder(FeatureNode featureRoot, int depth) {
+	  String xml="";
+	  for(FeatureNode child : featureRoot.getSubFeatures()){
+		for(int i=0; i<depth; ++i) xml+="\t";
+		if(child.getMinCardinality()==0) xml+=":o ";
+		else xml+=":m ";
+		
+		xml+= child.getName()+" ("+child.getName()+") ["
+			 +child.getMinCardinality()+"."+child.getMaxCardinality()+"]"
+			 +recursiveXMLTreeBuilder(child, depth+1);
+	  }
+	  for(GroupNode group : featureRoot.getSubGroups()){
+		for(int i=0; i<depth; ++i) xml+="\t";
+		xml+=":g ["+group.getMinCardinality()+"."+group.getMaxCardinality()+"]";
+		for(FeatureNode member : group.getMembers()){
+			for(int i=0; i<depth+1; ++i) xml+="\t";
+			xml+= ": "+member.getName()+" ("+member.getName()+") ["
+			   +member.getMinCardinality()+"."+member.getMaxCardinality()+"]"
+			   +recursiveXMLTreeBuilder(member, depth+2);			
+		}
+
+	  }
+
+	  return xml;
 	}
 }

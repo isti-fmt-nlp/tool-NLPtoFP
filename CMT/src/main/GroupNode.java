@@ -70,6 +70,24 @@ public class GroupNode {
 	public Point getCardinality(){
 		return new Point(minCardinality, maxCardinality);
 	}
+
+	/**
+	 * Returns the minimum cardinality of this feature .
+	 * 
+	 * @return - an int value representing the minimum cardinality of this feature
+	 */
+	public int getMinCardinality(){
+		return minCardinality;
+	}	
+
+	/**
+	 * Returns the maximum cardinality of this feature .
+	 * 
+	 * @return - an int value representing the maximum cardinality of this feature
+	 */
+	public int getMaxCardinality(){
+		return maxCardinality;
+	}
 	
 	/**
 	 * Returns the members of this group.
