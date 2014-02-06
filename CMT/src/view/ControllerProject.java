@@ -12,6 +12,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
@@ -19,6 +23,12 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 {
 	private static boolean verbose=true;//variabile usata per attivare stampe nel codice
 	
+	/** path used to save diagrams and feature models xml files*/
+	private static String diagramPath="/DIAGRAMS";
+	
+	/** Path where general loadable diagram files will be saved*/
+	private static String saveFilesSubPath="saved diagrams"; 
+
 	private ViewProject viewProject = null;
 	
 	private ModelProject modelProject = null;
@@ -117,7 +127,7 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 
 		//creating controller
 		EditorController editorController =new EditorController(editorView, editorModel);
-		editorController.setSavePath(modelProject.getPathProject());
+		editorController.setSavePath(modelProject.getPathProject()+diagramPath);
 		
 		//adding the view as observer to the model
 		editorModel.addObserver(editorView);
@@ -132,7 +142,40 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		
 	  }
 	  else if(ae.getActionCommand().equals("Open Diagram")){
+		String s1=null;		
+		String diagramDataPath=null;
+		ArrayList<String> featureModelDataPaths=new ArrayList<String>();
+		String loadDirectory=modelProject.getPathProject()+diagramPath+"/"+saveFilesSubPath;  
+		
+		String s = null;
+		if((s = viewProject.loadDiagramDialog(loadDirectory)) != null) try{
+		  BufferedReader br1 = new BufferedReader(
+				  new FileReader(modelProject.getPathProject()+diagramPath+"/"+saveFilesSubPath+"/"+s));
+		  diagramDataPath=br1.readLine();
+		  while( (s1 = br1.readLine()) != null ) featureModelDataPaths.add(s1);
+		  br1.close();
+		}catch (Exception e) {
+		  viewProject.errorDialog("Error while reading general save file");
+		  e.printStackTrace();
+		  return;
+		}
+		  
+		//creating model
+		EditorModel editorModel= EditorModel.loadSavedModel(featureModelDataPaths);
+		//creating view
+		EditorView editorView= EditorView.loadSavedDiagram(diagramDataPath);
 
+		//creating controller
+//		EditorController editorController =new EditorController(editorView, editorModel);
+//		editorController.setSavePath(modelProject.getPathProject()+diagramPath);
+			
+		//adding the view as observer to the model
+//		editorModel.addObserver(editorView);
+
+//		if( !editorView.prepareUI(editorController) ){
+//		  System.out.println("Controller not set. Closing...");
+//		  return;
+//		}
 	  }
 	  else if(ae.getActionCommand().equals("Exit")){
 		if(modelProject.readStateProject()[1]){

@@ -9,12 +9,18 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 
+import view.EditorModel.GroupTypes;
 import view.EditorView.activeItems;
 import main.*;
 
@@ -26,18 +32,21 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 	private static boolean debug3=false;
 	private static boolean debug4=false;
 		
+	/** Path where general loadable diagram files will be saved*/
+	private static String saveFilesSubPath="saved diagrams"; 
+	
+	/** Path where diagram files will be saved*/
+	private String diagramPath = null;
+		
 	private EditorView editorView = null;
 		
 	private EditorModel editorModel = null;
 	
-	/* Stringa contenente il percorso del progetto */
-	private String pathProject = null;
-		
-		/** Costruttore
-		 * 
-		 * @param viewProject
-		 * @param modelProject
-		 */
+	/** Costruttore
+	 * 
+	 * @param viewProject
+	 * @param modelProject
+	 */
 	public EditorController(EditorView editorView, EditorModel featureModel) {
 			this.editorView = editorView;
 			this.editorModel = featureModel;
@@ -512,6 +521,8 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+	  String diagDataPath=null;
+	  ArrayList<String> modelDataPaths=null;
 	  //commands from diagram popup menu
 	  JComponent popupElement=editorView.getPopUpElement();
 	  //popup menu command: Delete Element
@@ -588,15 +599,35 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
       else if(e.getActionCommand().equals("Save Diagram")){
   		String s = null;			
   		if((s = editorView.assignNameDiagramDialog()) != null){
-  		  editorView.saveDiagram(pathProject, s);
-  		  editorModel.saveModel(pathProject, s);
-  		}
-    	  
+  		  diagDataPath=editorView.saveDiagram(diagramPath, s);
+  		  modelDataPaths=editorModel.saveModel(diagramPath, s);
+  		  if(diagDataPath==null || modelDataPaths==null) 
+  			editorView.errorDialog("Error during save.");
+  		  else try{
+  			//checking if the diagrams save directory must be created
+  			File dir=new File(diagramPath+"/"+saveFilesSubPath);		
+  			if(!dir.isDirectory() && !dir.mkdir() ) 
+  			  throw new IOException("Save Directory can't be created.");
+  				
+  			PrintWriter pw1 = new PrintWriter(new BufferedWriter(
+  					new FileWriter(diagramPath+"/"+saveFilesSubPath+"/"+s) ));
+  			pw1.println(diagDataPath);
+  			for(String path : modelDataPaths) pw1.println(path);
+  			pw1.close();  				
+  		  }catch (IOException ex){
+  			System.out.println("Exception saveDiagram: " + ex.getMessage());
+  			ex.printStackTrace();
+  		  }
+  		}    	  
       }
       else if(e.getActionCommand().equals("Open Diagram")){
+  		String s = null;
+  		if((s = editorView.loadXMLDialog(diagramPath)) != null)
+  		  System.out.println("You selected "+s+" file.");
+//  				s.substring(0, s.length() - 4)
     	  
       }
-      else if(e.getActionCommand().equals("Export model to XML")){
+      else if(e.getActionCommand().equals("Export as SXFM")){
     	  
       }
       else if(e.getActionCommand().equals("Delete Diagram")){
@@ -651,6 +682,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 	 * @param e - MouseEvent of the type Mouse Released.
 	 */
 	private void dropAnchor(MouseEvent e) {
+		GroupTypes type=null;
 //		Component comp=EditorView.dropAnchorOnDiagram(e);
 		Component comp=editorView.dropAnchorOnDiagram(e);
 		if (comp!=null) System.out.println("comp= "+comp.getName());
@@ -675,13 +707,16 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 					 || otherEnd.getName().startsWith(EditorView.altGroupNamePrefix) ){
 			  //about to add a feature to a group
 			  System.out.println("about to add a feature to a group");
+			  if(otherEnd.getName().startsWith(EditorView.orGroupNamePrefix)) 
+				type=GroupTypes.OR_GROUP;
+			  else 
+				type=GroupTypes.ALT_GROUP;
+			  
 			  if ( ((GroupPanel)otherEnd).getParent().getName().startsWith(EditorView.featureNamePrefix))
-//					editorModel.addFeatureToGroup( otherEnd.getParent().getName(), comp.getName(), otherEnd.getName());
 				editorModel.addFeatureToGroup( ((FeaturePanel)otherEnd.getParent()).getLabelName(),
-											   ((FeaturePanel)comp).getLabelName(), otherEnd.getName() );
+											   ((FeaturePanel)comp).getLabelName(), otherEnd.getName(), type );
 			  else
-//					editorModel.addFeatureToGroup( null, comp.getName(), otherEnd.getName());
-				editorModel.addFeatureToGroup( null, ((FeaturePanel)comp).getLabelName(), otherEnd.getName());
+				editorModel.addFeatureToGroup( null, ((FeaturePanel)comp).getLabelName(), otherEnd.getName(), type);
 			  return;
 			}	
 		  }
@@ -706,12 +741,18 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 				 || comp.getName().startsWith(EditorView.orGroupNamePrefix)){
 		  //about to merge a connector with a group
 		  System.out.println("about to merge a connector with a group");
+		  if(otherEnd.getName().startsWith(EditorView.orGroupNamePrefix)) 
+			type=GroupTypes.OR_GROUP;
+		  else 
+			type=GroupTypes.ALT_GROUP;
+		  
 		  //group is not owned by any feature
 		  if(comp.getParent().getName()==null || comp.getParent().getName().startsWith(EditorView.diagramPanelName)){
 			if(otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix))
-			  editorModel.mergeConnectorWithGroup( null, ((FeaturePanel)otherEnd.getParent()).getLabelName(), comp.getName());
+			  editorModel.mergeConnectorWithGroup( null, ((FeaturePanel)otherEnd.getParent()).getLabelName(), 
+					  							   comp.getName(), type);
 			else 
-			  editorModel.mergeConnectorWithGroup( null, null, comp.getName());				
+			  editorModel.mergeConnectorWithGroup(null, null, comp.getName(), type);				
 //			  editorModel.mergeConnectorWithGroup( null, otherEnd.getParent().getName(), comp.getName());
 //			  else editorModel.mergeConnectorWithGroup( comp.getParent().getName(), otherEnd.getParent().getName(), comp.getName());
 		  }
@@ -720,11 +761,11 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 			if(otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix))
 			  editorModel.mergeConnectorWithGroup(
 					  	((FeaturePanel)comp.getParent()).getLabelName(),
-					  	((FeaturePanel)otherEnd.getParent()).getLabelName(), comp.getName() );
+					  	((FeaturePanel)otherEnd.getParent()).getLabelName(), comp.getName(), type);
 			else 
 			  editorModel.mergeConnectorWithGroup(
 					  	((FeaturePanel)comp.getParent()).getLabelName(),
-					  	null, comp.getName() );	
+					  	null, comp.getName(), type);	
 		  }
 		  return;		  
 		}
@@ -804,7 +845,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 	 * @param pathProject - the path used for saving the project
 	 */
 	public void setSavePath(String pathProject) {
-		this.pathProject=pathProject;		
+		this.diagramPath=pathProject;		
 	}
 	
 }

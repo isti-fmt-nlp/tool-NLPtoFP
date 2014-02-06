@@ -6,6 +6,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FileDialog;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
@@ -37,6 +38,7 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
@@ -93,6 +95,7 @@ public class EditorView extends JFrame implements Observer{
 	
 	private static final long serialVersionUID = 1L;
 
+	/** Class used to implement the editor. */
 	class EditorSplitPane extends JSplitPane{
 
 		public static final long serialVersionUID = 1L;
@@ -113,6 +116,15 @@ public class EditorView extends JFrame implements Observer{
 //			super.paint(g);	
 		}		
 	}
+	
+	/** Class used to filter project files. */
+	class FilterFileProject implements FilenameFilter{
+		@Override
+		public boolean accept(File dir, String name){
+			return name.endsWith( ".xml" );
+	    }
+	}
+	
 	
 	/** URL of the new feature icon*/
 	private static URL newFeatureIconURL=EditorView.class.getResource("/feature rectangle2.png");
@@ -2809,6 +2821,33 @@ public class EditorView extends JFrame implements Observer{
 	}
 	
 	/** 
+	 * Loads a project file.
+	 * 
+	 * @return s - the selected project file path 
+	 */
+	public String loadXMLDialog(String pathProject){
+		FileDialog d = new FileDialog(new JFrame("Load File"));
+    	d.setMode(FileDialog.LOAD);
+    	d.setFilenameFilter(new FilterFileProject());
+    	
+    	//checking if the diagrams save directory must be created
+    	File dir=new File(pathProject);		
+    	if(!dir.isDirectory() && !dir.mkdir()){
+    		errorDialog("Save Directory can't be created.");
+    		return null;
+    	}
+
+    	
+//	    d.setDirectory(".");
+	    d.setDirectory(pathProject);
+	    d.setVisible(true);
+	    
+	    if(d.getFile() == null) return null;
+
+	    return d.getFile().toString();
+	}
+	
+	/** 
 	 * Shows a message when the user makes an error.
 	 * 
 	 * @param s - the error message
@@ -2821,7 +2860,12 @@ public class EditorView extends JFrame implements Observer{
 				JOptionPane.OK_OPTION, JOptionPane.NO_OPTION, null, options, options[0]);
 	}
 
-	public void saveDiagram(String pathProject, String s) {
+	/**
+	 * Saves the visual elements of the digram and the diagram state on file.
+	 * @param pathProject - the directory path where to save the diagram
+	 * @param s - the name of the file in which to save the diagram
+	 */
+	public String saveDiagram(String pathProject, String s) {
 		OrderedListNode tmp = null;
 		String xml = null;
 		FeaturePanel featTmp=null;
@@ -2831,7 +2875,6 @@ public class EditorView extends JFrame implements Observer{
 		String endOwner=null;
 		String savePath = pathProject + "/" + s + "_DiagView.xml"; 
 
-		
 		xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 			  +"<Diagram name=\"" + s + "\">"
 				+"<features>";
@@ -2925,6 +2968,10 @@ public class EditorView extends JFrame implements Observer{
 		
 		//saving xml string on file
 		try{
+		  //checking if the diagrams save directory must be created
+		  File dir=new File(pathProject);		
+		  if(!dir.isDirectory() && !dir.mkdir() ) throw new IOException("Save Directory can't be created.");
+			
 		  PrintWriter pw1 = new PrintWriter(new BufferedWriter(new FileWriter(savePath)));
 		  pw1.print(xml);
 		  pw1.close();
@@ -2934,7 +2981,15 @@ public class EditorView extends JFrame implements Observer{
 		catch (IOException e){
 			System.out.println("Exception saveDiagram: " + e.getMessage());
 			e.printStackTrace();
+			return null;
 		}
+		return savePath;
 	}
+
+	public static EditorView loadSavedDiagram(String diagramDataPath) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 	
 }

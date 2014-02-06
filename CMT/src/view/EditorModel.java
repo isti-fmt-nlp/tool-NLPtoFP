@@ -1,16 +1,30 @@
 package view;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.SAXException;
+
 import main.FeatureNode;
+import main.ModelXMLHandler;
 import main.OrderedListNode;
 import main.FeatureNode.FeatureTypes;
 import main.GroupNode;
@@ -25,6 +39,8 @@ public class EditorModel extends Observable{
 
 	
 	private static boolean debug = false;
+	
+	public enum GroupTypes { ALT_GROUP, OR_GROUP, N_M_GROUP};
 
 	/** root feature of the feature model*/
 	private FeatureNode featureRoot = null;
@@ -101,14 +117,16 @@ public class EditorModel extends Observable{
 	 * @param groupOwner - the feature owner of the group
 	 * @param groupMember - the feature to be grouped
 	 * @param groupName - the name of the group
+	 * @param type 
 	 * 
 	 * @see {@link EditorModel#mergeConnectorWithGroup(String, String, String)}
 	 */
-	public void addFeatureToGroup(String groupOwner, String groupMember, String groupName){
+	public void addFeatureToGroup(String groupOwner, String groupMember, String groupName, GroupTypes type){
 	  FeatureNode parent= null;
 	  GroupNode group = searchGroup(groupName);
 	  FeatureNode sub= searchFeature(groupMember);
 	  boolean groupFound= (group==null)? false : true;
+	  int maxCardinality=0;
 	  
 	  if(groupOwner!=null) parent=searchFeature(groupOwner);
 		  
@@ -129,7 +147,13 @@ public class EditorModel extends Observable{
 	  
 	  //if the group was not found, it is created
 	  if (!groupFound){
-		group = new GroupNode(groupName, 1, 1, new ArrayList<FeatureNode>());
+		switch (type){
+		  case ALT_GROUP: maxCardinality=1;
+		  case OR_GROUP: maxCardinality=2;
+		  case N_M_GROUP: maxCardinality=GroupNode.CARD_UNDEF;
+		}
+		
+		group = new GroupNode(groupName, 1, maxCardinality, new ArrayList<FeatureNode>());
 		groups.put(groupName, group);
 		//if group icon was over a feature in the diagram, the new GroupNode is added to the corresponding FeatureNode
 		if(parent!=null) parent.getSubGroups().add(group);
@@ -150,14 +174,16 @@ public class EditorModel extends Observable{
 	 * @param groupOwner - the feature owner of the group, or null if the group is not owned by a feature
 	 * @param groupMember - the feature to be grouped, or null if only an anchor must be grouped
 	 * @param groupName - the name of the group	 
+	 * @param type 
 	 * 
 	 * @see {@link EditorModel#addFeatureToGroup(String, String, String)}
 	 */
-	public void mergeConnectorWithGroup(String groupOwner, String groupMember, String groupName){
+	public void mergeConnectorWithGroup(String groupOwner, String groupMember, String groupName, GroupTypes type){
 	  FeatureNode parent = null;
 	  GroupNode group = searchGroup(groupName);
 	  FeatureNode sub = null;
 	  boolean groupFound = false;
+	  int maxCardinality=0;
 	  
 	  if(groupOwner!=null) parent = searchFeature(groupOwner);
 	  if(groupMember!=null) sub = searchFeature(groupMember);
@@ -179,7 +205,12 @@ public class EditorModel extends Observable{
 	  
 	  //if the group was not found, it is created
 	  if (!groupFound){
-		group = new GroupNode(groupName, 1, 1, new ArrayList<FeatureNode>());
+		switch (type){
+		  case ALT_GROUP: maxCardinality=1;
+		  case OR_GROUP: maxCardinality=2;
+		  case N_M_GROUP: maxCardinality=GroupNode.CARD_UNDEF;
+		}
+		group = new GroupNode(groupName, 1, maxCardinality, new ArrayList<FeatureNode>());
 		groups.put(groupName, group);
 		//if group icon was over a feature in the diagram, the new GroupNode is added to the corresponding FeatureNode
 		if(parent!=null) parent.getSubGroups().add(group);
@@ -505,15 +536,16 @@ public class EditorModel extends Observable{
 	  return false;	
 	}
 
-	public void saveModel(String pathProject, String s) {
+	public ArrayList<String> saveModel(String pathProject, String s) {
 		String xml = null;
 		String savePathPrefix = pathProject + "/" + s + "_DiagModel"; 
 		String savePathSuffix= ".xml";
 		String date=null;
+		ArrayList<String> modelPaths=new ArrayList<String>();
 		
 		//calculating save time in a 'yyyyy-mm-dd hh:mm' format
 		Calendar cal= Calendar.getInstance();
-		date=cal.get(Calendar.YEAR)+"-"+cal.get(Calendar.MONTH)+"-"+cal.get(Calendar.MONTH)
+		date=cal.get(Calendar.YEAR)+"-"+cal.get(Calendar.MONTH+1)
 			+"-"+cal.get(Calendar.DAY_OF_MONTH)+" "+cal.get(Calendar.HOUR_OF_DAY)+":"+cal.get(Calendar.MINUTE);
 		
     	for(Map.Entry<String,FeatureNode> feature : unrootedFeatures.entrySet()){
@@ -543,14 +575,20 @@ public class EditorModel extends Observable{
 		  
 		  //saving xml string on file
 		  try{
+			//checking if the diagrams save directory must be created
+			File dir=new File(pathProject);		
+			if(!dir.isDirectory() && !dir.mkdir()) throw new IOException("Save Directory can't be created.");
+
 			PrintWriter pw1 = new PrintWriter(new BufferedWriter(
 					new FileWriter(savePathPrefix+feature.getValue().getName()+savePathSuffix) ));
 			pw1.print(xml);
 			pw1.close();
+			modelPaths.add(savePathPrefix+feature.getValue().getName()+savePathSuffix);
 		  } 
 		  catch (IOException e){
 			System.out.println("Exception saveModel: " + e.getMessage());
 			e.printStackTrace();
+			return null;
 		  }		  
 
     	}
@@ -602,6 +640,7 @@ public class EditorModel extends Observable{
 	
 	DOVE LE INDENTAZIONI SONO TABS!(\t)
 */		
+    	return modelPaths;
 	}
 
 	/**
@@ -636,5 +675,38 @@ public class EditorModel extends Observable{
 	  }
 
 	  return xml;
+	}
+
+	public static EditorModel loadSavedModel(ArrayList<String> featureModelDataPaths) {
+	  String xml="";
+	  String s=null;
+	  System.out.println("***PARSING ALL XML MODEL FILES***");
+	  SAXParserFactory saxFactory = SAXParserFactory.newInstance();
+	  ModelXMLHandler xmlHandler = new ModelXMLHandler();
+	  SAXParser saxParser = null;
+	  InputStream stream = null;
+	  
+	  for(int i=0; i< featureModelDataPaths.size(); ++i){
+	    try{
+	      xml="";
+		  BufferedReader br1 = new BufferedReader(new FileReader(featureModelDataPaths.get(i)));
+		  while( (s = br1.readLine()) != null ) xml+=s;
+		  br1.close();
+		  stream = new ByteArrayInputStream(xml.getBytes());
+		  
+		  System.out.println("**PARSING: "+featureModelDataPaths.get(i));
+		  saxParser = saxFactory.newSAXParser();
+		  saxParser.parse(stream, xmlHandler);
+		  
+		  System.out.println("\nResulting XML from parsing:\n"+xmlHandler.xml);
+		  xmlHandler.xml="";
+		  
+	    }catch (Exception e) {
+	      System.out.println("Error while reading general save file");
+	      e.printStackTrace();
+	      return null;
+	    }
+	  }
+	  return null;
 	}
 }

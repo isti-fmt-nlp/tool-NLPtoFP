@@ -37,6 +37,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 
+import view.EditorView.FilterFileProject;
+
 
 public class ViewProject implements Observer, Runnable
 {
@@ -545,6 +547,33 @@ public class ViewProject implements Observer, Runnable
 	    
 	//	    if(!buttonProjectEC.isEnabled())
 	//    		buttonProjectEC.setEnabled(true);
+
+	    return d.getFile().toString();
+	}
+	
+	/** 
+	 * Loads a project file.
+	 * 
+	 * @return s - the selected project file path 
+	 */
+	public String loadDiagramDialog(String pathProject){
+		FileDialog d = new FileDialog(new JFrame("Load File"));
+    	d.setMode(FileDialog.LOAD);
+//    	d.setFilenameFilter(new FilterFileProject());
+    	
+    	//checking if the diagrams save directory must be created
+    	File dir=new File(pathProject);		
+    	if(!dir.isDirectory() && !dir.mkdir()){
+    		errorDialog("Save Directory can't be created.");
+    		return null;
+    	}
+
+    	
+//	    d.setDirectory(".");
+	    d.setDirectory(pathProject);
+	    d.setVisible(true);
+	    
+	    if(d.getFile() == null) return null;
 
 	    return d.getFile().toString();
 	}

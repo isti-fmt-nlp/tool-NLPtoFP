@@ -205,7 +205,7 @@ public class ViewPanelCentral{
 		tabFeatures[1].setBounds(510, 0, 535, 702);//+50?
 		
 		tabFeatures[1].add( displayText+"Candidates", getTabFeaturesCandidates(alFeaturesCand, alFeaturesSel,
-									alFeaturesToHighlight, buttonSelectionEnd));
+									alFeaturesToHighlight, buttonSelectionEnd, fType));
 		if( selectFilePath != null) tabFeatures[1].add("Selected"+displayText, getTabHTMLFile(selectFilePath));		
 		
 		panelAnalysis.removeAll();
@@ -498,7 +498,8 @@ public class ViewPanelCentral{
 	 * @return JScrollPane creato
 	 */
 	private JScrollPane getTabHTMLFile(String s){	
-
+		String html=null;
+		StringReader strReader=null;
 		System.out.println("entered in getTabHTMLFile("+s+")");
 		if(s == null) return null;
 		
@@ -510,11 +511,19 @@ public class ViewPanelCentral{
 		try{	
 			File file= new File(s);
 			System.out.println("file.exists()="+file.exists());
-			fr = new FileReader(s);
-			System.out.println("getTabHTMLFile("+s+"), fr="+fr);
-			
-			ep.read(fr, s);
-			fr.close();
+		
+			if (file.exists()){
+			  fr = new FileReader(s);
+			  System.out.println("getTabHTMLFile("+s+"), fr="+fr);
+			  ep.read(fr, s);
+			  fr.close();
+			}
+			else{
+			  html="<html><head></head><body><h1>NO FEATURES SELECTED YET</h1></body></html>";
+			  strReader=new StringReader(html);
+			  ep.read(strReader, html);
+			  strReader.close();
+			}
 		} 
 		catch (FileNotFoundException e){
 			System.out.println("FileNotFoundException getTabHTMLFile: " + e.getMessage());
@@ -534,11 +543,13 @@ public class ViewPanelCentral{
 	 * @param alFeaturesCand - ArrayList containing le commonalities candidates
 	 * @param alFeaturesSel - ArrayList containing le commonalities selected
 	 * @param alFeaturesToHighlight - if not null, the terms in alFeaturesToHighlight will be highlighted 
+	 * @param fType 
 	 * @return the JPanel created
 	 */
 	private JScrollPane getTabFeaturesCandidates(ArrayList <String> alFeaturesCand, ArrayList <String> alFeaturesSel,
-				ArrayList <String> alFeaturesToHighlight, JButton buttonSelectionEnd){
+				ArrayList <String> alFeaturesToHighlight, JButton buttonSelectionEnd, FeatureType fType){
 
+		String addTermText=null;
 		JCheckBox checkBoxTmp=null;//temporary variable for CheckBoxes creation
 		JPanel checkBoxIconPanelTmp=null;//temporary variable for CheckBoxes panels creation
 		
@@ -655,8 +666,10 @@ public class ViewPanelCentral{
 				   ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				   ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		jsp.setBounds(15, 10, 490, 260);
-		
-		JLabel jl = new JLabel("Add term at the commonality candidates:");
+
+		if(fType==FeatureType.COMMONALITIES) addTermText="Add term at the commonality candidates:";
+		else addTermText="Add term at the variability candidates:";
+		JLabel jl = new JLabel(addTermText);
 		jl.setBounds(16, 271, 400, 30);
 		
 		final JTextField jtf = new JTextField();

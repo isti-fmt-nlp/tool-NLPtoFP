@@ -10,6 +10,8 @@ import java.util.ArrayList;
  */
 public class GroupNode {
 	
+	public static final int CARD_UNDEF=-1;
+	
 	/** The group name*/
 	private String name="";
 	/** The group minimum cardinality*/
