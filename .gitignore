@@ -1,5 +1,6 @@
 *.class
 bin
+Usage Tries
 # Package Files #
 *.jar
 *.war
