@@ -1,0 +1,57 @@
+(1)
+In informatica le servlet sono oggetti che operano all'interno di un server per applicazioni (es. Tomcat) potenziandone le funzionalità.
+
+In particolare una servlet è un programma che si esegue in un server web (elaborazione lato server) il cui significato deriva e si contrappone ad applet, che si riferisce a piccoli programmi scritti in linguaggio Java che invece si eseguono all'interno del browser dell'utente client (elaborazione lato client). L'uso più frequente delle servlet è generare pagine web dinamiche a seconda dei parametri della richiesta inviata al server dal client browser dell'utente.
+Descrizione
+
+Una servlet può avere molteplici funzionalità e può essere associata ad una o più risorse web.
+
+Per esempio per la realizzazione della parte di Controller nel pattern Model-View-Controller (MVC) in una architettura basata su Java si può ricorrere ad una servlet. Questa servlet, una volta invocata dal server, deciderà quale pagina visualizzare o quale parte dell'applicazione invocare.
+
+Un altro esempio potrebbe essere un meccanismo per il riconoscimento dell'utente (login): quando si digita un URL del tipo miosito/login.login viene invocata una servlet che verifica la correttezza delle credenziali inserite appoggiandosi ad un database e indirizza ad una pagina di conferma o di errore a seconda del risultato.
+
+Sotto quest'ottica una servlet è un programma che deve rispettare determinate regole e che processa in un determinato modo una richiesta HTTP. Nulla vieta che all'interno dello stesso server web possano girare più servlet associate a URL diversi, ognuna delle quali farà cose diverse e estenderà le funzionalità del server web.
+
+(2)
+In informatica le servlet sono oggetti che operano all'interno di un server per applicazioni (es. Tomcat) potenziandone le funzionalità.
+
+In particolare una servlet è un programma che si esegue in un server web (elaborazione lato server) il cui significato deriva e si contrappone ad applet, che si riferisce a piccoli programmi scritti in linguaggio Java che invece si eseguono all'interno del browser dell'utente client (elaborazione lato client). L'uso più frequente delle servlet è generare pagine web dinamiche a seconda dei parametri della richiesta inviata al server dal client browser dell'utente.
+Descrizione
+
+Una servlet può avere molteplici funzionalità e può essere associata ad una o più risorse web.
+
+Per esempio per la realizzazione della parte di Controller nel pattern Model-View-Controller (MVC) in una architettura basata su Java si può ricorrere ad una servlet. Questa servlet, una volta invocata dal server, deciderà quale pagina visualizzare o quale parte dell'applicazione invocare.
+
+Un altro esempio potrebbe essere un meccanismo per il riconoscimento dell'utente (login): quando si digita un URL del tipo miosito/login.login viene invocata una servlet che verifica la correttezza delle credenziali inserite appoggiandosi ad un database e indirizza ad una pagina di conferma o di errore a seconda del risultato.
+
+Sotto quest'ottica una servlet è un programma che deve rispettare determinate regole e che processa in un determinato modo una richiesta HTTP. Nulla vieta che all'interno dello stesso server web possano girare più servlet associate a URL diversi, ognuna delle quali farà cose diverse e estenderà le funzionalità del server web.
+
+(3)
+In informatica le servlet sono oggetti che operano all'interno di un server per applicazioni (es. Tomcat) potenziandone le funzionalità.
+
+In particolare una servlet è un programma che si esegue in un server web (elaborazione lato server) il cui significato deriva e si contrappone ad applet, che si riferisce a piccoli programmi scritti in linguaggio Java che invece si eseguono all'interno del browser dell'utente client (elaborazione lato client). L'uso più frequente delle servlet è generare pagine web dinamiche a seconda dei parametri della richiesta inviata al server dal client browser dell'utente.
+Descrizione
+
+Una servlet può avere molteplici funzionalità e può essere associata ad una o più risorse web.
+
+Per esempio per la realizzazione della parte di Controller nel pattern Model-View-Controller (MVC) in una architettura basata su Java si può ricorrere ad una servlet. Questa servlet, una volta invocata dal server, deciderà quale pagina visualizzare o quale parte dell'applicazione invocare.
+
+Un altro esempio potrebbe essere un meccanismo per il riconoscimento dell'utente (login): quando si digita un URL del tipo miosito/login.login viene invocata una servlet che verifica la correttezza delle credenziali inserite appoggiandosi ad un database e indirizza ad una pagina di conferma o di errore a seconda del risultato.
+
+Sotto quest'ottica una servlet è un programma che deve rispettare determinate regole e che processa in un determinato modo una richiesta HTTP. Nulla vieta che all'interno dello stesso server web possano girare più servlet associate a URL diversi, ognuna delle quali farà cose diverse e estenderà le funzionalità del server web.
+
+(4)
+In informatica le servlet sono oggetti che operano all'interno di un server per applicazioni (es. Tomcat) potenziandone le funzionalità.
+
+In particolare una servlet è un programma che si esegue in un server web (elaborazione lato server) il cui significato deriva e si contrappone ad applet, che si riferisce a piccoli programmi scritti in linguaggio Java che invece si eseguono all'interno del browser dell'utente client (elaborazione lato client). L'uso più frequente delle servlet è generare pagine web dinamiche a seconda dei parametri della richiesta inviata al server dal client browser dell'utente.
+Descrizione
+
+Una servlet può avere molteplici funzionalità e può essere associata ad una o più risorse web.
+
+Per esempio per la realizzazione della parte di Controller nel pattern Model-View-Controller (MVC) in una architettura basata su Java si può ricorrere ad una servlet. Questa servlet, una volta invocata dal server, deciderà quale pagina visualizzare o quale parte dell'applicazione invocare.
+
+Un altro esempio potrebbe essere un meccanismo per il riconoscimento dell'utente (login): quando si digita un URL del tipo miosito/login.login viene invocata una servlet che verifica la correttezza delle credenziali inserite appoggiandosi ad un database e indirizza ad una pagina di conferma o di errore a seconda del risultato.
+
+Sotto quest'ottica una servlet è un programma che deve rispettare determinate regole e che processa in un determinato modo una richiesta HTTP. Nulla vieta che all'interno dello stesso server web possano girare più servlet associate a URL diversi, ognuna delle quali farà cose diverse e estenderà le funzionalità del server web.
+
+
