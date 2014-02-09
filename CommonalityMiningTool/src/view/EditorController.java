@@ -581,18 +581,24 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
         editorView.repaintRootFrame();
       }
       else if(e.getActionCommand().equals("Print Model[DEBUG COMMAND]")){
-    	System.out.println("\n\nPRINTING TREES");
-    	for(Map.Entry<String,FeatureNode> feature : editorModel.getUnrootedFeatures().entrySet()){
-    	  if(feature.getValue().getParent()==null) treePrint(feature.getValue(), "*R*");
+    	editorModel.printModel();
+//    	System.out.println("\n\nPRINTING TREES");
+//    	for(Map.Entry<String,FeatureNode> feature : editorModel.getUnrootedFeatures().entrySet()){
+//    	  if(feature.getValue().getParent()==null) treePrint(feature.getValue(), "*R*");
+//    	}
+    	
+    	/* ***DEBUG*** */
+    	if(debug){
+    	  System.out.println("\n\nPRINTING VISIBLE ORDER DRAGGABLES");
+    	  OrderedListNode drag = editorView.getVisibleOrderDraggables().getFirst();
+    	  while(drag!=null){
+    		if(((Component)drag.getElement()).getName().startsWith(EditorView.featureNamePrefix))
+    		  System.out.println("\n"+((FeaturePanel)drag.getElement()).getLabelName());
+    		else System.out.println("\n"+((Component)drag.getElement()).getName());
+    		drag=drag.getNext();
+    	  }
     	}
-    	System.out.println("\n\nPRINTING VISIBLE ORDER DRAGGABLES");
-    	OrderedListNode drag = editorView.getVisibleOrderDraggables().getFirst();
-    	while(drag!=null){
-    	  if(((Component)drag.getElement()).getName().startsWith(EditorView.featureNamePrefix))
-      	    System.out.println("\n"+((FeaturePanel)drag.getElement()).getLabelName());
-    	  else System.out.println("\n"+((Component)drag.getElement()).getName());
-    	  drag=drag.getNext();
-    	}
+    	/* ***DEBUG*** */
     	
       }
 	  //commands from editor menu bar

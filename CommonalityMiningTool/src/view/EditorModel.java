@@ -37,6 +37,30 @@ import main.GroupNode;
  */
 public class EditorModel extends Observable{
 
+	/**
+	 * Wraps a String in a wrapper object. 
+	 * Used as a turn-around for java Strings immutability.
+	 */
+	static class StringWrapper {
+		
+	    public String string;
+	    
+	    /**
+	     * Returns a new StringWrapper containig the String s.
+	     * @param s - the String to be wrapped
+	     */
+	    public StringWrapper(String s) {
+	        this.string = s;
+	    }
+
+	    /**
+	     * Returns the length of the contained string. The length is equal to the number of Unicode code units in the string.
+	     * This behaves exactly like the length() method in String.
+	     * 
+	     * @return the length of the sequence of characters represented by this object.
+	     */
+//		public int length() { return string.length();}
+	}
 	
 	private static boolean debug = false;
 	
@@ -55,15 +79,22 @@ public class EditorModel extends Observable{
 	private HashMap<String, GroupNode> groups= new HashMap<String, GroupNode>();
 
 	/**
+	 * Creates a new empty editor model.
+	 * 
+	 */
+	public EditorModel(){}
+	
+	/**
 	 * Creates an editor model and adds to it the features contained in commonalities and variabilities lists.
 	 * 
 	 * @param commonalitiesSelected - list of commonality names
 	 * @param variabilitiesSelected - list of variabilities names
 	 */
-	public EditorModel(ArrayList<String> commonalitiesSelected,
-					   ArrayList<String> variabilitiesSelected) {
-	  for(String name : commonalitiesSelected) addUnrootedFeature(name, FeatureTypes.COMMONALITY);
-	  for(String name : variabilitiesSelected) addUnrootedFeature(name, FeatureTypes.VARIABILITY);
+	public EditorModel(ArrayList<String> commonalitiesSelected, ArrayList<String> variabilitiesSelected) {
+	  if(commonalitiesSelected!=null)
+		for(String name : commonalitiesSelected) addUnrootedFeature(name, FeatureTypes.COMMONALITY);
+	  if(variabilitiesSelected!=null)
+	    for(String name : variabilitiesSelected) addUnrootedFeature(name, FeatureTypes.VARIABILITY);
 	}
 
 	/**
@@ -681,11 +712,15 @@ public class EditorModel extends Observable{
 	public static EditorModel loadSavedModel(ArrayList<String> featureModelDataPaths) {
 	  String xml="";
 	  String s=null;
-	  System.out.println("***PARSING ALL XML MODEL FILES***");
-	  SAXParserFactory saxFactory = SAXParserFactory.newInstance();
-	  ModelXMLHandler xmlHandler = new ModelXMLHandler();
 	  SAXParser saxParser = null;
 	  InputStream stream = null;
+	  SAXParserFactory saxFactory = SAXParserFactory.newInstance();
+	  ModelXMLHandler xmlHandler = new ModelXMLHandler();
+	  StringWrapper featureTree=null;
+
+	  EditorModel newModel=new EditorModel();
+	  
+	  System.out.println("***PARSING ALL XML MODEL FILES***");
 	  
 	  for(int i=0; i< featureModelDataPaths.size(); ++i){
 	    try{
@@ -698,12 +733,10 @@ public class EditorModel extends Observable{
 		  System.out.println("**PARSING: "+featureModelDataPaths.get(i));
 		  saxParser = saxFactory.newSAXParser();
 		  saxParser.parse(stream, xmlHandler);
-		  
-		  recursiveFeatureTreeBuilder(null, 0, xml);
-		  
-		  
-		  
 		  System.out.println("\nResulting XML from parsing:\n"+xmlHandler.xml);
+
+		  featureTree=new StringWrapper(xmlHandler.xml);
+		  newModel.recursiveFeatureTreeBuilder(null, 0, featureTree);
 		  xmlHandler.xml="";
 		  
 	    }catch (Exception e) {
@@ -712,53 +745,118 @@ public class EditorModel extends Observable{
 	      return null;
 	    }
 	  }
+	  newModel.printModel();
 	  return null;
 	}
-
+	
 	/**
-	 * Recursevely parse the featureTree String and creates the feature model tree.
+	 * Recursevely parse the String contained in featureTree and creates the feature model tree.
 	 * 
 	 * @param parent - the feature to which childs must be added
-	 * @param tabs - number of tabulation characters preceding parent in the featureTree String
-	 * @param featureTree - the String representing the tree
+	 * @param tabs - number of tabulation characters preceding parent in featureTree
+	 * @param featureTree - contains the String representing the tree
 	 */
-	private static int recursiveFeatureTreeBuilder(FeatureNode parent, int tabs, String featureTree) {
+	private int recursiveFeatureTreeBuilder(FeatureNode parent, int tabs, StringWrapper featureTree) {
 	  int nextTabs=0;
-	  String elementString=null;
 	  FeatureNode lastFeatureAdded=null;
 	  GroupNode lastGroupAdded=null;
 	  int i=0;
-	  //counting the tabulations preceding the next element
-	  for( ;i<featureTree.length(); ++i){
-		if(featureTree.charAt(i)=='\t') ++nextTabs;
-		else break;
-	  }
-	  //next element is a child of the last feature added
-	  if(nextTabs>tabs){
-		if(featureTree.startsWith(":g", nextTabs)) 
-		  nextTabs=recursiveGroupTreeBuilder(lastFeatureAdded, nextTabs, featureTree);
-		else nextTabs=recursiveFeatureTreeBuilder(lastFeatureAdded, nextTabs, featureTree);
-	  }
-	  //next element is a child of parent
-	  else if(nextTabs==tabs){
-		for(  ;i<featureTree.length(); ++i) if(featureTree.charAt(i)=='\t') break;
-		elementString=featureTree.substring(nextTabs, i);
-		featureTree=featureTree.substring(i, featureTree.length());
-		if(elementString.startsWith(":g")) loadAddGroupTofeature(parent, elementString);
-		else loadAddFeatureTofeature(parent, elementString);
-		/* **CI VUOLE LA CHIAMATA RICORSIVA** */
 	  
-	  }
-	  else{
+	  //building current feature element
+	  lastFeatureAdded=addChildToParent(parent, tabs, featureTree);
+	  
+	  //if featureTree has been consumed, return
+	  while (featureTree.string.length()>0){
+		nextTabs=0; i=0;
+		
+		//counting the tabulations preceding the next element
+		for( ;i<featureTree.string.length(); ++i){
+		  if(featureTree.string.charAt(i)=='\t') ++nextTabs;
+		  else break;
+		}
+
+		//next element is a child of parent
+		if(nextTabs==tabs){
+//		  for(  ;i<featureTree.length(); ++i) if(featureTree.charAt(i)=='\t') break;
+//		  elementString=featureTree.substring(nextTabs, i);
+//	  	  featureTree=featureTree.substring(i, featureTree.length());
+			  
+		  //next element is a group
+		  if(featureTree.string.substring(nextTabs, nextTabs+2).startsWith(":g"))
+			nextTabs=recursiveGroupTreeBuilder(parent, tabs, featureTree);
+		  //next element is a feature
+		  else lastFeatureAdded=addChildToParent(parent, tabs, featureTree);
+				
+//			  loadAddGroupTofeature(parent, elementString);
+//		  else loadAddFeatureTofeature(parent, elementString);
+			/* **CI VUOLE LA CHIAMATA RICORSIVA** */
 		  
-	  }
-	  
+		}
+		//next element is a child of the last feature added
+		else if(nextTabs>tabs){
+		  if(featureTree.string.startsWith(":g", nextTabs)) 
+			nextTabs=recursiveGroupTreeBuilder(lastFeatureAdded, nextTabs, featureTree);
+		  else nextTabs=recursiveFeatureTreeBuilder(lastFeatureAdded, nextTabs, featureTree);
+		}
+		//next element belongs to another sub-tree
+		else return nextTabs;		  
+	  }	  
 	  return 0;
 	}
+	
+	/**
+	 * Retrieves the current element data from the String contained in featureTree and <br>
+	 *  creates the corresponding FeatureNode, adding it to the feature parent,<br>
+	 *  or to the list unrootedFeatures if parent is null.<br>
+	 * Each call to this method will remove from featureTree the prefix String representing the current element.
+	 * 
+	 * @param parent - the parent feature
+	 * @param tabs - number of tabulation characters preceding the element to be created in featureTree
+	 * @param featureTree - contains the String representing the tree
+	 * 
+	 */
+	private FeatureNode addChildToParent(FeatureNode parent, int tabs, StringWrapper featureTree) {
+	  String element=null;
+	  String[] elementData=null;
+	  FeatureNode newFeature=null;
+	  int k=0, h=0, i=0;
+	  FeatureTypes type=null;
+	  int minCard=0, maxCard=0;
+	  
+	  //splitting element prefix from the rest of featureTree String
+	  i=tabs;
+	  while(i<featureTree.string.length() && featureTree.string.charAt(i)!='\t') ++i;
+//	  for(i=tabs; i<featureTree.length(); ++i) if(featureTree.charAt(i)=='\t') break;
 
-	
-	
-	
+	  element=featureTree.string.substring(tabs, i);
+	  
+	  //cutting off current element from featureTree
+	  featureTree.string=featureTree.string.substring(i);
+		  
+	  System.out.println("The element String is:"+element+"\nfeatureTree:"+featureTree.string+"\nTabs:"+tabs);
+	  elementData=element.split(" ");
+	  for(int l=0; l<elementData.length; ++l) System.out.println("elementData["+l+"]: "+elementData[l]);
+	  
+	  //getting cardinalities of the feature
+	  for(k=1; k<elementData[3].length(); ++k) if(elementData[3].charAt(k)=='.') break;
+	  minCard=Integer.valueOf(elementData[3].substring(1, k));
+	  for(h=k+1; h<elementData[3].length(); ++h) if(elementData[3].charAt(h)==']') break;
+	  maxCard=Integer.valueOf(elementData[3].substring(k+1, h));
+
+	  if(minCard>0) type=FeatureTypes.COMMONALITY;
+	  else type=FeatureTypes.VARIABILITY;
+
+	  //adding new feature to the model
+	  newFeature=new FeatureNode(type, elementData[1], minCard, maxCard);
+	  if (parent!=null){
+		parent.getSubFeatures().add(newFeature);
+		newFeature.setParent(parent);
+	  }
+	  unrootedFeatures.put(elementData[1], newFeature);
+	  
+	  return newFeature;
+	}
+
 	private static void loadAddFeatureTofeature(FeatureNode parent,
 			String elementString) {
 		// TODO Auto-generated method stub
@@ -771,13 +869,39 @@ public class EditorModel extends Observable{
 		
 	}
 
-	private static int recursiveGroupTreeBuilder(FeatureNode parent, int tabs, String featureTree) {
+	private int recursiveGroupTreeBuilder(FeatureNode parent, int tabs, StringWrapper featureTree) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 	
 	
+
+
+	/**
+	 * Print the feature model indenting the lower levels. <br>
+	 * Prints a tree for each feature without parent in the model.
+	 * 
+	 */
+	public void printModel() {
+      System.out.println("\n\nPRINTING TREES");
+      for(Map.Entry<String,FeatureNode> feature : getUnrootedFeatures().entrySet()){
+    	if(feature.getValue().getParent()==null) treePrint(feature.getValue(), "*R*");
+      }		
+	}
 	
+	/**
+	 * Recursively print the feature tree rooted in feature, indenting the lower levels.
+	 * 
+	 * @param indent - String printed before the name of root element, for the lower leves <br>
+	 * it will be printed a number of times equals to 1+depth.
+	 */
+	private void treePrint(FeatureNode feature, String indent) {
+		System.out.println(indent+feature.getName());
+		for(FeatureNode child : feature.getSubFeatures()) treePrint(child, indent+">");
+		for(GroupNode group : feature.getSubGroups()) 
+		  for(FeatureNode member : group.getMembers()) 
+		  treePrint(member, indent+"|"); 
+	}	
 	
 	
 	

@@ -19,8 +19,8 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
-public class ControllerProject implements ActionListener, WindowListener, MouseListener
-{
+public class ControllerProject implements ActionListener, WindowListener, MouseListener{
+	
 	private static boolean verbose=true;//variabile usata per attivare stampe nel codice
 	
 	/** path used to save diagrams and feature models xml files*/
