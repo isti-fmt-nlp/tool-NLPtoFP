@@ -42,6 +42,19 @@ public class GroupNode {
 		this.members=members;
 		this.name=name;
 	}
+	
+	/**
+	 * Creates a new GroupNode, based on the parameters. 
+	 * 
+	 * @param name - the name of this group
+	 * @param minCardinality - group minimum cardinality
+	 * @param maxCardinality - group maximum cardinality
+	 */
+	public GroupNode(String name, int minCardinality, int maxCardinality){
+		this.minCardinality=minCardinality;
+		this.maxCardinality=maxCardinality;
+		this.name=name;
+	}
 
 	/**
 	 * Returns the name of this group.
