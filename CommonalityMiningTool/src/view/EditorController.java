@@ -619,7 +619,9 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
   					new FileWriter(diagramPath+"/"+saveFilesSubPath+"/"+s) ));
   			pw1.println(diagDataPath);
   			for(String path : modelDataPaths) pw1.println(path);
-  			pw1.close();  				
+  			pw1.close();  	
+  			editorView.setModified(false);
+  			editorModel.setModified(false);
   		  }catch (IOException ex){
   			System.out.println("Exception saveDiagram: " + ex.getMessage());
   			ex.printStackTrace();

@@ -149,8 +149,7 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		
 		String s = null;
 		if((s = viewProject.loadDiagramDialog(loadDirectory)) != null) try{
-		  BufferedReader br1 = new BufferedReader(
-				  new FileReader(modelProject.getPathProject()+diagramPath+"/"+saveFilesSubPath+"/"+s));
+		  BufferedReader br1 = new BufferedReader(new FileReader(loadDirectory+"/"+s));
 		  diagramDataPath=br1.readLine();
 		  while( (s1 = br1.readLine()) != null ) featureModelDataPaths.add(s1);
 		  br1.close();
@@ -164,14 +163,14 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		EditorModel editorModel= EditorModel.loadSavedModel(featureModelDataPaths);
 		//creating view
 		EditorView editorView= EditorView.loadSavedDiagram(diagramDataPath);
-
-		//creating controller
+		
+//		//creating controller
 //		EditorController editorController =new EditorController(editorView, editorModel);
 //		editorController.setSavePath(modelProject.getPathProject()+diagramPath);
-			
-		//adding the view as observer to the model
+//			
+//		//adding the view as observer to the model
 //		editorModel.addObserver(editorView);
-
+//
 //		if( !editorView.prepareUI(editorController) ){
 //		  System.out.println("Controller not set. Closing...");
 //		  return;

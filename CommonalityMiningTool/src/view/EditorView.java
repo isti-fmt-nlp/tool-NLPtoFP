@@ -35,11 +35,17 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.util.ArrayList;
@@ -77,11 +83,16 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.text.LayeredHighlighter;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.events.StartDocument;
 
+import view.EditorModel.StringWrapper;
+import main.ModelXMLHandler;
 import main.OrderedList;
 import main.OrderedListNode;
 import main.SortUtils;
+import main.ViewXMLHandler;
 
 
 public class EditorView extends JFrame implements Observer{
@@ -124,6 +135,19 @@ public class EditorView extends JFrame implements Observer{
 			return name.endsWith( ".xml" );
 	    }
 	}
+
+	/** prefix of any feature name*/
+	public static String featureNamePrefix="---FEATURE---#";
+	/** prefix of any connector starting dot name*/
+	public static String startConnectorsNamePrefix="---START_CONNECTOR---#";
+	/** prefix of any connector ending dot name*/
+	public static String endConnectorsNamePrefix="---END_CONNECTOR---#";
+	/** prefix of any group Alternative Gtarting dot name*/
+	public static String altGroupNamePrefix="---ALT_GROUP---#";
+	/** prefix of any Or Group starting dot name*/
+	public static String orGroupNamePrefix="---OR_GROUP---#";
+	/** name ofthe diagram panel*/
+	public static String diagramPanelName="---DIAGRAM_PANEL---";
 	
 	
 	/** URL of the new feature icon*/
@@ -140,19 +164,6 @@ public class EditorView extends JFrame implements Observer{
 	private static URL connectorLineLengthIconURL=EditorView.class.getResource("/Connector Line Length.png");
 	/** URL of the group line-only icon*/
 	private static URL groupLineLengthIconURL=EditorView.class.getResource("/Group Line Length.png");
-	
-	/** prefix of any feature name*/
-	public static String featureNamePrefix="---FEATURE---#";
-	/** prefix of any connector starting dot name*/
-	public static String startConnectorsNamePrefix="---START_CONNECTOR---#";
-	/** prefix of any connector ending dot name*/
-	public static String endConnectorsNamePrefix="---END_CONNECTOR---#";
-	/** prefix of any group Alternative Gtarting dot name*/
-	public static String altGroupNamePrefix="---ALT_GROUP---#";
-	/** prefix of any Or Group starting dot name*/
-	public static String orGroupNamePrefix="---OR_GROUP---#";
-	/** name ofthe diagram panel*/
-	public static String diagramPanelName="---DIAGRAM_PANEL---";
 
 	/** maps tool names in the corresponding icon resource path*/
 	private static HashMap<String, String> toolIconPaths=null;
@@ -172,7 +183,7 @@ public class EditorView extends JFrame implements Observer{
 	}
 	
 	/** Tells if the diagram has been modified after last save*/
-	private boolean modified=false;
+	private boolean modified=true;
 	
 	/** The popup menu for all diagram panel elements*/
 	private JPopupMenu diagramElementsMenu = new JPopupMenu();
@@ -2659,6 +2670,17 @@ public class EditorView extends JFrame implements Observer{
 		toolDragPosition=p;
 	}
 
+	/** Tells if the view has been modified since last save*/
+	public boolean getModified(){
+		return modified;
+	}
+
+	/** Sets the value of the modified field*/
+	public void setModified(boolean mod){
+		modified=mod;
+	}
+	
+
 	/**
 	 * Reset item used for dragging tools.*/
 	private void cancelToolDrag() {
@@ -2976,7 +2998,6 @@ public class EditorView extends JFrame implements Observer{
 		  pw1.print(xml);
 		  pw1.close();
 			
-		  modified = false;
 		} 
 		catch (IOException e){
 			System.out.println("Exception saveDiagram: " + e.getMessage());
@@ -2986,9 +3007,48 @@ public class EditorView extends JFrame implements Observer{
 		return savePath;
 	}
 
+	/**
+	 * Loads a saved feature model from a list of files, each describing a feature tree.
+	 * @param featureModelDataPaths - the list of files describing the feature trees
+	 * @return - the saved feature model
+	 */
 	public static EditorView loadSavedDiagram(String diagramDataPath) {
-		// TODO Auto-generated method stub
-		return null;
+	  String xml="";
+	  String s=null;
+	  SAXParser saxParser = null;
+	  InputStream stream = null;
+	  SAXParserFactory saxFactory = SAXParserFactory.newInstance();
+	  ViewXMLHandler xmlHandler = new ViewXMLHandler();
+	  StringWrapper featureTree=null;
+
+	  EditorView newView=new EditorView();
+
+
+	  try {
+		stream=new FileInputStream(diagramDataPath);
+		  
+//		  BufferedReader br1 = new BufferedReader(new FileReader(diagramDataPath));
+//		  while( (s = br1.readLine()) != null ) xml+=s;
+//		  br1.close();
+//		  stream = new ByteArrayInputStream(xml.getBytes());
+		  
+		System.out.println("EditorView: *** PARSING: "+diagramDataPath+" ***");
+		saxParser = saxFactory.newSAXParser();
+		saxParser.parse(stream, xmlHandler);
+	  } catch (Exception e) { e.printStackTrace();}
+
+	  System.out.println("\nResult of parsing:\n"
+		+"Features:\n"+xmlHandler.featuresList
+		+"Connectors:\n"+xmlHandler.connectorsList
+		+"Groups:\n"+xmlHandler.groupsList
+		+"Misc:\n"+xmlHandler.misc
+		+"Starting Commonalities:\n"+xmlHandler.startingComm
+		+"Starting Variabilities:\n"+xmlHandler.startingVars
+		+"");
+	  
+	 
+
+	  return newView;
 	}
 	
 	

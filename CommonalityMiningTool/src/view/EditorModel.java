@@ -37,17 +37,6 @@ import main.GroupNode;
  */
 public class EditorModel extends Observable{
 
-	/* SOLUZIONE BALORDA DA RIFATTORIZZARE CON UNA CLASSE DI COSTANTI*/
-	/** prefix of any group Alternative Gtarting dot name*/
-	public static String altGroupNamePrefix="---ALT_GROUP---#";
-	/** prefix of any Or Group starting dot name*/
-	public static String orGroupNamePrefix="---OR_GROUP---#";
-	/** Current amount of Alternative Groups in the diagram panel*/
-	private int altGroupsCount=0;
-	/** Current amount of Or Groups in the diagram panel*/
-	private int orGroupsCount=0;
-	/* SOLUZIONE BALORDA DA RIFATTORIZZARE CON UNA CLASSE DI COSTANTI*/
-
 	/**
 	 * Wraps a String in a wrapper object. 
 	 * Used as a turn-around for java Strings immutability.
@@ -74,8 +63,12 @@ public class EditorModel extends Observable{
 	}
 	
 	private static boolean debug = false;
+
+	/** enumeration used to specify a group type in the model*/
+	public static enum GroupTypes { ALT_GROUP, OR_GROUP, N_M_GROUP};
 	
-	public enum GroupTypes { ALT_GROUP, OR_GROUP, N_M_GROUP};
+	/** Tells if the model has been modified after last save*/
+	private boolean modified=true;
 
 	/** root feature of the feature model*/
 	private FeatureNode featureRoot = null;
@@ -579,111 +572,78 @@ public class EditorModel extends Observable{
 	  return false;	
 	}
 
+	/** Tells if the view has been modified since last save*/
+	public boolean getModified(){
+		return modified;
+	}
+
+	/** Sets the value of the modified field*/
+	public void setModified(boolean mod){
+		modified=mod;
+	}
+
+	/**
+	 * Saves the elements of the feature model on file.
+	 * @param pathProject - the directory path where to save the diagram
+	 * @param s - the name of the file in which to save the diagram
+	 */
 	public ArrayList<String> saveModel(String pathProject, String s) {
-		String xml = null;
-		String savePathPrefix = pathProject + "/" + s + "_DiagModel"; 
-		String savePathSuffix= ".xml";
-		String date=null;
-		ArrayList<String> modelPaths=new ArrayList<String>();
+	  String xml = null;
+	  String savePathPrefix = pathProject + "/" + s + "_DiagModel"; 
+	  String savePathSuffix= ".xml";
+	  String date=null;
+	  ArrayList<String> modelPaths=new ArrayList<String>();
+
+	  //calculating save time in a 'yyyyy-mm-dd hh:mm' format
+	  Calendar cal= Calendar.getInstance();
+	  date=cal.get(Calendar.YEAR)+"-"+cal.get(Calendar.MONTH+1)
+			  +"-"+cal.get(Calendar.DAY_OF_MONTH)+" "+cal.get(Calendar.HOUR_OF_DAY)+":"+cal.get(Calendar.MINUTE);
+
+	  for(Map.Entry<String,FeatureNode> feature : unrootedFeatures.entrySet()){
+	    //skipping features that have a parent feature
+		if(feature.getValue().getParent()!=null) continue;
 		
-		//calculating save time in a 'yyyyy-mm-dd hh:mm' format
-		Calendar cal= Calendar.getInstance();
-		date=cal.get(Calendar.YEAR)+"-"+cal.get(Calendar.MONTH+1)
-			+"-"+cal.get(Calendar.DAY_OF_MONTH)+" "+cal.get(Calendar.HOUR_OF_DAY)+":"+cal.get(Calendar.MINUTE);
+		xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+			  +"<feature_model name=\""+s+"_"+feature.getValue().getName()+"\">"
+				+"<meta>"
+			    +"<data name=\"date\">"+date+"</data>"
+				+"</meta>"
+				+"<feature_tree>";
 		
-    	for(Map.Entry<String,FeatureNode> feature : unrootedFeatures.entrySet()){
-    	  //skipping features that have a parent feature
-    	  if(feature.getValue().getParent()!=null) continue;
-		
-		  xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			    +"<feature_model name=\""+s+"_"+feature.getValue().getName()+"\">"
-				  +"<meta>"
-			      +"<data name=\"date\">"+date+"</data>"
-				  +"</meta>"
-				  +"<feature_tree>";
-		
-		  xml+=":r "+feature.getKey()+" ("+feature.getKey()+") ["
-		  +feature.getValue().getMinCardinality()+"."+feature.getValue().getMaxCardinality()+"]"
-		  +recursiveXMLTreeBuilder(feature.getValue(), 1);
-		  
-		  xml+=	   "</feature_tree>"
-				  +"<constraints>";
-		  
-		  /*
-		   * CONSTRAINT PART IS STILL TO BE ADDED...
-		   */
-		  
-		  xml+=	   "</constraints>"
+		xml+=":r "+feature.getKey()+" ("+feature.getKey()+") ["
+				+feature.getValue().getMinCardinality()+"."+feature.getValue().getMaxCardinality()+"]"
+				+recursiveXMLTreeBuilder(feature.getValue(), 1);
+
+		xml+=	   "</feature_tree>"
+				+"<constraints>";
+
+		/*
+		 * CONSTRAINT PART IS STILL TO BE ADDED...
+		 */
+
+		xml+=	   "</constraints>"
 				+"</feature_model>";
-		  
-		  //saving xml string on file
-		  try{
-			//checking if the diagrams save directory must be created
-			File dir=new File(pathProject);		
-			if(!dir.isDirectory() && !dir.mkdir()) throw new IOException("Save Directory can't be created.");
 
-			PrintWriter pw1 = new PrintWriter(new BufferedWriter(
-					new FileWriter(savePathPrefix+feature.getValue().getName()+savePathSuffix) ));
-			pw1.print(xml);
-			pw1.close();
-			modelPaths.add(savePathPrefix+feature.getValue().getName()+savePathSuffix);
-		  } 
-		  catch (IOException e){
-			System.out.println("Exception saveModel: " + e.getMessage());
-			e.printStackTrace();
-			return null;
-		  }		  
+		//saving xml string on file
+		try{
+		  //checking if the diagrams save directory must be created
+		  File dir=new File(pathProject);		
+		  if(!dir.isDirectory() && !dir.mkdir()) throw new IOException("Save Directory can't be created.");
 
-    	}
-		
-		
-		
-		
-/*		
-<feature_model name="My feature model">     <-- feature model start tag and name attribute (mandatory)
-  <meta>                                                                  <-- Optional
-  <data name="description">Model description</data>                 <-- Optional
-  <data name="creator">Model's creator</data>                       <-- Optional
-  <data name="email">Model creator's email</data>                   <-- Optional
-  <data name="date">Model creation date</data>                      <-- Optional
-  <data name="department">Model creator's department</data>         <-- Optional
-  <data name="organization">Model creator's organization</data>     <-- Optional
-  <data name="address">Model creator's address</data>               <-- Optional
-  <data name="phone">Model creator's phone</data>                   <-- Optional
-  <data name="website">Model creator's website</data>               <-- Optional
-  <data name="reference">Model's related publication</data>         <-- Optional
-  </meta>
-  <feature_tree>                <-- feature tree start tag
-    :r root (root_id)                 <-- root feature named 'root' with unique ID 'root_id'   						
-      :o opt1 (id_opt1)               <-- an optional feature named opt1 with unique id id_opt1
-      :o opt2 (id_opt2)               <-- an optional feature named opt2, child of opt1 with unique id id_opt2
-      :m man1                         <-- an mandatory feature named man1 with unique id id_man1
-        :g [1,*]                      <-- an inclusive-OR feature group with cardinality [1..*] ([1..3] also allowed)
-          : a (id_a)                  <-- a grouped feature name a with ID id_a
-          : b (id_b)                  <-- a grouped feature name b with ID id_b
-            :o opt3 (id_opt3)         <-- an optional feature opt3 child of b with unique id id_opt3
-          : c (id_c)                  <-- a grouped feature name c with ID id_c
-        :g [1,1]                      <-- an exclusive-OR feature group with cardinality [1..1]
-          : d (id_d)                  <-- a grouped feature name d with ID id_d
-          : e (id_e)                  <-- a grouped feature name e with ID id_e
-            :g [2,3]                      <-- a feature group with cardinality [2..3] children of feature e
-              : f (id_f)                  <-- a grouped feature name f with ID id_f
-              : g (id_g)                  <-- a grouped feature name g with ID id_g
-              : h (id_h)                  <-- a grouped feature name h with ID id_h
-  </feature_tree>               <-- feature tree end tag (mandatory)
-  <constraints>                 <-- extra constraints start tag (mandatory)
-    c1: ~id_a or id_opt2        <-- extra constraint named c1: id_a implies id_opt2 (must be a CNF clause)
-    c2: ~id_c or ~id_e          <-- extra constraint named c2: id_c excludes id_e (must be a CNF clause)
-  </constraints>                <-- extra constraint end tag (mandatory)
-</feature_model>                <-- feature model end tag  (mandatory)	
+		  PrintWriter pw1 = new PrintWriter(new BufferedWriter(
+				  new FileWriter(savePathPrefix+feature.getValue().getName()+savePathSuffix) ));
+		  pw1.print(xml);
+		  pw1.close();
+		  modelPaths.add(savePathPrefix+feature.getValue().getName()+savePathSuffix);
+		} 
+		catch (IOException e){
+		  System.out.println("Exception saveModel: " + e.getMessage());
+		  e.printStackTrace();
+		  return null;
+		}		  
 
-	
-	
-	
-	
-	DOVE LE INDENTAZIONI SONO TABS!(\t)
-*/		
-    	return modelPaths;
+	  }
+	  return modelPaths;
 	}
 
 	/**
@@ -707,7 +667,7 @@ public class EditorModel extends Observable{
 	  }
 	  for(GroupNode group : featureRoot.getSubGroups()){
 		for(int i=0; i<depth; ++i) xml+="\t";
-		xml+=":g ["+group.getMinCardinality()+"."+group.getMaxCardinality()+"]";
+		xml+=":g "+group.getName()+" ["+group.getMinCardinality()+"."+group.getMaxCardinality()+"]";
 		for(FeatureNode member : group.getMembers()){
 			for(int i=0; i<depth+1; ++i) xml+="\t";
 			xml+= ": "+member.getName()+" ("+member.getName()+") ["
@@ -720,6 +680,11 @@ public class EditorModel extends Observable{
 	  return xml;
 	}
 
+	/**
+	 * Loads a saved feature model from a list of files, each describing a feature tree.
+	 * @param featureModelDataPaths - the list of files describing the feature trees
+	 * @return - the saved feature model
+	 */
 	public static EditorModel loadSavedModel(ArrayList<String> featureModelDataPaths) {
 	  String xml="";
 	  String s=null;
@@ -731,7 +696,7 @@ public class EditorModel extends Observable{
 
 	  EditorModel newModel=new EditorModel();
 	  
-	  System.out.println("***PARSING ALL XML MODEL FILES***");
+	  System.out.println("EditorModel: ***PARSING ALL XML MODEL FILES***");
 	  
 	  for(int i=0; i< featureModelDataPaths.size(); ++i){
 	    try{
@@ -979,14 +944,15 @@ public class EditorModel extends Observable{
 //	  for(int l=2; l<elementData.length-2; ++l) groupName+=" "+elementData[l];
 	  
 	  //getting cardinalities of the group
-	  for(k=1; k<elementData[1].length(); ++k) if(elementData[1].charAt(k)=='.') break;
-	  minCard=Integer.valueOf(elementData[1].substring(1, k));
-	  for(h=k+1; h<elementData[1].length(); ++h) if(elementData[1].charAt(h)==']') break;
-	  maxCard=Integer.valueOf(elementData[1].substring(k+1, h));
+	  for(k=1; k<elementData[2].length(); ++k) if(elementData[2].charAt(k)=='.') break;
+	  minCard=Integer.valueOf(elementData[2].substring(1, k));
+	  for(h=k+1; h<elementData[2].length(); ++h) if(elementData[2].charAt(h)==']') break;
+	  maxCard=Integer.valueOf(elementData[2].substring(k+1, h));
 
 	  //getting the name of the group	  
-	  if(maxCard==1) groupName=altGroupNamePrefix+(altGroupsCount++);
-	  else groupName=orGroupNamePrefix+(orGroupsCount++);
+	  groupName=elementData[1];
+//	  if(maxCard==1) groupName=altGroupNamePrefix+(altGroupsCount++);
+//	  else groupName=orGroupNamePrefix+(orGroupsCount++);
 	  
 	  //adding new group to the model
 	  newGroup=new GroupNode(groupName, minCard, maxCard);
