@@ -87,6 +87,8 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.events.StartDocument;
 
+import org.bouncycastle.crypto.RuntimeCryptoException;
+
 import view.EditorModel.StringWrapper;
 import main.ModelXMLHandler;
 import main.OrderedList;
@@ -2166,6 +2168,19 @@ public class EditorView extends JFrame implements Observer{
 	 * @return A new JComponent representing the connection dot
 	 */
 	private JComponent getDraggableConnectionDot(ItemsType type, int x, int y) {
+		return buildConnectionDot(type, null, x, y);
+	}
+
+	/**
+	 * Creates a JComponent containing a Connection Dot with the specified name, <br>
+	 * or with a sequential name given by the static variable connectorsCount if name is null. 
+	 * 
+	 * @param x - x coordinate of the connection dot in the diagram panel
+	 * @param y - y coordinate of the connection dot in the diagram panel
+	 * @param name - String representing the name of the connection dot
+	 * @return A new JComponent representing the connection dot
+	 */
+	private JComponent buildConnectionDot(ItemsType type, String name, int x, int y) {
 		JComponent imagePanel=null;
 
 		ImageIcon connectorIcon=null;
@@ -2174,22 +2189,26 @@ public class EditorView extends JFrame implements Observer{
 		switch(type){
 		  case START_CONNECTOR:
 			imagePanel = new AnchorPanel();  
-			imagePanel.setName(startConnectorsNamePrefix+connectorsCount);
+			if(name!=null) imagePanel.setName(name);
+			else imagePanel.setName(startConnectorsNamePrefix+connectorsCount);
 			connectorIcon = new ImageIcon(connectorStartDotIconURL);
 			break;
 		  case END_CONNECTOR:
 			imagePanel = new AnchorPanel();  
-			imagePanel.setName(endConnectorsNamePrefix+connectorsCount);
+			if(name!=null) imagePanel.setName(name);
+			else imagePanel.setName(endConnectorsNamePrefix+connectorsCount);
 			connectorIcon = new ImageIcon(connectorEndDotIconURL);
 			break;
 		  case ALT_GROUP_START_CONNECTOR:
 			imagePanel = new GroupPanel();  
-			imagePanel.setName(altGroupNamePrefix+altGroupsCount);
+			if(name!=null) imagePanel.setName(name);
+			else imagePanel.setName(altGroupNamePrefix+altGroupsCount);
 			connectorIcon = new ImageIcon(ALTGroupDotIconURL);
 			break;
 		  case OR_GROUP_START_CONNECTOR:
 			imagePanel = new GroupPanel();  
-			imagePanel.setName(orGroupNamePrefix+orGroupsCount);
+			if(name!=null) imagePanel.setName(name);
+			else imagePanel.setName(orGroupNamePrefix+orGroupsCount);
 			connectorIcon = new ImageIcon(ORGroupDotIconURL);
 			break;
  		  default: return null;
@@ -2222,6 +2241,19 @@ public class EditorView extends JFrame implements Observer{
 	 * @return A new JPanel representing the feature
 	 */
 	private FeaturePanel getDraggableFeature(String name, int x, int y) {
+		return buildFeaturePanel(name, null, x, y);
+	}
+
+	/**
+	 * Creates a JPanel containing a Feature
+	 * 
+	 * @param name - the name of the feature
+	 * @param containerName - the name of the FeaturePanel object
+	 * @param x - x coordinate of the feature in the diagram panel
+	 * @param y - y coordinate of the feature in the diagram panel
+	 * @return A new JPanel representing the feature
+	 */
+	private FeaturePanel buildFeaturePanel(String name, String containerName, int x, int y) {
 		int layer=-1;
 		JLabel imageLabel = null, textLabel = null;
 		ImageIcon newFeatureIcon = null;
@@ -2245,7 +2277,8 @@ public class EditorView extends JFrame implements Observer{
 		
 		FeaturePanel container = new FeaturePanel(splitterPanel);
 		container.setLabelName(name);
-		container.setName(featureNamePrefix+featuresCount);
+		if(containerName==null) container.setName(featureNamePrefix+featuresCount);
+		else container.setName(containerName);
 		container.setLayout(null);
 		container.setBounds(x,  y,  newFeatureIcon.getIconWidth()+featureBorderSize,
 			newFeatureIcon.getIconHeight()+25+featureBorderSize);
@@ -3012,7 +3045,7 @@ public class EditorView extends JFrame implements Observer{
 	 * @param featureModelDataPaths - the list of files describing the feature trees
 	 * @return - the saved feature model
 	 */
-	public static EditorView loadSavedDiagram(String diagramDataPath) {
+	public void/* EditorView */loadSavedDiagram(String diagramDataPath) {
 	  String xml="";
 	  String s=null;
 	  SAXParser saxParser = null;
@@ -3021,7 +3054,7 @@ public class EditorView extends JFrame implements Observer{
 	  ViewXMLHandler xmlHandler = new ViewXMLHandler();
 	  StringWrapper featureTree=null;
 
-	  EditorView newView=new EditorView();
+//	  EditorView newView=new EditorView();
 
 
 	  try {
@@ -3039,16 +3072,156 @@ public class EditorView extends JFrame implements Observer{
 
 	  System.out.println("\nResult of parsing:\n"
 		+"Features:\n"+xmlHandler.featuresList
-		+"Connectors:\n"+xmlHandler.connectorsList
-		+"Groups:\n"+xmlHandler.groupsList
-		+"Misc:\n"+xmlHandler.misc
-		+"Starting Commonalities:\n"+xmlHandler.startingComm
-		+"Starting Variabilities:\n"+xmlHandler.startingVars
+		+"\nConnectors:\n"+xmlHandler.connectorsList
+		+"\nGroups:\n"+xmlHandler.groupsList
+		+"\nMisc:\n"+xmlHandler.misc
+		+"\nStarting Commonalities:\n"+xmlHandler.startingComm
+		+"\nStarting Variabilities:\n"+xmlHandler.startingVars
 		+"");
 	  
+	  loadFeatures(xmlHandler.featuresList);
+	  loadConnectors(xmlHandler.connectorsList);
+	  loadGroups(xmlHandler.groupsList);
 	 
 
-	  return newView;
+	  return;
+	}
+
+	/**
+	 * Adds to the diagram panel all the saved features described in the list.
+	 * 
+	 * @param featuresList - String describing the features to load, one for each line.
+	 */
+	private void loadFeatures(String featuresList) {
+	  String[] featureData=null;
+	  String featureName=null;
+	  String containerName=null;
+	  int x=0, y=0, width=0, height=0, i=0;
+	  String[] features=featuresList.split("\n");
+	  
+	  for(String feature : features){
+		//getting data of this feature
+		featureData=feature.split(" ");
+
+		featureName=featureData[0].substring(5);
+		containerName=featureData[1].substring(9);
+
+		for (i=4; i<featureData[2].length(); ++i) if (featureData[2].charAt(i)=='.') break;
+		x=Integer.valueOf(featureData[2].substring(4, i));
+		y=Integer.valueOf(featureData[2].substring(i+1));
+
+		for (i=5; i<featureData[3].length(); ++i) if (featureData[3].charAt(i)=='.') break;
+		width=Integer.valueOf(featureData[3].substring(5, i));
+		height=Integer.valueOf(featureData[3].substring(i+1));
+		
+		FeaturePanel newFeature=buildFeaturePanel(featureName, containerName, x, y);
+		newFeature.setSize(width, height);
+		
+		visibleOrderDraggables.addToTop(newFeature);
+		diagramPanel.setLayer(newFeature, 0);
+		diagramPanel.add(newFeature);
+		diagramPanel.setComponentZOrder(newFeature, 0);
+	  }
+	}
+
+	/**
+	 * Adds to the diagram panel all the saved connectors described in the list.
+	 * 
+	 * @param connectorsList - String describing the connectors to load, one for each line.
+	 */
+	private void loadConnectors(String connectorsList) {
+	  String[] connectorData=null;
+	  String startConnectorName=null;
+	  String startOwnerName=null;
+	  int startX=0, startY=0;	  
+	  String endConnectorName=null;
+	  String endOwnerName=null;
+	  int endX=0, endY=0;
+	  int i=0;
+	  String[] connectors=connectorsList.split("\n");
+	  AnchorPanel startConnector=null, endConnector=null;
+	  FeaturePanel owner=null;
+	  for(String connector : connectors){
+		connectorData=connector.split(" ");
+
+		//getting data of start anchor of this connector
+		startConnectorName=connectorData[0].substring(10);
+
+		for (i=4; i<connectorData[1].length(); ++i) if (connectorData[1].charAt(i)=='.') break;
+		startX=Integer.valueOf(connectorData[1].substring(4, i));
+		startY=Integer.valueOf(connectorData[1].substring(i+1));
+
+		startOwnerName=connectorData[2].substring(11);
+
+		//getting data of start anchor of this connector
+		endConnectorName=connectorData[3].substring(8);
+
+		for (i=4; i<connectorData[4].length(); ++i) if (connectorData[4].charAt(i)=='.') break;
+		endX=Integer.valueOf(connectorData[4].substring(4, i));
+		endY=Integer.valueOf(connectorData[4].substring(i+1));
+
+		endOwnerName=connectorData[5].substring(9);		
+		
+		//adding start connector
+		startConnector=(AnchorPanel)buildConnectionDot(ItemsType.START_CONNECTOR, startConnectorName, startX, startY);
+		if(startOwnerName==""){//adding connector to the diagram panel directly
+		  visibleOrderDraggables.addToTop(startConnector);
+		  diagramPanel.setLayer(startConnector, 0);
+		  diagramPanel.add(startConnector);
+		  diagramPanel.setComponentZOrder(startConnector, 0);			
+		}
+		else{//adding connector to its owner feature panel
+		  OrderedListNode tmp=visibleOrderDraggables.getFirst();
+		  while(tmp!=null){
+			if(((JComponent)tmp.getElement()).getName().compareTo(startOwnerName)==00){
+			  owner=(FeaturePanel)tmp.getElement(); break;
+			}
+			tmp=tmp.getNext();
+		  }
+		  if(owner==null)
+			throw new RuntimeException("Couldn't find feature '"+startOwnerName+"' as owner of '"+startConnectorName);
+
+		  owner.setLayer(startConnector, 0);
+		  owner.add(startConnector);
+		  owner.setComponentZOrder(startConnector, 0);
+		}
+		
+		
+		//adding end connector
+		endConnector=(AnchorPanel)buildConnectionDot(ItemsType.END_CONNECTOR, endConnectorName, endX, endY);
+		if(endOwnerName==""){//adding connector to the diagram panel directly
+		  visibleOrderDraggables.addToTop(endConnector);
+		  diagramPanel.setLayer(endConnector, 0);
+		  diagramPanel.add(endConnector);
+		  diagramPanel.setComponentZOrder(endConnector, 0);			
+		}
+		else{//adding connector to its owner feature panel
+		  OrderedListNode tmp=visibleOrderDraggables.getFirst();
+		  while(tmp!=null){
+			if(((JComponent)tmp.getElement()).getName().compareTo(endOwnerName)==00){
+			  owner=(FeaturePanel)tmp.getElement(); break;
+			}
+			tmp=tmp.getNext();
+		  }
+		  if(owner==null)
+			throw new RuntimeException("Couldn't find feature '"+endOwnerName+"' as owner of '"+endConnectorName);
+
+		  owner.setLayer(endConnector, 0);
+		  owner.add(endConnector);
+		  owner.setComponentZOrder(endConnector, 0);
+		}		
+	  }
+
+	}
+
+	/**
+	 * Adds to the diagram panel all the saved groups described in the list.
+	 * 
+	 * @param groupsList - String describing the groups to load, one for each line.
+	 */
+	private void loadGroups(String groupsList) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	

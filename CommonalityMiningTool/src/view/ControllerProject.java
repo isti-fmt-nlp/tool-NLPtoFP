@@ -161,20 +161,26 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		  
 		//creating model
 		EditorModel editorModel= EditorModel.loadSavedModel(featureModelDataPaths);
-		//creating view
-		EditorView editorView= EditorView.loadSavedDiagram(diagramDataPath);
 		
-//		//creating controller
-//		EditorController editorController =new EditorController(editorView, editorModel);
-//		editorController.setSavePath(modelProject.getPathProject()+diagramPath);
-//			
-//		//adding the view as observer to the model
-//		editorModel.addObserver(editorView);
-//
-//		if( !editorView.prepareUI(editorController) ){
-//		  System.out.println("Controller not set. Closing...");
-//		  return;
-//		}
+		//creating an empty view
+		EditorView editorView= new EditorView();
+
+		//creating controller
+		EditorController editorController =new EditorController(editorView, editorModel);
+		editorController.setSavePath(modelProject.getPathProject()+diagramPath);
+			
+		//adding the view as observer to the model
+		editorModel.addObserver(editorView);
+
+		if( !editorView.prepareUI(editorController) ){
+		  System.out.println("Controller not set. Closing...");
+		  return;
+		}
+
+		//loading saved view data
+//		EditorView editorView= EditorView.loadSavedDiagram(diagramDataPath);
+		editorView.loadSavedDiagram(diagramDataPath);
+		
 	  }
 	  else if(ae.getActionCommand().equals("Exit")){
 		if(modelProject.readStateProject()[1]){
