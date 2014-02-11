@@ -722,7 +722,7 @@ public class EditorModel extends Observable{
 	    }
 	  }
 	  newModel.printModel();
-	  return null;
+	  return newModel;
 	}
 	
 	/**

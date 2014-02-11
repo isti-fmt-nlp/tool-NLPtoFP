@@ -27,7 +27,7 @@ import main.*;
 public class EditorController implements ActionListener, WindowListener, MouseListener, MouseMotionListener{
 
 	/** variables used for debugging*/
-	private static boolean debug=false;
+	private static boolean debug=true;
 	private static boolean debug2=false;
 	private static boolean debug3=false;
 	private static boolean debug4=false;

@@ -3082,6 +3082,9 @@ public class EditorView extends JFrame implements Observer{
 	  loadFeatures(xmlHandler.featuresList);
 	  loadConnectors(xmlHandler.connectorsList);
 	  loadGroups(xmlHandler.groupsList);
+	  loadMiscellaneous(xmlHandler.misc);
+	  loadStartingCommonalities(xmlHandler.startingComm);
+	  loadStartingVariabilities(xmlHandler.startingVars);
 	 
 
 	  return;
@@ -3090,7 +3093,7 @@ public class EditorView extends JFrame implements Observer{
 	/**
 	 * Adds to the diagram panel all the saved features described in the list.
 	 * 
-	 * @param featuresList - String describing the features to load, one for each line.
+	 * @param featuresList - String describing the features to load, one per line
 	 */
 	private void loadFeatures(String featuresList) {
 	  String[] featureData=null;
@@ -3127,7 +3130,7 @@ public class EditorView extends JFrame implements Observer{
 	/**
 	 * Adds to the diagram panel all the saved connectors described in the list.
 	 * 
-	 * @param connectorsList - String describing the connectors to load, one for each line.
+	 * @param connectorsList - String describing the connectors to load, one per line
 	 */
 	private void loadConnectors(String connectorsList) {
 	  String[] connectorData=null;
@@ -3153,7 +3156,7 @@ public class EditorView extends JFrame implements Observer{
 
 		startOwnerName=connectorData[2].substring(11);
 
-		//getting data of start anchor of this connector
+		//getting data of end anchor of this connector
 		endConnectorName=connectorData[3].substring(8);
 
 		for (i=4; i<connectorData[4].length(); ++i) if (connectorData[4].charAt(i)=='.') break;
@@ -3173,7 +3176,7 @@ public class EditorView extends JFrame implements Observer{
 		else{//adding connector to its owner feature panel
 		  OrderedListNode tmp=visibleOrderDraggables.getFirst();
 		  while(tmp!=null){
-			if(((JComponent)tmp.getElement()).getName().compareTo(startOwnerName)==00){
+			if(((JComponent)tmp.getElement()).getName().compareTo(startOwnerName)==0){
 			  owner=(FeaturePanel)tmp.getElement(); break;
 			}
 			tmp=tmp.getNext();
@@ -3198,7 +3201,7 @@ public class EditorView extends JFrame implements Observer{
 		else{//adding connector to its owner feature panel
 		  OrderedListNode tmp=visibleOrderDraggables.getFirst();
 		  while(tmp!=null){
-			if(((JComponent)tmp.getElement()).getName().compareTo(endOwnerName)==00){
+			if(((JComponent)tmp.getElement()).getName().compareTo(endOwnerName)==0){
 			  owner=(FeaturePanel)tmp.getElement(); break;
 			}
 			tmp=tmp.getNext();
@@ -3210,6 +3213,11 @@ public class EditorView extends JFrame implements Observer{
 		  owner.add(endConnector);
 		  owner.setComponentZOrder(endConnector, 0);
 		}		
+		//adding mutual references
+		startConnector.setOtherEnd(endConnector);
+		endConnector.setOtherEnd(startConnector);
+		//adding connector to draw list
+		startConnectorDots.add(startConnector);
 	  }
 
 	}
@@ -3217,11 +3225,142 @@ public class EditorView extends JFrame implements Observer{
 	/**
 	 * Adds to the diagram panel all the saved groups described in the list.
 	 * 
-	 * @param groupsList - String describing the groups to load, one for each line.
+	 * @param groupsList - String describing the groups to load, one per line
 	 */
 	private void loadGroups(String groupsList) {
-		// TODO Auto-generated method stub
-		
+	  String[] groupData=null;
+	  String groupConnectorName=null;
+	  String groupOwnerName=null;
+	  int groupX=0, groupY=0;	
+	  String typeString=null;
+	  ItemsType groupType=null;
+
+	  String memberName=null;
+	  String memberOwnerName=null;
+	  int memberX=0, memberY=0;
+	  int i=0;
+	  String[] groups=groupsList.split("\n");
+
+	  GroupPanel group=null;
+	  AnchorPanel member=null;
+	  FeaturePanel owner=null;
+	  for(String connector : groups){
+		groupData=connector.split(" ");
+
+		//getting data of group
+		groupConnectorName=groupData[0].substring(10);
+
+		typeString=groupData[1].substring(5);
+		groupType=(typeString.compareTo("ALT")==0)? ItemsType.ALT_GROUP_START_CONNECTOR : ItemsType.OR_GROUP_START_CONNECTOR;
+
+		for (i=4; i<groupData[2].length(); ++i) if (groupData[2].charAt(i)=='.') break;
+		groupX=Integer.valueOf(groupData[2].substring(4, i));
+		groupY=Integer.valueOf(groupData[2].substring(i+1));
+
+		groupOwnerName=groupData[3].substring(11);
+
+		//adding group
+		group=(GroupPanel)buildConnectionDot(groupType, groupConnectorName, groupX, groupY);
+		if(groupOwnerName==""){//adding connector to the diagram panel directly
+		  visibleOrderDraggables.addToTop(group);
+		  diagramPanel.setLayer(group, 0);
+		  diagramPanel.add(group);
+		  diagramPanel.setComponentZOrder(group, 0);			
+		}
+		else{//adding group to its owner feature panel
+		  OrderedListNode tmp=visibleOrderDraggables.getFirst();
+		  while(tmp!=null){
+			if(((JComponent)tmp.getElement()).getName().compareTo(groupOwnerName)==0){
+			  owner=(FeaturePanel)tmp.getElement(); break;
+			}
+			tmp=tmp.getNext();
+		  }
+		  if(owner==null)
+		    throw new RuntimeException("Couldn't find feature '"+groupOwnerName+"' as owner of '"+groupConnectorName);
+
+		  owner.setLayer(group, 0);
+		  owner.add(group);
+		  owner.setComponentZOrder(group, 0);
+		}
+
+
+		//adding members
+		for(int k=4; k<groupData.length; k+=3){
+		  //getting member's data
+		  memberName=groupData[k].substring(11);
+
+		  for (i=4; i<groupData[k+1].length(); ++i) if (groupData[k+1].charAt(i)=='.') break;
+		  memberX=Integer.valueOf(groupData[k+1].substring(4, i));
+		  memberY=Integer.valueOf(groupData[k+1].substring(i+1));
+
+		  memberOwnerName=groupData[k+2].substring(9);		
+
+		  //adding member
+		  member=(AnchorPanel)buildConnectionDot(ItemsType.END_CONNECTOR, memberName, memberX, memberY);
+		  if(memberOwnerName==""){//adding member to the diagram panel directly
+			visibleOrderDraggables.addToTop(member);
+			diagramPanel.setLayer(member, 0);
+			diagramPanel.add(member);
+			diagramPanel.setComponentZOrder(member, 0);			
+		  }
+		  else{//adding member to its owner feature panel
+			OrderedListNode tmp=visibleOrderDraggables.getFirst();
+			while(tmp!=null){
+			  if(((JComponent)tmp.getElement()).getName().compareTo(memberOwnerName)==0){
+				owner=(FeaturePanel)tmp.getElement(); break;
+			  }
+			  tmp=tmp.getNext();
+			}
+			if(owner==null)
+			  throw new RuntimeException("Couldn't find feature '"+memberOwnerName+"' as owner of '"+memberName);
+
+			owner.setLayer(member, 0);
+			owner.add(member);
+			owner.setComponentZOrder(member, 0);
+		  }	
+		  //adding mutual references
+		  member.setOtherEnd(group);
+		  group.getMembers().add(member);
+		}
+
+		//adding group to draw list
+		if(groupType==ItemsType.ALT_GROUP_START_CONNECTOR) altGroupPanels.add(group);
+		else orGroupPanels.add(group);
+	  }
+	  
+	}
+
+	/**
+	 * Loads a set of values used by the view for various purposes.
+	 * 
+	 * @param misc - String describing the values to load, separated by a singol blank
+	 */
+	private void loadMiscellaneous(String misc) {
+	  String[] values=misc.split(" ");
+	  connectorsCount=Integer.valueOf(values[0].substring(16));
+	  altGroupsCount=Integer.valueOf(values[1].substring(15));
+	  orGroupsCount=Integer.valueOf(values[2].substring(14));
+	  featuresCount=Integer.valueOf(values[3].substring(14));
+	}
+
+	/**
+	 * Loads the list of starting commonalities.
+	 * 
+	 * @param startingComm - String containing the names of starting commonalities, separated by a singol blank
+	 */
+	private void loadStartingCommonalities(String startingComm) {
+	  String[] commonalityNames=startingComm.split(" ");
+	  for(String name : commonalityNames) startingCommonalities.add(name);
+	}
+
+	/**
+	 * Loads the list of starting variabilities.
+	 * 
+	 * @param startingVars - String containing the names of starting variabilities, separated by a singol blank
+	 */
+	private void loadStartingVariabilities(String startingVars) {
+	  String[] variabilityNames=startingVars.split(" ");
+	  for(String name : variabilityNames) startingVariabilities.add(name);
 	}
 	
 	
