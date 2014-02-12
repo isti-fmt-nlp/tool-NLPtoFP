@@ -584,8 +584,8 @@ public class EditorModel extends Observable{
 
 	/**
 	 * Saves the elements of the feature model on file.
-	 * @param pathProject - the directory path where to save the diagram
-	 * @param s - the name of the file in which to save the diagram
+	 * @param pathProject - the directory path where to save the model
+	 * @param s - the name of the file in which to save the model
 	 */
 	public ArrayList<String> saveModel(String pathProject, String s) {
 	  String xml = null;
@@ -628,6 +628,70 @@ public class EditorModel extends Observable{
 		try{
 		  //checking if the diagrams save directory must be created
 		  File dir=new File(pathProject);		
+		  if(!dir.isDirectory() && !dir.mkdir()) throw new IOException("Save Directory can't be created.");
+
+		  PrintWriter pw1 = new PrintWriter(new BufferedWriter(
+				  new FileWriter(savePathPrefix+feature.getValue().getName()+savePathSuffix) ));
+		  pw1.print(xml);
+		  pw1.close();
+		  modelPaths.add(savePathPrefix+feature.getValue().getName()+savePathSuffix);
+		} 
+		catch (IOException e){
+		  System.out.println("Exception saveModel: " + e.getMessage());
+		  e.printStackTrace();
+		  return null;
+		}		  
+
+	  }
+	  return modelPaths;
+	}
+
+	/**
+	 * Export the feature model in the SXFM xml format on file.
+	 * @param savePath - the directory path where to save the exported file
+	 * @param s - the name of the file in which to esport the model
+	 */
+	public ArrayList<String> exportAsSXFM(String savePath, String s) {
+	  String xml = null;
+	  String savePathPrefix = savePath + "/" + s + "_DiagModel"; 
+	  String savePathSuffix= ".xml";
+	  String date=null;
+	  ArrayList<String> modelPaths=new ArrayList<String>();
+
+	  //calculating save time in a 'yyyyy-mm-dd hh:mm' format
+	  Calendar cal= Calendar.getInstance();
+	  date=cal.get(Calendar.YEAR)+"-"+cal.get(Calendar.MONTH+1)
+			  +"-"+cal.get(Calendar.DAY_OF_MONTH)+" "+cal.get(Calendar.HOUR_OF_DAY)+":"+cal.get(Calendar.MINUTE);
+
+	  for(Map.Entry<String,FeatureNode> feature : unrootedFeatures.entrySet()){
+	    //skipping features that have a parent feature
+		if(feature.getValue().getParent()!=null) continue;
+		
+		xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+			  +"<feature_model name=\""+s+"_"+feature.getValue().getName()+"\">"
+				+"<meta>"
+			    +"<data name=\"date\">"+date+"</data>"
+				+"</meta>"
+				+"<feature_tree>";
+		
+		xml+=":r "+feature.getKey()+" ("+feature.getKey()+") ["
+				+feature.getValue().getMinCardinality()+"."+feature.getValue().getMaxCardinality()+"]"
+				+recursiveXMLTreeBuilder(feature.getValue(), 1);
+
+		xml+=	   "</feature_tree>"
+				+"<constraints>";
+
+		/*
+		 * CONSTRAINT PART IS STILL TO BE ADDED...
+		 */
+
+		xml+=	   "</constraints>"
+				+"</feature_model>";
+
+		//saving xml string on file
+		try{
+		  //checking if the diagrams save directory must be created
+		  File dir=new File(savePath);		
 		  if(!dir.isDirectory() && !dir.mkdir()) throw new IOException("Save Directory can't be created.");
 
 		  PrintWriter pw1 = new PrintWriter(new BufferedWriter(
@@ -897,6 +961,8 @@ public class EditorModel extends Observable{
 
 	  //adding new feature to the model
 	  newFeature=new FeatureNode(type, featureName, minCard, maxCard);
+	  System.out.println("***Adding child '"+newFeature.getName()+"' to parent '"
+	    +(parent==null ? "null":parent.getName())+"'");
 	  if (parent!=null){
 		parent.getSubFeatures().add(newFeature);
 		newFeature.setParent(parent);
@@ -957,7 +1023,7 @@ public class EditorModel extends Observable{
 	  //adding new group to the model
 	  newGroup=new GroupNode(groupName, minCard, maxCard);
 	  parent.getSubGroups().add(newGroup);
-	  
+	  groups.put(groupName, newGroup);
 	  return newGroup;
 	}
 
@@ -966,13 +1032,13 @@ public class EditorModel extends Observable{
 	 *  creates the corresponding FeatureNode, adding it to the parent group.
 	 * Each call to this method will remove from featureTree the prefix String representing the current element.
 	 * 
-	 * @param parent - the parent group
+	 * @param parentGroup - the parent group
 	 * @param groupOwner - the FeatureNode owner of the parent group
 	 * @param tabs - number of tabulation characters preceding the element to be created in featureTree
 	 * @param featureTree - contains the String representing the tree
 	 * 
 	 */
-	private FeatureNode addMemberToGroup(GroupNode parent, FeatureNode groupOwner, int tabs, StringWrapper featureTree) {
+	private FeatureNode addMemberToGroup(GroupNode parentGroup, FeatureNode groupOwner, int tabs, StringWrapper featureTree) {
 		  String element=null;
 		  String[] elementData=null;
 		  String featureName="";
@@ -981,7 +1047,7 @@ public class EditorModel extends Observable{
 		  FeatureTypes type=null;
 		  int minCard=0, maxCard=0;
 		  
-		  if(parent==null) throw new RuntimeException("A feature cannot be added as member to a null group");
+		  if(parentGroup==null) throw new RuntimeException("A feature cannot be added as member to a null group");
 		  //splitting element prefix from the rest of featureTree String
 		  i=tabs;
 		  while(i<featureTree.string.length() && featureTree.string.charAt(i)!='\t') ++i;
@@ -1011,7 +1077,10 @@ public class EditorModel extends Observable{
 
 		  //adding new feature to the model
 		  newFeature=new FeatureNode(type, featureName, minCard, maxCard);
-		  parent.getMembers().add(newFeature);
+		  System.out.println("***Adding member '"+newFeature.getName()+"' to parentGroup '"
+		    +(parentGroup==null ? "null":parentGroup.getName())
+		    +"' with parent feature '"+(groupOwner==null ? "null": groupOwner.getName())+"'");
+		  parentGroup.getMembers().add(newFeature);
 		  newFeature.setParent(groupOwner);
 		  unrootedFeatures.put(featureName, newFeature);
 		  

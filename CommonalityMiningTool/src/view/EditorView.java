@@ -572,145 +572,14 @@ public class EditorView extends JFrame implements Observer{
 		add(splitterPanel);
 
 
-		
-//		//creo i draggables
-//		String label[]={"Questo è un nome lungo per una Feature!", "Questo è un nome ammodo", "Corto!"};
-//		for(int i=0; i<label.length; ++i){
-//			visibleOrderDraggables.addToTop(getDraggableFeature(label[i], 15+i*75, 15+i*75));
-//			++featuresCount;
-//		}
-//						
-//		//aggiungo i draggables al diagram panel
-//		int index=0;
-//
-////		JPanel tmpPanel=null;
-//		
-//		tmpNode=visibleOrderDraggables.getFirst();
-//		while(tmpNode!=null){
-////			((JPanel)tmpNode.getElement()).addMouseListener(getDiagramMouseListener());
-////			((JPanel)tmpNode.getElement()).addMouseMotionListener(getDiagramMouseMotionListener());
-//			diagramPanel.setLayer((Component)tmpNode.getElement(), index);
-//			diagramPanel.add((Component)tmpNode.getElement());
-//			diagramPanel.setComponentZOrder((Component)tmpNode.getElement(), index);
-////			tmpPanel=(JPanel)tmpNode.getElement();
-////			diagramPanel.setLayer(tmpPanel, index);
-////			diagramPanel.add(tmpPanel);
-////			tmpPanel.setOpaque(false);
-////			diagramPanel.setComponentZOrder(tmpPanel, index);
-//			
-//			
-//			
-//			tmpNode=tmpNode.getNext();
-//			++index;
-//		}
-
-//		tmpNode=visibleOrderDraggables.getLast();
-//		while(tmpNode!=null){
-//			diagramPanel.add((JPanel)tmpNode.getElement(), index);
-//			tmpNode=tmpNode.getPrev();
-//			++index;
-//		}
-
 		diagramPanel.addMouseListener(editorController);
 		diagramPanel.addMouseMotionListener(editorController);
-//		diagramPanel.addMouseListener(getDiagramMouseListener());
-//		diagramPanel.addMouseMotionListener(getDiagramMouseMotionListener());
-
-//		splitterPanel.addMouseListener(getDiagramMouseListener());
-//		splitterPanel.addMouseMotionListener(getDiagramMouseMotionListener());
-//		frameRoot.addMouseListener(getDiagramMouseListener());
-//		frameRoot.addMouseMotionListener(getDiagramMouseMotionListener());
-		
-//		toolsPanel.addMouseListener(getToolbarMouseListener());
-//		toolsPanel.addMouseMotionListener(getToolbarMouseMotionListener());
 
 		setSize(Toolkit.getDefaultToolkit().getScreenSize());
 		setVisible(true);
 		setLocation(0, 0);
 		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
-//		addMouseListener(getToolbarMouseListener());
-//		addMouseMotionListener(getToolbarMouseMotionListener());
-		
 
-		//creating diagram popup menu
-//		diagramElementsMenu = new JPopupMenu();
-//		popMenuItemDelete = new JMenuItem("Delete Element");
-//        popMenuItemUngroup = new JMenuItem("Ungroup Element");        
-//        popMenuItemPrintModelDebug = new JMenuItem("Print Model[DEBUG COMMAND]");
-
-        
-//        popMenuItemDelete.addActionListener(
-//        		
-//          new ActionListener() {
-//            public void actionPerformed(ActionEvent e) {
-////              System.out.println("e.getSource():"+e.getSource());
-////              System.out.println("e.ActionCommand():"+e.getActionCommand());
-//              String elementName = null;
-//              if (popUpElement!=null) elementName=popUpElement.getName();
-//
-//              /* ***DEBUG*** */
-//              if(debug3) System.out.println("Popup Menu requested delete on "+elementName
-//            		  +"\ne = "+e
-//            		  /*+"\ncomp.getName()="+comp.getName()*/);
-//              /* ***DEBUG*** */
-//              
-//              if(elementName!=null && elementName.startsWith(startConnectorsNamePrefix)){
-////                if(elementName.startsWith(startConnectorsNamePrefix)) ){
-//            	deleteAnchor(popUpElement);
-//            	deleteAnchor(((AnchorPanel)popUpElement).getOtherEnd());
-////                deleteAnchor( ((AnchorPanel)popUpElement).getOtherEnd());
-//            	frameRoot.repaint();
-//              }
-//              if(elementName!=null && elementName.startsWith(endConnectorsNamePrefix)){
-////                if(elementName.startsWith(startConnectorsNamePrefix)) ){
-//            	if(((AnchorPanel)popUpElement).getOtherEnd().getName().startsWith(startConnectorsNamePrefix)){
-//                  deleteAnchor(popUpElement);
-//                  deleteAnchor(((AnchorPanel)popUpElement).getOtherEnd());            		
-//            	}
-//            	if( ( ((AnchorPanel)popUpElement).getOtherEnd().getName().startsWith(orGroupNamePrefix)
-//            	   || ((AnchorPanel)popUpElement).getOtherEnd().getName().startsWith(altGroupNamePrefix) )
-//            	   && ((GroupPanel)((AnchorPanel)popUpElement).getOtherEnd()).getMembers().size()>2 ){
-//
-//            		((GroupPanel)((AnchorPanel)popUpElement).getOtherEnd()).getMembers().remove(popUpElement);
-//              	    deleteAnchor(popUpElement);
-//            	}	
-////                deleteAnchor( ((AnchorPanel)popUpElement).getOtherEnd());
-//                frameRoot.repaint();
-//              }
-//              popUpElement=null;
-////              diagramElementsMenu.setVisible(false);
-//
-//            }
-//
-//          });
-
-
-//        popMenuItemUngroup.addActionListener(
-//          new ActionListener() {
-//            public void actionPerformed(ActionEvent e) {
-//              System.out.println("Detach not implemented yet! ");
-//            }
-//        });
-		
-		
-//		setExtendedState(MAXIMIZED_BOTH);
-
-//		GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
-//		device.setFullScreenWindow(this);
-
-//		frameRoot.setSize(Toolkit.getDefaultToolkit().getScreenSize());
-//		frameRoot.setLocation(0, 0);
-
-//		frameRoot.repaint();
-//		frameRoot.validate();
-//		frameRoot.setVisible(true);
-		
-//        SwingUtilities.invokeLater(new Runnable() {
-//            public void run() {
-//            	frameRoot.setVisible(true);
-//            }
-//        });
-//		diagramPanel.add(diagramElementsMenu);
 		
 		//adding starting commonalities and variabilities
 		int i=10, j=10;
@@ -1916,15 +1785,11 @@ public class EditorView extends JFrame implements Observer{
 		if(underlyingPanel!=null){//if the underlying panel is a feature, the start connection dot is anchored to it
 		  if (underlyingPanel.getClass().equals(FeaturePanel.class) ){
 			featurePanel=(FeaturePanel)underlyingPanel;
-//			  if (!underlyingPanel.getName().startsWith(diagramPanelName)&&
-//					  !underlyingPanel.getName().startsWith(startConnectorsNamePrefix)&&
-//					  !underlyingPanel.getName().startsWith(endConnectorsNamePrefix)  ){			  
 
 			newConnectorStartDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.START_CONNECTOR, 
 				toolDragPosition.x-(int)featurePanel.getLocationOnScreen().getX(),
 				toolDragPosition.y-(int)featurePanel.getLocationOnScreen().getY()-5);			
 
-//			System.out.println("adding to feature: "+addAnchorToFeature(newConnectorStartDot, underlyingPanel));
 			moveComponentToTop(featurePanel);
 
 			featurePanel.setLayer(newConnectorStartDot, 0);
@@ -1954,13 +1819,9 @@ public class EditorView extends JFrame implements Observer{
 		ImageIcon lineLengthIcon = new ImageIcon(connectorLineLengthIconURL);
 		ImageIcon startConnectorIcon = new ImageIcon(connectorStartDotIconURL);
 
-//		newConnectorEndDot=getDraggableConnectionDot(itemsTypes.END_CONNECTOR, actualPositionX+40, actualPositionY+40);
 		newConnectorEndDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.END_CONNECTOR,
 			actualPositionX+lineLengthIcon.getIconWidth()+startConnectorIcon.getIconWidth(),
 			actualPositionY-5+lineLengthIcon.getIconHeight()+startConnectorIcon.getIconHeight());
-
-//		newConnectorStartDot.add(diagramElementsMenu);
-//		newConnectorEndDot.add(diagramElementsMenu);
 
 		/* ***DEBUG*** */
 		if(debug) System.out.println("Mouse released(Drag relative) on: ("+e.getX()+", "+e.getY()+")."
@@ -1992,7 +1853,7 @@ public class EditorView extends JFrame implements Observer{
 		newConnectorEndDot.setOtherEnd(newConnectorStartDot);
 
 		addConnectorsToDrawLists(newConnectorStartDot, newConnectorEndDot);
-		++connectorsCount;
+//		++connectorsCount;
 
 		cancelToolDrag();
 	}
@@ -2001,7 +1862,6 @@ public class EditorView extends JFrame implements Observer{
 		GroupPanel newGroupStartDot = addGroupToDiagram(e, ItemsType.OR_GROUP_START_CONNECTOR);
 		if (newGroupStartDot==null) return;
 		addOrGroupToDrawLists(newGroupStartDot);
-		++orGroupsCount;
 	}
 
 	/**
@@ -2014,7 +1874,6 @@ public class EditorView extends JFrame implements Observer{
 		GroupPanel newGroupStartDot = addGroupToDiagram(e, ItemsType.ALT_GROUP_START_CONNECTOR);
 		if (newGroupStartDot==null) return;
 		addAltGroupToDrawLists(newGroupStartDot);
-		++altGroupsCount;
 	}
 
 	/**
@@ -2070,16 +1929,12 @@ public class EditorView extends JFrame implements Observer{
 		if(underlyingPanel!=null){//if the underlying panel is a feature, the start connection dot is anchored to it
 		  if (underlyingPanel.getClass().equals(FeaturePanel.class) ){
 			featurePanel=(FeaturePanel)underlyingPanel;
-//		if(underlyingPanel!=null){//if the underlying panel is a feature, the group start dot is anchored to it
-//		  if (!underlyingPanel.getName().startsWith(diagramPanelName)&&
-//			  !underlyingPanel.getName().startsWith(startConnectorsNamePrefix)&&
-//			  !underlyingPanel.getName().startsWith(endConnectorsNamePrefix)  ){			  
+
 			newGroupStartDot=(GroupPanel)getDraggableConnectionDot(requestedType, 
 				toolDragPosition.x-(int)featurePanel.getLocationOnScreen().getX()
 					+groupIcon.getIconWidth()/2-startConnectorIcon.getIconWidth()/2,
 				toolDragPosition.y-(int)featurePanel.getLocationOnScreen().getY()-5);			
 
-//			System.out.println("adding to feature: "+addAnchorToFeature(newConnectorStartDot, underlyingPanel));
 			moveComponentToTop(featurePanel);
 
 			featurePanel.setLayer(newGroupStartDot, 0);
@@ -2106,7 +1961,6 @@ public class EditorView extends JFrame implements Observer{
 			newGroupStartDot=(GroupPanel)getDraggableConnectionDot(requestedType,
 				actualPositionX+groupIcon.getIconWidth()/2-startConnectorIcon.getIconWidth()/2, actualPositionY-5);			
 		
-//		newConnectorEndDot=getDraggableConnectionDot(itemsTypes.END_CONNECTOR, actualPositionX+40, actualPositionY+40);
 		newGroupEndpoint1=(AnchorPanel)getDraggableConnectionDot(ItemsType.END_CONNECTOR,
 				actualPositionX+groupIcon.getIconWidth()/2-startConnectorIcon.getIconWidth()/2
 				+groupLineLengthIcon.getIconWidth(),
@@ -2188,25 +2042,37 @@ public class EditorView extends JFrame implements Observer{
 		  case START_CONNECTOR:
 			imagePanel = new AnchorPanel();  
 			if(name!=null) imagePanel.setName(name);
-			else imagePanel.setName(startConnectorsNamePrefix+connectorsCount);
+			else{
+			  imagePanel.setName(startConnectorsNamePrefix+connectorsCount);
+			  ++connectorsCount;
+			}
 			connectorIcon = new ImageIcon(connectorStartDotIconURL);
 			break;
 		  case END_CONNECTOR:
 			imagePanel = new AnchorPanel();  
 			if(name!=null) imagePanel.setName(name);
-			else imagePanel.setName(endConnectorsNamePrefix+connectorsCount);
+			else{
+			  imagePanel.setName(endConnectorsNamePrefix+connectorsCount);
+			  ++connectorsCount;
+			}
 			connectorIcon = new ImageIcon(connectorEndDotIconURL);
 			break;
 		  case ALT_GROUP_START_CONNECTOR:
 			imagePanel = new GroupPanel();  
 			if(name!=null) imagePanel.setName(name);
-			else imagePanel.setName(altGroupNamePrefix+altGroupsCount);
+			else{
+			  imagePanel.setName(altGroupNamePrefix+altGroupsCount);
+			  ++altGroupsCount;
+			}
 			connectorIcon = new ImageIcon(ALTGroupDotIconURL);
 			break;
 		  case OR_GROUP_START_CONNECTOR:
 			imagePanel = new GroupPanel();  
 			if(name!=null) imagePanel.setName(name);
-			else imagePanel.setName(orGroupNamePrefix+orGroupsCount);
+			else{
+			  imagePanel.setName(orGroupNamePrefix+orGroupsCount);
+			  ++orGroupsCount;
+			}
 			connectorIcon = new ImageIcon(ORGroupDotIconURL);
 			break;
  		  default: return null;
@@ -2932,10 +2798,12 @@ public class EditorView extends JFrame implements Observer{
 			  +"<Diagram name=\"" + s + "\">"
 				+"<features>";
 		
+		System.out.println("***Printing draggables in reverse order before save***\n");
 		tmp = visibleOrderDraggables.getLast();
 		while(tmp!=null){
 		  if(((JComponent)tmp.getElement()).getName().startsWith(featureNamePrefix)){
 			featTmp = (FeaturePanel)tmp.getElement();
+			System.out.println("Adding element: "+featTmp.getLabelName());
 			xml+="Name="+featTmp.getLabelName()+" ContName="+featTmp.getName()
 			    +" Loc="+featTmp.getX()+"."+featTmp.getY()
 			    +" Size="+featTmp.getWidth()+"."+featTmp.getHeight()+"\n";
@@ -3044,15 +2912,10 @@ public class EditorView extends JFrame implements Observer{
 	 * @return - the saved feature model
 	 */
 	public void/* EditorView */loadSavedDiagram(String diagramDataPath) {
-	  String xml="";
-	  String s=null;
 	  SAXParser saxParser = null;
 	  InputStream stream = null;
 	  SAXParserFactory saxFactory = SAXParserFactory.newInstance();
 	  ViewXMLHandler xmlHandler = new ViewXMLHandler();
-	  StringWrapper featureTree=null;
-
-//	  EditorView newView=new EditorView();
 
 
 	  try {
@@ -3182,6 +3045,7 @@ public class EditorView extends JFrame implements Observer{
 		  if(owner==null)
 			throw new RuntimeException("Couldn't find feature '"+startOwnerName+"' as owner of '"+startConnectorName);
 
+		  visibleOrderDraggables.addToTop(startConnector);
 		  owner.setLayer(startConnector, 0);
 		  owner.add(startConnector);
 		  owner.setComponentZOrder(startConnector, 0);
@@ -3207,6 +3071,7 @@ public class EditorView extends JFrame implements Observer{
 		  if(owner==null)
 			throw new RuntimeException("Couldn't find feature '"+endOwnerName+"' as owner of '"+endConnectorName);
 
+		  visibleOrderDraggables.addToTop(endConnector);
 		  owner.setLayer(endConnector, 0);
 		  owner.add(endConnector);
 		  owner.setComponentZOrder(endConnector, 0);
@@ -3276,6 +3141,7 @@ public class EditorView extends JFrame implements Observer{
 		  if(owner==null)
 		    throw new RuntimeException("Couldn't find feature '"+groupOwnerName+"' as owner of '"+groupConnectorName);
 
+		  visibleOrderDraggables.addToTop(group);
 		  owner.setLayer(group, 0);
 		  owner.add(group);
 		  owner.setComponentZOrder(group, 0);
@@ -3312,6 +3178,7 @@ public class EditorView extends JFrame implements Observer{
 			if(owner==null)
 			  throw new RuntimeException("Couldn't find feature '"+memberOwnerName+"' as owner of '"+memberName);
 
+			visibleOrderDraggables.addToTop(member);
 			owner.setLayer(member, 0);
 			owner.add(member);
 			owner.setComponentZOrder(member, 0);

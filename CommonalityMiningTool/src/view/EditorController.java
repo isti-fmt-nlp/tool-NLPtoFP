@@ -32,11 +32,17 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 	private static boolean debug3=false;
 	private static boolean debug4=false;
 		
-	/** Path where general loadable diagram files will be saved*/
+	/** Suffix of the path where general loadable diagram files will be saved*/
 	private static String saveFilesSubPath="saved diagrams"; 
 	
+	/** Suffix of the path where SXFM exported files will be saved*/
+	private static String sxfmSubPath="SXFM"; 
+
 	/** Path where diagram files will be saved*/
-	private String diagramPath = null;
+	private String diagramPath = null;		
+
+	/** Path where SXFM exported files will be saved*/
+	private String sxfmPath = null;		
 		
 	private EditorView editorView = null;
 		
@@ -231,6 +237,8 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 			  featurePanelY=featurePanel.getY();
 			  anchorPanel=(JComponent)featurePanel.getComponentAt(e.getX()-featurePanelX, e.getY()-featurePanelY);
 			  anchorPanelName=anchorPanel.getName();
+			  System.out.println("Mouse pressed on "+featurePanel.getName()+", on anchor "+anchorPanelName);
+
 			  //mouse pressed on an anchor inside the feature panel
 			  if(anchorPanelName!=null && anchorPanel.getClass().equals(AnchorPanel.class) &&(
 					  anchorPanelName.startsWith(EditorView.startConnectorsNamePrefix) ||
@@ -597,6 +605,15 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
     		else System.out.println("\n"+((Component)drag.getElement()).getName());
     		drag=drag.getNext();
     	  }
+    	  System.out.println("\n\nPRINTING VISIBLE ORDER DRAGGABLES IN REVERSE ORDER");
+    	  drag = editorView.getVisibleOrderDraggables().getLast();
+    	  while(drag!=null){
+    		if(((Component)drag.getElement()).getName().startsWith(EditorView.featureNamePrefix))
+    		  System.out.println("\n"+((FeaturePanel)drag.getElement()).getLabelName());
+    		else System.out.println("\n"+((Component)drag.getElement()).getName());
+    		drag=drag.getPrev();
+    	  }
+
     	}
     	/* ***DEBUG*** */
     	
@@ -849,11 +866,12 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 	}
 
 	/**
-	 * Sets the path used for saving the project.
+	 * Sets the path used for saving the project and that used to export SXFM files into.
 	 * @param pathProject - the path used for saving the project
 	 */
 	public void setSavePath(String pathProject) {
 		this.diagramPath=pathProject;		
+		this.sxfmPath=pathProject+sxfmSubPath;
 	}
 	
 }

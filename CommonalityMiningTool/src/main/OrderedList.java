@@ -66,6 +66,11 @@ public class OrderedList{
 	 * @param element - the Object to be moved 
 	 */
 	public void moveToTop(Object element){
+
+		remove(element);
+		addToTop(element);
+		
+/*		
 		//if list is empty, element is added to the top
 		if (first==null){ addToTop(element); return;}
 		
@@ -89,6 +94,7 @@ public class OrderedList{
 
 		//element is not present in the list, so it's added to the top
 		addToTop(element);
+*/
 	}
 	
 	/**
@@ -97,6 +103,10 @@ public class OrderedList{
 	 * @param element - the Object to be added 
 	 */
 	public void moveToBottom(Object element){
+		remove(element);
+		addToBottom(element);
+		
+/*		
 		//if list is empty, element is added to the top, which is also the bottom
 		if (first==null){ addToTop(element); return;}
 		
@@ -120,6 +130,7 @@ public class OrderedList{
 
 		//element is not present in the list, so it's added to the bottom
 		addToBottom(element);
+*/		
 	}
 	
 	/**
