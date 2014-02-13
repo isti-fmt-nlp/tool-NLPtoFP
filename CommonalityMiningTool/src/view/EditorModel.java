@@ -21,6 +21,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.bouncycastle.crypto.RuntimeCryptoException;
 import org.xml.sax.SAXException;
 
 import main.FeatureNode;
@@ -653,7 +654,7 @@ public class EditorModel extends Observable{
 	 */
 	public ArrayList<String> exportAsSXFM(String savePath, String s) {
 	  String xml = null;
-	  String savePathPrefix = savePath + "/" + s + "_DiagModel"; 
+	  String savePathPrefix = savePath + "/" + s + "_SXFM"; 
 	  String savePathSuffix= ".xml";
 	  String date=null;
 	  ArrayList<String> modelPaths=new ArrayList<String>();
@@ -674,9 +675,8 @@ public class EditorModel extends Observable{
 				+"</meta>"
 				+"<feature_tree>";
 		
-		xml+=":r "+feature.getKey()+" ("+feature.getKey()+") ["
-				+feature.getValue().getMinCardinality()+"."+feature.getValue().getMaxCardinality()+"]"
-				+recursiveXMLTreeBuilder(feature.getValue(), 1);
+		xml+=":r "+feature.getKey()+" ("+feature.getKey()+")"
+				+recursiveSXFMTreeBuilder(feature.getValue(), 1);
 
 		xml+=	   "</feature_tree>"
 				+"<constraints>";
@@ -690,7 +690,7 @@ public class EditorModel extends Observable{
 
 		//saving xml string on file
 		try{
-		  //checking if the diagrams save directory must be created
+		  //checking if the SXFM files save directory must be created
 		  File dir=new File(savePath);		
 		  if(!dir.isDirectory() && !dir.mkdir()) throw new IOException("Save Directory can't be created.");
 
@@ -710,6 +710,45 @@ public class EditorModel extends Observable{
 	  return modelPaths;
 	}
 
+/*
+<feature_model name="My feature model">     <-- feature model start tag and name attribute (mandatory)
+  <meta>                                                                  <-- Optional
+  <data name="description">Model description</data>                 <-- Optional
+  <data name="creator">Model's creator</data>                       <-- Optional
+  <data name="email">Model creator's email</data>                   <-- Optional
+  <data name="date">Model creation date</data>                      <-- Optional
+  <data name="department">Model creator's department</data>         <-- Optional
+  <data name="organization">Model creator's organization</data>     <-- Optional
+  <data name="address">Model creator's address</data>               <-- Optional
+  <data name="phone">Model creator's phone</data>                   <-- Optional
+  <data name="website">Model creator's website</data>               <-- Optional
+  <data name="reference">Model's related publication</data>         <-- Optional
+  </meta>
+  <feature_tree>                <-- feature tree start tag
+    :r root (root_id)                 <-- root feature named 'root' with unique ID 'root_id'   						
+      :o opt1 (id_opt1)               <-- an optional feature named opt1 with unique id id_opt1
+      :o opt2 (id_opt2)               <-- an optional feature named opt2, child of opt1 with unique id id_opt2
+      :m man1                         <-- an mandatory feature named man1 with unique id id_man1
+        :g [1,*]                      <-- an inclusive-OR feature group with cardinality [1..*] ([1..3] also allowed)
+          : a (id_a)                  <-- a grouped feature name a with ID id_a
+          : b (id_b)                  <-- a grouped feature name b with ID id_b
+            :o opt3 (id_opt3)         <-- an optional feature opt3 child of b with unique id id_opt3
+          : c (id_c)                  <-- a grouped feature name c with ID id_c
+        :g [1,1]                      <-- an exclusive-OR feature group with cardinality [1..1]
+          : d (id_d)                  <-- a grouped feature name d with ID id_d
+          : e (id_e)                  <-- a grouped feature name e with ID id_e
+            :g [2,3]                      <-- a feature group with cardinality [2..3] children of feature e
+              : f (id_f)                  <-- a grouped feature name f with ID id_f
+              : g (id_g)                  <-- a grouped feature name g with ID id_g
+              : h (id_h)                  <-- a grouped feature name h with ID id_h
+  </feature_tree>               <-- feature tree end tag (mandatory)
+  <constraints>                 <-- extra constraints start tag (mandatory)
+    c1: ~id_a or id_opt2        <-- extra constraint named c1: id_a implies id_opt2 (must be a CNF clause)
+    c2: ~id_c or ~id_e          <-- extra constraint named c2: id_c excludes id_e (must be a CNF clause)
+  </constraints>                <-- extra constraint end tag (mandatory)
+</feature_model>  	
+ */
+	
 	/**
 	 * Recursevely visits all features and groups in the feature tree <br>
 	 * rooted in featureRoot, creating the xml string of the tree.
@@ -743,7 +782,38 @@ public class EditorModel extends Observable{
 
 	  return xml;
 	}
+	
+	/**
+	 * Recursevely visits all features and groups in the feature tree <br>
+	 * rooted in featureRoot, creating the xml string of the tree in SXFM format.
+	 * 
+	 * @param featureRoot - the root feature from which to build the xml string
+	 * @param depth - the current tree level depth 
+	 * @return - the xml string representing the tree rooted in featureRoot
+	 */
+	private String recursiveSXFMTreeBuilder(FeatureNode featureRoot, int depth) {
+	  String xml="";
+	  for(FeatureNode child : featureRoot.getSubFeatures()){
+		for(int i=0; i<depth; ++i) xml+="\t";
+		if(child.getMinCardinality()==0) xml+=":o ";
+		else xml+=":m ";
+		
+		xml+= child.getName()+" ("+child.getName()+")"
+			 +recursiveSXFMTreeBuilder(child, depth+1);
+	  }
+	  for(GroupNode group : featureRoot.getSubGroups()){
+		for(int i=0; i<depth; ++i) xml+="\t";
+		xml+=":g ["+group.getMinCardinality()+"."+group.getMaxCardinality()+"]";
+		for(FeatureNode member : group.getMembers()){
+			for(int i=0; i<depth+1; ++i) xml+="\t";
+			xml+= ": "+member.getName()+" ("+member.getName()+")"
+			   +recursiveSXFMTreeBuilder(member, depth+2);			
+		}
 
+	  }
+
+	  return xml;
+	}
 	/**
 	 * Loads a saved feature model from a list of files, each describing a feature tree.
 	 * @param featureModelDataPaths - the list of files describing the feature trees
@@ -780,9 +850,9 @@ public class EditorModel extends Observable{
 		  xmlHandler.xml="";
 		  
 	    }catch (Exception e) {
-	      System.out.println("Error while reading general save file");
+	      System.out.println("Error while loading saved model");
 	      e.printStackTrace();
-	      return null;
+	      throw new RuntimeException("Error while load saved model");
 	    }
 	  }
 	  newModel.printModel();

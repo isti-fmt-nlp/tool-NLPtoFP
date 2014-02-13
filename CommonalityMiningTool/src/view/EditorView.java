@@ -2714,29 +2714,47 @@ public class EditorView extends JFrame implements Observer{
 	 * @return s - String representing the diagram name, or null if dialog has been aborted
 	 */
 	public String assignNameDiagramDialog(){				
-	  String s = null;			
-	  JTextField jtf = new JTextField();
-		 	
-	  Object[] o1 = {"Diagram name: ", jtf};
-	  Object[] o2 = { "Cancel", "OK" };
-		    
-	  int i = JOptionPane.showOptionDialog(new JFrame("Save Diagram"), o1, "",
-			  JOptionPane.YES_NO_OPTION, JOptionPane.DEFAULT_OPTION, null, o2, o2[1]);
-		    
-	  if(i == JOptionPane.NO_OPTION){
-		if((s = jtf.getText()) != null){
-		  if(!s.trim().equals("")) return s;
-		  else{
-			errorDialog("Invalid name");
-			return null;
-		  }
-		}
-		else{
-		  errorDialog("Invalid name");
-		  return null;
-		}
-	  }		    		      
-	  else return null;	  
+	  return assignNameDialog("Diagram name: ");	  
+	}
+	
+	/** 
+	 * Assigns a name to the SXFM file to be created as result of model exportation.
+	 * 
+	 * @return s - String representing the SXFM name, or null if dialog has been aborted
+	 */
+	public String assignNameSXFMDialog(){				
+	  return assignNameDialog("SXFM filename: ");	  
+	}
+
+	/** 
+	 * opens a dialog to ask user for a name.
+	 * 
+	 * @return s - String representing the name, or null if dialog has been aborted
+	 */
+	private String assignNameDialog(String message) {
+		String s = null;			
+		  JTextField jtf = new JTextField();
+			 	
+		  Object[] o1 = {message, jtf};
+		  Object[] o2 = { "Cancel", "OK" };
+			    
+		  int i = JOptionPane.showOptionDialog(new JFrame("Save Diagram"), o1, "",
+				  JOptionPane.YES_NO_OPTION, JOptionPane.DEFAULT_OPTION, null, o2, o2[1]);
+			    
+		  if(i == JOptionPane.NO_OPTION){
+			if((s = jtf.getText()) != null){
+			  if(!s.trim().equals("")) return s;
+			  else{
+				errorDialog("Invalid name");
+				return null;
+			  }
+			}
+			else{
+			  errorDialog("Invalid name");
+			  return null;
+			}
+		  }		    		      
+		  else return null;
 	}
 	
 	/** 
@@ -2911,7 +2929,7 @@ public class EditorView extends JFrame implements Observer{
 	 * @param featureModelDataPaths - the list of files describing the feature trees
 	 * @return - the saved feature model
 	 */
-	public void/* EditorView */loadSavedDiagram(String diagramDataPath) {
+	public void loadSavedDiagram(String diagramDataPath) {
 	  SAXParser saxParser = null;
 	  InputStream stream = null;
 	  SAXParserFactory saxFactory = SAXParserFactory.newInstance();
@@ -2929,25 +2947,27 @@ public class EditorView extends JFrame implements Observer{
 		System.out.println("EditorView: *** PARSING: "+diagramDataPath+" ***");
 		saxParser = saxFactory.newSAXParser();
 		saxParser.parse(stream, xmlHandler);
-	  } catch (Exception e) { e.printStackTrace();}
 
-	  System.out.println("\nResult of parsing:\n"
-		+"Features:\n"+xmlHandler.featuresList
-		+"\nConnectors:\n"+xmlHandler.connectorsList
-		+"\nGroups:\n"+xmlHandler.groupsList
-		+"\nMisc:\n"+xmlHandler.misc
-		+"\nStarting Commonalities:\n"+xmlHandler.startingComm
-		+"\nStarting Variabilities:\n"+xmlHandler.startingVars
-		+"");
-	  
-	  loadFeatures(xmlHandler.featuresList);
-	  loadConnectors(xmlHandler.connectorsList);
-	  loadGroups(xmlHandler.groupsList);
-	  loadMiscellaneous(xmlHandler.misc);
-	  loadStartingCommonalities(xmlHandler.startingComm);
-	  loadStartingVariabilities(xmlHandler.startingVars);
-	 
+		System.out.println("\nResult of parsing:\n"
+				+"Features:\n"+xmlHandler.featuresList
+				+"\nConnectors:\n"+xmlHandler.connectorsList
+				+"\nGroups:\n"+xmlHandler.groupsList
+				+"\nMisc:\n"+xmlHandler.misc
+				+"\nStarting Commonalities:\n"+xmlHandler.startingComm
+				+"\nStarting Variabilities:\n"+xmlHandler.startingVars
+				+"");
 
+		loadFeatures(xmlHandler.featuresList);
+		loadConnectors(xmlHandler.connectorsList);
+		loadGroups(xmlHandler.groupsList);
+		loadMiscellaneous(xmlHandler.misc);
+		loadStartingCommonalities(xmlHandler.startingComm);
+		loadStartingVariabilities(xmlHandler.startingVars);
+	  } catch (Exception e) {
+		System.out.println("Error while loading saved diagram");
+		e.printStackTrace(); 
+		throw new RuntimeException("Error while loading saved diagram");
+	  }
 	  return;
 	}
 

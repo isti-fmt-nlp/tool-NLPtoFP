@@ -36,7 +36,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 	private static String saveFilesSubPath="saved diagrams"; 
 	
 	/** Suffix of the path where SXFM exported files will be saved*/
-	private static String sxfmSubPath="SXFM"; 
+	private static String sxfmSubPath="_SXFM"; 
 
 	/** Path where diagram files will be saved*/
 	private String diagramPath = null;		
@@ -653,6 +653,25 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
     	  
       }
       else if(e.getActionCommand().equals("Export as SXFM")){
+    	String s = null;			
+    	if((s = editorView.assignNameSXFMDialog()) != null){
+    	  modelDataPaths=editorModel.exportAsSXFM(sxfmPath, s);
+    	  if(modelDataPaths==null) editorView.errorDialog("Error during save.");
+    	  else try{
+    		//checking if the SXFM files save directory must be created
+    		File dir=new File(sxfmPath+"/"+saveFilesSubPath);		
+    		if(!dir.isDirectory() && !dir.mkdir() ) 
+    		  throw new IOException("Save Directory can't be created.");
+
+    		PrintWriter pw1 = new PrintWriter(new BufferedWriter(
+    				new FileWriter(sxfmPath+"/"+saveFilesSubPath+"/"+s) ));
+    		for(String path : modelDataPaths) pw1.println(path);
+    		pw1.close();  	
+    	  }catch (IOException ex){
+    		System.out.println("Exception exportAsSXFM: " + ex.getMessage());
+    		ex.printStackTrace();
+    	  }
+    	}    	  
     	  
       }
       else if(e.getActionCommand().equals("Delete Diagram")){

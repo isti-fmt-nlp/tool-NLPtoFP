@@ -142,6 +142,7 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		
 	  }
 	  else if(ae.getActionCommand().equals("Open Diagram")){
+		EditorModel editorModel=null;
 		String s1=null;		
 		String diagramDataPath=null;
 		ArrayList<String> featureModelDataPaths=new ArrayList<String>();
@@ -160,27 +161,37 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		}
 		  
 		//creating model
-		EditorModel editorModel= EditorModel.loadSavedModel(featureModelDataPaths);
-		
-		//creating an empty view
-		EditorView editorView= new EditorView();
-
-		//creating controller
-		EditorController editorController =new EditorController(editorView, editorModel);
-		editorController.setSavePath(modelProject.getPathProject()+diagramPath);
-			
-		//adding the view as observer to the model
-		editorModel.addObserver(editorView);
-
-		if( !editorView.prepareUI(editorController) ){
-		  System.out.println("Controller not set. Closing...");
+		try{
+		  editorModel= EditorModel.loadSavedModel(featureModelDataPaths);
+		}catch(Exception e){
+		  e.printStackTrace();
+		  viewProject.errorDialog("Error while loading model.");
 		  return;
 		}
 
+		  //creating an empty view
+		  EditorView editorView= new EditorView();
+
+		  //creating controller
+		  EditorController editorController =new EditorController(editorView, editorModel);
+		  editorController.setSavePath(modelProject.getPathProject()+diagramPath);
+
+		  //adding the view as observer to the model
+		  editorModel.addObserver(editorView);
+
+		  if( !editorView.prepareUI(editorController) ){
+			  System.out.println("Controller not set. Closing...");
+			  return;
+		  }
+
 		//loading saved view data
-//		EditorView editorView= EditorView.loadSavedDiagram(diagramDataPath);
-		editorView.loadSavedDiagram(diagramDataPath);
-		
+		try{
+		  editorView.loadSavedDiagram(diagramDataPath);
+		}catch(Exception e){
+		  e.printStackTrace();
+		  viewProject.errorDialog("Error while loading diagram.");
+		  return;
+		}
 	  }
 	  else if(ae.getActionCommand().equals("Exit")){
 		if(modelProject.readStateProject()[1]){
