@@ -61,7 +61,7 @@ public class GroupNode {
 	 * 
 	 * @return - a String representing the name of this group
 	 */
-	public String getName(){
+	public String getID(){
 		return name;
 	}
 	

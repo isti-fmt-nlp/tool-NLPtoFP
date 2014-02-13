@@ -117,9 +117,9 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 	  }
 	  else if(ae.getActionCommand().equals("New Diagram")){
 		//creating model
-		EditorModel editorModel= new EditorModel(
-						modelProject.readCommonalitiesSelected(), 
-						modelProject.readVariabilitiesSelected());
+		EditorModel editorModel= new EditorModel();
+//						modelProject.readCommonalitiesSelected(), 
+//						modelProject.readVariabilitiesSelected());
 		//creating view
 		EditorView editorView= new EditorView(
 						modelProject.readCommonalitiesSelected(), 
@@ -132,10 +132,12 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		//adding the view as observer to the model
 		editorModel.addObserver(editorView);
 
-		if( !editorView.prepareUI(editorController) ){
+		if(!editorView.prepareUI(editorController) ){
 		  System.out.println("Controller not set. Closing...");
 		  return;
 		}
+		
+		editorController.addStartingfeatures();
 //		else editorView.setVisible(true);
 //		editor.setResizable(false);
 //		editorView.setExtendedState(editorView.getExtendedState() | JFrame.MAXIMIZED_BOTH);

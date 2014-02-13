@@ -88,6 +88,7 @@ public class EditorModel extends Observable{
 	 * 
 	 */
 	public EditorModel(){}
+
 	
 	/**
 	 * Creates an editor model and adds to it the features contained in commonalities and variabilities lists.
@@ -95,31 +96,48 @@ public class EditorModel extends Observable{
 	 * @param commonalitiesSelected - list of commonality names
 	 * @param variabilitiesSelected - list of variabilities names
 	 */
-	public EditorModel(ArrayList<String> commonalitiesSelected, ArrayList<String> variabilitiesSelected) {
+/*
+ * 	public EditorModel(ArrayList<String> commonalitiesSelected, ArrayList<String> variabilitiesSelected) {
 	  if(commonalitiesSelected!=null)
 		for(String name : commonalitiesSelected) addUnrootedFeature(name, FeatureTypes.COMMONALITY);
 	  if(variabilitiesSelected!=null)
 	    for(String name : variabilitiesSelected) addUnrootedFeature(name, FeatureTypes.VARIABILITY);
 	}
-
+*/
 	/**
 	 * Adds a newly created Commonality feature named name to the unrooted features.
 	 * 
-	 * @param name - String containing the name of the new features
+	 * @param name - String containing the name of the new feature
+	 * @param id - String containing the ID of the new feature
 	 */
-	public void addUnrootedCommonality(String name){
+	public void addUnrootedCommonality(String name, String id){
 		System.out.println("Creating new commonality: "+name);
-		addUnrootedFeature(name, FeatureTypes.COMMONALITY);
+		addUnrootedFeature(name, id, FeatureTypes.COMMONALITY);
 	}
 
 	/**
 	 * Adds a newly created Variability feature named name to the unrooted features.
 	 * 
-	 * @param name - String containing the name of the new features
+	 * @param name - String containing the name of the new feature
+	 * @param id - String containing the ID of the new feature
 	 */
-	public void addUnrootedVariabilities(String name){
+	public void addUnrootedVariabilities(String name, String id){
 		System.out.println("Creating new variability: "+name);
-		addUnrootedFeature(name, FeatureTypes.VARIABILITY);
+		addUnrootedFeature(name, id, FeatureTypes.VARIABILITY);
+	}
+
+	/**
+	 * Adds a newly created feature named name of the specified type to the unrooted features.
+	 * 
+	 * @param name - String containing the name of the new feature
+	 * @param id - String containing the ID of the new feature
+	 * @param type - type of the feature to create, a value from the FeatureTypes enum type
+	 */
+	private void addUnrootedFeature(String name, String id, FeatureTypes type) {
+		FeatureNode newFeature = new FeatureNode(type, name, id, 1, 1);
+		unrootedFeatures.put(id, newFeature);
+		setChanged();
+		notifyObservers("New Feature Correctly Added");
 	}
 
 	/**
@@ -128,11 +146,11 @@ public class EditorModel extends Observable{
 	 * @param name - String containing the name of the new features
 	 * @param type - type of the feature to create, a value from the FeatureTypes enum type
 	 */
-	private void addUnrootedFeature(String name, FeatureTypes type) {
-		FeatureNode newFeature = new FeatureNode(type, name, 1, 1);
-		unrootedFeatures.put(name, newFeature);
+	public void addUnrootedNamedFeature(String name, String id, FeatureTypes type) {
+		FeatureNode newFeature = new FeatureNode(type, name, id, 1, 1);
+		unrootedFeatures.put(id, newFeature);
 		setChanged();
-		notifyObservers("New Feature Correctly Added");
+		notifyObservers("New Named Feature Correctly Added");
 	}
 
 	/**
@@ -405,8 +423,8 @@ public class EditorModel extends Observable{
 	  //the group was owned by a feature
 	  if (parent!=null){
 		for(GroupNode featureGroup : parent.getSubGroups()){
-		  System.out.println("featureGroup.getName()="+featureGroup.getName());
-		  if(featureGroup.getName().equals(groupName) )
+		  System.out.println("featureGroup.getName()="+featureGroup.getID());
+		  if(featureGroup.getID().equals(groupName) )
 			if (featureGroup.getMembers().contains(sub)){
 			  featureGroup.getMembers().remove(sub);
 			  sub.setParent(null);
@@ -476,15 +494,15 @@ public class EditorModel extends Observable{
 		//the parent feature is diretly linked
 	    if(((FeatureNode)featurefound.getParent()).getSubFeatures().contains(featurefound)){
 		  System.out.println("The feature: "+featurefound+" has a direct parent feature: "+
-				  ((FeatureNode)featurefound.getParent()).getName());
+				  ((FeatureNode)featurefound.getParent()).getID());
 		  ((FeatureNode)featurefound.getParent()).getSubFeatures().remove(featurefound);
 	    }
 		//the parent feature is linked through a group
 	    else{
 	      for(GroupNode group : ((FeatureNode)featurefound.getParent()).getSubGroups())
 	    	if(group.getMembers().contains(featurefound)){
-	  		  System.out.println("The feature: "+featurefound.getName()+" has a parent feature: "+
-					  ((FeatureNode)featurefound.getParent()).getName()+" through the group: "+group.getName());
+	  		  System.out.println("The feature: "+featurefound.getID()+" has a parent feature: "+
+					  ((FeatureNode)featurefound.getParent()).getID()+" through the group: "+group.getID());
 	    	  group.getMembers().remove(featurefound);
 	    	}	      
 	    }
@@ -525,7 +543,7 @@ public class EditorModel extends Observable{
 	  if(featurefound==null) featurefound=unrootedFeatures.get(name);
 	  
 	  /* ***DEBUG*** */
-	  if(debug && featurefound!=null) System.out.println("searchFeature("+name+"): "+featurefound.getName());
+	  if(debug && featurefound!=null) System.out.println("searchFeature("+name+"): "+featurefound.getID());
 	  /* ***DEBUG*** */
 
 	  return featurefound;
@@ -541,7 +559,7 @@ public class EditorModel extends Observable{
 	  GroupNode groupfound=groups.get(name);
 
 	  /* ***DEBUG*** */
-	  if(debug && groupfound!=null) System.out.println("searchGroup("+name+"): "+groupfound.getName());
+	  if(debug && groupfound!=null) System.out.println("searchGroup("+name+"): "+groupfound.getID());
 	  /* ***DEBUG*** */
 
 	  return groupfound;
@@ -556,17 +574,17 @@ public class EditorModel extends Observable{
 	 * @return true if the feature descendant really is a descendant of the feature ancestor, false otherwise
 	 */
 	private boolean isDescendantOf(FeatureNode ancestor, FeatureNode descendant){
-	  System.out.println("ancestor: "+ancestor.getName()+"\tdescendant: "+descendant.getName());
+	  System.out.println("ancestor: "+ancestor.getID()+"\tdescendant: "+descendant.getID());
 	  for(FeatureNode child : ancestor.getSubFeatures()){
-		System.out.println("child.getName()="+child.getName());
-		if (child.getName().equals(descendant.getName())
+		System.out.println("child.getName()="+child.getID());
+		if (child.getID().equals(descendant.getID())
 			|| isDescendantOf(child, descendant)) return true;
 	  }
 	  for(GroupNode group : ancestor.getSubGroups()){
-		System.out.println("group .getName()="+group.getName());
+		System.out.println("group .getName()="+group.getID());
 		for(FeatureNode child : group.getMembers() ){
-		  System.out.println("child.getName()="+child.getName());
-		  if (child.getName().equals(descendant.getName())
+		  System.out.println("child.getName()="+child.getID());
+		  if (child.getID().equals(descendant.getID())
 			|| isDescendantOf(child, descendant)) return true;
 		}
 	  }
@@ -605,13 +623,13 @@ public class EditorModel extends Observable{
 		if(feature.getValue().getParent()!=null) continue;
 		
 		xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			  +"<feature_model name=\""+s+"_"+feature.getValue().getName()+"\">"
+			  +"<feature_model name=\""+s+"_"+feature.getValue().getID()+"\">"
 				+"<meta>"
 			    +"<data name=\"date\">"+date+"</data>"
 				+"</meta>"
 				+"<feature_tree>";
 		
-		xml+=":r "+feature.getKey()+" ("+feature.getKey()+") ["
+		xml+=":r "+feature.getValue().getName()+" ("+feature.getValue().getID()+") ["
 				+feature.getValue().getMinCardinality()+"."+feature.getValue().getMaxCardinality()+"]"
 				+recursiveXMLTreeBuilder(feature.getValue(), 1);
 
@@ -632,10 +650,10 @@ public class EditorModel extends Observable{
 		  if(!dir.isDirectory() && !dir.mkdir()) throw new IOException("Save Directory can't be created.");
 
 		  PrintWriter pw1 = new PrintWriter(new BufferedWriter(
-				  new FileWriter(savePathPrefix+feature.getValue().getName()+savePathSuffix) ));
+				  new FileWriter(savePathPrefix+feature.getValue().getID()+savePathSuffix) ));
 		  pw1.print(xml);
 		  pw1.close();
-		  modelPaths.add(savePathPrefix+feature.getValue().getName()+savePathSuffix);
+		  modelPaths.add(savePathPrefix+feature.getValue().getID()+savePathSuffix);
 		} 
 		catch (IOException e){
 		  System.out.println("Exception saveModel: " + e.getMessage());
@@ -669,13 +687,13 @@ public class EditorModel extends Observable{
 		if(feature.getValue().getParent()!=null) continue;
 		
 		xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			  +"<feature_model name=\""+s+"_"+feature.getValue().getName()+"\">"
+			  +"<feature_model name=\""+s+"_"+feature.getValue().getID()+"\">"
 				+"<meta>"
 			    +"<data name=\"date\">"+date+"</data>"
 				+"</meta>"
 				+"<feature_tree>";
 		
-		xml+=":r "+feature.getKey()+" ("+feature.getKey()+")"
+		xml+=":r "+feature.getValue().getName()+" ("+feature.getValue().getID()+")"
 				+recursiveSXFMTreeBuilder(feature.getValue(), 1);
 
 		xml+=	   "</feature_tree>"
@@ -695,10 +713,10 @@ public class EditorModel extends Observable{
 		  if(!dir.isDirectory() && !dir.mkdir()) throw new IOException("Save Directory can't be created.");
 
 		  PrintWriter pw1 = new PrintWriter(new BufferedWriter(
-				  new FileWriter(savePathPrefix+feature.getValue().getName()+savePathSuffix) ));
+				  new FileWriter(savePathPrefix+feature.getValue().getID()+savePathSuffix) ));
 		  pw1.print(xml);
 		  pw1.close();
-		  modelPaths.add(savePathPrefix+feature.getValue().getName()+savePathSuffix);
+		  modelPaths.add(savePathPrefix+feature.getValue().getID()+savePathSuffix);
 		} 
 		catch (IOException e){
 		  System.out.println("Exception saveModel: " + e.getMessage());
@@ -764,16 +782,16 @@ public class EditorModel extends Observable{
 		if(child.getMinCardinality()==0) xml+=":o ";
 		else xml+=":m ";
 		
-		xml+= child.getName()+" ("+child.getName()+") ["
+		xml+= child.getName()+" ("+child.getID()+") ["
 			 +child.getMinCardinality()+"."+child.getMaxCardinality()+"]"
 			 +recursiveXMLTreeBuilder(child, depth+1);
 	  }
 	  for(GroupNode group : featureRoot.getSubGroups()){
 		for(int i=0; i<depth; ++i) xml+="\t";
-		xml+=":g "+group.getName()+" ["+group.getMinCardinality()+"."+group.getMaxCardinality()+"]";
+		xml+=":g "+group.getID()+" ["+group.getMinCardinality()+"."+group.getMaxCardinality()+"]";
 		for(FeatureNode member : group.getMembers()){
 			for(int i=0; i<depth+1; ++i) xml+="\t";
-			xml+= ": "+member.getName()+" ("+member.getName()+") ["
+			xml+= ": "+member.getName()+" ("+member.getID()+") ["
 			   +member.getMinCardinality()+"."+member.getMaxCardinality()+"]"
 			   +recursiveXMLTreeBuilder(member, depth+2);			
 		}
@@ -798,7 +816,7 @@ public class EditorModel extends Observable{
 		if(child.getMinCardinality()==0) xml+=":o ";
 		else xml+=":m ";
 		
-		xml+= child.getName()+" ("+child.getName()+")"
+		xml+= child.getName()+" ("+child.getID()+")"
 			 +recursiveSXFMTreeBuilder(child, depth+1);
 	  }
 	  for(GroupNode group : featureRoot.getSubGroups()){
@@ -806,7 +824,7 @@ public class EditorModel extends Observable{
 		xml+=":g ["+group.getMinCardinality()+"."+group.getMaxCardinality()+"]";
 		for(FeatureNode member : group.getMembers()){
 			for(int i=0; i<depth+1; ++i) xml+="\t";
-			xml+= ": "+member.getName()+" ("+member.getName()+")"
+			xml+= ": "+member.getName()+" ("+member.getID()+")"
 			   +recursiveSXFMTreeBuilder(member, depth+2);			
 		}
 
@@ -887,20 +905,11 @@ public class EditorModel extends Observable{
 
 		//next element is a child of parent
 		if(nextTabs==tabs){
-//		  for(  ;i<featureTree.length(); ++i) if(featureTree.charAt(i)=='\t') break;
-//		  elementString=featureTree.substring(nextTabs, i);
-//	  	  featureTree=featureTree.substring(i, featureTree.length());
-			  
 		  //next element is a group
 		  if(featureTree.string.substring(nextTabs, nextTabs+2).startsWith(":g"))
 			nextTabs=recursiveGroupTreeBuilder(parent, tabs, featureTree);
 		  //next element is a feature
-		  else lastFeatureAdded=addChildToParent(parent, tabs, featureTree);
-				
-//			  loadAddGroupTofeature(parent, elementString);
-//		  else loadAddFeatureTofeature(parent, elementString);
-			/* **CI VUOLE LA CHIAMATA RICORSIVA** */
-		  
+		  else lastFeatureAdded=addChildToParent(parent, tabs, featureTree);				
 		}
 		//next element is a child of the last feature added
 		else if(nextTabs>tabs){
@@ -944,20 +953,11 @@ public class EditorModel extends Observable{
 
 		//next element is a child of parent
 		if(nextTabs==tabs){
-			//			  for(  ;i<featureTree.length(); ++i) if(featureTree.charAt(i)=='\t') break;
-			//			  elementString=featureTree.substring(nextTabs, i);
-			//		  	  featureTree=featureTree.substring(i, featureTree.length());
-
 		  //next element is a group
 		  if(featureTree.string.substring(nextTabs, nextTabs+2).startsWith(":g"))
 			nextTabs=recursiveGroupTreeBuilder(parent, tabs, featureTree);
 		  //next element is a feature
 		  else lastChildAdded=addChildToParent(parent, tabs, featureTree);
-
-		  //				  loadAddGroupTofeature(parent, elementString);
-		  //			  else loadAddFeatureTofeature(parent, elementString);
-		  /* **CI VUOLE LA CHIAMATA RICORSIVA** */
-
 		}
 		else if(nextTabs==tabs+1){
 		  //next element is a member of the last group added
@@ -997,6 +997,7 @@ public class EditorModel extends Observable{
 	  String element=null;
 	  String[] elementData=null;
 	  String featureName="";
+	  String featureID=null;
 	  FeatureNode newFeature=null;
 	  int k=0, h=0, i=0;
 	  FeatureTypes type=null;
@@ -1020,24 +1021,29 @@ public class EditorModel extends Observable{
 	  featureName+=elementData[1];
 	  for(int l=2; l<elementData.length-2; ++l) featureName+=" "+elementData[l];
 	  
+	  //getting ID of the feature
+//	  featureID=elementData[elementData.length-2];
+	  featureID=elementData[elementData.length-2].substring(1, elementData[elementData.length-2].length()-1);
+	  
 	  //getting cardinalities of the feature
-	  for(k=1; k<elementData[3].length(); ++k) if(elementData[3].charAt(k)=='.') break;
-	  minCard=Integer.valueOf(elementData[3].substring(1, k));
-	  for(h=k+1; h<elementData[3].length(); ++h) if(elementData[3].charAt(h)==']') break;
-	  maxCard=Integer.valueOf(elementData[3].substring(k+1, h));
+	  for(k=1; k<elementData[elementData.length-1].length(); ++k) if(elementData[elementData.length-1].charAt(k)=='.') break;
+	  minCard=Integer.valueOf(elementData[elementData.length-1].substring(1, k));
+	  for(h=k+1; h<elementData[elementData.length-1].length(); ++h) if(elementData[elementData.length-1].charAt(h)==']') break;
+	  maxCard=Integer.valueOf(elementData[elementData.length-1].substring(k+1, h));
 
 	  if(minCard>0) type=FeatureTypes.COMMONALITY;
 	  else type=FeatureTypes.VARIABILITY;
 
 	  //adding new feature to the model
-	  newFeature=new FeatureNode(type, featureName, minCard, maxCard);
-	  System.out.println("***Adding child '"+newFeature.getName()+"' to parent '"
-	    +(parent==null ? "null":parent.getName())+"'");
+	  newFeature=new FeatureNode(type, featureName, featureID, minCard, maxCard);
+	  System.out.println("***Adding child '"+newFeature.getID()+"' to parent '"
+	    +(parent==null ? "null":parent.getID())+"'");
 	  if (parent!=null){
 		parent.getSubFeatures().add(newFeature);
 		newFeature.setParent(parent);
 	  }
-	  unrootedFeatures.put(featureName, newFeature);
+	  unrootedFeatures.put(featureID, newFeature);
+//	  unrootedFeatures.put(featureName, newFeature);
 	  
 	  return newFeature;
 	}
@@ -1064,7 +1070,6 @@ public class EditorModel extends Observable{
 	  //splitting element prefix from the rest of featureTree String
 	  i=tabs;
 	  while(i<featureTree.string.length() && featureTree.string.charAt(i)!='\t') ++i;
-//	  for(i=tabs; i<featureTree.length(); ++i) if(featureTree.charAt(i)=='\t') break;
 
 	  element=featureTree.string.substring(tabs, i);
 		  
@@ -1075,10 +1080,6 @@ public class EditorModel extends Observable{
 	  elementData=element.split(" ");
 	  for(int l=0; l<elementData.length; ++l) System.out.println("elementData["+l+"]: "+elementData[l]);
 		  
-//	  //getting the name of the group	  
-//	  groupName+=elementData[1];
-//	  for(int l=2; l<elementData.length-2; ++l) groupName+=" "+elementData[l];
-	  
 	  //getting cardinalities of the group
 	  for(k=1; k<elementData[2].length(); ++k) if(elementData[2].charAt(k)=='.') break;
 	  minCard=Integer.valueOf(elementData[2].substring(1, k));
@@ -1087,8 +1088,6 @@ public class EditorModel extends Observable{
 
 	  //getting the name of the group	  
 	  groupName=elementData[1];
-//	  if(maxCard==1) groupName=altGroupNamePrefix+(altGroupsCount++);
-//	  else groupName=orGroupNamePrefix+(orGroupsCount++);
 	  
 	  //adding new group to the model
 	  newGroup=new GroupNode(groupName, minCard, maxCard);
@@ -1112,6 +1111,7 @@ public class EditorModel extends Observable{
 		  String element=null;
 		  String[] elementData=null;
 		  String featureName="";
+		  String featureID=null;
 		  FeatureNode newFeature=null;
 		  int k=0, h=0, i=0;
 		  FeatureTypes type=null;
@@ -1121,7 +1121,6 @@ public class EditorModel extends Observable{
 		  //splitting element prefix from the rest of featureTree String
 		  i=tabs;
 		  while(i<featureTree.string.length() && featureTree.string.charAt(i)!='\t') ++i;
-//		  for(i=tabs; i<featureTree.length(); ++i) if(featureTree.charAt(i)=='\t') break;
 
 		  element=featureTree.string.substring(tabs, i);
 		  
@@ -1136,23 +1135,27 @@ public class EditorModel extends Observable{
 		  featureName+=elementData[1];
 		  for(int l=2; l<elementData.length-2; ++l) featureName+=" "+elementData[l];
 		  
+		  //getting ID of the feature
+		  featureID=elementData[elementData.length-2].substring(1, elementData[elementData.length-2].length()-1);
+		  
 		  //getting cardinalities of the feature
-		  for(k=1; k<elementData[3].length(); ++k) if(elementData[3].charAt(k)=='.') break;
-		  minCard=Integer.valueOf(elementData[3].substring(1, k));
-		  for(h=k+1; h<elementData[3].length(); ++h) if(elementData[3].charAt(h)==']') break;
-		  maxCard=Integer.valueOf(elementData[3].substring(k+1, h));
+		  for(k=1; k<elementData[elementData.length-1].length(); ++k) if(elementData[elementData.length-1].charAt(k)=='.') break;
+		  minCard=Integer.valueOf(elementData[elementData.length-1].substring(1, k));
+		  for(h=k+1; h<elementData[elementData.length-1].length(); ++h) if(elementData[elementData.length-1].charAt(h)==']') break;
+		  maxCard=Integer.valueOf(elementData[elementData.length-1].substring(k+1, h));
 
 		  if(minCard>0) type=FeatureTypes.COMMONALITY;
 		  else type=FeatureTypes.VARIABILITY;
 
 		  //adding new feature to the model
-		  newFeature=new FeatureNode(type, featureName, minCard, maxCard);
-		  System.out.println("***Adding member '"+newFeature.getName()+"' to parentGroup '"
-		    +(parentGroup==null ? "null":parentGroup.getName())
-		    +"' with parent feature '"+(groupOwner==null ? "null": groupOwner.getName())+"'");
+		  newFeature=new FeatureNode(type, featureName, featureID, minCard, maxCard);
+		  System.out.println("***Adding member '"+newFeature.getID()+"' to parentGroup '"
+		    +(parentGroup==null ? "null":parentGroup.getID())
+		    +"' with parent feature '"+(groupOwner==null ? "null": groupOwner.getID())+"'");
 		  parentGroup.getMembers().add(newFeature);
 		  newFeature.setParent(groupOwner);
-		  unrootedFeatures.put(featureName, newFeature);
+		  unrootedFeatures.put(featureID, newFeature);
+//		  unrootedFeatures.put(featureName, newFeature);
 		  
 		  return newFeature;
 	}
@@ -1176,7 +1179,7 @@ public class EditorModel extends Observable{
 	 * it will be printed a number of times equals to 1+depth.
 	 */
 	private void treePrint(FeatureNode feature, String indent) {
-		System.out.println(indent+feature.getName());
+		System.out.println(indent+feature.getID());
 		for(FeatureNode child : feature.getSubFeatures()) treePrint(child, indent+">");
 		for(GroupNode group : feature.getSubGroups()) 
 		  for(FeatureNode member : group.getMembers()) 

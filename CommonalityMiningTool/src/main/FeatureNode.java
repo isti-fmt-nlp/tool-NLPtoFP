@@ -16,6 +16,8 @@ public class FeatureNode {
 	private FeatureTypes type=FeatureTypes.COMMONALITY;
 	/** The feature name*/
 	private String name="";
+	/** The feature ID*/
+	private String id="";
 	/** The feature minimum cardinality*/
 	private int minCardinality=1;
 	/** The feature maximum cardinality*/
@@ -42,12 +44,14 @@ public class FeatureNode {
 	 * 
 	 * @param type - the type of the feature, COMMONALITY or VARIABILITY
 	 * @param name - the name of the feature
+	 * @param id - the ID of the feature
 	 * @param minCardinality - feature's minimum cardinality
 	 * @param maxCardinality - feature's maximum cardinality
 	 */
-	public FeatureNode(FeatureTypes type, String name, int minCardinality, int maxCardinality){
+	public FeatureNode(FeatureTypes type, String name, String id, int minCardinality, int maxCardinality){
 		this.type=type;
 		this.name=name;
+		this.id=id;
 		this.minCardinality=minCardinality;
 		this.maxCardinality=maxCardinality;
 	}
@@ -91,6 +95,15 @@ public class FeatureNode {
 		this.minCardinality=min;
 		this.maxCardinality=max;
 	}
+	
+	/**
+	 * Sets the name of this feature node.
+	 * 
+	 * @param name - a String containing the name.
+	 */
+	public void setName(String name){
+		this.name=name;
+	}
 
 	/**
 	 * Returns the name of this feature node.
@@ -100,14 +113,14 @@ public class FeatureNode {
 	public String getName(){
 		return name;
 	}
-	
+
 	/**
-	 * Sets the name of this feature node.
+	 * Returns the ID of this feature node.
 	 * 
-	 * @param name - a String containing the name.
+	 * @return - a String containing the ID.
 	 */
-	public void setName(String name){
-		this.name=name;
+	public String getID(){
+		return id;
 	}
 	
 	/**

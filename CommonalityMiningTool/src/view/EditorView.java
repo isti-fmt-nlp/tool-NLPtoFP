@@ -281,6 +281,8 @@ public class EditorView extends JFrame implements Observer{
 	/** Position of the dragged image*/
 	private Point toolDragPosition = null;
 	
+	/** Name of the next feature to add*/
+	private String featureToAddName = null;
 	
 	/** The panel containing the diagram */
 	private JLayeredPane diagramPanel=null;
@@ -580,7 +582,7 @@ public class EditorView extends JFrame implements Observer{
 		setLocation(0, 0);
 		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
 
-		
+/*		
 		//adding starting commonalities and variabilities
 		int i=10, j=10;
 		for(String name : startingCommonalities){
@@ -602,7 +604,7 @@ public class EditorView extends JFrame implements Observer{
 		  diagramPanel.setComponentZOrder(newFeature, 0);
 		  ++featuresCount; i+=70;
 		}
-		
+*/		
         return true;
 	}
 
@@ -1688,11 +1690,25 @@ public class EditorView extends JFrame implements Observer{
 
 	/**
 	 * Adds a new feature to the diagram panel, incrementing featuresCount.
-	 * 
-	 * @param e - MouseEvent of the type Mouse Released.
 	 */
-	public void addNewFeatureToDiagram(/*MouseEvent e*/) {
-		
+	public void addNewFeatureToDiagram() {
+		addFeatureToDiagram(null);
+	}
+	
+	/**
+	 * Adds a new named feature to the diagram panel, incrementing featuresCount.
+	 */
+	public void addNamedFeatureToDiagram() {		
+		addFeatureToDiagram(featureToAddName);
+	}
+
+	/**
+	 * Adds a new feature to the diagram panel, incrementing featuresCount.<br>
+	 * The feature will be named name, or with a default name if name is null.
+	 * 
+	 * @param name - the name of the new feature
+	 */
+	private void addFeatureToDiagram(String name) {
 		//the new feature must be dropped on the diagram panel for it to be added
 		if( diagramPanel.getLocationOnScreen().getX()>toolDragPosition.x ||
 			diagramPanel.getLocationOnScreen().getX()+diagramPanel.getWidth()<=toolDragPosition.x ||
@@ -1707,15 +1723,9 @@ public class EditorView extends JFrame implements Observer{
 			return;
 		}
 
-//		if (!checkDroppedOnDiagram()) return;
-
-//		/* ***DEBUG*** */
-//		if(debug) System.out.println("Mouse rilasciato(Drag relative) su: ("+e.getX()+", "+e.getY()+")."
-//		  +"\nMouse rilasciato(Screen relative) su: ("+e.getXOnScreen()+", "+e.getYOnScreen()+")."
-//		  +"\nLocation dove verrà aggiunta la nuova Feature: ("+toolDragPosition.x+", "+toolDragPosition.y+").");
-//		/* ***DEBUG*** */
-//
-		FeaturePanel newFeature=getDraggableFeature(/*"Default Feature Name"*/featureNamePrefix+featuresCount,
+		if (name==null) name=featureNamePrefix+featuresCount;
+		
+		FeaturePanel newFeature=getDraggableFeature(name,
 			toolDragPosition.x-(int)diagramPanel.getLocationOnScreen().getX(),
 			toolDragPosition.y-(int)diagramPanel.getLocationOnScreen().getY());
 		
@@ -1724,7 +1734,6 @@ public class EditorView extends JFrame implements Observer{
 		diagramPanel.setLayer(newFeature, 0);
 		diagramPanel.add(newFeature);
 		diagramPanel.setComponentZOrder(newFeature, 0);
-//		diagramPanel.repaint();
 		cancelToolDrag();
 
 		/* ***DEBUG*** */
@@ -2616,6 +2625,26 @@ public class EditorView extends JFrame implements Observer{
 		return featuresCount;
 	}
 
+	/** Returns an ArrayList<String> representing the starting commonalities*/
+	public ArrayList<String> getStartingCommonalities(){
+	  return startingCommonalities;
+	}
+	
+	/** Returns an ArrayList<String> representing the starting variabilities*/
+	public ArrayList<String> getStartingVariabilities(){
+	  return startingVariabilities;
+	}
+
+	/** Returns the name of next feature to add tot he diagram.*/
+	public String getFeatureToAddName(){
+	  return featureToAddName;
+	}
+	
+	/** Sets the name of next feature to add tot he diagram.*/
+	public void setFeatureToAddName(String name){
+	  featureToAddName=name;
+	}
+	
 	
 	/**
 	 * Checks whether the dragged tool has been dropped on the diagram panel or not.
@@ -2653,7 +2682,8 @@ public class EditorView extends JFrame implements Observer{
 	@Override
 	public void update(Observable o, Object arg) {
 		System.out.println("Message received: "+arg);
-		if(arg.equals("New Feature Correctly Added")) addNewFeatureToDiagram();			
+		if(arg.equals("New Feature Correctly Added")) addNewFeatureToDiagram();		
+		else if(arg.equals("New Named Feature Correctly Added")) addNamedFeatureToDiagram();		
 		else if(arg.equals("Feature Deleted")) deleteFeature(popUpElement);
 		else if(arg.equals("Group Deleted")) deleteGroup(popUpElement);
 		else if(arg.equals("Feature Not Deleted"))
@@ -2821,8 +2851,8 @@ public class EditorView extends JFrame implements Observer{
 		while(tmp!=null){
 		  if(((JComponent)tmp.getElement()).getName().startsWith(featureNamePrefix)){
 			featTmp = (FeaturePanel)tmp.getElement();
-			System.out.println("Adding element: "+featTmp.getLabelName());
-			xml+="Name="+featTmp.getLabelName()+" ContName="+featTmp.getName()
+			System.out.println("Adding element: "+featTmp.getID());
+			xml+="Name="+featTmp.getLabelName()+" ContName="+featTmp.getID()
 			    +" Loc="+featTmp.getX()+"."+featTmp.getY()
 			    +" Size="+featTmp.getWidth()+"."+featTmp.getHeight()+"\n";
 		  }

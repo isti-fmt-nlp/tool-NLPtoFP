@@ -19,10 +19,12 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
+import javax.swing.JLayeredPane;
 
 import view.EditorModel.GroupTypes;
 import view.EditorView.activeItems;
 import main.*;
+import main.FeatureNode.FeatureTypes;
 
 public class EditorController implements ActionListener, WindowListener, MouseListener, MouseMotionListener{
 
@@ -255,23 +257,23 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 				if(otherEndFeaturePanel.getName().startsWith(EditorView.featureNamePrefix) ){
 				  if(anchorPanelName.startsWith(EditorView.startConnectorsNamePrefix) )
 //						editorModel.removeLink(featurePanel.getName(), otherEndFeaturePanel.getName());
-					editorModel.removeLink(featurePanel.getLabelName(), ((FeaturePanel)otherEndFeaturePanel).getLabelName());
+					editorModel.removeLink(featurePanel.getID(), ((FeaturePanel)otherEndFeaturePanel).getID());
 				  if(anchorPanelName.startsWith(EditorView.endConnectorsNamePrefix) ){
 					if (otherEnd.getName().startsWith(EditorView.startConnectorsNamePrefix))
 //						  editorModel.removeLink(otherEndFeaturePanel.getName(), featurePanel.getName());
-					  editorModel.removeLink(((FeaturePanel)otherEndFeaturePanel).getLabelName(), featurePanel.getLabelName());
+					  editorModel.removeLink(((FeaturePanel)otherEndFeaturePanel).getID(), featurePanel.getID());
 					if (otherEnd.getName().startsWith(EditorView.altGroupNamePrefix)
 					    || otherEnd.getName().startsWith(EditorView.orGroupNamePrefix))
 //						  editorModel.removeFeatureFromGroup(otherEndFeaturePanel.getName(), featurePanel.getName(), otherEnd.getName());
-					  editorModel.removeFeatureFromGroup(((FeaturePanel)otherEndFeaturePanel).getLabelName(),
-							  featurePanel.getLabelName(), otherEnd.getName());
+					  editorModel.removeFeatureFromGroup(((FeaturePanel)otherEndFeaturePanel).getID(),
+							  featurePanel.getID(), otherEnd.getName());
 				  }
 				}
 				//the other end is attached to a group not owned by a feature
 				else if (otherEnd.getName().startsWith(EditorView.altGroupNamePrefix)
 					|| otherEnd.getName().startsWith(EditorView.orGroupNamePrefix))
 //					  editorModel.removeFeatureFromGroup(null, featurePanel.getName(), otherEnd.getName());
-				  editorModel.removeFeatureFromGroup(null, featurePanel.getLabelName(), otherEnd.getName());
+				  editorModel.removeFeatureFromGroup(null, featurePanel.getID(), otherEnd.getName());
 
 				//the other end is not attached to any feature
 //				else EditorView.detachAnchor(featurePanel, anchorPanel);
@@ -291,7 +293,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 				if(((GroupPanel)anchorPanel).getMembers().size()==0) editorView.detachAnchor(featurePanel, anchorPanel);
 				//the group has members				
 //				else editorModel.removeGroupFromFeature(featurePanel.getName(), anchorPanel.getName());
-				else editorModel.removeGroupFromFeature(featurePanel.getLabelName(), anchorPanel.getName());
+				else editorModel.removeGroupFromFeature(featurePanel.getID(), anchorPanel.getName());
 			  }
 			  //mouse directly pressed on a feature panel, not on an inner anchor
 			  else{
@@ -575,7 +577,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
         }
         else if(elementName!=null && elementName.startsWith(EditorView.featureNamePrefix)){
 //        	  editorModel.deleteFeature(elementName);
-          editorModel.deleteFeature(((FeaturePanel)popupElement).getLabelName());
+          editorModel.deleteFeature(((FeaturePanel)popupElement).getID());
           editorView.repaintRootFrame();
         }
         editorView.setPopUpElement(null);
@@ -601,7 +603,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
     	  OrderedListNode drag = editorView.getVisibleOrderDraggables().getFirst();
     	  while(drag!=null){
     		if(((Component)drag.getElement()).getName().startsWith(EditorView.featureNamePrefix))
-    		  System.out.println("\n"+((FeaturePanel)drag.getElement()).getLabelName());
+    		  System.out.println("\n"+((FeaturePanel)drag.getElement()).getID());
     		else System.out.println("\n"+((Component)drag.getElement()).getName());
     		drag=drag.getNext();
     	  }
@@ -609,7 +611,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
     	  drag = editorView.getVisibleOrderDraggables().getLast();
     	  while(drag!=null){
     		if(((Component)drag.getElement()).getName().startsWith(EditorView.featureNamePrefix))
-    		  System.out.println("\n"+((FeaturePanel)drag.getElement()).getLabelName());
+    		  System.out.println("\n"+((FeaturePanel)drag.getElement()).getID());
     		else System.out.println("\n"+((Component)drag.getElement()).getName());
     		drag=drag.getPrev();
     	  }
@@ -691,7 +693,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 	 * it will be printed a number of times equals to 1+depth.
 	 */
 	private void treePrint(FeatureNode feature, String indent) {
-		System.out.println(indent+feature.getName());
+		System.out.println(indent+feature.getID());
 		for(FeatureNode child : feature.getSubFeatures()) treePrint(child, indent+">");
 		for(GroupNode group : feature.getSubGroups()) 
 		  for(FeatureNode member : group.getMembers()) 
@@ -716,7 +718,8 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 
 		editorView.setLastPositionX(e.getX());
 		editorView.setLastPositionY(e.getY());
-		editorModel.addUnrootedCommonality(EditorView.featureNamePrefix+editorView.getFeaturesCount());
+		editorModel.addUnrootedCommonality(EditorView.featureNamePrefix+editorView.getFeaturesCount(), 
+					EditorView.featureNamePrefix+editorView.getFeaturesCount());
 	  }
 	}
 
@@ -743,8 +746,8 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 		      //about to link 2 features by a connector
 			  System.out.println("about to link 2 features by a connector_R");
 //			  editorModel.addMandatoryLink( (otherEnd.getParent().getName(), comp.getName() );
-			  editorModel.addMandatoryLink( ((FeaturePanel)otherEnd.getParent()).getLabelName(), 
-					  						((FeaturePanel)comp).getLabelName() );
+			  editorModel.addMandatoryLink( ((FeaturePanel)otherEnd.getParent()).getID(), 
+					  						((FeaturePanel)comp).getID() );
 			  return;
 			}
 			else if( otherEnd.getName().startsWith(EditorView.orGroupNamePrefix)
@@ -757,10 +760,10 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 				type=GroupTypes.ALT_GROUP;
 			  
 			  if ( ((GroupPanel)otherEnd).getParent().getName().startsWith(EditorView.featureNamePrefix))
-				editorModel.addFeatureToGroup( ((FeaturePanel)otherEnd.getParent()).getLabelName(),
-											   ((FeaturePanel)comp).getLabelName(), otherEnd.getName(), type );
+				editorModel.addFeatureToGroup( ((FeaturePanel)otherEnd.getParent()).getID(),
+											   ((FeaturePanel)comp).getID(), otherEnd.getName(), type );
 			  else
-				editorModel.addFeatureToGroup( null, ((FeaturePanel)comp).getLabelName(), otherEnd.getName(), type);
+				editorModel.addFeatureToGroup( null, ((FeaturePanel)comp).getID(), otherEnd.getName(), type);
 			  return;
 			}	
 		  }
@@ -769,8 +772,8 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 			//about to link 2 features by a connector
 			System.out.println("about to link 2 features by a connector");
 //			editorModel.addMandatoryLink( comp.getName(), otherEnd.getParent().getName() );
-			editorModel.addMandatoryLink( ((FeaturePanel)comp).getLabelName(),
-										  ((FeaturePanel)otherEnd.getParent()).getLabelName() );
+			editorModel.addMandatoryLink( ((FeaturePanel)comp).getID(),
+										  ((FeaturePanel)otherEnd.getParent()).getID() );
 			return;
 		  }
 		  //the other end of the connector is not anchored to anything
@@ -793,7 +796,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 		  //group is not owned by any feature
 		  if(comp.getParent().getName()==null || comp.getParent().getName().startsWith(EditorView.diagramPanelName)){
 			if(otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix))
-			  editorModel.mergeConnectorWithGroup( null, ((FeaturePanel)otherEnd.getParent()).getLabelName(), 
+			  editorModel.mergeConnectorWithGroup( null, ((FeaturePanel)otherEnd.getParent()).getID(), 
 					  							   comp.getName(), type);
 			else 
 			  editorModel.mergeConnectorWithGroup(null, null, comp.getName(), type);				
@@ -804,11 +807,11 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 		  else{
 			if(otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix))
 			  editorModel.mergeConnectorWithGroup(
-					  	((FeaturePanel)comp.getParent()).getLabelName(),
-					  	((FeaturePanel)otherEnd.getParent()).getLabelName(), comp.getName(), type);
+					  	((FeaturePanel)comp.getParent()).getID(),
+					  	((FeaturePanel)otherEnd.getParent()).getID(), comp.getName(), type);
 			else 
 			  editorModel.mergeConnectorWithGroup(
-					  	((FeaturePanel)comp.getParent()).getLabelName(),
+					  	((FeaturePanel)comp.getParent()).getID(),
 					  	null, comp.getName(), type);	
 		  }
 		  return;		  
@@ -840,7 +843,7 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 		  //about to add group to the feature comp
 		  System.out.println("about to add a group to a feature");
 //		  editorModel.addGroupToFeature( comp.getName(), group.getName() );
-		  editorModel.addGroupToFeature( ((FeaturePanel)comp).getLabelName(), group.getName() );
+		  editorModel.addGroupToFeature( ((FeaturePanel)comp).getID(), group.getName() );
 		  return;
 			
 		}
@@ -891,6 +894,40 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 	public void setSavePath(String pathProject) {
 		this.diagramPath=pathProject;		
 		this.sxfmPath=pathProject+sxfmSubPath;
+	}
+
+	/**
+	 * Adds starting Commonalities and Variabilities to the diagram and model, using the ArrayLists in EditorView.
+	 */
+	public void addStartingfeatures() {
+		ArrayList<String> startingCommonalities=editorView.getStartingCommonalities();			
+		ArrayList<String> startingVariabilities=editorView.getStartingVariabilities();
+		JLayeredPane diagramPanel=editorView.getDiagramPanel();
+		Point position=new Point();
+		//adding starting commonalities
+		int i=10, j=10;
+		for(String name : startingCommonalities){
+		  if(i>=diagramPanel.getWidth()){ i=10; j+=55;}
+		  position.x=i+(int)diagramPanel.getLocationOnScreen().getX();
+		  position.y=j+(int)diagramPanel.getLocationOnScreen().getY();
+		  editorView.setToolDragPosition(position);
+		  editorView.setFeatureToAddName(name);
+		  editorModel.addUnrootedNamedFeature(name, 
+				  EditorView.featureNamePrefix+editorView.getFeaturesCount(), FeatureTypes.COMMONALITY);
+		  i+=70;
+		}
+		//adding starting variabilities
+		for(String name : startingVariabilities){
+		  if(i>=diagramPanel.getWidth()){ i=10; j+=55;}
+		  position.x=i+(int)diagramPanel.getLocationOnScreen().getX();
+		  position.y=j+(int)diagramPanel.getLocationOnScreen().getY();
+		  editorView.setToolDragPosition(position);
+		  editorView.setFeatureToAddName(name);
+		  editorModel.addUnrootedNamedFeature(name, 
+				  EditorView.featureNamePrefix+editorView.getFeaturesCount(), FeatureTypes.VARIABILITY);
+		  i+=70;
+		}
+		
 	}
 	
 }

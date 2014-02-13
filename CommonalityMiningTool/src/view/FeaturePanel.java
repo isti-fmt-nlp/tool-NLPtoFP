@@ -38,16 +38,38 @@ public class FeaturePanel extends JLayeredPane {
 	
 	private String labelName=null;
 
-	
+
+	/**
+	 * Creates a new default FeaturePanel. <br>
+	 */
 	public FeaturePanel(Component parent){
 		super();
 		splitterPanel=parent;
 	}
 
+	/**
+	 * Returns the ID of this feature.
+	 * 
+	 * @return - a String containing the ID.
+	 */
+	public String getID(){
+		return getName();
+	}
+
+	/**
+	 * Returns the name of this feature.
+	 * 
+	 * @return - a String containing the name.
+	 */
 	public String getLabelName(){
 		return labelName;
 	}
 
+	/**
+	 * Sets the name of this feature node.
+	 * 
+	 * @return - a String containing the name.
+	 */
 	public void setLabelName(String labelName){
 		this.labelName=labelName;
 	}
