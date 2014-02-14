@@ -289,6 +289,10 @@ public class EditorView extends JFrame implements Observer{
 	
 	/** The panel containing the diagram */
 	private JLayeredPane diagramPanel=null;
+	
+	/** The JScrollPane containing the diagramPanel */
+	private JScrollPane diagramScroller=null;
+	
 //	private ScrollLayeredPane diagramPanel=null;
 	
 	/** The panel containing the tools */
@@ -493,6 +497,7 @@ public class EditorView extends JFrame implements Observer{
 			paintChildren(g);//panels in the diagram panel are drawn over lines			  
 		  }
 		};
+		
 //		diagramPanel = new ScrollLayeredPane();
 		diagramPanel.setName(diagramPanelName);
 //		diagramPanel = new OrderedListPaintJPanel();
@@ -560,18 +565,13 @@ public class EditorView extends JFrame implements Observer{
 
 		
 		//creating diagram scroller, which will fit the rest of the root frame		
-		JScrollPane diagramScroller=new JScrollPane( diagramPanel, 
+		diagramScroller=new JScrollPane( diagramPanel, 
 				   ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				   ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		
 		splitterPanel.add(diagramScroller);
-
-		
-		
-		
-
-		
-		//diagramPanel.setPreferredSize(new Dimension(10000, 10000));
+				
+//		diagramPanel.setPreferredSize(new Dimension(10000, 10000));
 		
 		/* TEST */
 		
@@ -1337,6 +1337,7 @@ public class EditorView extends JFrame implements Observer{
 		  int adjustedMoveX=0, adjustedMoveY=0;	  
 		  int newLocationX=0, newLocationY=0;
 		  boolean normalUpdateX=true, normalUpdateY=true;
+		  int enlargeX=0, enlargeY=0;
 
 		  moveX = e.getX()-lastPositionX;
 		  moveY = e.getY()-lastPositionY;
@@ -1352,24 +1353,41 @@ public class EditorView extends JFrame implements Observer{
 			normalUpdateX=false;
 			adjustedMoveX=newLocationX-element.getX();
 		  }
+*/
 		  if( diagramPanel.getWidth()<=newLocationX+element.getWidth() ){
-			newLocationX=diagramPanel.getWidth()-element.getWidth()-1;
-			normalUpdateX=false;
-			adjustedMoveX=newLocationX-element.getX();
+			Dimension diagramSize= diagramPanel.getPreferredSize();
+			enlargeX=newLocationX+element.getWidth()-diagramPanel.getWidth()+20;
+			diagramSize.width+=enlargeX;
+			diagramPanel.setPreferredSize(diagramSize);
+			diagramPanel.setSize(diagramSize);
+			diagramScroller.getHorizontalScrollBar().setValue(
+					enlargeX+diagramScroller.getHorizontalScrollBar().getValue());
+			
+//			newLocationX=diagramPanel.getWidth()-element.getWidth()-1;
+//			normalUpdateX=false;
+//			adjustedMoveX=newLocationX-element.getX();
 		  }
-		  
+/*		  
 		  //checking vertical borders
 		  if( newLocationY<0 ){
 			newLocationY=1;
 			normalUpdateY=false;
 			adjustedMoveY=newLocationY-element.getY();
 		  }
-		  if( diagramPanel.getHeight()<=newLocationY+element.getHeight() ){
-			newLocationY=diagramPanel.getHeight()-element.getHeight()-1;
-			normalUpdateY=false;
-			adjustedMoveY=newLocationY-element.getY();
-		  }
 */
+		  if( diagramPanel.getHeight()<=newLocationY+element.getHeight() ){
+			Dimension diagramSize= diagramPanel.getPreferredSize();
+			enlargeY=newLocationY+element.getHeight()-diagramPanel.getHeight()+20;
+			diagramSize.height+=enlargeY;
+			diagramPanel.setPreferredSize(diagramSize);
+			diagramPanel.setSize(diagramSize);
+			diagramScroller.getVerticalScrollBar().setValue(
+					enlargeY+diagramScroller.getVerticalScrollBar().getValue());
+
+//			newLocationY=diagramPanel.getHeight()-element.getHeight()-1;
+//			normalUpdateY=false;
+//			adjustedMoveY=newLocationY-element.getY();
+		  }
 
 		  /* ***DEBUG*** */
 		  if (debug4){
@@ -1379,12 +1397,16 @@ public class EditorView extends JFrame implements Observer{
 		  }
 		  /* ***DEBUG*** */
 		  
-		  //adjusting last drag position depending on eventual border collisions
-		  if(normalUpdateX) lastPositionX=e.getX();
-		  else lastPositionX=lastPositionX+adjustedMoveX;
-
-		  if(normalUpdateY) lastPositionY=e.getY();
-		  else lastPositionY=lastPositionY+adjustedMoveY;
+		  lastPositionX=e.getX();
+		  lastPositionY=e.getY();
+		  
+//		  //adjusting last drag position depending on eventual border collisions
+//		  if(normalUpdateX) lastPositionX=e.getX();
+//		  else lastPositionX=lastPositionX+adjustedMoveX;
+//
+//		  if(normalUpdateY) lastPositionY=e.getY();
+//		  else lastPositionY=lastPositionY+adjustedMoveY;
+		  
 		  element.setLocation(newLocationX, newLocationY);
 	}
 

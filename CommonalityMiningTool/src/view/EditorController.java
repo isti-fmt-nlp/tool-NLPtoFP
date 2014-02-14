@@ -1,6 +1,7 @@
 package view;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -162,6 +163,18 @@ public class EditorController implements
 		  case MouseEvent.BUTTON2: System.out.println("BUTTON2!"); break;
 		  case MouseEvent.BUTTON3: System.out.println("BUTTON3!"); break;		  
 		}
+
+		/* TEST */
+		if (e.getButton() == MouseEvent.BUTTON2) {
+		  System.out.println("Ma ci sono o no?");
+		  editorView.getDiagramPanel().setPreferredSize(new Dimension(10000, 10000));
+		  editorView.getDiagramPanel().setSize(new Dimension(10000, 10000));
+//		  editorView.getDiagramPanel().invalidate();
+//		  editorView.repaintRootFrame();
+//		  editorView.getDiagramPanel().validate();
+//		  editorView.getDiagramPanel().repaint();
+		}
+		/* TEST */
 
 		if (e.getButton() == MouseEvent.BUTTON3) {//user asked for the popup menu
           Component comp=editorView.getDiagramPanel().getComponentAt(e.getX(), e.getY());
