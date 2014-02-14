@@ -2,6 +2,7 @@ package view;
 
 import java.awt.Component;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -140,8 +141,11 @@ public class EditorController implements
 	@Override
 	public void mouseClicked(MouseEvent e) {
 	  JComponent popupElement=null;
+	  
+	  
 	  //event originated from the diagram panel
       if( ((Component)e.getSource()).getName().startsWith(EditorView.diagramPanelName) ){
+//	  if(containsPoint(editorView.getDiagramPanel(), e.getLocationOnScreen())){
 		
 
     	/* ***DEBUG*** */
@@ -243,6 +247,7 @@ public class EditorController implements
 	public void mousePressed(MouseEvent e) {
 	  //event originated from the diagram panel
       if( ((Component)e.getSource()).getName().startsWith(EditorView.diagramPanelName) ){
+//	  if(containsPoint(editorView.getDiagramPanel(), e.getLocationOnScreen())){
 		int featurePanelX=0, featurePanelY=0;
 		FeaturePanel featurePanel=null;
 		JComponent otherEnd=null;
@@ -446,7 +451,8 @@ public class EditorController implements
 	@Override
 	public void mouseReleased(MouseEvent e) {
 	  //event originated from the diagram panel
-	  if( ((Component)e.getSource()).getName().startsWith(EditorView.diagramPanelName) ) 
+      if( ((Component)e.getSource()).getName().startsWith(EditorView.diagramPanelName) )
+//	  if(containsPoint(editorView.getDiagramPanel(), e.getLocationOnScreen()))
 		switch(editorView.getActiveItem()){
 		  case DRAGGING_FEATURE:
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
@@ -504,7 +510,8 @@ public class EditorController implements
 	@Override
 	public void mouseEntered(MouseEvent e) {
 	  //event originated from the diagram panel
-	  if( ((Component)e.getSource()).getName().startsWith(EditorView.diagramPanelName) ) 
+	  if( ((Component)e.getSource()).getName()!=null &&
+		  ((Component)e.getSource()).getName().startsWith(EditorView.diagramPanelName) ) 
 
 	    /* ***DEBUG *** */
 	    if (debug2){
@@ -519,6 +526,19 @@ public class EditorController implements
 	    }
   	    /* ***DEBUG *** */
 
+	}
+
+	/**
+	 * Checks if the rectangle of comp contains the point location
+	 * @param comp - JComponent that can contains location
+	 * @param location - Point that can be contained in comp
+	 * @return
+	 */
+	private boolean containsPoint(JComponent comp, Point location) {		
+	  System.out.println("Clicked on position: "+location
+		  +"\ncomp.getVisibleRect()"+comp.getVisibleRect());
+	  if (comp.getVisibleRect().contains(location)) return true;
+	  else return false;
 	}
 
 	@Override

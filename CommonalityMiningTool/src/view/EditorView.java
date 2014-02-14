@@ -75,8 +75,12 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
@@ -123,23 +127,6 @@ public class EditorView extends JFrame implements Observer{
 //			drawAllConnectors(g2);
 			paintChildren(g);//panels in the diagram panel are drawn over lines
 		}		
-	}
-	
-	/** Class used to implement the scrollable diagram. */	
-	class ScrollLayeredPane extends JLayeredPane{
-
-		private static final long serialVersionUID = 1L;
-		
-		public void paint(Graphics g){
-			g.translate(0, verticalShift);
-			paintComponent(g);
-			paintBorder(g);
-
-			Graphics2D g2 = (Graphics2D)g.create();		
-			drawAllConnectors(g2);
-			paintChildren(g);//panels in the diagram panel are drawn over lines
-//			super.paint(g);
-		}	
 	}
 	
 	/** Class used to filter project files. */
@@ -301,8 +288,8 @@ public class EditorView extends JFrame implements Observer{
 	private int verticalShift=0;
 	
 	/** The panel containing the diagram */
-//	private JLayeredPane diagramPanel=null;
-	private ScrollLayeredPane diagramPanel=null;
+	private JLayeredPane diagramPanel=null;
+//	private ScrollLayeredPane diagramPanel=null;
 	
 	/** The panel containing the tools */
 	private JPanel toolsPanel=null;
@@ -432,51 +419,6 @@ public class EditorView extends JFrame implements Observer{
         popMenuItemUngroup.addActionListener(editorController);        
         popMenuItemPrintModelDebug.addActionListener(editorController);        
 
-//		System.out.println("GraphicsEnvironment.isHeadless(): "+GraphicsEnvironment.isHeadless());
-//		try {
-//			eventsRobot = new Robot();
-//		} catch (AWTException e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
-//		diagramElementsMenu.setFocusable(false);
-//		diagramElementsMenu.setLightWeightPopupEnabled(false);
-//		diagramElementsMenu.addFocusListener(new FocusListener() {
-//			@Override
-//			public void focusLost(FocusEvent e) {
-//				System.out.println("Menu Lost Focus");				
-//			}
-//			
-//			@Override
-//			public void focusGained(FocusEvent e) {
-//				System.out.println("Menu Gained Focus");								
-//			}
-//		});
-//		diagramElementsMenu.addPopupMenuListener(new PopupMenuListener() {
-//			
-//			@Override
-//			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-//				System.out.println("Menu Became Visible");
-//			}
-//			
-//			@Override
-//			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-//				System.out.println("Menu Became Invisible");
-//			}
-//			
-//			@Override
-//			public void popupMenuCanceled(PopupMenuEvent e) {
-//				System.out.println("Menu Canceled");
-//			}
-//		});
-		
-//		diagramElementsMenu.setIgnoreRepaint(true);
-//		diagramElementsMenu.setLayout(new BorderLayout());
-        
-//        diagramElementsMenu.add(popMenuItemDelete);
-//        diagramElementsMenu.add(popMenuItemUngroup);
-
-
 		visibleOrderDraggables = new OrderedList();
 		startConnectorDots = new ArrayList<JComponent>();
 //		endConnectorDots = new ArrayList<JComponent>();
@@ -538,8 +480,20 @@ public class EditorView extends JFrame implements Observer{
 		//creating diagram panel, which will fit the rest of the root frame
 		float[] myColorHBS=Color.RGBtoHSB(0, 0, 0, null);
 //		float[] myColorHBS=Color.RGBtoHSB(150, 150, 190, null);
-//		diagramPanel = new JLayeredPane();
-		diagramPanel = new ScrollLayeredPane();
+		diagramPanel = new JLayeredPane(){
+
+		  private static final long serialVersionUID = 1L;
+			
+		  @Override
+		  public void paint(Graphics g){
+			Graphics2D g2 = (Graphics2D)g.create();		
+			paintComponent(g);
+			paintBorder(g);
+			drawAllConnectors(g2);
+			paintChildren(g);//panels in the diagram panel are drawn over lines			  
+		  }
+		};
+//		diagramPanel = new ScrollLayeredPane();
 		diagramPanel.setName(diagramPanelName);
 //		diagramPanel = new OrderedListPaintJPanel();
 //		diagramPanel = new OrderedListPaintJPanel(visibleOrderDraggables);
@@ -561,21 +515,81 @@ public class EditorView extends JFrame implements Observer{
 //		splitterPanel.setDoubleBuffered(true);
 		splitterPanel.setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width,
 				Toolkit.getDefaultToolkit().getScreenSize().height));
-		splitterPanel.setContinuousLayout(true);
 //		splitterPanel.setLocation(0,0);
 //		splitterPanel.setResizeWeight(0.5);
 		
 //		splitterPanel.add(diagramPanel);
 		splitterPanel.add(toolsPanel);
-		splitterPanel.add(diagramPanel);
+		
+		
+		/* TEST */
 
+		//creating diagram scroller, which will fit the rest of the root frame
+//		JScrollPane diagramScroller=new JScrollPane( diagramPanel, 
+//				   ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+//				   ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		
+//		diagramScroller=new JScrollPane();
+		
+//		JScrollBar verticalScrollBar=new JScrollBar();
+//		verticalScrollBar.setOrientation(JScrollBar.VERTICAL);
+//		verticalScrollBar.setValue(0);
+//		verticalScrollBar.setVisibleAmount(2000);
+//		verticalScrollBar.setMinimum(0);
+//		verticalScrollBar.setMaximum(2000);
+//		
+//		diagramScroller.setVerticalScrollBar(verticalScrollBar);
+		
+//		diagramScroller.add(diagramPanel);
+		
+		
+		
+//		diagramScroller.setViewport(diagramPanel);
+//		splitterPanel.add(diagramScroller);
+		
+//		frameRoot.addMouseListener(editorController);
+//		frameRoot.addMouseMotionListener(editorController);
+
+//		splitterPanel.addMouseListener(editorController);
+//		splitterPanel.addMouseMotionListener(editorController);
+
+//		diagramScroller.addMouseListener(editorController);
+//		diagramScroller.addMouseMotionListener(editorController);
+
+		
+
+		
+		//creating diagram scroller, which will fit the rest of the root frame		
+		JScrollPane diagramScroller=new JScrollPane( diagramPanel, 
+				   ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+				   ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		
+		splitterPanel.add(diagramScroller);
+
+		
+		
+		
+
+		
+		//diagramPanel.setPreferredSize(new Dimension(10000, 10000));
+		
+		/* TEST */
+		
+		
+		
+//		splitterPanel.add(diagramPanel);
+
+		
+		
+		
+		
 //		frameRoot.add(splitterPanel);
 		add(splitterPanel);
 
 
 		diagramPanel.addMouseListener(editorController);
 		diagramPanel.addMouseMotionListener(editorController);
-		diagramPanel.addMouseWheelListener(editorController);
+//		diagramPanel.addMouseWheelListener(editorController);
 		
 
 		setSize(Toolkit.getDefaultToolkit().getScreenSize());
@@ -611,14 +625,9 @@ public class EditorView extends JFrame implements Observer{
 
 	@Override
 	public void paint(java.awt.Graphics g) {
-		int rectX=0, rectY=0, rectWidth=0, rectHeight=0;
 		super.paint(g);
 
 		Graphics2D g2 = (Graphics2D)g.create();
-//		drawAllConnectors(g2);		
-//		paintComponents(g);
-//		paintAll(g);
-		
 		
 		/* ***DEBUG*** */
 		if(debug3) System.out.println("Mi han chiamato, son la paint()");
@@ -648,26 +657,10 @@ public class EditorView extends JFrame implements Observer{
 			g2.draw(elementSelectionFrame);
 		  }
 		}
-//		   g2.finalize();
-
-		    //		BufferedImage image=null;
-//		try {
-//			image = ImageIO.read(this.getClass().getResourceAsStream(((JPanel)compList[i]).getName()));
-//		} catch (IOException e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
-//		   Graphics2D g2 = GraphicsEnvironment.getLocalGraphicsEnvironment().createGraphics(image);
-////		   Graphics2D g2 = (Graphics2D) g;
-////
-////		    BufferedImage img1 = (BufferedImage) Toolkit.getDefaultToolkit().getImage("yourFile.gif");
-//		    g2.drawImage(image, 10, 10, frameRoot);
-//		    g2.finalize();
-
 	}
 
 	/**
-	 * Draws all connectors lines.
+	 * Draws all connectors lines inside the diagram panel coordinate system.
 	 * 
 	 * @param g2 - the Graphics2D object used for drawing
 	 */
@@ -1308,7 +1301,6 @@ public class EditorView extends JFrame implements Observer{
 		  }
 		  
 		  //checking vertical borders
-/*		  
 		  if( newLocationY<0 ){
 			newLocationY=1;
 			normalUpdateY=false;
@@ -1319,15 +1311,14 @@ public class EditorView extends JFrame implements Observer{
 			normalUpdateY=false;
 			adjustedMoveY=newLocationY-element.getY();
 		  }
-*/
+
 		  //adjusting last drag position depending on eventual border collisions
 		  if(normalUpdateX) lastPositionX=e.getX();
 		  else lastPositionX=lastPositionX+adjustedMoveX;
 
-/*		  
 		  if(normalUpdateY) lastPositionY=e.getY();
 		  else lastPositionY=lastPositionY+adjustedMoveY;
-*/
+
 		  if(!normalUpdateX&&!normalUpdateY) break;
 		  element.setLocation(newLocationX, newLocationY);
 		}
@@ -1353,7 +1344,8 @@ public class EditorView extends JFrame implements Observer{
 		  newLocationY=element.getY()+moveY;
 		  
 		  //the feature must not be dragged beyond the borders of the diagram panel
-		  
+
+/*		  
 		  //checking horizontal borders
 		  if( newLocationX<0 ){
 			newLocationX=1;
@@ -1367,7 +1359,6 @@ public class EditorView extends JFrame implements Observer{
 		  }
 		  
 		  //checking vertical borders
-/*
 		  if( newLocationY<0 ){
 			newLocationY=1;
 			normalUpdateY=false;
@@ -1387,15 +1378,13 @@ public class EditorView extends JFrame implements Observer{
 			System.out.println("moveX: "+moveX+"\tmoveY: "+moveY);
 		  }
 		  /* ***DEBUG*** */
-
+		  
 		  //adjusting last drag position depending on eventual border collisions
 		  if(normalUpdateX) lastPositionX=e.getX();
 		  else lastPositionX=lastPositionX+adjustedMoveX;
 
-/*
 		  if(normalUpdateY) lastPositionY=e.getY();
 		  else lastPositionY=lastPositionY+adjustedMoveY;
-*/
 		  element.setLocation(newLocationX, newLocationY);
 	}
 
