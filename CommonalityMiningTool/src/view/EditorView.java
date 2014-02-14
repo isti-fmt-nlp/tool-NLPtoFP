@@ -106,7 +106,7 @@ public class EditorView extends JFrame implements Observer{
 	
 	private static final long serialVersionUID = 1L;
 
-	/** Class used to implement the editor. */
+	/** Class used to implement the editor contained in the frame. */
 	class EditorSplitPane extends JSplitPane{
 
 		public static final long serialVersionUID = 1L;
@@ -117,15 +117,29 @@ public class EditorView extends JFrame implements Observer{
 
 		@Override
 		public void paint(Graphics g){
-//			System.out.println("getParent().getParent().getParent().getParent(): "+getParent().getParent().getParent().getParent());
-			Graphics2D g2 = (Graphics2D)g.create();		
+//			Graphics2D g2 = (Graphics2D)g.create();		
 			paintComponent(g);
 			paintBorder(g);
-//			paintChildren(g);//panels in the diagram panel are drawn over lines
-			drawAllConnectors(g2);
-			paintChildren(g);//panels in the diagram panel are drawn below lines
-//			super.paint(g);	
+//			drawAllConnectors(g2);
+			paintChildren(g);//panels in the diagram panel are drawn over lines
 		}		
+	}
+	
+	/** Class used to implement the scrollable diagram. */	
+	class ScrollLayeredPane extends JLayeredPane{
+
+		private static final long serialVersionUID = 1L;
+		
+		public void paint(Graphics g){
+			g.translate(0, verticalShift);
+			paintComponent(g);
+			paintBorder(g);
+
+			Graphics2D g2 = (Graphics2D)g.create();		
+			drawAllConnectors(g2);
+			paintChildren(g);//panels in the diagram panel are drawn over lines
+//			super.paint(g);
+		}	
 	}
 	
 	/** Class used to filter project files. */
@@ -284,9 +298,12 @@ public class EditorView extends JFrame implements Observer{
 	/** Name of the next feature to add*/
 	private String featureToAddName = null;
 	
+	private int verticalShift=0;
+	
 	/** The panel containing the diagram */
-	private JLayeredPane diagramPanel=null;
-
+//	private JLayeredPane diagramPanel=null;
+	private ScrollLayeredPane diagramPanel=null;
+	
 	/** The panel containing the tools */
 	private JPanel toolsPanel=null;
 	
@@ -473,19 +490,13 @@ public class EditorView extends JFrame implements Observer{
 		
 		
 		//creating root frame
-//		frameRoot=new OrderedListPaintJFrame(visibleOrderDraggables);
 		frameRoot=this;
 		setLayout(new BorderLayout());		
-//		frameRoot.setLayout(new BorderLayout());		
-//		frameRoot.setLayout(null);		
-//		frameRoot.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 		//creating tools panel
 		toolsPanel = new JPanel();		
 		toolsPanel.setLayout(new GridLayout(0, 2, 2, 2));		
-//		toolsPanel.setLayout(new GridLayout(0, 2));		
 		toolsPanel.setPreferredSize(new Dimension(140, Toolkit.getDefaultToolkit().getScreenSize().height));
 		toolsPanel.setBackground(Color.white);
 //		toolsPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -504,43 +515,31 @@ public class EditorView extends JFrame implements Observer{
 		JComponent iconTmpPanel=null;
 		for(int i=0; i<4; ++i){
 		  iconTmpPanel=getToolIcon("New Feature", true);
-//		  iconTmpPanel.addMouseListener(getToolbarMouseListener());
-//		  iconTmpPanel.addMouseMotionListener(getToolbarMouseMotionListener());
 		  iconTmpPanel.addMouseListener(editorController);
 		  iconTmpPanel.addMouseMotionListener(editorController);
 		  toolsPanel.add(iconTmpPanel);
 
 		  iconTmpPanel=getToolIcon("Connector Line", true);
-//		  iconTmpPanel.addMouseListener(getToolbarMouseListener());
-//		  iconTmpPanel.addMouseMotionListener(getToolbarMouseMotionListener());
 		  iconTmpPanel.addMouseListener(editorController);
 		  iconTmpPanel.addMouseMotionListener(editorController);
 		  toolsPanel.add(iconTmpPanel);
 
 		  iconTmpPanel=getToolIcon("Alternative Group", true);
-//		  iconTmpPanel.addMouseListener(getToolbarMouseListener());
-//		  iconTmpPanel.addMouseMotionListener(getToolbarMouseMotionListener());
 		  iconTmpPanel.addMouseListener(editorController);
 		  iconTmpPanel.addMouseMotionListener(editorController);
 		  toolsPanel.add(iconTmpPanel);
 
 		  iconTmpPanel=getToolIcon("Or Group", true);
-//		  iconTmpPanel.addMouseListener(getToolbarMouseListener());
-//		  iconTmpPanel.addMouseMotionListener(getToolbarMouseMotionListener());
 		  iconTmpPanel.addMouseListener(editorController);
 		  iconTmpPanel.addMouseMotionListener(editorController);
 		  toolsPanel.add(iconTmpPanel);
 		}
 
-//		toolsPanel.add(tryPink);
-//		toolsPanel.add(tryGreen);
-//		toolsPanel.add(tryOrange);
-
-		
 		//creating diagram panel, which will fit the rest of the root frame
 		float[] myColorHBS=Color.RGBtoHSB(0, 0, 0, null);
 //		float[] myColorHBS=Color.RGBtoHSB(150, 150, 190, null);
-		diagramPanel = new JLayeredPane();
+//		diagramPanel = new JLayeredPane();
+		diagramPanel = new ScrollLayeredPane();
 		diagramPanel.setName(diagramPanelName);
 //		diagramPanel = new OrderedListPaintJPanel();
 //		diagramPanel = new OrderedListPaintJPanel(visibleOrderDraggables);
@@ -576,6 +575,8 @@ public class EditorView extends JFrame implements Observer{
 
 		diagramPanel.addMouseListener(editorController);
 		diagramPanel.addMouseMotionListener(editorController);
+		diagramPanel.addMouseWheelListener(editorController);
+		
 
 		setSize(Toolkit.getDefaultToolkit().getScreenSize());
 		setVisible(true);
@@ -614,8 +615,7 @@ public class EditorView extends JFrame implements Observer{
 		super.paint(g);
 
 		Graphics2D g2 = (Graphics2D)g.create();
-//		drawAllConnectors(g2);
-		
+//		drawAllConnectors(g2);		
 //		paintComponents(g);
 //		paintAll(g);
 		
@@ -630,17 +630,7 @@ public class EditorView extends JFrame implements Observer{
 		if(isActiveItem==activeItems.DRAGGING_SELECTION_RECT){
 			System.out.println("Disegno il rect");
 			g2.setColor(Color.BLUE);
-//			rectX=(int)(startSelectionRect.getX()+diagramPanel.getX());
-//			rectY=(int)(startSelectionRect.getY()+diagramPanel.getY());
-
-//			rectX=(int)(startSelectionRect.getX());
-//			rectY=(int)(startSelectionRect.getY());
-//			rectWidth=(int)(endSelectionRect.getX()-startSelectionRect.getX());
-//			rectHeight=(int)(endSelectionRect.getY()-startSelectionRect.getY());			
-//			g2.drawRect(rectX, rectY, rectWidth, rectHeight);
-			g2.setColor(Color.BLUE);
-			g2.draw(selectionRect);
-			
+			g2.draw(selectionRect);			
 		}
 		if(selectionGroupFocused.size()>0){
 		  g2.setColor(Color.BLUE);
@@ -1051,8 +1041,10 @@ public class EditorView extends JFrame implements Observer{
      * @return the visible center point of the anchor
      */
     public Point2D getVisibleStartAnchorCenter(JComponent anchor) {
-    	double x=(anchor.getLocationOnScreen().getX()-splitterPanel.getLocationOnScreen().getX()+anchor.getWidth()/2);
-    	double y=(anchor.getLocationOnScreen().getY()-splitterPanel.getLocationOnScreen().getY()+anchor.getHeight()/2+3);
+//    	double x=(anchor.getLocationOnScreen().getX()-splitterPanel.getLocationOnScreen().getX()+anchor.getWidth()/2);
+//    	double y=(anchor.getLocationOnScreen().getY()-splitterPanel.getLocationOnScreen().getY()+anchor.getHeight()/2+3);
+    	double x=(anchor.getLocationOnScreen().getX()-diagramPanel.getLocationOnScreen().getX()+anchor.getWidth()/2);
+    	double y=(anchor.getLocationOnScreen().getY()-diagramPanel.getLocationOnScreen().getY()+anchor.getHeight()/2+3);
     	
     	return new Point2D.Double(x, y);
     }
@@ -1302,6 +1294,8 @@ public class EditorView extends JFrame implements Observer{
 		  newLocationY=element.getY()+moveY;
 		  
 		  //the feature must not be dragged beyond the borders of the diagram panel
+		  
+		  //checking horizontal borders
 		  if( newLocationX<0 ){
 			newLocationX=1;
 			normalUpdateX=false;
@@ -1312,6 +1306,9 @@ public class EditorView extends JFrame implements Observer{
 			normalUpdateX=false;
 			adjustedMoveX=newLocationX-element.getX();
 		  }
+		  
+		  //checking vertical borders
+/*		  
 		  if( newLocationY<0 ){
 			newLocationY=1;
 			normalUpdateY=false;
@@ -1322,15 +1319,16 @@ public class EditorView extends JFrame implements Observer{
 			normalUpdateY=false;
 			adjustedMoveY=newLocationY-element.getY();
 		  }
-
+*/
 		  //adjusting last drag position depending on eventual border collisions
 		  if(normalUpdateX) lastPositionX=e.getX();
 		  else lastPositionX=lastPositionX+adjustedMoveX;
 
+/*		  
 		  if(normalUpdateY) lastPositionY=e.getY();
 		  else lastPositionY=lastPositionY+adjustedMoveY;
-
-		  if(!normalUpdateX&&normalUpdateY) break;
+*/
+		  if(!normalUpdateX&&!normalUpdateY) break;
 		  element.setLocation(newLocationX, newLocationY);
 		}
 		frameRoot.repaint();	
@@ -1355,34 +1353,32 @@ public class EditorView extends JFrame implements Observer{
 		  newLocationY=element.getY()+moveY;
 		  
 		  //the feature must not be dragged beyond the borders of the diagram panel
+		  
+		  //checking horizontal borders
 		  if( newLocationX<0 ){
-//		  if( diagramPanel.getLocation().getX()>newLocationX ){
-//			newLocationX=(int)diagramPanel.getLocation().getX()+1;
 			newLocationX=1;
 			normalUpdateX=false;
 			adjustedMoveX=newLocationX-element.getX();
 		  }
 		  if( diagramPanel.getWidth()<=newLocationX+element.getWidth() ){
-//		  if( diagramPanel.getLocation().getX()+diagramPanel.getWidth()<=newLocationX+lastFeatureFocused.getWidth() ){
 			newLocationX=diagramPanel.getWidth()-element.getWidth()-1;
-//			newLocationX=(int)diagramPanel.getLocation().getX()+diagramPanel.getWidth()-lastFeatureFocused.getWidth()-1;
 			normalUpdateX=false;
 			adjustedMoveX=newLocationX-element.getX();
 		  }
+		  
+		  //checking vertical borders
+/*
 		  if( newLocationY<0 ){
-//		  if( diagramPanel.getLocation().getY()>newLocationY ){
-//			newLocationY=(int)diagramPanel.getLocation().getY()+1;
 			newLocationY=1;
 			normalUpdateY=false;
 			adjustedMoveY=newLocationY-element.getY();
 		  }
 		  if( diagramPanel.getHeight()<=newLocationY+element.getHeight() ){
-//		  if( diagramPanel.getLocation().getY()+diagramPanel.getHeight()<=newLocationY+lastFeatureFocused.getHeight() ){
 			newLocationY=diagramPanel.getHeight()-element.getHeight()-1;
-//			newLocationY=(int)diagramPanel.getLocation().getY()+diagramPanel.getHeight()-lastFeatureFocused.getHeight()-1;
 			normalUpdateY=false;
 			adjustedMoveY=newLocationY-element.getY();
 		  }
+*/
 
 		  /* ***DEBUG*** */
 		  if (debug4){
@@ -1396,9 +1392,10 @@ public class EditorView extends JFrame implements Observer{
 		  if(normalUpdateX) lastPositionX=e.getX();
 		  else lastPositionX=lastPositionX+adjustedMoveX;
 
+/*
 		  if(normalUpdateY) lastPositionY=e.getY();
 		  else lastPositionY=lastPositionY+adjustedMoveY;
-
+*/
 		  element.setLocation(newLocationX, newLocationY);
 	}
 
@@ -2635,14 +2632,25 @@ public class EditorView extends JFrame implements Observer{
 	  return startingVariabilities;
 	}
 
-	/** Returns the name of next feature to add tot he diagram.*/
+	/** Returns the name of next feature to add to the diagram.*/
 	public String getFeatureToAddName(){
 	  return featureToAddName;
 	}
 	
-	/** Sets the name of next feature to add tot he diagram.*/
+	/** Sets the name of next feature to add to the diagram.*/
 	public void setFeatureToAddName(String name){
 	  featureToAddName=name;
+	}
+
+	/** Returns the verticalShift of the diagram.*/
+	public int getVerticalShift(){
+	  return verticalShift;
+	}
+	
+	/** Sets the verticalShift of the diagram.*/
+	public void setVerticalShift(int y){
+	  verticalShift+=y;
+	  repaintRootFrame();
 	}
 	
 	

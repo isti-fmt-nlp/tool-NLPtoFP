@@ -7,6 +7,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.BufferedWriter;
@@ -26,7 +28,8 @@ import view.EditorView.activeItems;
 import main.*;
 import main.FeatureNode.FeatureTypes;
 
-public class EditorController implements ActionListener, WindowListener, MouseListener, MouseMotionListener{
+public class EditorController implements 
+	ActionListener, WindowListener, MouseListener, MouseMotionListener, MouseWheelListener{
 
 	/** variables used for debugging*/
 	private static boolean debug=true;
@@ -59,6 +62,36 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
 			this.editorView = editorView;
 			this.editorModel = featureModel;
 		}
+
+	@Override
+	public void mouseWheelMoved(MouseWheelEvent e) {
+        System.out.println("MouseWheelListenerDemo.mouseWheelMoved");
+        if (e.getWheelRotation() < 0) {
+            System.out.println("!!Rotated Up... " + e.getWheelRotation());
+        } else {
+            System.out.println("!!Rotated Down... " + e.getWheelRotation());
+        }
+
+        //
+        // Get scrolled unit amount
+        //
+        System.out.println("!!ScrollAmount: " + e.getScrollAmount());
+
+        //
+        // WHEEL_UNIT_SCROLL representing scroll by unit such as the
+        // arrow keys. WHEEL_BLOCK_SCROLL representing scroll by block
+        // such as the page-up or page-down key.
+        //
+        if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
+            System.out.println("!!MouseWheelEvent.WHEEL_UNIT_SCROLL");
+        }
+
+        if (e.getScrollType() == MouseWheelEvent.WHEEL_BLOCK_SCROLL) {
+            System.out.println("!!MouseWheelEvent.WHEEL_BLOCK_SCROLL");
+        }		
+
+        editorView.setVerticalShift(-10*e.getWheelRotation());
+	}
 	
 	@Override
 	public void mouseMoved(MouseEvent e) {}
@@ -118,8 +151,15 @@ public class EditorController implements ActionListener, WindowListener, MouseLi
     	/* ***DEBUG*** */
 
 		editorView.getDiagramElementsMenu().removeAll();
+
 		
-        if (e.getButton() == MouseEvent.BUTTON3) {//user asked for the popup menu
+		switch(e.getButton()){
+		  case MouseEvent.BUTTON1: System.out.println("BUTTON1!"); break;
+		  case MouseEvent.BUTTON2: System.out.println("BUTTON2!"); break;
+		  case MouseEvent.BUTTON3: System.out.println("BUTTON3!"); break;		  
+		}
+
+		if (e.getButton() == MouseEvent.BUTTON3) {//user asked for the popup menu
           Component comp=editorView.getDiagramPanel().getComponentAt(e.getX(), e.getY());
         	
           /* ***DEBUG*** */
