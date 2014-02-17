@@ -1,11 +1,13 @@
 package view;
 
+import java.awt.AWTEvent;
 import java.awt.AWTException;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Event;
 import java.awt.FileDialog;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -29,12 +31,15 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.TextEvent;
+import java.awt.event.TextListener;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -60,6 +65,7 @@ import java.util.Stack;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Box.Filler;
+import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
@@ -78,7 +84,9 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
@@ -102,10 +110,10 @@ import main.ViewXMLHandler;
 public class EditorView extends JFrame implements Observer{
 	
 	/** variables used for debugging*/
-	private static boolean debug=false;
+	private static boolean debug=true;
 	private static boolean debug2=false;
 	private static boolean debug3=false;
-	private static boolean debug4=false;
+	private static boolean debug4=true;
 //	private static Robot eventsRobot = null;
 	
 	private static final long serialVersionUID = 1L;
@@ -137,8 +145,10 @@ public class EditorView extends JFrame implements Observer{
 	    }
 	}
 
-	/** prefix of any feature name*/
+	/** prefix of any feature ID*/
 	public static String featureNamePrefix="---FEATURE---#";
+	/** prefix of any text area owned by feature panels*/
+	public static String textAreaNamePrefix="---TEXTAREA---";
 	/** prefix of any connector starting dot name*/
 	public static String startConnectorsNamePrefix="---START_CONNECTOR---#";
 	/** prefix of any connector ending dot name*/
@@ -194,6 +204,7 @@ public class EditorView extends JFrame implements Observer{
 	/** Popup menu items*/
 	private JMenuItem popMenuItemDelete = new JMenuItem("Delete Element");
 	private JMenuItem popMenuItemDeleteFeature = new JMenuItem("Delete Feature");
+	private JMenuItem popMenuItemRenameFeature = new JMenuItem("Rename Feature");
 	private JMenuItem popMenuItemDeleteConnector = new JMenuItem("Delete Connector");
 	private JMenuItem popMenuItemDeleteGroup = new JMenuItem("Delete Group");
 	private JMenuItem popMenuItemUngroup = new JMenuItem("Ungroup");
@@ -280,7 +291,10 @@ public class EditorView extends JFrame implements Observer{
 	/** Image used to drag tools*/
 	private BufferedImage toolDragImage = null;
 	/** Position of the dragged image*/
-	private Point toolDragPosition = null;
+	private Point toolDragPosition = null;	
+	
+	/** Old name of the feature about to be renamed*/
+	private String oldFeatureName=null;
 	
 	/** Name of the next feature to add*/
 	private String featureToAddName = null;
@@ -322,7 +336,6 @@ public class EditorView extends JFrame implements Observer{
 	/** Variable used to draw selection rectangle on the diagram */
 	private Rectangle selectionRect=new Rectangle();
 	
-
 	public EditorView(){}
 	
 	public EditorView(ArrayList<String> commonalitiesSelected,
@@ -338,6 +351,7 @@ public class EditorView extends JFrame implements Observer{
 	 */
 	public boolean prepareUI(EditorController editorController){
 		if(editorController==null) return false;
+//		this.editorController=editorController;
 
 		/* initializing JMenuBar */		
 		menuFiles = new JMenu("Files");
@@ -412,9 +426,13 @@ public class EditorView extends JFrame implements Observer{
 		popMenuItemDeleteFeature.setText("Delete Feature");
 		popMenuItemDeleteFeature.setActionCommand("Delete Element");
 		popMenuItemDeleteFeature.addActionListener(editorController);
+		
+		popMenuItemRenameFeature.addActionListener(editorController);
+		
 		popMenuItemDeleteConnector.setText("Delete Connector");
 		popMenuItemDeleteConnector.setActionCommand("Delete Element");
 		popMenuItemDeleteConnector.addActionListener(editorController);
+
 		popMenuItemDeleteGroup.setText("Delete Group");
 		popMenuItemDeleteGroup.setActionCommand("Delete Element");
 		popMenuItemDeleteGroup.addActionListener(editorController);
@@ -570,20 +588,32 @@ public class EditorView extends JFrame implements Observer{
 				   ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		
 		splitterPanel.add(diagramScroller);
-				
-//		diagramPanel.setPreferredSize(new Dimension(10000, 10000));
-		
-		/* TEST */
-		
-		
-		
-//		splitterPanel.add(diagramPanel);
 
 		
+//		System.out.println("diagramScroller.getVerticalScrollBar().getBlockIncrement(). "
+//		  +diagramScroller.getVerticalScrollBar().getBlockIncrement()
+//		  +"\ndiagramScroller.getVerticalScrollBar().getBlockIncrement(-1): "
+//		  +diagramScroller.getVerticalScrollBar().getBlockIncrement(-1));
+//		
+//		
+//		
+//		
+//		diagramScroller.getVerticalScrollBar().setBlockIncrement(
+//				diagramScroller.getVerticalScrollBar().getBlockIncrement()*2/3);
+//		diagramScroller.getHorizontalScrollBar().setBlockIncrement(
+//				diagramScroller.getHorizontalScrollBar().getBlockIncrement()*2/3);
+//		
+//
+//		
+//		System.out.println("diagramScroller.getVerticalScrollBar().getBlockIncrement(). "
+//		  +diagramScroller.getVerticalScrollBar().getBlockIncrement()
+//		  +"\ndiagramScroller.getVerticalScrollBar().getBlockIncrement(-1): "
+//		  +diagramScroller.getVerticalScrollBar().getBlockIncrement(-1));
 		
 		
 		
-//		frameRoot.add(splitterPanel);
+		/* TEST */
+				
 		add(splitterPanel);
 
 
@@ -1346,17 +1376,20 @@ public class EditorView extends JFrame implements Observer{
 		  
 		  //the feature must not be dragged beyond the borders of the diagram panel
 
-/*		  
 		  //checking horizontal borders
 		  if( newLocationX<0 ){
-			newLocationX=1;
-			normalUpdateX=false;
-			adjustedMoveX=newLocationX-element.getX();
+			Dimension diagramSize= diagramPanel.getPreferredSize();
+			enlargeX=-newLocationX;
+			diagramSize.width+=enlargeX;
+			diagramPanel.setPreferredSize(diagramSize);
+			diagramPanel.setSize(diagramSize);
+			shiftAllDraggablesButOneHorizontal(enlargeX, element);
+			newLocationX=0;
 		  }
-*/
 		  if( diagramPanel.getWidth()<=newLocationX+element.getWidth() ){
 			Dimension diagramSize= diagramPanel.getPreferredSize();
-			enlargeX=newLocationX+element.getWidth()-diagramPanel.getWidth()+20;
+			enlargeX=newLocationX+element.getWidth()-diagramPanel.getWidth();
+//			enlargeX=moveX+20;
 			diagramSize.width+=enlargeX;
 			diagramPanel.setPreferredSize(diagramSize);
 			diagramPanel.setSize(diagramSize);
@@ -1367,17 +1400,25 @@ public class EditorView extends JFrame implements Observer{
 //			normalUpdateX=false;
 //			adjustedMoveX=newLocationX-element.getX();
 		  }
-/*		  
 		  //checking vertical borders
+
 		  if( newLocationY<0 ){
-			newLocationY=1;
-			normalUpdateY=false;
-			adjustedMoveY=newLocationY-element.getY();
+			Dimension diagramSize= diagramPanel.getPreferredSize();
+			enlargeY=-newLocationY;
+			diagramSize.height+=enlargeY;
+			diagramPanel.setPreferredSize(diagramSize);
+			diagramPanel.setSize(diagramSize);
+			shiftAllDraggablesButOneVertical(enlargeY, element);
+			newLocationY=0;
+//			newLocationY=1;
+//			normalUpdateY=false;
+//			adjustedMoveY=newLocationY-element.getY();
 		  }
-*/
+
 		  if( diagramPanel.getHeight()<=newLocationY+element.getHeight() ){
 			Dimension diagramSize= diagramPanel.getPreferredSize();
-			enlargeY=newLocationY+element.getHeight()-diagramPanel.getHeight()+20;
+			enlargeY=newLocationY+element.getHeight()-diagramPanel.getHeight();
+//			enlargeY=moveY+20;
 			diagramSize.height+=enlargeY;
 			diagramPanel.setPreferredSize(diagramSize);
 			diagramPanel.setSize(diagramSize);
@@ -1397,8 +1438,8 @@ public class EditorView extends JFrame implements Observer{
 		  }
 		  /* ***DEBUG*** */
 		  
-		  lastPositionX=e.getX();
-		  lastPositionY=e.getY();
+		  if(newLocationX>0) lastPositionX=e.getX();
+		  if(newLocationY>0) lastPositionY=e.getY();
 		  
 //		  //adjusting last drag position depending on eventual border collisions
 //		  if(normalUpdateX) lastPositionX=e.getX();
@@ -1408,6 +1449,48 @@ public class EditorView extends JFrame implements Observer{
 //		  else lastPositionY=lastPositionY+adjustedMoveY;
 		  
 		  element.setLocation(newLocationX, newLocationY);
+	}
+
+	/**
+	 * Shifts horizontally the position of all draggables in the diagram panel.<br>
+	 * If element is not null and is a draggable, it is not shifted.
+	 * 
+	 * @param enlargeX - the amount of horizontal shift
+	 * @param element - the JComponent that must not be shifted
+	 */
+	private void shiftAllDraggablesButOneHorizontal(int enlargeX, JComponent element) {
+	  OrderedListNode tmp= visibleOrderDraggables.getFirst();
+	  Point location=null;
+	  while (tmp!=null){
+		if( !((JComponent)tmp.getElement()).equals(element) 
+		    && ((JComponent)tmp.getElement()).getParent().getName().startsWith(EditorView.diagramPanelName)){
+		  location=((JComponent)tmp.getElement()).getLocation();
+		  location.x+=enlargeX;
+		  ((JComponent)tmp.getElement()).setLocation(location);
+		}
+		tmp=tmp.getNext();
+	  }		
+	}
+
+	/**
+	 * Shifts vertically the position of all draggables in the diagram panel.<br>
+	 * If element is not null and is a draggable, it is not shifted.
+	 * 
+	 * @param enlargeY - the amount of vertical shift
+	 * @param element - the JComponent that must not be shifted
+	 */
+	private void shiftAllDraggablesButOneVertical(int enlargeY, JComponent element) {
+	  OrderedListNode tmp= visibleOrderDraggables.getFirst();
+	  Point location=null;
+	  while (tmp!=null){
+		if( !((JComponent)tmp.getElement()).equals(element) 
+			&& ((JComponent)tmp.getElement()).getParent().getName().startsWith(EditorView.diagramPanelName)){
+		  location=((JComponent)tmp.getElement()).getLocation();
+		  location.y+=enlargeY;
+		  ((JComponent)tmp.getElement()).setLocation(location);
+		}
+		tmp=tmp.getNext();
+	  }		
 	}
 
 	/**
@@ -1735,7 +1818,8 @@ public class EditorView extends JFrame implements Observer{
 		
 		FeaturePanel newFeature=getDraggableFeature(name,
 			toolDragPosition.x-(int)diagramPanel.getLocationOnScreen().getX(),
-			toolDragPosition.y-(int)diagramPanel.getLocationOnScreen().getY());
+			toolDragPosition.y-(int)diagramPanel.getLocationOnScreen().getY(), 
+			Color.CYAN);
 		
 
 		visibleOrderDraggables.addToTop(newFeature);
@@ -2121,8 +2205,8 @@ public class EditorView extends JFrame implements Observer{
 	 * @param y - y coordinate of the feature in the diagram panel
 	 * @return A new JPanel representing the feature
 	 */
-	private FeaturePanel getDraggableFeature(String name, int x, int y) {
-		return buildFeaturePanel(name, null, x, y);
+	private FeaturePanel getDraggableFeature(String name, int x, int y, Color color) {
+		return buildFeaturePanel(name, null, x, y, color);
 	}
 
 	/**
@@ -2134,54 +2218,121 @@ public class EditorView extends JFrame implements Observer{
 	 * @param y - y coordinate of the feature in the diagram panel
 	 * @return A new JPanel representing the feature
 	 */
-	private FeaturePanel buildFeaturePanel(String name, String containerName, int x, int y) {
+	private FeaturePanel buildFeaturePanel(String name, String containerName, int x, int y, Color color) {
 		int layer=-1;
-		JLabel imageLabel = null, textLabel = null;
-		ImageIcon newFeatureIcon = null;
-		
+//		JLabel imageLabel = null, textLabel = null;
+		JTextField textLabel=null;
+//		ImageIcon newFeatureIcon = null;
+
+/*		
 		//creating image		
 		newFeatureIcon=new ImageIcon(newFeatureIconURL);		
 		imageLabel = new JLabel(newFeatureIcon);
-		imageLabel.setBounds(0+featureBorderSize/2, +featureBorderSize/2,
+		imageLabel.setBounds(0+featureBorderS		//creating textize/2, +featureBorderSize/2,
 				newFeatureIcon.getIconWidth(), newFeatureIcon.getIconHeight());
 		imageLabel.setBackground(Color.BLACK);
 		imageLabel.setOpaque(true);
 		imageLabel.setVisible(true);
-
-		//creating text
-		textLabel=new JLabel(name, SwingConstants.CENTER);
-		textLabel.setForeground(Color.GRAY);
-		textLabel.setBackground(Color.BLACK);
-		textLabel.setBounds(0+featureBorderSize/2, newFeatureIcon.getIconHeight()+featureBorderSize/2,
-			newFeatureIcon.getIconWidth(), 25);
-		textLabel.setOpaque(true);
+*/
 		
-		FeaturePanel container = new FeaturePanel(splitterPanel);
-		container.setLabelName(name);
+		//creating text		
+		textLabel=new JTextField(name){
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public boolean contains(int x, int y){
+			  if(!isEditable()) return false;
+			  else return super.contains(x, y);
+			}
+//			@Override
+//			protected void processEvent(AWTEvent e){
+//			  ((Component)e.getSource()).dispatchEvent(e);
+//			  return;
+//			}
+		};
+
+//		textLabel.getInputMap().remove(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ENTER, 0));
+//		
+//		textLabel.getInputMap().put(KeyStroke.getKeyStroke(
+//				java.awt.event.KeyEvent.VK_ENTER, 0), "Change Feature Name");
+//		
+//		textLabel.getActionMap().put("Change Feature Name", new Action() {
+//			
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//			  System.out.println("You pressed Enter");
+//			  ((Component)e.getSource()).setEnabled(false);
+//			}
+//			
+//			@Override
+//			public Object getValue(String key) {return null;}
+//			@Override
+//			public void putValue(String key, Object value) { }
+//			@Override
+//			public void setEnabled(boolean b) {}
+//			@Override
+//			public boolean isEnabled() {return false;}
+//			@Override
+//			public void addPropertyChangeListener(PropertyChangeListener listener) {}
+//			@Override
+//			public void removePropertyChangeListener(PropertyChangeListener listener) {}
+//		});
+		   
+		textLabel.setBounds(featureBorderSize/2, featureBorderSize/2, 120, 60);
+		textLabel.setHorizontalAlignment(JTextField.CENTER);
+		textLabel.setOpaque(true);
+//		textLabel.setEnabled(false);
+		textLabel.setEditable(false);
+		textLabel.setFocusable(true);
+		textLabel.setName(textAreaNamePrefix);
+		
+		
+		//creating text
+//		textLabel=new JLabel(name, SwingConstants.CENTER);
+//		textLabel.setForeground(Color.GRAY);
+//		textLabel.setBackground(Color.BLACK);
+//		textLabel.setBounds(0+featureBorderSize/2, newFeatureIcon.getIconHeight()+featureBorderSize/2,
+//			newFeatureIcon.getIconWidth(), 25);
+//		textLabel.setOpaque(true);
+		
+//		FeaturePanel container = new FeaturePanel(splitterPanel);
+		FeaturePanel container = new FeaturePanel(textLabel);
+//		container.setLabelName(name);
 		if(containerName==null) container.setName(featureNamePrefix+featuresCount);
 		else container.setName(containerName);
 		container.setLayout(null);
-		container.setBounds(x,  y,  newFeatureIcon.getIconWidth()+featureBorderSize,
-			newFeatureIcon.getIconHeight()+25+featureBorderSize);
-
+//		container.setBounds(x,  y,  newFeatureIcon.getIconWidth()+featureBorderSize,
+//				newFeatureIcon.getIconHeight()+25+featureBorderSize);
+		container.setBounds(x,  y,  120+featureBorderSize,
+				60+featureBorderSize);
 		container.setOpaque(true);
-		container.setBackground(Color.DARK_GRAY);
-		  
+		
+		container.setBackground(color);
+//		container.setBackground(Color.DARK_GRAY);
+		
+		
+/*
 		//adding the image
 		layer=container.getComponentCount();
 		container.setLayer(imageLabel, layer);
 		container.add(imageLabel);
 		container.setComponentZOrder(imageLabel, layer);
-
+*/
 		//adding the text
 		layer=container.getComponentCount();
 		container.setLayer(textLabel, layer);
 		container.add(textLabel);
 		container.setComponentZOrder(textLabel, layer);
+		
 
 		/* ***DEBUG*** */
 		if(debug) System.out.println("container.getBounds(): "+container.getBounds());
 		/* ***DEBUG*** */
+
+//		textLabel.addMouseListener(editorController);
+//		textLabel.addMouseMotionListener(editorController);
+
 
 		return container;
 	}
@@ -2430,6 +2581,11 @@ public class EditorView extends JFrame implements Observer{
 		return popMenuItemDeleteFeature;
 	};
 	
+	/** Returns the 'Rename Feature' popup menu item */
+	public JMenuItem getPopMenuItemRenameFeature(){
+		return popMenuItemRenameFeature;
+	};	
+	
 	/** Returns the 'Delete Connector' popup menu item */
 	public JMenuItem getPopMenuItemDeleteConnector(){
 		return popMenuItemDeleteConnector;
@@ -2652,7 +2808,12 @@ public class EditorView extends JFrame implements Observer{
 	public void setFeatureToAddName(String name){
 	  featureToAddName=name;
 	}
-
+	
+	/** Sets the old name of the feature about to be renamed.*/
+	public void setOldFeatureName(String name){
+	  oldFeatureName=name;
+	}
+	
 	/** Returns the verticalShift of the diagram.*/
 	public int getVerticalShift(){
 	  return verticalShift;
@@ -2698,10 +2859,19 @@ public class EditorView extends JFrame implements Observer{
 		frameRoot.repaint();		
 	}
 
+	/**
+	 * Reverts to the old name the last renamed feature.
+	 */
+	private void undoRenameFeature() {
+	  ((FeaturePanel)popUpElement).getTextArea().setText(oldFeatureName);
+	}
+
 	@Override
 	public void update(Observable o, Object arg) {
 		System.out.println("Message received: "+arg);
 		if(arg.equals("New Feature Correctly Added")) addNewFeatureToDiagram();		
+		else if(arg.equals("Feature Renamed"));	
+		else if(arg.equals("Feature Not Renamed")) undoRenameFeature();	
 		else if(arg.equals("New Named Feature Correctly Added")) addNamedFeatureToDiagram();		
 		else if(arg.equals("Feature Deleted")) deleteFeature(popUpElement);
 		else if(arg.equals("Group Deleted")) deleteGroup(popUpElement);
@@ -3047,7 +3217,7 @@ public class EditorView extends JFrame implements Observer{
 		width=Integer.valueOf(featureData[3].substring(5, i));
 		height=Integer.valueOf(featureData[3].substring(i+1));
 		
-		FeaturePanel newFeature=buildFeaturePanel(featureName, containerName, x, y);
+		FeaturePanel newFeature=buildFeaturePanel(featureName, containerName, x, y, Color.CYAN);
 		newFeature.setSize(width, height);
 		
 		visibleOrderDraggables.addToTop(newFeature);

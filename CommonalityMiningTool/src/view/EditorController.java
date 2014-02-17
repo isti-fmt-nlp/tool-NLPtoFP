@@ -47,6 +47,9 @@ public class EditorController implements
 
 	/** Path where diagram files will be saved*/
 	private String diagramPath = null;		
+	
+	/** Old name of the feature about to be renamed*/
+	private String oldFeatureName=null;
 
 	/** Path where SXFM exported files will be saved*/
 	private String sxfmPath = null;		
@@ -164,17 +167,17 @@ public class EditorController implements
 		  case MouseEvent.BUTTON3: System.out.println("BUTTON3!"); break;		  
 		}
 
-		/* TEST */
-		if (e.getButton() == MouseEvent.BUTTON2) {
-		  System.out.println("Ma ci sono o no?");
-		  editorView.getDiagramPanel().setPreferredSize(new Dimension(10000, 10000));
-		  editorView.getDiagramPanel().setSize(new Dimension(10000, 10000));
-//		  editorView.getDiagramPanel().invalidate();
-//		  editorView.repaintRootFrame();
-//		  editorView.getDiagramPanel().validate();
-//		  editorView.getDiagramPanel().repaint();
-		}
-		/* TEST */
+//		/* TEST */
+//		if (e.getButton() == MouseEvent.BUTTON2) {
+//		  System.out.println("Ma ci sono o no?");
+//		  editorView.getDiagramPanel().setPreferredSize(new Dimension(10000, 10000));
+//		  editorView.getDiagramPanel().setSize(new Dimension(10000, 10000));
+////		  editorView.getDiagramPanel().invalidate();
+////		  editorView.repaintRootFrame();
+////		  editorView.getDiagramPanel().validate();
+////		  editorView.getDiagramPanel().repaint();
+//		}
+//		/* TEST */
 
 		if (e.getButton() == MouseEvent.BUTTON3) {//user asked for the popup menu
           Component comp=editorView.getDiagramPanel().getComponentAt(e.getX(), e.getY());
@@ -202,18 +205,23 @@ public class EditorController implements
 //        	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemDelete());
 //          }
 
+          //clicked on a connector
           if(popupElement.getName().startsWith(EditorView.startConnectorsNamePrefix)
         	 || popupElement.getName().startsWith(EditorView.endConnectorsNamePrefix)){
         	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemDeleteConnector());
           }
+          //clicked on an end feature
           if(popupElement.getName().startsWith(EditorView.endConnectorsNamePrefix)
 				  && ( ((AnchorPanel)popupElement).getOtherEnd().getName().startsWith(EditorView.altGroupNamePrefix)
 					   || ((AnchorPanel)popupElement).getOtherEnd().getName().startsWith(EditorView.orGroupNamePrefix) ) ){
 	    	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemUngroup());			  
 		  }
+          //clicked on a feature
           if(popupElement.getName().startsWith(EditorView.featureNamePrefix)){
         	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemDeleteFeature());
+        	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemRenameFeature());
           }
+          //clicked on a group
           if(popupElement.getName().startsWith(EditorView.altGroupNamePrefix)
         	 || popupElement.getName().startsWith(EditorView.orGroupNamePrefix)){
         	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemDeleteGroup());
@@ -259,8 +267,33 @@ public class EditorController implements
 	@Override
 	public void mousePressed(MouseEvent e) {
 	  //event originated from the diagram panel
+	  System.out.println("((Component)e.getSource()).getName(): "+((Component)e.getSource()).getName());
+	  System.out.println("e.getSource().getClass(): "+e.getSource().getClass());
       if( ((Component)e.getSource()).getName().startsWith(EditorView.diagramPanelName) ){
+//      if( ((Component)e.getSource()).getName().startsWith(EditorView.diagramPanelName) 
+//    	  || ((Component)e.getSource()).getName().startsWith(EditorView.textAreaNamePrefix) ){
 //	  if(containsPoint(editorView.getDiagramPanel(), e.getLocationOnScreen())){
+    	  
+    	  
+          
+      	//checking if a feature must be renamed
+      	if(oldFeatureName!=null){
+      		
+      	  JComponent popupElement=editorView.getPopUpElement();
+      	  editorView.setOldFeatureName(oldFeatureName);
+      	  
+      	  ((FeaturePanel)popupElement).getTextArea().setEditable(false);
+      	  ((FeaturePanel)popupElement).getTextArea().getCaret().setVisible(false);	  
+
+      	  String newFeatureName=((FeaturePanel)popupElement).getLabelName();
+      	  
+      	  editorModel.changeFeatureName(((FeaturePanel)popupElement).getID(), newFeatureName);
+      	  
+      	  oldFeatureName=null;
+      	  return;
+      	}    	  
+    	  
+    	  
 		int featurePanelX=0, featurePanelY=0;
 		FeaturePanel featurePanel=null;
 		JComponent otherEnd=null;
@@ -270,6 +303,7 @@ public class EditorController implements
 		OrderedListNode tmpNode=editorView.getVisibleOrderDraggables().getFirst();
 		while(tmpNode!=null){
 		  System.out.println("Testing for pressed element: "+((Component)tmpNode.getElement()).getName());
+		  System.out.println("e.getLocation: "+e.getX()+"."+e.getY()+" - elemtn: "+((Component)tmpNode.getElement()).getBounds());			  
 		  if (((Component)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY())){
 			System.out.println("Pressed point got by element: "+((Component)tmpNode.getElement()).getName());
 			editorView.setLastPositionX(e.getX());
@@ -521,25 +555,7 @@ public class EditorController implements
 	}
 
 	@Override
-	public void mouseEntered(MouseEvent e) {
-	  //event originated from the diagram panel
-	  if( ((Component)e.getSource()).getName()!=null &&
-		  ((Component)e.getSource()).getName().startsWith(EditorView.diagramPanelName) ) 
-
-	    /* ***DEBUG *** */
-	    if (debug2){
-		  OrderedListNode tmpNode=editorView.getVisibleOrderDraggables().getFirst();
-		  while(tmpNode!=null){
-		    if (((Component)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY())){
-			  System.out.println("Sei passato su "+((Component)tmpNode.getElement()).getName()+"!");
-			  return;
-		    }
-		    tmpNode=tmpNode.getNext();
-		  }
-	    }
-  	    /* ***DEBUG *** */
-
-	}
+	public void mouseEntered(MouseEvent e) {}
 
 	/**
 	 * Checks if the rectangle of comp contains the point location
@@ -655,6 +671,14 @@ public class EditorController implements
         }
         editorView.setPopUpElement(null);
       }
+	  //popup menu command: Rename Feature
+      else if(e.getActionCommand().equals("Rename Feature")){
+    	oldFeatureName=((FeaturePanel)popupElement).getLabelName();
+    	
+        System.out.println("Renaming: "+popupElement.getName()); 
+        ((FeaturePanel)popupElement).getTextArea().setEditable(true);
+        
+      }
 	  //popup menu command: Ungroup Element
       else if(e.getActionCommand().equals("Ungroup")){
         System.out.println("Ungrouping: "+popupElement.getName());
@@ -663,6 +687,7 @@ public class EditorController implements
     	editorView.ungroupAnchor((AnchorPanel)popupElement);
         editorView.repaintRootFrame();
       }
+	  //popup menu command: Print Model[DEBUG COMMAND]
       else if(e.getActionCommand().equals("Print Model[DEBUG COMMAND]")){
     	editorModel.printModel();
 //    	System.out.println("\n\nPRINTING TREES");
@@ -766,7 +791,7 @@ public class EditorController implements
 	 * it will be printed a number of times equals to 1+depth.
 	 */
 	private void treePrint(FeatureNode feature, String indent) {
-		System.out.println(indent+feature.getID());
+		System.out.println(indent+feature.getName()+"("+feature.getID()+")");
 		for(FeatureNode child : feature.getSubFeatures()) treePrint(child, indent+">");
 		for(GroupNode group : feature.getSubGroups()) 
 		  for(FeatureNode member : group.getMembers()) 

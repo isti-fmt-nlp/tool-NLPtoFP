@@ -531,6 +531,25 @@ public class EditorModel extends Observable{
 	  setChanged();
 	  notifyObservers("Group Deleted");		  
 	}
+
+	/**
+	 * Changes the name of a feature, if it is present in the model.
+	 * 
+	 * @param id - ID of the feature
+	 * @param newName - the new name of the feature
+	 */
+	public void changeFeatureName(String id, String newName){
+	  FeatureNode featurefound=unrootedFeatures.get(id);
+	  if (featurefound==null){
+		setChanged();
+		notifyObservers("Feature Not Renamed");		  
+	  }
+	  else{
+		featurefound.setName(newName);
+		setChanged();
+		notifyObservers("Feature Renamed");		
+	  }
+	}
 	
 	/**
 	 * Search for a feature node named name in the model.
@@ -591,12 +610,12 @@ public class EditorModel extends Observable{
 	  return false;	
 	}
 
-	/** Tells if the view has been modified since last save*/
+	/** Tells if the model has been modified since last save*/
 	public boolean getModified(){
 		return modified;
 	}
 
-	/** Sets the value of the modified field*/
+	/** Sets the model of the modified field*/
 	public void setModified(boolean mod){
 		modified=mod;
 	}
@@ -1179,7 +1198,7 @@ public class EditorModel extends Observable{
 	 * it will be printed a number of times equals to 1+depth.
 	 */
 	private void treePrint(FeatureNode feature, String indent) {
-		System.out.println(indent+feature.getID());
+		System.out.println(indent+feature.getName()+"("+feature.getID()+")");
 		for(FeatureNode child : feature.getSubFeatures()) treePrint(child, indent+">");
 		for(GroupNode group : feature.getSubGroups()) 
 		  for(FeatureNode member : group.getMembers()) 
