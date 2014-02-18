@@ -101,117 +101,112 @@ public class ModelProject extends Observable implements Runnable{
 	
 	private static boolean verbose3=true;//variabile usata per attivare stampe nel codice
 	
-	/** Thread: Attende la terminazione dei thread workerProject e calcala i commonalities candidates
-	 * 
+	/** 
+	 * Waits for threads workerProject to end their work, and computes commonalities candidates
 	 */
 	@Override
-	public void run() 
-	{
-		//variables used to calculate occurencies lists
-		String line=null;		//line read from an input file 
-		int charcount=0;		//starting position of a line in the file
-		int index=0;			//index of a possible relevant term occurence in line
+	public void run(){
+	  //variables used to calculate occurencies lists
+	  String line=null;		//line read from an input file 
+	  int charcount=0;		//starting position of a line in the file
+	  int index=0;			//index of a possible relevant term occurence in line
 		
+	  commonalitiesCandidates = new ArrayList <String> ();
 		
-		commonalitiesCandidates = new ArrayList <String> ();
-		
-		for(int i = 0; i < workerProject.size(); i++)
-		{
-			try 
-			{
-				/* ***VERBOSE****/
-				if (verbose){
-					System.out.println("ModelProject.run(): starting join with workerProject.get("+i+").");
-					System.out.flush();
-				}
-				/* ***VERBOSE****/
+	  for(int i = 0; i < workerProject.size(); i++){
+		try{
 
-				workerProject.get(i).join();
+		  /* ***VERBOSE****/
+		  if (verbose){
+			System.out.println("ModelProject.run(): starting join with workerProject.get("+i+").");
+			System.out.flush();
+		  }
+		  /* ***VERBOSE****/
 
-				/* ***VERBOSE****/
-				if (verbose){
-					System.out.println("ModelProject.run(): ended join with workerProject.get("+i+").");
-					System.out.flush();
-				/* ***VERBOSE****/
-				}
-			} 
-			catch (InterruptedException e) 
-			{
-				System.out.println("Exception Handler: " + e.getMessage());
-				return;
-			}	
-		}
+		  workerProject.get(i).join();
+
+		  /* ***VERBOSE****/
+		  if (verbose){
+			System.out.println("ModelProject.run(): ended join with workerProject.get("+i+").");
+			System.out.flush();
+		  }
+		  /* ***VERBOSE****/
+
+		} 
+		catch (InterruptedException e){
+		  System.out.println("Exception Handler: " + e.getMessage());
+		  return;
+		}	
+	  }
 		
-		//saving the positions in input files of relevant terms occurences 
-		relevantTerms=new HashMap<String, HashMap<String, ArrayList<Integer>>>();
-		for(int k=0; k<fileProject.size(); k++){//for each file
-		  BufferedReader reader = null;
-		  try {
-			reader = new BufferedReader(new FileReader(fileProject.get(k).readPathFileUTF8()));
-			charcount=0;
+	  //saving the positions in input files of relevant terms occurences 
+	  relevantTerms=new HashMap<String, HashMap<String, ArrayList<Integer>>>();
+	  for(int k=0; k<fileProject.size(); k++){//for each file
+		BufferedReader reader = null;
+		try {
+		  reader = new BufferedReader(new FileReader(fileProject.get(k).readPathFileUTF8()));
+		  charcount=0;
 			
-			while((line = reader.readLine()) != null){//for each line
-			  for(int h=0; h<fileProject.get(k).readTermRelevant().size(); h++){//for each relevant term
-				index=0;
-				while(index<line.length()){//for each occurrence
-				  //get next occurrence
-  				  index = line.toUpperCase().indexOf(fileProject.get(k).readTermRelevant().get(h).toUpperCase(), index);
+		  while((line = reader.readLine()) != null){//for each line
+			for(int h=0; h<fileProject.get(k).readTermRelevant().size(); h++){//for each relevant term
+			  index=0;
+			  while(index<line.length()){//for each occurrence
+				//get next occurrence
+				index = line.toUpperCase().indexOf(fileProject.get(k).readTermRelevant().get(h).toUpperCase(), index);
 
-  				  if (index == -1) break;//start checking next relevant term occurrences in this line
+				if (index == -1) break;//start checking next relevant term occurrences in this line
 
-  				  //add occurrence to relevantTerms, if it is valid
-//  				  if (isValidOccurrence(fileProject.get(k).readTermRelevant().get(h), line, index))
-				    addCharIndexToOccursList(fileProject.get(k).readTermRelevant().get(h),
-					  fileProject.get(k).readPathFileUTF8(), charcount+index);
-  				  
-  				  //incrementing index to search for next occurrence
-				  index+=fileProject.get(k).readTermRelevant().get(h).length();
-				}
+				//add occurrence to relevantTerms, if it is valid
+				//  				  if (isValidOccurrence(fileProject.get(k).readTermRelevant().get(h), line, index))
+				addCharIndexToOccursList(fileProject.get(k).readTermRelevant().get(h),
+						  fileProject.get(k).readPathFileUTF8(), charcount+index);
+
+				//incrementing index to search for next occurrence
+				index+=fileProject.get(k).readTermRelevant().get(h).length();
 			  }
-			  charcount+=line.length()+1;
-			  
 			}
-
-			reader.close();
-		  } catch (IOException e) {
+			charcount+=line.length()+1;
+		  }
+		  
+		  reader.close();
+		} catch (IOException e) {
 			e.printStackTrace();
-		  }	finally{
+		}	finally{
 			if (reader!=null) try {reader.close();}catch(Exception e){}
-		  }		
+		}		
 
-		}
+	  }
+
+	  //extracting communalities candidates from first input File
+	  for(int j = 0; j < fileProject.get(0).readTermRelevant().size(); j = j + 1)
+       	if(intersectTermRelevant(fileProject.get(0).readTermRelevant().get(j)))
+       		  commonalitiesCandidates.add(fileProject.get(0).readTermRelevant().get(j));
 		
+	  //removing duplicates among communalities candidates
+	  for(int i = 0; i < commonalitiesCandidates.size(); i++)
+		for(int j = i + 1; j < commonalitiesCandidates.size(); j++)
+		  if(commonalitiesCandidates.get(i).equals(commonalitiesCandidates.get(j)))
+			  	commonalitiesCandidates.remove(j);
 		
-		//extracting communalities candidates from first input File
-		for(int j = 0; j < fileProject.get(0).readTermRelevant().size(); j = j + 1)
-        	if(intersectTermRelevant(fileProject.get(0).readTermRelevant().get(j)))
-        		commonalitiesCandidates.add(fileProject.get(0).readTermRelevant().get(j));
-		
-		//removing duplicates among communalities candidates
-		for(int i = 0; i < commonalitiesCandidates.size(); i++)
-			for(int j = i + 1; j < commonalitiesCandidates.size(); j++)
-				if(commonalitiesCandidates.get(i).equals(commonalitiesCandidates.get(j)))
-					commonalitiesCandidates.remove(j);
-		
-		/* ***VERBOSE****/
-		if(verbose){
-		  System.out.println("Sono ModelProject.run(): inizio a stampare le occorrenze delle communalitiesCandidates");
-		  for(String comm: commonalitiesCandidates){
-			System.out.println("***["+comm+"]***");
-			for(ModelFile file: fileProject){
-			  if (relevantTerms.get(comm)!=null && relevantTerms.get(comm).get(file.readPathFileUTF8())!=null){
-				System.out.println("----File: "+file.readPathFileUTF8());
-				for(int lineNum: relevantTerms.get(comm).get(file.readPathFileUTF8())){
-				  System.out.println("\tline: "+lineNum);
-				}
+	  /* ***VERBOSE****/
+	  if(verbose){
+		System.out.println("Sono ModelProject.run(): inizio a stampare le occorrenze delle communalitiesCandidates");
+		for(String comm: commonalitiesCandidates){
+		  System.out.println("***["+comm+"]***");
+		  for(ModelFile file: fileProject){
+			if (relevantTerms.get(comm)!=null && relevantTerms.get(comm).get(file.readPathFileUTF8())!=null){
+			  System.out.println("----File: "+file.readPathFileUTF8());
+			  for(int lineNum: relevantTerms.get(comm).get(file.readPathFileUTF8())){
+				System.out.println("\tline: "+lineNum);
 			  }
 			}
 		  }
 		}
-		/* ***VERBOSE****/
+	  }
+	  /* ***VERBOSE****/
 		
-		setChanged();
-		notifyObservers("End Extract Commonalities");
+	  setChanged();
+	  notifyObservers("End Extract Commonalities");
 	}
 	
 	/**
@@ -338,8 +333,7 @@ public class ModelProject extends Observable implements Runnable{
 	 * @return al ArrayList contenenti i nomi dei file del progetto
 	 */
 	public ArrayList <String> loadProject(String s){
-		if(s == null)
-			return null;
+		if(s == null) return null;
 
 		parserXML = new ParserXML();
 		
@@ -536,7 +530,12 @@ public class ModelProject extends Observable implements Runnable{
 			//a new file name has been found
 			if(tokens[i].compareTo("f:")==0){ 
 			  occurrences=new ArrayList<Integer>();
+			  
 			  ++i; fileName=tokens[i]; ++i;
+			  while(tokens[i].compareTo("i:")!=0){
+				fileName+=" "+tokens[i]; ++i;
+			  }
+			  
 			  if(verbose3) System.out.println("\tTrovato file: "+fileName);
 			  if(tokens[i].compareTo("i:")!=0){
 				  if(verbose3) System.out.println("Uncorrect format for relevant terms file");
@@ -623,25 +622,20 @@ public class ModelProject extends Observable implements Runnable{
 
 	}
 	
-	/** Analizza il progetto
-	 * 
+	/**
+	 * Analizes project input files.
 	 */
-	public void analyzesFileProject()
-	{
-		for(int i = 0; i < fileProject.size(); i++)
-		{
-			if(workerProject.get(i).getState() != Thread.State.TERMINATED)
-				workerProject.get(i).start();
-			
-			else
-			{
-				workerProject.set(i, new Thread(fileProject.get(i)));
-				workerProject.get(i).start();
-			}
+	public void analizesFileProject(){
+	  for(int i = 0; i < fileProject.size(); i++){
+		if(workerProject.get(i).getState() != Thread.State.TERMINATED) workerProject.get(i).start();
+		else{
+		  workerProject.set(i, new Thread(fileProject.get(i)));
+		  workerProject.get(i).start();
 		}
+	  }
 		
-		handlerProject = new Thread(this);
-		handlerProject.start();
+	  handlerProject = new Thread(this);
+	  handlerProject.start();
 	}
 	
 	/**
@@ -673,45 +667,38 @@ public class ModelProject extends Observable implements Runnable{
 
 	}
 
-	public ArrayList <String> loadAnalysisFileProject()
-	{
-		ArrayList <String> al = new ArrayList <String> ();
-		
-		for(int i = 0; i < fileProject.size(); i++)
-		{
-			if(new File(fileProject.get(i).readPathFileUTF8()).exists())
-			{
-				if(workerProject.get(i).getState() != Thread.State.TERMINATED)
-				{
-					workerProject.get(i).start();
-					al.add(String.valueOf(i));
-					try 
-					{
-						workerProject.get(i).join();
-					} 
-					catch (InterruptedException e) 
-					{
-						System.out.println("Exception loadAnalysisFileProject: " + e.getMessage());
-					}
-				}
-				
-				else
-				{
-					workerProject.set(i, new Thread(fileProject.get(i)));
-					workerProject.get(i).start();
-					al.add(String.valueOf(i));
-					try 
-					{
-						workerProject.get(i).join();
-					} 
-					catch (InterruptedException e) 
-					{
-						System.out.println("Exception loadAnalysisFileProject: " + e.getMessage());
-					}
-				}
+
+	
+	/**
+	 * Loads the analisys files of the project.
+	 */
+	public ArrayList <String> loadAnalysisFileProject(){
+	  ArrayList <String> al = new ArrayList <String> ();
+
+	  for(int i = 0; i < fileProject.size(); i++){
+		if(new File(fileProject.get(i).readPathFileUTF8()).exists()){
+		  if(workerProject.get(i).getState() != Thread.State.TERMINATED){
+			workerProject.get(i).start();
+			al.add(String.valueOf(i));
+			try{
+			  workerProject.get(i).join();
+			}catch (InterruptedException e){
+			  System.out.println("Exception loadAnalysisFileProject: " + e.getMessage());
 			}
+		  }
+		  else{
+			workerProject.set(i, new Thread(fileProject.get(i)));
+			workerProject.get(i).start();
+			al.add(String.valueOf(i));
+			try{
+			  workerProject.get(i).join();
+			}catch (InterruptedException e){
+			  System.out.println("Exception loadAnalysisFileProject: " + e.getMessage());
+			}
+		  }
 		}
-		return al;
+	  }
+	  return al;
 	}
 	
 	/** Aggiunge un elemento al progetto
@@ -727,26 +714,29 @@ public class ModelProject extends Observable implements Runnable{
 		stateProject[1] = true;
 	}
 	
-	/** Rimuove un elemento dal progetto
+	/**
+	 * Removes an input file from the project.
 	 * 
-	 * @param i indice del file
+	 * @param i - index of the file
 	 */
-	public void removeFileProject(int i)
-	{
-		if(fileProject.get(i).readPathFileUTF8() != null)
-			new File(fileProject.get(i).readPathFileUTF8()).delete();
+	public void removeFileProject(int i){
+	  File logFile =null;
+	  if(fileProject.get(i).readPathFileUTF8() != null)
+		  new File(fileProject.get(i).readPathFileUTF8()).delete();
 		
-		if(fileProject.get(i).readPathFileHTML() != null)
-			for(int j = 0; j < fileProject.get(i).readPathFileHTML().size(); j++)
-				new File(fileProject.get(i).readPathFileHTML().get(j)).delete();
-		
-		if(new File((fileProject.get(i).readPathFileUTF8().substring(0, fileProject.get(i).readPathFileUTF8().length()-4)) + ".log").exists())
-			new File((fileProject.get(i).readPathFileUTF8().substring(0, fileProject.get(i).readPathFileUTF8().length()-4)) + ".log").delete();
-		
-		fileProject.remove(i);
-		workerProject.remove(i);
-//		stateProject[1] = false;
-		stateProject[1] = true;
+	  if(fileProject.get(i).readPathFileHTML() != null)
+		  for(int j = 0; j < fileProject.get(i).readPathFileHTML().size(); j++)
+			  new File(fileProject.get(i).readPathFileHTML().get(j)).delete();
+
+	  logFile=new File(
+		(fileProject.get(i).readPathFileUTF8().substring(0, fileProject.get(i).readPathFileUTF8().length()-4)) + ".log");
+	  
+	  if(logFile.exists()) logFile.delete();
+
+	  fileProject.remove(i);
+	  workerProject.remove(i);
+//	  stateProject[1] = false;
+	  stateProject[1] = true;
 	}
 	
 	/* -= FUNZIONI lettura parametri =- */
@@ -855,7 +845,8 @@ public class ModelProject extends Observable implements Runnable{
 		return pathVariabilitiesSelectedHTML;
 	}
 
-	/** Create the HTML file containing the selected features
+	/** 
+	 * Create the HTML file containing the selected features
 	 * 
 	 * @param al - ArrayList containing the selected features
 	 * @param type - type of the selected features, a constant from ViewPanelCentral.FeatureType

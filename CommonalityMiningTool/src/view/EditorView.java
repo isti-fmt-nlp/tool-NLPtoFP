@@ -500,8 +500,6 @@ public class EditorView extends JFrame implements Observer{
 		}
 
 		//creating diagram panel, which will fit the rest of the root frame
-		float[] myColorHBS=Color.RGBtoHSB(0, 0, 0, null);
-//		float[] myColorHBS=Color.RGBtoHSB(150, 150, 190, null);
 		diagramPanel = new JLayeredPane(){
 
 		  private static final long serialVersionUID = 1L;
@@ -522,7 +520,8 @@ public class EditorView extends JFrame implements Observer{
 //		diagramPanel = new OrderedListPaintJPanel(visibleOrderDraggables);
 //		diagramPanel.setPaintList(visibleOrderDraggables);
 //		diagramPanel = new JPanel();
-		diagramPanel.setBackground(Color.getHSBColor(myColorHBS[0], myColorHBS[1], myColorHBS[2]));
+//		diagramPanel.setBackground(Color.getHSBColor(myColorHBS[0], myColorHBS[1], myColorHBS[2]));
+//		diagramPanel.setOpaque(true);
 		diagramPanel.setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width-160,
 		Toolkit.getDefaultToolkit().getScreenSize().height));
 		diagramPanel.setLayout(null);		
@@ -2308,10 +2307,22 @@ public class EditorView extends JFrame implements Observer{
 				60+featureBorderSize);
 		container.setOpaque(true);
 		
-		container.setBackground(color);
-//		container.setBackground(Color.DARK_GRAY);
 		
+		/* TEST */
+//		float[] myColorHBS=Color.RGBtoHSB(255, 0, 0, null);
+//		float[] myColorHBS=Color.RGBtoHSB(0, 255, 0, null);
+//		float[] myColorHBS=Color.RGBtoHSB(0, 0, 255, null);
+//		float[] myColorHBS=Color.RGBtoHSB(128, 128, 0, null);
+//		float[] myColorHBS=Color.RGBtoHSB(128, 0, 128, null);
+		float[] myColorHBS=Color.RGBtoHSB(200, 200, 200, null);
+////		float[] myColorHBS=Color.RGBtoHSB(150, 150, 190, null);
+		container.setBackground(Color.getHSBColor(myColorHBS[0], myColorHBS[1], myColorHBS[2]));
+
+
 		
+		/* TEST */
+//		container.setBackground(color);
+
 /*
 		//adding the image
 		layer=container.getComponentCount();
@@ -3206,16 +3217,25 @@ public class EditorView extends JFrame implements Observer{
 		//getting data of this feature
 		featureData=feature.split(" ");
 
+		//getting feature name
 		featureName=featureData[0].substring(5);
-		containerName=featureData[1].substring(9);
+		for(int k=1; k<featureData.length-3; ++k) featureName+=" "+featureData[k];
 
-		for (i=4; i<featureData[2].length(); ++i) if (featureData[2].charAt(i)=='.') break;
-		x=Integer.valueOf(featureData[2].substring(4, i));
-		y=Integer.valueOf(featureData[2].substring(i+1));
+		//getting feature ID
+		containerName=featureData[featureData.length-3].substring(9);
 
-		for (i=5; i<featureData[3].length(); ++i) if (featureData[3].charAt(i)=='.') break;
-		width=Integer.valueOf(featureData[3].substring(5, i));
-		height=Integer.valueOf(featureData[3].substring(i+1));
+		//getting feature location in the diagram
+		for (i=4; i<featureData[featureData.length-2].length(); ++i)
+			if (featureData[featureData.length-2].charAt(i)=='.') break;
+
+		x=Integer.valueOf(featureData[featureData.length-2].substring(4, i));
+		y=Integer.valueOf(featureData[featureData.length-2].substring(i+1));
+
+		for (i=5; i<featureData[featureData.length-1].length(); ++i) 
+		    if (featureData[featureData.length-1].charAt(i)=='.') break;
+		
+		width=Integer.valueOf(featureData[featureData.length-1].substring(5, i));
+		height=Integer.valueOf(featureData[featureData.length-1].substring(i+1));
 		
 		FeaturePanel newFeature=buildFeaturePanel(featureName, containerName, x, y, Color.CYAN);
 		newFeature.setSize(width, height);

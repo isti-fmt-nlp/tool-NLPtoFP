@@ -276,6 +276,12 @@ public class ViewPanelCentral{
 	{
 		ArrayList <String> al = new ArrayList <String> ();
 		
+		
+		/* COLOR ASSOCIATION TO BE IMPLEMENTED ON THE BASIS OF DOCUMENT PHRASES*/
+		//must be added " featureColor" to each string
+		/* COLOR ASSOCIATION TO BE IMPLEMENTED ON THE BASIS OF DOCUMENT PHRASES*/
+		
+		
 		for(int i = 0; i < checkBoxFeatures.size(); i++)
 			if(checkBoxFeatures.get(i).isSelected())
 				al.add(checkBoxFeatures.get(i).getText());
@@ -543,7 +549,7 @@ public class ViewPanelCentral{
 	 * @param alFeaturesCand - ArrayList containing le commonalities candidates
 	 * @param alFeaturesSel - ArrayList containing le commonalities selected
 	 * @param alFeaturesToHighlight - if not null, the terms in alFeaturesToHighlight will be highlighted 
-	 * @param fType 
+	 * @param fType - a FeatureType constant representing the type of features
 	 * @return the JPanel created
 	 */
 	private JScrollPane getTabFeaturesCandidates(ArrayList <String> alFeaturesCand, ArrayList <String> alFeaturesSel,
@@ -555,7 +561,8 @@ public class ViewPanelCentral{
 		
 //		ImageIcon icon = new ImageIcon(getClass().getResource("/Search/magnifier glasses-min2.png"));
 //		ImageIcon icon = new ImageIcon(getClass().getResource("/Search/magnifier glasses-min3.png"));
-		ImageIcon icon = new ImageIcon(getClass().getResource("/Search/magnifier glasses-min3.png"));
+		ImageIcon iconSearch = new ImageIcon(getClass().getResource("/Search/magnifier glasses-min3.png"));
+		ImageIcon iconNoSearch = new ImageIcon(getClass().getResource("/Search/magnifier glasses_NO_SEARCH.png"));
 		JLabel iconLabel = null;
 
 //		JButton fileSearchButton = null;
@@ -579,88 +586,63 @@ public class ViewPanelCentral{
 		
 
 		if(alFeaturesSel == null){//there are no Features Selected
-			for(int i = 0; i < alFeaturesCand.size(); i++){
-				//each entry has a panel with a JCheckBox and an icon button inside
-				checkBoxTmp=new JCheckBox(alFeaturesCand.get(i));
-				checkBoxTmp.setSelected(true);
+		  for(int i = 0; i < alFeaturesCand.size(); i++){
+			//each entry has a panel with a JCheckBox and an icon button inside
+			checkBoxTmp=new JCheckBox(alFeaturesCand.get(i));
+			checkBoxTmp.setSelected(false);
 
-//				fileSearchButton = new JButton(icon);
-//				fileSearchButton.setBackground(Color.WHITE);
-//				fileSearchButton.setOpaque(false);
-//				fileSearchButton.setSize(icon.getIconWidth(), icon.getIconHeight());
-				
-				iconLabel = new JLabel(icon);
-				iconLabel.setOpaque(false);
-				
-				checkBoxIconPanelTmp = new JPanel();
-				checkBoxIconPanelTmp.setLayout(new BoxLayout(checkBoxIconPanelTmp, BoxLayout.X_AXIS));
-				checkBoxIconPanelTmp.add(checkBoxTmp);
-//				checkBoxIconPanelTmp.add(fileSearchButton);
+			iconLabel = new JLabel(iconSearch);
+			iconLabel.setOpaque(false);
 
-				checkBoxIconPanelTmp.add(iconLabel);
-				
-				iconLabel.addMouseListener(getTermSearchIconListener("Extracted", alFeaturesCand.get(i), alFeaturesToHighlight));
+			checkBoxIconPanelTmp = new JPanel();
+			checkBoxIconPanelTmp.setLayout(new BoxLayout(checkBoxIconPanelTmp, BoxLayout.X_AXIS));
+			checkBoxIconPanelTmp.add(checkBoxTmp);
 
-//				fileSearchButton.addActionListener(getTermSearchButtonListener("Extracted", alFeaturesCand.get(i),
-//							alFeaturesToHighlight));
+			checkBoxIconPanelTmp.add(iconLabel);
 
-				checkBoxFeatures.add(checkBoxTmp);	panelFeatures.add(checkBoxIconPanelTmp);
-			}
+			iconLabel.addMouseListener(getTermSearchIconListener("Extracted", alFeaturesCand.get(i), alFeaturesToHighlight));
+
+			checkBoxFeatures.add(checkBoxTmp);	panelFeatures.add(checkBoxIconPanelTmp);
+		  }
 		}
 		else{//there are some Features Selected
-			for(int i = 0; i < alFeaturesCand.size(); i++){//adding Features Extracted
-				checkBoxTmp=new JCheckBox(alFeaturesCand.get(i));
-				if(alFeaturesSel.contains(alFeaturesCand.get(i))) checkBoxTmp.setSelected(true);
-				else checkBoxTmp.setSelected(false);
+		  for(int i = 0; i < alFeaturesCand.size(); i++){//adding Features Extracted
+			checkBoxTmp=new JCheckBox(alFeaturesCand.get(i));
+			if(alFeaturesSel.contains(alFeaturesCand.get(i))) checkBoxTmp.setSelected(true);
+			else checkBoxTmp.setSelected(false);
 
-//				fileSearchButton = new JButton(icon);
-//				fileSearchButton.setBackground(Color.WHITE);
-//				fileSearchButton.setSize(icon.getIconWidth(), icon.getIconHeight());
+			iconLabel = new JLabel(iconSearch);
+			iconLabel.setOpaque(false);
 
-				iconLabel = new JLabel(icon);
-				iconLabel.setOpaque(false);
-				
-				checkBoxIconPanelTmp = new JPanel();
-				checkBoxIconPanelTmp.setLayout(new BoxLayout(checkBoxIconPanelTmp, BoxLayout.X_AXIS));
-				checkBoxIconPanelTmp.add(checkBoxTmp);
-//				checkBoxIconPanelTmp.add(fileSearchButton);
-				
-				checkBoxIconPanelTmp.add(iconLabel);
-				
-				iconLabel.addMouseListener(getTermSearchIconListener("Extracted", alFeaturesCand.get(i), alFeaturesToHighlight));
+			checkBoxIconPanelTmp = new JPanel();
+			checkBoxIconPanelTmp.setLayout(new BoxLayout(checkBoxIconPanelTmp, BoxLayout.X_AXIS));
+			checkBoxIconPanelTmp.add(checkBoxTmp);
 
-//				fileSearchButton.addActionListener(getTermSearchButtonListener("Extracted", alFeaturesCand.get(i),
-//							alFeaturesToHighlight));
-				checkBoxFeatures.add(checkBoxTmp); panelFeatures.add(checkBoxIconPanelTmp);
+			checkBoxIconPanelTmp.add(iconLabel);
+
+			iconLabel.addMouseListener(getTermSearchIconListener("Extracted", alFeaturesCand.get(i), alFeaturesToHighlight));
+			checkBoxFeatures.add(checkBoxTmp); panelFeatures.add(checkBoxIconPanelTmp);
+		  }
+
+		  for(int i = 0; i < alFeaturesSel.size(); i++){//adding Features typed
+			if(!alFeaturesCand.contains(alFeaturesSel.get(i))){
+			  checkBoxTmp=new JCheckBox(alFeaturesSel.get(i));
+			  checkBoxTmp.setSelected(true);
+			  checkBoxTmp.setForeground(Color.RED);
+
+			  iconLabel = new JLabel(iconNoSearch);
+			  iconLabel.setOpaque(false);
+
+			  checkBoxIconPanelTmp = new JPanel();
+			  checkBoxIconPanelTmp.setLayout(new BoxLayout(checkBoxIconPanelTmp, BoxLayout.X_AXIS));
+			  checkBoxIconPanelTmp.add(checkBoxTmp);
+
+			  checkBoxIconPanelTmp.add(iconLabel);
+
+//			  iconLabel.addMouseListener(getTermSearchIconListener("Extracted", alFeaturesSel.get(i), alFeaturesToHighlight));
+			  checkBoxFeatures.add(checkBoxTmp); panelFeatures.add(checkBoxIconPanelTmp);
 			}
-			
-			for(int i = 0; i < alFeaturesSel.size(); i++){//adding Features typed
-				if(!alFeaturesCand.contains(alFeaturesSel.get(i))){
-					checkBoxTmp=new JCheckBox(alFeaturesSel.get(i));
-					checkBoxTmp.setSelected(true);
-					checkBoxTmp.setForeground(Color.RED);
-
-//					fileSearchButton = new JButton(icon);
-//					fileSearchButton.setBackground(Color.WHITE);
-//					fileSearchButton.setSize(icon.getIconWidth(), icon.getIconHeight());
-
-					iconLabel = new JLabel(icon);
-					iconLabel.setOpaque(false);
-					
-					checkBoxIconPanelTmp = new JPanel();
-					checkBoxIconPanelTmp.setLayout(new BoxLayout(checkBoxIconPanelTmp, BoxLayout.X_AXIS));
-					checkBoxIconPanelTmp.add(checkBoxTmp);
-//					checkBoxIconPanelTmp.add(fileSearchButton);
-					
-					checkBoxIconPanelTmp.add(iconLabel);
-					
-					iconLabel.addMouseListener(getTermSearchIconListener("Extracted", alFeaturesCand.get(i), alFeaturesToHighlight));
-
-//					fileSearchButton.addActionListener(getTermSearchButtonListener("Inserted",
-//							alFeaturesSel.get(i), alFeaturesToHighlight));
-					checkBoxFeatures.add(checkBoxTmp); panelFeatures.add(checkBoxIconPanelTmp);
-				}
-			}
+		  }
 		}
 		
 		JScrollPane jsp = new JScrollPane(panelFeatures, 

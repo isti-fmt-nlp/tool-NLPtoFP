@@ -87,13 +87,14 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 	  else if(ae.getActionCommand().equals("Delete Selected File")){
 			int i = -1;
 			
-			if((i = viewProject.deleteSelectedFileDialog()) != 1)
+			if((i = viewProject.deleteSelectedFileDialog()) != -1)
 				modelProject.removeFileProject(i);
+//			System.out.println("i="+i);
 	  }
 	  else if(ae.getActionCommand().equals("Delete File")){
 			int i = -1;
 			
-			if((i = viewProject.deleteFileDialog()) != 1){
+			if((i = viewProject.deleteFileDialog()) != -1){
 
 				/* ***VERBOSE *** */
 				if(verbose) System.out.println("Ho ricevuto i="+i);

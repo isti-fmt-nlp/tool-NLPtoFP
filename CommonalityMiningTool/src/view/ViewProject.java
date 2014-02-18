@@ -432,20 +432,22 @@ public class ViewProject implements Observer, Runnable{
 //	            return;
 //			}		    
 		}
-		else if(o.equals("End Commonalities Selected"))
-		{
+		else if(o.equals("End Commonalities Selected")){
 			panelCentralProject.refreshTabFeaturesSelected(
 				modelProject.readPathCommonalitiesSelectedHTML(), ViewPanelCentral.FeatureType.COMMONALITIES);
 			frameProject.remove(panelCentralProject.getPanelAnalysis());
 			frameProject.add(panelCentralProject.getPanelAnalysis());	
 		}
-		else if(o.equals("End Variabilities Selected"))
-		{
+		else if(o.equals("End Variabilities Selected")){
 			panelCentralProject.refreshTabFeaturesSelected(
 				modelProject.readPathVariabilitiesSelectedHTML(), ViewPanelCentral.FeatureType.VARIABILITIES);
 			frameProject.remove(panelCentralProject.getPanelAnalysis());
 			frameProject.add(panelCentralProject.getPanelAnalysis());	
 		}
+		else if(o.equals("Input File Deleted")){
+//			if (panelLateralProject.getAnalysisLeafTree().size())
+		}
+		
 		frameProject.repaint(); 	
 	}
 	
@@ -544,8 +546,7 @@ public class ViewProject implements Observer, Runnable{
 	    d.setDirectory("../"+savedProjectsDir);
 	    d.setVisible(true);
 	    
-	    if(d.getFile() == null)
-	    	return null;
+	    if(d.getFile() == null) return null;
 	    
 	//	    if(!buttonProjectEC.isEnabled())
 	//    		buttonProjectEC.setEnabled(true);
@@ -649,31 +650,26 @@ public class ViewProject implements Observer, Runnable{
 	 *  
 	 * @return i - the index of the deleted file
 	 */
-	public int deleteSelectedFileDialog()
-	{
-		JFrame f = new JFrame("Delete File");
+	public int deleteSelectedFileDialog(){
+	  JFrame f = new JFrame("Delete File");
 		
-    	Object[] options = {"No","Yes"};			
+	  Object[] options = {"No","Yes"};			
 		
-		int i = JOptionPane.showOptionDialog(
-				f, "Do you want delete the file?", "Delete File", JOptionPane.OK_OPTION, JOptionPane.NO_OPTION, null, options, options[1]);
-		
-		if(i == 1)
-		{
-			if((i = panelLateralProject.deleteSelectedInputNode()) != -1)
-			{
-				if(panelLateralProject.getAnalysisLeafTree().size() == 0){
-//				  buttonProjectEC.setEnabled(false);
-					
-				  //activating menu items
-				  menuFilesDelete.setEnabled(false);
-				  menuFeaturesExtractComm.setEnabled(false);
-				}
+	  int i = JOptionPane.showOptionDialog(f, "Do you want delete the file?", "Delete File",
+			  			JOptionPane.OK_OPTION, JOptionPane.NO_OPTION, null, options, options[1]);
 
-			}
-			return i;
-		}	
-		return -1;
+	  if(i == 1){
+		if((i = panelLateralProject.deleteSelectedInputNode()) != -1){
+		  if(panelLateralProject.getAnalysisLeafTree().size() == 0){
+			  //				  buttonProjectEC.setEnabled(false);
+			  //activating menu items
+			  menuFilesDelete.setEnabled(false);
+			  menuFeaturesExtractComm.setEnabled(false);
+		  }
+		}
+		return i;
+	  }	
+	  return -1;
 	}
 
 	/** 
@@ -700,6 +696,7 @@ public class ViewProject implements Observer, Runnable{
 		
 //    buttonProjectEC.setEnabled(false);
 
+		if(i==-1) return -1;
 		deleted=panelLateralProject.deleteSpecifiedInputNode(i);
 		if(deleted){
 		  if(panelLateralProject.getAnalysisLeafTree().size() == 0){
@@ -727,7 +724,7 @@ public class ViewProject implements Observer, Runnable{
 		if(i == 1)
 		{
 			frameProject.setEnabled(false);
-			modelProject.analyzesFileProject();
+			modelProject.analizesFileProject();
 			setStateThrobber(false);
 			throbber = new Thread(this);
 			throbber.start();
@@ -807,6 +804,10 @@ public class ViewProject implements Observer, Runnable{
     	menuProjectSave.setEnabled(true);
     	
     	menuFilesLoad.setEnabled(true);
+    	if (panelLateralProject.getAnalysisLeafTree().size()>0){
+    	  menuFilesDelete.setEnabled(true);
+    	  menuFeaturesExtractComm.setEnabled(true);
+    	}
     	
     	frameProject.add(panelLateralProject.getPanelTree());	    	
     	frameProject.repaint();   
@@ -847,11 +848,10 @@ public class ViewProject implements Observer, Runnable{
 		}
 	}
 
-	/** Mostra le features selezionate
-	 * 
+	/** 
+	 * Shows the selected features.
 	 */
-	public void showFeaturesSelected(ViewPanelCentral.FeatureType type)
-	{
+	public void showFeaturesSelected(ViewPanelCentral.FeatureType type){
 		modelProject.setFeaturesSelected(panelCentralProject.getSelectedFeatures(), type);
 	}
 	

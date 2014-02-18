@@ -134,18 +134,15 @@ public class ModelParserUTF8
 	 * 
 	 * @return s stringa con codifica UTF-8
 	 */
-	private String encodeFileToStringUTF8()
-	{
+	private String encodeFileToStringUTF8(){
 		File f = new File(pathFile);
 	    
 	    String s = "";
 	    
-	    if(pathFile.substring(pathFile.length() - 4, pathFile.length()).equals(".pdf"))
-	    {
+	    if(pathFile.substring(pathFile.length() - 4, pathFile.length()).equals(".pdf")){
 	        PDFParser pp = null;
 			
-	        try
-	        {
+	        try{
 	            /* 
 	               Estrae il contenuto del file pdf con codifica UTF-8
 	            */
@@ -155,22 +152,17 @@ public class ModelParserUTF8
 	            s = new String(
 	            		new PDFTextStripper().getText(
 	            			new PDDocument(pp.getDocument())).getBytes(),"UTF-8");
-	        }
-	        catch (FileNotFoundException e)
-	        {
+
+	        }catch (FileNotFoundException e){
 	            System.out.println("Exception encodeFileToStringUTF8: " + e.getMessage());
 	            return null;
-	        }
-	        catch (IOException e)
-	        {
+	        }catch (IOException e){
 	            System.out.println("Exception encodeFileToStringUTF8: " + e.getMessage());
 	            return null;
 	        }
 	    }
-	    else
-	    {
-	    	try 
-	    	{
+	    else{
+	      try{
 	    		String s1, s2 = "";
 	    		
 				BufferedReader reader =
