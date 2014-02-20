@@ -693,8 +693,6 @@ public class ViewProject implements Observer, Runnable{
 		/* ***VERBOSE*** */
 		if(verbose)System.out.println("Scelta fatta: "+i);
 		/* ***VERBOSE*** */
-		
-//    buttonProjectEC.setEnabled(false);
 
 		if(i==-1) return -1;
 		deleted=panelLateralProject.deleteSpecifiedInputNode(i);
@@ -709,20 +707,18 @@ public class ViewProject implements Observer, Runnable{
 		else return -1;
 	}
 	
-	/** Estrae le Commonalities
-	 * 
+	/** 
+	 * Extracts the commonalities from input files.
 	 */
-	public void extractCommonalitiesdDialog()
-	{
+	public void extractCommonalitiesDialog(){
 		JFrame f = new JFrame("Extract Commonalities");
 		
     	Object[] options = {"No","Yes"};			
 		
-		int i = JOptionPane.showOptionDialog(
-				f, "Do you want extract commonalities from the file?", "Extract Commonalities", JOptionPane.OK_OPTION, JOptionPane.NO_OPTION, null, options, options[1]);
+		int i = JOptionPane.showOptionDialog(f, "Do you want extract commonalities from the file?",
+			"Extract Commonalities", JOptionPane.OK_OPTION, JOptionPane.NO_OPTION, null, options, options[1]);
 		
-		if(i == 1)
-		{
+		if(i == 1){
 			frameProject.setEnabled(false);
 			modelProject.analizesFileProject();
 			setStateThrobber(false);
@@ -734,19 +730,16 @@ public class ViewProject implements Observer, Runnable{
 	
 	/** 
 	 * Extract variabilities from input files.
-	 * 
 	 */
-	public void extractVariabilitiesDialog()
-	{
+	public void extractVariabilitiesDialog(){
 		JFrame f = new JFrame("Extract Variabilities");
 		
     	Object[] options = {"No","Yes"};			
 		
-		int i = JOptionPane.showOptionDialog(
-				f, "Do you want extract variabilities from the file?", "Extract Variabilities", JOptionPane.OK_OPTION, JOptionPane.NO_OPTION, null, options, options[1]);
+		int i = JOptionPane.showOptionDialog(f, "Do you want extract variabilities from the file?",
+			"Extract Variabilities", JOptionPane.OK_OPTION, JOptionPane.NO_OPTION, null, options, options[1]);
 		
-		if(i == 1)
-		{
+		if(i == 1){
 			frameProject.setEnabled(false);
 			modelProject.extractVariabilities();
 			setStateThrobber(false);
@@ -756,14 +749,13 @@ public class ViewProject implements Observer, Runnable{
 		}
 	}
 	
-	/** Mostra l'errore commesso dall'utente
+	/** 
+	 * Shows a frame with text, to display the user error
 	 * 
-	 * @param s stringa contenente l'errore commesso dall'utente
+	 * @param s - String representing the user error
 	 */
-	public void errorDialog(String s)
-	{
-		JFrame f = new JFrame("Error");
-		
+	public void errorDialog(String s){
+		JFrame f = new JFrame("Error");		
     	Object[] options = {"OK"};			
 		
 		JOptionPane.showOptionDialog(

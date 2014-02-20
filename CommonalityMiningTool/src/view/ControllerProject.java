@@ -105,7 +105,7 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 			}
 	  }
 	  else if(ae.getActionCommand().equals("Extract Commonalities")){
-			viewProject.extractCommonalitiesdDialog();
+			viewProject.extractCommonalitiesDialog();
 	  }
 	  else if(ae.getActionCommand().equals("Extract Variabilities")){
 			viewProject.extractVariabilitiesDialog();

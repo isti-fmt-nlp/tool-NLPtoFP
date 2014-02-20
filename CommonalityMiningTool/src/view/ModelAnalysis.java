@@ -36,18 +36,24 @@ public class ModelAnalysis extends ModelParserUTF8
 //    									http://www.ilc.cnr.it/dylanlab/apps/texttools/?tt_lang=it&tt_tmid=tm_sentencesplitter
 //										http://www.ilc.cnr.it/dylanlab/apps/texttools/?tt_lang=it&tt_tmid=tm_sentencesplitter&tt_jid=1390844913949403_it
 
-	public final String URL_ANALYSIS = "http://www.ilc.cnr.it/dylanlab/apps/texttools/?tt_user=guest"; //---TRY1
+	public static final String URL_ANALYSIS = "http://www.ilc.cnr.it/dylanlab/apps/texttools/?tt_user=guest"; //---TRY1
 	
-	public final String URL_SENTENCE_SPLITTER_PART = "&tt_tmid=tm_sentencesplitter";
-	public final String URL_PARSER_PART = "&tt_tmid=tm_parser";
-	public final String URL_TOKENIZER_PART = "&tt_tmid=tm_tokenizer";
+	public static final String URL_SENTENCE_SPLITTER_PART = "&tt_tmid=tm_sentencesplitter";
+	public static final String URL_PARSER_PART = "&tt_tmid=tm_parser";
+	public static final String URL_TOKENIZER_PART = "&tt_tmid=tm_tokenizer";
 
 	//currently a work in progress
 	public final String URL_TERM_EXTRACTOR_PART = "&tt_tmid=tm_term_extractor";
 	
+	public static final String SENTENCE_PREFIX="*** + + SENTENCE#";
+	public static final String SENTENCE_SUFFIX=" + + ***" + "\n";
+	
 	
 	/** ArrayList containing the relevant tems of input file */
 	private ArrayList <String> termRelevant = null;
+
+	/** Contains a terms set for each sentence of the input file */
+	private ArrayList<ArrayList<String>> termsInSentencesSet=null;
 	
 	/** ArrayList containing the paths to html analysis result files.*/
     private ArrayList <String> pathPageHTML = null;
@@ -211,19 +217,42 @@ public class ModelAnalysis extends ModelParserUTF8
 	 * 
 	 * @return the ArrayList<String> containing the paths
 	 */
-	public ArrayList <String> readPathFileHTML()
-	{
+	public ArrayList <String> readPathFileHTML(){
 		return pathPageHTML;
 	}
 	
 	/**
-	 * Returns an ArrayList<String> containing the relevant terms to html analysis result files.
+	 * Returns a String representing the path to the file containing the relevant terms sets, <br>
+	 * one set per sentence in the input file.
+	 * 
+	 * @return - a String representing the path to the file containing the relevant terms sets
+	 */
+	public String readPathFileSets(){
+		return readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + "SETS.log";
+	}
+	/**
+	 * Returns an ArrayList<String> containing the relevant terms extracted from html analysis result files.
 	 * 
 	 * @return the ArrayList<String> containing the paths
 	 */
-	public ArrayList<String> readTermRelevant()
-	{
+	public ArrayList<String> readTermRelevant(){
 		return termRelevant;
+	}
+	
+	/**
+	 * Returns an ArrayList<ArrayList<String>> containing the sets of relevant terms, one per sentence.
+	 * 
+	 * @return the ArrayList<String> containing the paths
+	 */
+	public ArrayList<ArrayList<String>> getTermsInSentencesSet(){
+		return termsInSentencesSet;
+	}
+	
+	/**
+	 * Sets an ArrayList<ArrayList<String>> containing the sets of relevant terms, one per sentence.
+	 */
+	public void setTermsInSentencesSet(ArrayList<ArrayList<String>> termsInSentencesSet){
+		this.termsInSentencesSet=termsInSentencesSet;
 	}
 	
 	/* -= FUNZIONI Ausiliarie =- */
@@ -470,18 +499,32 @@ public class ModelAnalysis extends ModelParserUTF8
         
         //extracting relevant terms
         extracted=extractTerms2(f);
-        if(!extracted) return false;        
+        if(!extracted) return false;   
         
+      
         try{
             Collections.sort(termRelevant);
-            
+            //saving relevant terms on file
             PrintWriter writer =
-                    new PrintWriter(
-                    		new BufferedWriter(
-                    				new FileWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + ".log")));
+                new PrintWriter(
+                    new BufferedWriter(
+                    	new FileWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + ".log")));
 
             for(int j = 0; j< termRelevant.size(); j++)
             	writer.print(termRelevant.get(j) + "\n");
+
+            writer.close();
+            
+            //saving relevant terms sets, one per sentence, on file
+            writer =
+            	new PrintWriter(
+            		new BufferedWriter(
+            			new FileWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + "SETS.log")));
+
+            for(int j = 0; j< termsInSentencesSet.size(); j++){
+              writer.print(SENTENCE_PREFIX+j+SENTENCE_SUFFIX);
+              for(String term : termsInSentencesSet.get(j)) writer.print(term + "\n");
+            }
 
             writer.close();
 
@@ -580,6 +623,14 @@ public class ModelAnalysis extends ModelParserUTF8
 	 * @return - true if extraction was successful, false otherwise
 	 */
 	private boolean extractTerms2(File f){
+		int startSidIndex=0, endSidIndex=0;
+		termsInSentencesSet = new ArrayList<ArrayList<String>>();
+		String sid=null, term=null; 
+		ArrayList<String> termSet = new ArrayList<String>();
+		
+		/* TRY TO ADD SENTENCE SET CONSTRUCTION HERE*/
+
+		/* TRY TO ADD SENTENCE SET CONSTRUCTION HERE*/
 		
 		String html="", s1=null;
 		int startIndex=0, endIndex=0;
@@ -602,29 +653,56 @@ public class ModelAnalysis extends ModelParserUTF8
             //getting start index of a term
             for(int i=0; i<3; ++i){
               startIndex=html.indexOf("<td", startIndex+1);
-              if(startIndex==-1) return true;
+              if(startIndex==-1){
+            	termsInSentencesSet.add(termSet);
+            	return true;
+              }
             }
             startIndex=html.indexOf(">", startIndex);
-            if(startIndex==-1) return true;
+            if(startIndex==-1){
+              termsInSentencesSet.add(termSet);
+              return true;
+            }
             else startIndex+=1;
 
             //at each change of SID, we must skip 2 more <td> tags
             if(html.startsWith("<b>", startIndex)){
+            	
+              //changing the sentence set
+              startSidIndex=startIndex+3;
+              endSidIndex=html.indexOf("<", startSidIndex);
+              sid=html.substring(startSidIndex, endSidIndex);
+              System.out.println("Found a SID: "+sid);
+              termsInSentencesSet.add(termSet);
+              termSet= new ArrayList<String>();
+              
               for(int i=0; i<2; ++i){
                 startIndex=html.indexOf("<td", startIndex+1);
-                if(startIndex==-1) return true;
+                if(startIndex==-1){
+                  termsInSentencesSet.add(termSet);
+                  return true;
+                }
               }
               startIndex=html.indexOf(">", startIndex);
-              if(startIndex==-1) return true;
+              if(startIndex==-1){
+              	termsInSentencesSet.add(termSet);
+              	return true;
+              }
               else startIndex+=1;
             }
             
             //getting end index of a term
             endIndex=html.indexOf("</td>", startIndex);
-            if(endIndex==-1) return true;
+            if(endIndex==-1){
+              termsInSentencesSet.add(termSet);
+              return true;
+            }
             
-            System.out.println("Extracted term: "+html.substring(startIndex, endIndex));
-            if(!termRelevant.contains(html.substring(startIndex, endIndex))) termRelevant.add(html.substring(startIndex, endIndex));
+            //adding relevant term
+            term=html.substring(startIndex, endIndex);
+            System.out.println("Extracted term: "+term);
+            if(!termRelevant.contains(term)) termRelevant.add(term);
+            termSet.add(term);
           }
 
         }catch(Exception e){
@@ -632,8 +710,9 @@ public class ModelAnalysis extends ModelParserUTF8
             e.printStackTrace();
             return false;
         }
-        
-		return true;
+
+        termsInSentencesSet.add(termSet);
+        return true;
 	}
 
 }

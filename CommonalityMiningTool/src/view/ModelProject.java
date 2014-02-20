@@ -71,11 +71,12 @@ public class ModelProject extends Observable implements Runnable{
 	/* Stringa contenente il percorso della pagina HTML delle variabilities selected */
 	private String pathVariabilitiesSelectedHTML = null;
 	
-	/*(MANUEL M.) insieme dei termini rilevanti, ad ognuno corrisponde una lista di file di input
-	 e ad ogni file corrisponde una lista di indici di caratteri, le occorrenze del termine*/
 	/** Relevant terms set. For each, there is a corresponding input file names list, and for each file
 	 * there is a corresponding list of integers, the indexes of term occurrence in that file*/
 	private HashMap<String, HashMap<String, ArrayList<Integer>>> relevantTerms=null;
+
+	/** Contains a terms set for each sentence of all input files */
+	private ArrayList<ArrayList<String>> termsInSentencesSet=null;
 	
 	/** String representing the path of variabilities selected HTML page*/
 	private String pathRelevantTerms = null;
@@ -98,21 +99,26 @@ public class ModelProject extends Observable implements Runnable{
 	private static boolean verbose=false;//variabile usata per attivare stampe nel codice
 	
 	private static boolean verbose2=false;//variabile usata per attivare stampe nel codice
-	
+
 	private static boolean verbose3=true;//variabile usata per attivare stampe nel codice
 	
 	/** 
 	 * Waits for threads workerProject to end their work, and computes commonalities candidates
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void run(){
 	  //variables used to calculate occurencies lists
-	  String line=null;		//line read from an input file 
-	  int charcount=0;		//starting position of a line in the file
-	  int index=0;			//index of a possible relevant term occurence in line
+	  /** line read from an input file */
+	  String line=null;							//line read from an input file 	  
+	  int charcount=0;							//starting position of a line in the file
+	  int index=0;								//index of a possible relevant term occurence in line
+
+	  //variables used to calculate terms color
+//	  ArrayList<ArrayList<String>> termsInSentencesSet=null;//contains a terms set for each sentence of all input files
 		
 	  commonalitiesCandidates = new ArrayList <String> ();
-		
+
 	  for(int i = 0; i < workerProject.size(); i++){
 		try{
 
@@ -146,7 +152,6 @@ public class ModelProject extends Observable implements Runnable{
 		try {
 		  reader = new BufferedReader(new FileReader(fileProject.get(k).readPathFileUTF8()));
 		  charcount=0;
-			
 		  while((line = reader.readLine()) != null){//for each line
 			for(int h=0; h<fileProject.get(k).readTermRelevant().size(); h++){//for each relevant term
 			  index=0;
@@ -174,9 +179,34 @@ public class ModelProject extends Observable implements Runnable{
 		}	finally{
 			if (reader!=null) try {reader.close();}catch(Exception e){}
 		}		
-
 	  }
+	  
+	  //calculating relevant terms colors
 
+	  /* ***DEBUG*** */
+	  for(int k=0; k<fileProject.size(); k++){//for each file
+	    termsInSentencesSet=fileProject.get(k).getTermsInSentencesSet();
+	    System.out.println("\n***Printing all sentences sets for file "+fileProject.get(k).readPathFile()+":\n");
+	    for(int i=0; i<termsInSentencesSet.size(); ++i){
+		  System.out.println("Set#"+i+":\n");
+		  for(String relTerm: termsInSentencesSet.get(i)) System.out.println(relTerm);
+	    }
+	  }
+      /* ***DEBUG*** */  
+
+
+	  //creating a global set, containing a set of terms for each sentence in all input files
+	  termsInSentencesSet=new ArrayList<ArrayList<String>>();
+	  for(ModelFile model: fileProject ) 
+		for(ArrayList<String> set : model.getTermsInSentencesSet()) 
+		  termsInSentencesSet.add(set);
+	  
+
+	  System.out.println("\n\nNumero totale di insiemi: "+termsInSentencesSet.size());
+	  System.out.println("Radice cubica: "+Math.pow(termsInSentencesSet.size(), 1.0/3));
+	  
+	  
+	  
 	  //extracting communalities candidates from first input File
 	  for(int j = 0; j < fileProject.get(0).readTermRelevant().size(); j = j + 1)
        	if(intersectTermRelevant(fileProject.get(0).readTermRelevant().get(j)))
@@ -204,7 +234,8 @@ public class ModelProject extends Observable implements Runnable{
 		}
 	  }
 	  /* ***VERBOSE****/
-		
+	  
+	  
 	  setChanged();
 	  notifyObservers("End Extract Commonalities");
 	}
@@ -381,7 +412,8 @@ public class ModelProject extends Observable implements Runnable{
 			loadFeaturesList(variabilitiesCandidates, pathVariabilitiesCandidates);
 			loadFeaturesList(variabilitiesSelected, pathVariabilitiesSelected);
 			
-			if(!loadProjectRelevantTerms()) System.out.println("Project files corrupted!");
+			if(!loadProjectRelevantTerms()) System.out.println("Relevant terms files corrupted!");
+			if(!loadProjectTermsInSentencesSets()) System.out.println("Sets of terms files corrupted!");
             
 			return parserXML.readNameFile();
 		} 
@@ -449,8 +481,10 @@ public class ModelProject extends Observable implements Runnable{
 			//saving selected feature lists on html tables	
 			saveSelectedFeaturesHTML(commonalitiesSelected, pathCommonalitiesSelectedHTML, "Commonalities Selected");
 			saveSelectedFeaturesHTML(variabilitiesSelected, pathVariabilitiesSelectedHTML, "Variabilities Selected");			
-
+			//saving occurrences of relevant terms
 			saveProjectRelevantTerms();
+//			//saving sets of relevant terms, one per sentence from all input files
+//			saveProjectRelevantTerms();
 
 			stateProject[0] = false;
 			stateProject[1] = false;
@@ -502,6 +536,7 @@ public class ModelProject extends Observable implements Runnable{
 	/**
 	 * Loads occurrences of relevant terms for every input files from a file, one term per line.
 	 * 
+	 * @return - true if successful, false otherwise
 	 * @throws IOException
 	 */
 	private boolean loadProjectRelevantTerms() throws IOException {
@@ -522,10 +557,16 @@ public class ModelProject extends Observable implements Runnable{
 		while( (s1 = br1.readLine()) != null ){
 		  fileMap=new HashMap<String, ArrayList<Integer>>();
 		  tokens=s1.split(" ");
-		  System.out.println("Stampo i tokens!");
-		  if(verbose3) for(String str:tokens) System.out.println(str);
-		  termName=tokens[0];
-		  if(verbose3) System.out.println("Trovato termine: "+termName);
+		  
+		  /* ***VERBOSE*** */
+		  if(verbose3){
+			System.out.println("Stampo i tokens!");
+			for(String str:tokens) System.out.println(str);
+			termName=tokens[0];
+			System.out.println("Trovato termine: "+termName);
+		  }
+		  /* ***VERBOSE*** */
+
 		  for(int i=1;i<tokens.length; ++i){
 			//a new file name has been found
 			if(tokens[i].compareTo("f:")==0){ 
@@ -561,6 +602,60 @@ public class ModelProject extends Observable implements Runnable{
 		br1.close();
 		return true;
 	}	
+
+	/**
+	 * Loads the sets of relevant terms for each sentence of the input file of a model from a file, for all models.
+	 * 
+	 * @return - true if successful, false otherwise
+	 * @throws IOException
+	 */
+	private boolean loadProjectTermsInSentencesSets() throws IOException {
+		BufferedReader br1 =null;
+		String s1=null;		
+
+		ArrayList<ArrayList<String>> termsSetsSet=null;
+		ArrayList<String> termSet=null;
+
+		try{
+		  for(ModelFile model : fileProject){
+ 			br1 = new BufferedReader(new FileReader(model.readPathFileSets()));						  
+ 			termSet=null;
+ 			termsSetsSet=new ArrayList<ArrayList<String>>();
+ 			
+ 			while( (s1 = br1.readLine()) != null ){
+ 			  if(s1.startsWith(ModelFile.SENTENCE_PREFIX)){
+ 				//a new sentence is starting, adding termSet general set for this model
+ 				if(termSet!=null) termsSetsSet.add(termSet);
+ 				termSet=new ArrayList<String>();
+ 			  }
+ 			  else termSet.add(s1);
+ 			  
+ 			  /* ***VERBOSE*** */
+ 			  if(verbose3) System.out.println("loadProjectTermsInSentencesSets() - Ho letto: "+s1);
+ 			  /* ***VERBOSE*** */
+ 			  
+ 			}
+ 			//adding last termSet to general set for this model
+ 			if(termSet!=null) termsSetsSet.add(termSet);
+ 			
+ 			//adding terms sets to the model
+ 			model.setTermsInSentencesSet(termsSetsSet);
+ 			br1.close();
+		  }
+		  
+		  //creating a global set, containing a set of terms for each sentence in all input files
+		  termsInSentencesSet=new ArrayList<ArrayList<String>>();
+		  for(ModelFile model : fileProject)
+			for(ArrayList<String> set : model.getTermsInSentencesSet())
+			  termsInSentencesSet.add(set);
+		  
+		}catch(FileNotFoundException e){ 
+		  e.printStackTrace();
+		  return true;
+		}
+		
+		return false;
+	}
 
 	/**
 	 * Stores a list of features in a file, one per line.
