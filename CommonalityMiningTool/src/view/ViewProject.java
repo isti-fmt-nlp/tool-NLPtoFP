@@ -830,7 +830,7 @@ public class ViewProject implements Observer, Runnable{
 				lastButtonSelectionEnd=buttonVariabilitiesSelectionEnd;
 				panelCentralProject.createTabFeatures( modelProject.readPathHTMLTermRelevantFile(), 
 				  modelProject.readVariabilitiesCandidates(), modelProject.readVariabilitiesSelected(),
-				  modelProject.readPathCommonalitiesSelectedHTML(), modelProject.getRelevantTerms(), 
+				  modelProject.readPathVariabilitiesSelectedHTML(), modelProject.getRelevantTerms(), 
 				  ViewPanelCentral.FeatureType.VARIABILITIES, modelProject.readCommonalitiesCandidates(), lastButtonSelectionEnd);
 			}
 

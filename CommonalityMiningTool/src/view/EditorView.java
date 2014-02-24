@@ -57,7 +57,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Stack;
@@ -275,6 +277,9 @@ public class EditorView extends JFrame implements Observer{
 	private ArrayList<String> startingCommonalities=new ArrayList<String>();
 	/** List of starting commonalities and variabilities selected by the user */
 	private ArrayList<String> startingVariabilities=new ArrayList<String>();
+
+	/** Contains the color for all starting features*/
+	private HashMap<String, int[]> termsColor=null;
 	
 	/** OrderedList containing the panels children of the diagram panel*/
 	private OrderedList visibleOrderDraggables = null;
@@ -339,9 +344,17 @@ public class EditorView extends JFrame implements Observer{
 	public EditorView(){}
 	
 	public EditorView(ArrayList<String> commonalitiesSelected,
-			   		  ArrayList<String> variabilitiesSelected) {
+			   		  ArrayList<String> variabilitiesSelected,
+			   		  HashMap<String, int[]> colorsMap) {
 	  for(String name : commonalitiesSelected) startingCommonalities.add(name);
 	  for(String name : variabilitiesSelected) startingVariabilities.add(name);
+
+	  this.termsColor = new HashMap<String, int[]>();
+	  
+	  for(String name : commonalitiesSelected) 
+		/*if(startingCommonalities.contains(name))*/ this.termsColor.put(name, colorsMap.get(name));
+	  for(String name : variabilitiesSelected)
+	  	/*if(startingVariabilities.contains(name))*/ this.termsColor.put(name, colorsMap.get(name));
 	}
 
 	/**
@@ -499,7 +512,7 @@ public class EditorView extends JFrame implements Observer{
 		  toolsPanel.add(iconTmpPanel);
 		}
 
-		//creating diagram panel, which will fit the rest of the root frame
+		//creating diagram panel, that will be inserted in the scroller
 		diagramPanel = new JLayeredPane(){
 
 		  private static final long serialVersionUID = 1L;
@@ -1799,40 +1812,46 @@ public class EditorView extends JFrame implements Observer{
 	 * @param name - the name of the new feature
 	 */
 	private void addFeatureToDiagram(String name) {
-		//the new feature must be dropped on the diagram panel for it to be added
-		if( diagramPanel.getLocationOnScreen().getX()>toolDragPosition.x ||
-			diagramPanel.getLocationOnScreen().getX()+diagramPanel.getWidth()<=toolDragPosition.x ||
-			diagramPanel.getLocationOnScreen().getY()>toolDragPosition.y ||
-			diagramPanel.getLocationOnScreen().getX()+diagramPanel.getHeight()<=toolDragPosition.y ){
+	  Color featureColor=null;
+	  
+	  
+	  //the new feature must be dropped on the diagram panel for it to be added
+	  if( diagramPanel.getLocationOnScreen().getX()>toolDragPosition.x ||
+		  diagramPanel.getLocationOnScreen().getX()+diagramPanel.getWidth()<=toolDragPosition.x ||
+		  diagramPanel.getLocationOnScreen().getY()>toolDragPosition.y ||
+		  diagramPanel.getLocationOnScreen().getX()+diagramPanel.getHeight()<=toolDragPosition.y ){
 			
-			cancelToolDrag();
-
-			/* ***DEBUG*** */
-			if(debug4) System.out.println("Cannot drop a new feature on tools panel.");
-			/* ***DEBUG*** */
-			return;
-		}
-
-		if (name==null) name=featureNamePrefix+featuresCount;
-		
-		FeaturePanel newFeature=getDraggableFeature(name,
-			toolDragPosition.x-(int)diagramPanel.getLocationOnScreen().getX(),
-			toolDragPosition.y-(int)diagramPanel.getLocationOnScreen().getY(), 
-			Color.CYAN);
-		
-
-		visibleOrderDraggables.addToTop(newFeature);
-		diagramPanel.setLayer(newFeature, 0);
-		diagramPanel.add(newFeature);
-		diagramPanel.setComponentZOrder(newFeature, 0);
 		cancelToolDrag();
 
 		/* ***DEBUG*** */
-		if(debug) System.out.println("Actual location of the new Feature: ("+newFeature.getLocationOnScreen()
-		  +"\ndiagramPanel.getLocationOnScreen(): ("+diagramPanel.getLocationOnScreen());
+		if(debug4) System.out.println("Cannot drop a new feature on tools panel.");
 		/* ***DEBUG*** */
+		return;
+	  }
 
-		++featuresCount;
+	  if (name==null){
+		name=featureNamePrefix+featuresCount;
+		featureColor=Color.BLACK;
+	  }
+	  else featureColor = getNewColor(termsColor.get(name));		
+		
+	  FeaturePanel newFeature=getDraggableFeature(name,
+		toolDragPosition.x-(int)diagramPanel.getLocationOnScreen().getX(),
+		toolDragPosition.y-(int)diagramPanel.getLocationOnScreen().getY(), 
+		featureColor);
+
+	  visibleOrderDraggables.addToTop(newFeature);
+	  diagramPanel.setLayer(newFeature, 0);
+	  diagramPanel.add(newFeature);
+	  diagramPanel.setComponentZOrder(newFeature, 0);
+	  cancelToolDrag();
+
+	  /* ***DEBUG*** */
+	  if(debug) System.out.println("Actual location of the new Feature: ("+newFeature.getLocationOnScreen()
+			  +"\ndiagramPanel.getLocationOnScreen(): ("+diagramPanel.getLocationOnScreen());
+	  /* ***DEBUG*** */
+
+	  ++featuresCount;
 	}
 
 	/**
@@ -2215,6 +2234,7 @@ public class EditorView extends JFrame implements Observer{
 	 * @param containerName - the name of the FeaturePanel object
 	 * @param x - x coordinate of the feature in the diagram panel
 	 * @param y - y coordinate of the feature in the diagram panel
+	 * @param color - the background color of the FeaturePanel object 
 	 * @return A new JPanel representing the feature
 	 */
 	private FeaturePanel buildFeaturePanel(String name, String containerName, int x, int y, Color color) {
@@ -2306,22 +2326,8 @@ public class EditorView extends JFrame implements Observer{
 		container.setBounds(x,  y,  120+featureBorderSize,
 				60+featureBorderSize);
 		container.setOpaque(true);
-		
-		
-		/* TEST */
-//		float[] myColorHBS=Color.RGBtoHSB(255, 0, 0, null);
-//		float[] myColorHBS=Color.RGBtoHSB(0, 255, 0, null);
-//		float[] myColorHBS=Color.RGBtoHSB(0, 0, 255, null);
-//		float[] myColorHBS=Color.RGBtoHSB(128, 128, 0, null);
-//		float[] myColorHBS=Color.RGBtoHSB(128, 0, 128, null);
-		float[] myColorHBS=Color.RGBtoHSB(200, 200, 200, null);
-////		float[] myColorHBS=Color.RGBtoHSB(150, 150, 190, null);
-		container.setBackground(Color.getHSBColor(myColorHBS[0], myColorHBS[1], myColorHBS[2]));
-
-
-		
-		/* TEST */
-//		container.setBackground(color);
+		System.out.println("Color of the new feature is: "+color.toString());
+		container.setBackground(color);
 
 /*
 		//adding the image
@@ -2566,6 +2572,22 @@ public class EditorView extends JFrame implements Observer{
         if (anchor.getName().startsWith(startConnectorsNamePrefix)) startConnectorDots.remove(anchor);
         
 	}
+
+	/**
+	 * Return a new Color, created using rgb parameters values.
+	 * 
+	 * @param RGBValues - an int[] containing color RGB values in order: red in position 0, green in pos. 1, blue in pos. 2.
+	 * @return - the new Color object required
+	 */
+	private Color getNewColor(int[] RGBValues) {
+		if(RGBValues==null) return Color.BLACK;
+		float[] colorHBS=null;
+		Color featureColor=null;
+		colorHBS=Color.RGBtoHSB(RGBValues[0], RGBValues[1], RGBValues[2], null);		
+		featureColor=Color.getHSBColor(colorHBS[0], colorHBS[1], colorHBS[2]);
+		return featureColor;
+	}
+	
 
 	/** Returns the popup menu for all diagram panel elements*/
 	public JPopupMenu getDiagramElementsMenu(){
@@ -3040,21 +3062,33 @@ public class EditorView extends JFrame implements Observer{
 		AnchorPanel endTmp=null;
 		String startOwner=null;
 		String endOwner=null;
+		Iterator<Entry<String, int[]>> colorIter = null;
+		Entry<String, int[]> colorEntry=null;
+		int[] color=null;
+		
+		//saving diagram graphic elements data
 		String savePath = pathProject + "/" + s + "_DiagView.xml"; 
 
 		xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 			  +"<Diagram name=\"" + s + "\">"
 				+"<features>";
 		
-		System.out.println("***Printing draggables in reverse order before save***\n");
+		/* ***DEBUG*** */
+		if(debug) System.out.println("***Printing draggables in reverse order before save***\n");
+		/* ***DEBUG*** */
+
 		tmp = visibleOrderDraggables.getLast();
 		while(tmp!=null){
 		  if(((JComponent)tmp.getElement()).getName().startsWith(featureNamePrefix)){
 			featTmp = (FeaturePanel)tmp.getElement();
-			System.out.println("Adding element: "+featTmp.getID());
+
+			/* ***DEBUG*** */
+			if(debug) System.out.println("Adding element: "+featTmp.getID());
+			/* ***DEBUG*** */
+
 			xml+="Name="+featTmp.getLabelName()+" ContName="+featTmp.getID()
-			    +" Loc="+featTmp.getX()+"."+featTmp.getY()
-			    +" Size="+featTmp.getWidth()+"."+featTmp.getHeight()+"\n";
+			   +" Loc="+featTmp.getX()+"."+featTmp.getY()
+			   +" Size="+featTmp.getWidth()+"."+featTmp.getHeight()+"\n";
 		  }
 		  tmp=tmp.getPrev();
 		}
@@ -3133,6 +3167,16 @@ public class EditorView extends JFrame implements Observer{
 		}		
 
 		xml+=	 "</startingVariabilities>"
+				+"<featureColors>";
+
+		colorIter = termsColor.entrySet().iterator();
+		while(colorIter.hasNext()){
+		  colorEntry=colorIter.next();
+		  color=colorEntry.getValue();
+		  xml+=colorEntry.getKey()+"\t"+color[0]+"-"+color[1]+"-"+color[2]+"\n";
+		}
+		
+		xml+=	 "</featureColors>"
 			  +"</Diagram>";
 		
 		//saving xml string on file
@@ -3147,17 +3191,38 @@ public class EditorView extends JFrame implements Observer{
 			
 		} 
 		catch (IOException e){
-			System.out.println("Exception saveDiagram: " + e.getMessage());
-			e.printStackTrace();
-			return null;
+		  System.out.println("Exception saveDiagram for save file "+savePath+" : " + e.getMessage());
+		  e.printStackTrace();
+		  return null;
 		}
+		
+//		//saving colors-features association on file
+//		savePath = pathProject + "/" + s + "_ColorsView.log"; 
+//		try{
+//		  PrintWriter pw1 = new PrintWriter(new BufferedWriter(new FileWriter(savePath)));
+//		  colorIter = termsColor.entrySet().iterator();
+//		  while(colorIter.hasNext()){
+//			colorEntry=colorIter.next();
+//			color=colorEntry.getValue();
+//			xml=colorEntry.getKey()+"\t"+color[0]+"."+color[1]+"."+color[2];
+//			pw1.println(xml);
+//		  }			
+//		  pw1.close();
+//			
+//		}catch(IOException e){
+//		  System.out.println("Exception saveDiagram for save file "+savePath+" : " + e.getMessage());
+//		  e.printStackTrace();
+//		  return null;
+//		}
+
+		
 		return savePath;
 	}
 
 	/**
-	 * Loads a saved feature model from a list of files, each describing a feature tree.
-	 * @param featureModelDataPaths - the list of files describing the feature trees
-	 * @return - the saved feature model
+	 * Loads a saved feature diagram from a file describing the graphic elements.
+	 * 
+	 * @param diagramDataPath - the file to load from
 	 */
 	public void loadSavedDiagram(String diagramDataPath) {
 	  SAXParser saxParser = null;
@@ -3185,8 +3250,10 @@ public class EditorView extends JFrame implements Observer{
 				+"\nMisc:\n"+xmlHandler.misc
 				+"\nStarting Commonalities:\n"+xmlHandler.startingComm
 				+"\nStarting Variabilities:\n"+xmlHandler.startingVars
-				+"");
+				+"\nFeatures Colors:\n"+xmlHandler.featureColors
+				+"\n");
 
+		loadStartingTermsColor(xmlHandler.featureColors);
 		loadFeatures(xmlHandler.featuresList);
 		loadConnectors(xmlHandler.connectorsList);
 		loadGroups(xmlHandler.groupsList);
@@ -3212,6 +3279,7 @@ public class EditorView extends JFrame implements Observer{
 	  String containerName=null;
 	  int x=0, y=0, width=0, height=0, i=0;
 	  String[] features=featuresList.split("\n");
+	  Color featureColor=null;
 	  
 	  for(String feature : features){
 		//getting data of this feature
@@ -3237,7 +3305,10 @@ public class EditorView extends JFrame implements Observer{
 		width=Integer.valueOf(featureData[featureData.length-1].substring(5, i));
 		height=Integer.valueOf(featureData[featureData.length-1].substring(i+1));
 		
-		FeaturePanel newFeature=buildFeaturePanel(featureName, containerName, x, y, Color.CYAN);
+		featureColor = getNewColor(termsColor.get(featureName));
+		
+		
+		FeaturePanel newFeature=buildFeaturePanel(featureName, containerName, x, y, featureColor);
 		newFeature.setSize(width, height);
 		
 		visibleOrderDraggables.addToTop(newFeature);
@@ -3486,6 +3557,43 @@ public class EditorView extends JFrame implements Observer{
 	  String[] variabilityNames=startingVars.split(" ");
 	  for(String name : variabilityNames) startingVariabilities.add(name);
 	}
+
+	/**
+	 * Loads the colors of starting features.
+	 * 
+	 * @param featureColors - String containing the colors associated with starting features, one per line
+	 */
+	private void loadStartingTermsColor(String featureColors) {
+	  String[] colorLines=featureColors.split("\n");
+	  String[] lineElements=null;
+	  String featureName=null;
+	  String[] rgbValues=null;
+	  int[] rgbIntValues=null;
+
+	  termsColor=new HashMap<String, int[]>();
+	  
+	  for(String colorLine : colorLines){
+		lineElements=colorLine.split("\t");
+		//getting feature name
+		featureName=lineElements[0];
+		for(int i=1; i<lineElements.length-1; ++i) featureName+=lineElements[i];
+		//getting RGB values as String
+		rgbValues=lineElements[lineElements.length-1].split("-");
+		
+		System.out.println("featureName: "+featureName+", rgbValues: "+lineElements[lineElements.length-1]);
+		for(String k : rgbValues) System.out.println("rgb element: "+k);
+//		System.out.println("Red="+rgbValues[0]+"Green="+rgbValues[1]+"Blue="+rgbValues[2]);
+
+		rgbIntValues=new int[3];
+		rgbIntValues[0]=new Integer(rgbValues[0]);
+		rgbIntValues[1]=new Integer(rgbValues[1]);
+		rgbIntValues[2]=new Integer(rgbValues[2]);
+		termsColor.put(featureName, rgbIntValues);
+	  }
+	  
+	}
+	
+	
 	
 	
 }

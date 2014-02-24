@@ -24,12 +24,18 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ModelAnalysis extends ModelParserUTF8
 {
 	private static boolean debug=true;//variabile usata per attivare stampe nel codice
+	
+	/** If true, the relevant terms file will be created after analisys, otherwise it will be created after save*/
+	private static final boolean SAVE_RELEVANT_TERMS_IMMEDIATELY = true;
 
 	/* URL da cui ottenere le analisi del file */
 //	public final String URL_ANALYSIS = "http://www.ilc.cnr.it/dylanlab/index.php?page=texttools&hl=en_US&showtemplate=false";
@@ -49,8 +55,11 @@ public class ModelAnalysis extends ModelParserUTF8
 	public static final String SENTENCE_SUFFIX=" + + ***" + "\n";
 	
 	
-	/** ArrayList containing the relevant tems of input file */
+	/** ArrayList containing the relevant terms of input file */
 	private ArrayList <String> termRelevant = null;
+	
+	/** Contains the arity for all terms of the input file */
+	private HashMap<String, Integer> termsArity=null;
 
 	/** Contains a terms set for each sentence of the input file */
 	private ArrayList<ArrayList<String>> termsInSentencesSet=null;
@@ -67,25 +76,23 @@ public class ModelAnalysis extends ModelParserUTF8
 		super(pathFile, pathProject);
 	}
 	
-	/** Carica analisi del file
+	/** Loads a file analisys 
 	 * 
-	 * @return true caricamento dell'analisi del file � avvenuta in maniera corretta
-	 * @return false se si � verificato un errore 
+	 * @return true if loading has been successful, false otherwise
 	 */
-	public boolean loadAnalysisFile()
-	{
+	public boolean loadAnalysisFile(){
 		termRelevant = new ArrayList <String> ();
 		
 		pathPageHTML = new ArrayList <String> ();
 		
-		/* Inserisce le path Html */
+		// inserting html path 
 		for(int i = 0; i < 4; i++)
 			pathPageHTML.add(
 					new String(
 							readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + i +".html"));
 		
-		try
-        {
+		//loading relevant terms
+		try{
             String s;
 
             BufferedReader br = 
@@ -99,13 +106,10 @@ public class ModelAnalysis extends ModelParserUTF8
 
             br.close(); 
         }
-        catch (FileNotFoundException ex)
-        {
+        catch (FileNotFoundException ex){
             System.out.println("Exception LoadAnalysis: " + ex.getMessage());
             return false;
-        }
-        catch (IOException ex)
-        {
+        }catch (IOException ex){
             System.out.println("Exception LoadAnalysis: " + ex.getMessage());
             return false;
         }        
@@ -147,7 +151,8 @@ public class ModelAnalysis extends ModelParserUTF8
 	 * 
 	 * @param stringURL - a String representing the URL of html page to download
 	 * @param path - the path in which to save the html page
-	 * @return true if the file has been saved, false if the analysis was not completed yet
+	 * @return - true if the file has been saved, false if the analysis was not completed yet
+	 * 
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 * @throws ProtocolException
@@ -215,7 +220,7 @@ public class ModelAnalysis extends ModelParserUTF8
 	/**
 	 * Returns an ArrayList<String> containing the paths to html analysis result files.
 	 * 
-	 * @return the ArrayList<String> containing the paths
+	 * @return - the ArrayList<String> containing the paths
 	 */
 	public ArrayList <String> readPathFileHTML(){
 		return pathPageHTML;
@@ -230,10 +235,20 @@ public class ModelAnalysis extends ModelParserUTF8
 	public String readPathFileSets(){
 		return readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + "SETS.log";
 	}
+	
+	/**
+	 * Returns a String representing the path to the file containing the relevant terms arities.
+	 * 
+	 * @return - a String representing the path to the file containing the relevant terms arities
+	 */
+	public String readPathFileArities(){
+		return readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + "ARITY.log";
+	}
+	
 	/**
 	 * Returns an ArrayList<String> containing the relevant terms extracted from html analysis result files.
 	 * 
-	 * @return the ArrayList<String> containing the paths
+	 * @return - the ArrayList<String> containing the paths
 	 */
 	public ArrayList<String> readTermRelevant(){
 		return termRelevant;
@@ -254,6 +269,17 @@ public class ModelAnalysis extends ModelParserUTF8
 	public void setTermsInSentencesSet(ArrayList<ArrayList<String>> termsInSentencesSet){
 		this.termsInSentencesSet=termsInSentencesSet;
 	}
+	
+	/**
+	 * Returns an HashMap<String, Integer> containing the arities of relevant terms, <br>
+	 * the arity of a term is the number of different sentences in which occurs.
+	 * 
+	 * @return - the HashMap<String, Integer> containing the arities of this model relevant terms
+	 */
+	public HashMap<String, Integer> getTermsAriety(){
+		return termsArity;
+	}
+	
 	
 	/* -= FUNZIONI Ausiliarie =- */
 
@@ -482,15 +508,14 @@ public class ModelAnalysis extends ModelParserUTF8
         	 + s.substring(i2, i3) + "</div></div></body></html>";
 	}
 	
-	/** Estrae i termini rilevanti
+	/** 
+	 * Extract relevant terms from File f.<br>
+	 * (VERSION FOR THE TOKENIZER OF TextTools, NEW PROJECT OF DylanLab)
 	 * 
-	 * @param f file contenente i termini rilevanti
-	 * 
-	 * @return true termini rilevanti estratti
-	 * @return false se si � verificato un errore
+	 * @param f - the file containing the relevant terms
+	 * @return - true if extraction was successful, false otherwise
 	 */
 	private boolean extractTermRelevant(File f){
-        termRelevant = new ArrayList <String> ();
         boolean extracted=false;
         
 //        //extracting relevant terms
@@ -499,53 +524,20 @@ public class ModelAnalysis extends ModelParserUTF8
         
         //extracting relevant terms
         extracted=extractTerms2(f);
-        if(!extracted) return false;   
         
-      
-        try{
-            Collections.sort(termRelevant);
-            //saving relevant terms on file
-            PrintWriter writer =
-                new PrintWriter(
-                    new BufferedWriter(
-                    	new FileWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + ".log")));
-
-            for(int j = 0; j< termRelevant.size(); j++)
-            	writer.print(termRelevant.get(j) + "\n");
-
-            writer.close();
-            
-            //saving relevant terms sets, one per sentence, on file
-            writer =
-            	new PrintWriter(
-            		new BufferedWriter(
-            			new FileWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + "SETS.log")));
-
-            for(int j = 0; j< termsInSentencesSet.size(); j++){
-              writer.print(SENTENCE_PREFIX+j+SENTENCE_SUFFIX);
-              for(String term : termsInSentencesSet.get(j)) writer.print(term + "\n");
-            }
-
-            writer.close();
-
-            return true;
-        }
-        catch(FileNotFoundException e)
-        {
-            System.out.println("extractTermRelevant - Exception during write: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
-        catch (IOException e)
-        {
-            System.out.println("extractTermRelevant - Exception during write: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
-    }
+        //saving relevant terms on file, so sequent analisys operation can simply read from that
+        if (SAVE_RELEVANT_TERMS_IMMEDIATELY) try {
+			saveRelevantTerms();
+		} catch (IOException e) {
+		  System.out.println("Relevant terms file could not be saved");
+		  e.printStackTrace();
+		}
+        return extracted;        
+	}
 		
 	/**
-	 * Extract relevant terms from File f.
+	 * Extract relevant terms from File f.<br>
+	 * (VERSION FOR THE OLD TERM EXTRACTOR OF DylanLab)
 	 * 
 	 * @param f - the file containing the relevant terms
 	 * @return - true if extraction was successful, false otherwise
@@ -623,18 +615,17 @@ public class ModelAnalysis extends ModelParserUTF8
 	 * @return - true if extraction was successful, false otherwise
 	 */
 	private boolean extractTerms2(File f){
-		int startSidIndex=0, endSidIndex=0;
-		termsInSentencesSet = new ArrayList<ArrayList<String>>();
-		String sid=null, term=null; 
-		ArrayList<String> termSet = new ArrayList<String>();
-		
-		/* TRY TO ADD SENTENCE SET CONSTRUCTION HERE*/
-
-		/* TRY TO ADD SENTENCE SET CONSTRUCTION HERE*/
-		
 		String html="", s1=null;
 		int startIndex=0, endIndex=0;
 		
+		int startSidIndex=0, endSidIndex=0;
+		String sid=null, term=null; 
+		ArrayList<String> termSet = new ArrayList<String>();
+
+		termRelevant = new ArrayList <String> ();
+		termsInSentencesSet = new ArrayList<ArrayList<String>>();
+		termsArity= new HashMap<String, Integer>();
+
         try{
           BufferedReader reader = new BufferedReader(new FileReader(f.getPath()));
           while( (s1 = reader.readLine()) != null ) html += s1;
@@ -702,7 +693,12 @@ public class ModelAnalysis extends ModelParserUTF8
             term=html.substring(startIndex, endIndex);
             System.out.println("Extracted term: "+term);
             if(!termRelevant.contains(term)) termRelevant.add(term);
-            termSet.add(term);
+            //adding term to sentence set and updating its arity
+            if(!termSet.contains(term)){
+              termSet.add(term);
+              if(termsArity.get(term)==null) termsArity.put(term, 1);
+              else termsArity.put(term, termsArity.get(term)+1);
+            }
           }
 
         }catch(Exception e){
@@ -713,6 +709,139 @@ public class ModelAnalysis extends ModelParserUTF8
 
         termsInSentencesSet.add(termSet);
         return true;
+	}
+	
+	/**
+	 * Saves the state of this model on file.
+	 */
+	public void saveState(){
+
+	  try{
+		//saving relevant terms on file
+		saveRelevantTerms();
+		//saving relevant terms sets, one per sentence, on file
+		saveRelevantTermsSets();
+		//saving relevant terms arities on file
+		saveRelevantTermsArities();
+		
+	  }catch(FileNotFoundException e){
+		System.out.println("ModelAnalysis.saveState(): Exception during write: " + e.getMessage());
+		e.printStackTrace();
+	  }catch (IOException e){
+		System.out.println("ModelAnalysis.saveState(): Exception during write: " + e.getMessage());
+		e.printStackTrace();
+	  }
+	}
+	
+	/**
+	 * Saves relevant terms of this model on file.
+	 */	private void saveRelevantTerms() throws IOException {
+	  Collections.sort(termRelevant);
+	  PrintWriter writer =
+		new PrintWriter(
+		  new BufferedWriter(
+				  new FileWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + ".log")));
+
+	  for(int j = 0; j< termRelevant.size(); j++) writer.print(termRelevant.get(j) + "\n");
+
+	  writer.close();
+	}
+
+	/**
+	 * Saves relevant terms sets of this model on file, one per sentence.
+	 */
+	private void saveRelevantTermsSets() throws IOException {
+	  PrintWriter writer;
+	  writer =
+		new PrintWriter(
+		  new BufferedWriter(
+			new FileWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + "SETS.log")));
+
+	  for(int j = 0; j< termsInSentencesSet.size(); j++){
+		writer.print(SENTENCE_PREFIX+j+SENTENCE_SUFFIX);
+		for(String term : termsInSentencesSet.get(j)) writer.print(term + "\n");
+	  }
+
+	  writer.close();
+	}
+
+	/**
+	 * Saves relevant terms arities of this model on file.
+	 */
+	private void saveRelevantTermsArities() throws IOException {
+	  PrintWriter writer;
+	  writer =
+		new PrintWriter(
+		  new BufferedWriter(
+			new FileWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + "ARITY.log")));
+
+	  Iterator<Entry<String, Integer>> iter = termsArity.entrySet().iterator();
+	  Entry<String, Integer> entry=null;
+	  while(iter.hasNext()){
+		entry=iter.next();
+		writer.print(entry.getKey()+ " "+entry.getValue()+"\n");  
+	  }
+
+	  writer.close();
+	}
+		
+	/**
+	 * Loads the state of this model from file.
+	 */	
+	public void loadState(){
+	  BufferedReader br1 =null;
+	  String s1=null;		
+	  ArrayList<String> termSet=null;
+	  String[] arityLineSplitted=null;
+	  String termName=null;
+	  
+	  //loading relevant terms sets, one per sentence, from file
+	  try{
+		br1 = new BufferedReader(new FileReader(readPathFileSets()));	
+		termsInSentencesSet=new ArrayList<ArrayList<String>>();		
+	    while( (s1 = br1.readLine()) != null ){
+		  if(s1.startsWith(ModelFile.SENTENCE_PREFIX)){
+		    //a new sentence is starting, adding termSet to general set for this model
+		    if(termSet!=null) termsInSentencesSet.add(termSet);
+		    termSet=new ArrayList<String>();
+		  }
+		  else termSet.add(s1);
+
+		  /* ***VERBOSE*** */
+		  if(debug) System.out.println("loadProjectTermsInSentencesSets() - Ho letto: "+s1);
+		  /* ***VERBOSE*** */
+			  
+	    }
+	    //adding last termSet to general set for this model
+	    if(termSet!=null) termsInSentencesSet.add(termSet);
+			
+	    br1.close();
+	    
+		//loading relevant terms arities from file
+	    termsArity= new HashMap<String, Integer>();
+		br1 = new BufferedReader(new FileReader(readPathFileArities()));	
+
+	    while( (s1 = br1.readLine()) != null ){
+	    	
+	      /* ***VERBOSE*** */
+		  if(debug) System.out.println("loadProjectTermsInSentencesSets() - Ho letto: "+s1);
+		  /* ***VERBOSE*** */
+
+		  arityLineSplitted=s1.split(" ");
+		  termName=arityLineSplitted[0];
+		  for(int k=1; k<arityLineSplitted.length-1; ++k) termName+=" "+arityLineSplitted[k];
+		  termsArity.put(termName, new Integer(arityLineSplitted[arityLineSplitted.length-1]));
+			  
+	    }
+			
+	    br1.close();		
+		
+	  }catch(FileNotFoundException e){ 
+		e.printStackTrace();
+	  }catch (IOException e) {
+		e.printStackTrace();
+	  }
+	  
 	}
 
 }

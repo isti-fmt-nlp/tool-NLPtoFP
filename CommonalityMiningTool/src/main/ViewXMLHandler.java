@@ -11,6 +11,7 @@ public class ViewXMLHandler extends DefaultHandler {
 	boolean inMisc=false;
 	boolean inStartingComm=false;
 	boolean inStartingVars=false;
+	boolean inFeatureColors=false;	
 
 	public String featuresList="";
 	public String connectorsList="";
@@ -18,6 +19,7 @@ public class ViewXMLHandler extends DefaultHandler {
 	public String misc="";
 	public String startingComm="";
 	public String startingVars="";
+	public String featureColors="";	
 	
 	public void startElement(String uri, String localName, String qName, Attributes atts) {
 	  if (qName.equals("features")) inFeaturesList=true;
@@ -26,6 +28,7 @@ public class ViewXMLHandler extends DefaultHandler {
 	  else if (qName.equals("misc")) inMisc=true;
 	  else if (qName.equals("startingCommonalities")) inStartingComm=true;
 	  else if (qName.equals("startingVariabilities")) inStartingVars=true;
+	  else if (qName.equals("featureColors")) inFeatureColors=true;
 	  
 	  System.out.println("*START*\nuri: "+uri+"\nlocalName: "+localName+"\nqName: "+qName+"\nAttribute:");
 	  for(int i=0; i< atts.getLength(); ++i)
@@ -40,6 +43,7 @@ public class ViewXMLHandler extends DefaultHandler {
 	  else if (qName.equals("misc")) inMisc=false;
 	  else if (qName.equals("startingCommonalities")) inStartingComm=false;
 	  else if (qName.equals("startingVariabilities")) inStartingVars=false;
+	  else if (qName.equals("featureColors")) inFeatureColors=false;
 		  
 	  System.out.println("*END*\nuri: "+uri+"\nlocalName: "+localName+"\nqName: "+qName);
 	}
@@ -54,6 +58,7 @@ public class ViewXMLHandler extends DefaultHandler {
 	  else if (inMisc) misc+=tmp;
 	  else if (inStartingComm) startingComm+=tmp;
 	  else if (inStartingVars) startingVars+=tmp;
+	  else if (inFeatureColors) featureColors+=tmp;
 	}
 }
 

@@ -111,6 +111,7 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 			viewProject.extractVariabilitiesDialog();
 	  }
 	  else if(ae.getActionCommand().equals("Select Commonalities")){
+		  System.out.println("Son io! Select Commonalities");
 			viewProject.showFeaturesSelected(ViewPanelCentral.FeatureType.COMMONALITIES);
 	  }
 	  else if(ae.getActionCommand().equals("Select Variabilities")){
@@ -124,7 +125,8 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		//creating view
 		EditorView editorView= new EditorView(
 						modelProject.readCommonalitiesSelected(), 
-						modelProject.readVariabilitiesSelected());
+						modelProject.readVariabilitiesSelected(), 
+						modelProject.getTermsColor());
 
 		//creating controller
 		EditorController editorController =new EditorController(editorView, editorModel);

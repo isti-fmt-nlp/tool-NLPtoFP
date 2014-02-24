@@ -29,7 +29,8 @@ public class ModelFile extends ModelAnalysis implements Runnable
 	public void run() 
 	{
 		/* Controlla se il file � stato analizzato in precedenza */
-		if((new File(readPathFileUTF8()).exists()) && (new File(readPathFileUTF8()).lastModified() > new File(readPathFile()).lastModified()))
+		if( (new File(readPathFileUTF8()).exists()) 
+			 && (new File(readPathFileUTF8()).lastModified() > new File(readPathFile()).lastModified()))
 		{
 			/* Carica i dati del file */
 			if(loadAnalysisFile())

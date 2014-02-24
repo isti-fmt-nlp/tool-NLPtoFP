@@ -5,6 +5,7 @@
  */
 package view;
 
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -14,6 +15,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -24,7 +26,11 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import main.CombinatoryUtils;
+
 import org.xml.sax.SAXException;
+
+import view.ViewPanelCentral.FeatureType;
 
 
 public class ModelProject extends Observable implements Runnable{
@@ -77,6 +83,12 @@ public class ModelProject extends Observable implements Runnable{
 
 	/** Contains a terms set for each sentence of all input files */
 	private ArrayList<ArrayList<String>> termsInSentencesSet=null;
+
+	/** Contains the arity for all terms of all input files */
+	private HashMap<String, Integer> termsArity=null;
+
+	/** Contains the color for all terms of all input files */
+	private HashMap<String, int[]> termsColor=null;
 	
 	/** String representing the path of variabilities selected HTML page*/
 	private String pathRelevantTerms = null;
@@ -96,6 +108,9 @@ public class ModelProject extends Observable implements Runnable{
 	/* boolean contenente lo stato del progetto */
 	private boolean [] stateProject = {false, false};
 	
+	/** Minimum intersection size required to join two sets of terms into one, used to assign color to terms */
+	private static int minimumIntersectionSize=10;
+	
 	private static boolean verbose=false;//variabile usata per attivare stampe nel codice
 	
 	private static boolean verbose2=false;//variabile usata per attivare stampe nel codice
@@ -105,7 +120,6 @@ public class ModelProject extends Observable implements Runnable{
 	/** 
 	 * Waits for threads workerProject to end their work, and computes commonalities candidates
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public void run(){
 	  //variables used to calculate occurencies lists
@@ -115,7 +129,7 @@ public class ModelProject extends Observable implements Runnable{
 	  int index=0;								//index of a possible relevant term occurence in line
 
 	  //variables used to calculate terms color
-//	  ArrayList<ArrayList<String>> termsInSentencesSet=null;//contains a terms set for each sentence of all input files
+	  int intersectionSize=0;
 		
 	  commonalitiesCandidates = new ArrayList <String> ();
 
@@ -195,18 +209,9 @@ public class ModelProject extends Observable implements Runnable{
       /* ***DEBUG*** */  
 
 
-	  //creating a global set, containing a set of terms for each sentence in all input files
-	  termsInSentencesSet=new ArrayList<ArrayList<String>>();
-	  for(ModelFile model: fileProject ) 
-		for(ArrayList<String> set : model.getTermsInSentencesSet()) 
-		  termsInSentencesSet.add(set);
-	  
+	  //creating global structures needed to assign colors
+	  buildColorStructures();
 
-	  System.out.println("\n\nNumero totale di insiemi: "+termsInSentencesSet.size());
-	  System.out.println("Radice cubica: "+Math.pow(termsInSentencesSet.size(), 1.0/3));
-	  
-	  
-	  
 	  //extracting communalities candidates from first input File
 	  for(int j = 0; j < fileProject.get(0).readTermRelevant().size(); j = j + 1)
        	if(intersectTermRelevant(fileProject.get(0).readTermRelevant().get(j)))
@@ -239,7 +244,161 @@ public class ModelProject extends Observable implements Runnable{
 	  setChanged();
 	  notifyObservers("End Extract Commonalities");
 	}
+
+	/**
+	 * Builds the global structures used to assign a color to each term. More specifically, this will build <br>
+	 * the following object members: termsInSentencesSet, termsArity, termsColor.
+	 * 
+	 * @see termsInSentencesSet
+	 * @see termsArity
+	 * @see termsColor
+	 */
+	private void buildColorStructures() {
+	  int intersectionSize;	  
+	  Iterator<Entry<String, Integer>> arityIterator=null;
+	  Entry<String, Integer> arityEntry=null;
+	  double card=0;
+	  int cardUpper=0;
+	  int[] values=null;
+	  int colorOffset=0;
+	  int[][] colors=null;
+	  double maxColorReduction=0;
+	  double colorReductionUnit=0;
+	  int maxArity=0;
+	  int[] baseColor=null;
+	  int[] termColor=null;
+	  Iterator<Entry<String, int[]>> colorIter = null;
+	  Entry<String, int[]> colorEntry = null;
+	  
+	  //creating a global set, containing a set of terms for each sentence in all input files
+	  termsInSentencesSet=new ArrayList<ArrayList<String>>();
+	  //creating an arity-among-all-files-sentences map for all relevant terms
+	  termsArity=new HashMap<String, Integer>();
+	  //creating a color map for all relevant terms
+	  termsColor= new HashMap<String, int[]>();
+
+	  for(ModelFile model: fileProject ){
+		for(ArrayList<String> set : model.getTermsInSentencesSet()) termsInSentencesSet.add(set);
+		arityIterator=model.getTermsAriety().entrySet().iterator();
+		while(arityIterator.hasNext()){
+		  arityEntry=arityIterator.next();
+		  if(termsArity.get(arityEntry.getKey())==null)
+			termsArity.put(arityEntry.getKey(), arityEntry.getValue());
+		  else termsArity.put(arityEntry.getKey(), termsArity.get(arityEntry.getKey())+arityEntry.getValue());
+		}
+	  }
+
+	  card=Math.pow(termsInSentencesSet.size(), 1.0/3);
+	  cardUpper=((int)card<card)? (int)card+1: (int)card;
+	  System.out.println("\n\nNumero totale di insiemi: "+termsInSentencesSet.size());
+	  System.out.println("Radice cubica: "+card);
+	  System.out.println("Radice cubica[UPPER]: "+cardUpper);
+	  System.out.println("\n\nLista delle arietà totali dei termini: ");
+	  arityIterator=termsArity.entrySet().iterator();
+	  while(arityIterator.hasNext()){
+		arityEntry=arityIterator.next();
+		System.out.println(arityEntry.getKey()+": "+arityEntry.getValue());		  
+	  }
+
+	  //joining all intersected sets until only disjointed sets remains
+	  for(int k=0; k<termsInSentencesSet.size(); ++k){
+		for(int l=k+1; l<termsInSentencesSet.size(); ++l){  
+		  intersectionSize=0;
+		  for(String term : termsInSentencesSet.get(k)) if(termsInSentencesSet.get(l).contains(term)){
+			++intersectionSize;
+			if(minimumIntersectionSize==intersectionSize) break;
+		  }		  
+		  if(minimumIntersectionSize==intersectionSize){
+			//joining two sets into the first
+			joinSets(termsInSentencesSet.get(k), termsInSentencesSet.get(l));
+			termsInSentencesSet.remove(l);
+			//restarting cycle after join
+			k=-1; break;
+		  }
+		}
+	  }
+
+	  //calculating all possible RGB combinations to get base colors for the sets
+	  card=Math.pow(termsInSentencesSet.size(), 1.0/3);
+	  cardUpper=((int)card<card)? (int)card+1: (int)card;
+	  values=new int[cardUpper];
+	  colorOffset=255/cardUpper;
+	  values[0]=0;
+	  for(int i=1; i<values.length-1; ++i){
+		values[i]=colorOffset*i;
+	  }
+	  values[values.length-1]=255;
+
+	  colors=CombinatoryUtils.threePositionsCombinationsAsIntegers(values);
+		  
+	  /* ***DEBUG*** */
+	  System.out.println("\n\nNumero totale di insiemi: "+termsInSentencesSet.size());
+	  System.out.println("Radice cubica: "+card);
+	  System.out.println("Radice cubica[UPPER]: "+cardUpper);
+	  System.out.println("Elenco elementi per ogni insieme: ");
+	  for(int k=0; k<termsInSentencesSet.size(); ++k){
+		System.out.println("**Set#"+k);
+		for(String term : termsInSentencesSet.get(k)) System.out.println(term);
+	  }
+	  for(int k=0; k<colors.length; ++k){
+		System.out.println("**Color#"+k+": "+colors[k][0]+"."+colors[k][1]+"."+colors[k][2]);
+	  }
+	  /* ***DEBUG*** */
+
+		  
+	  //assigning colors to terms
+	  maxColorReduction=((double)colorOffset/2.0)/255.0;
+	  colorReductionUnit=0;
+	  maxArity=0;
+	  baseColor=null;
+	  termColor=null;
+
+	  for(int k=0; k<termsInSentencesSet.size(); ++k){
+		//getting the term with max arity in the set
+		for(String term : termsInSentencesSet.get(k)){
+		  if(termsArity.get(term)>maxArity){
+		    maxArity=termsArity.get(term);
+		  }
+		}
+		colorReductionUnit=maxColorReduction/(maxArity-1);
+
+		//assigning colors
+		baseColor=colors[k];
+		for(String term : termsInSentencesSet.get(k)){
+		  termColor=new int[3];
+		  termColor[0]=(int)((double)baseColor[0]*(1.0-colorReductionUnit*(maxArity-termsArity.get(term))));			
+		  termColor[1]=(int)((double)baseColor[1]*(1.0-colorReductionUnit*(maxArity-termsArity.get(term))));			
+		  termColor[2]=(int)((double)baseColor[2]*(1.0-colorReductionUnit*(maxArity-termsArity.get(term))));			
+		  termsColor.put(term, termColor);
+		  System.out.println("Base Color for term '"+term+"' is: ("+baseColor[0]+"."+baseColor[1]+"."+baseColor[2]+")");
+		  System.out.println("maxArity: "+maxArity+"\ttermsArity.get(term): "+termsArity.get(term)+"\tcolorReductionUnit: "+colorReductionUnit);
+		  System.out.println("Exact Color for term '"+term+"' is: ("+termColor[0]+"."+termColor[1]+"."+termColor[2]+")");
+		}
+	  }
+		  
+	  /* ***VERBOSE*** */
+	  System.out.println("Printing color assignments: ");
+	  colorIter = termsColor.entrySet().iterator();
+	  colorEntry=null;
+	  while(colorIter.hasNext()){
+		colorEntry=colorIter.next();
+		System.out.println(colorEntry.getKey()+": "+colorEntry.getValue());
+	  }
+	  /* ***VERBOSE*** */
+
+	}
 	
+	/**
+	 * Join two sets into the first. After a call to this method,<br>
+	 * array1 will be the union of the two arrays, array2 will remain unchanged
+	 * 
+	 * @param array1 - first array to be joined, this will be changed
+	 * @param array2 - first array to be joined, this will not change 
+	 */
+	private void joinSets(ArrayList<String> array1, ArrayList<String> array2) {
+	  for(String tmp : array2) if(!array1.contains(tmp)) array1.add(tmp);
+	}
+
 	/**
 	 * Check if there is a valid occurrence of term in line, starting at index.<br>
 	 * An occurrence is valid when: <br>
@@ -357,345 +516,36 @@ public class ModelProject extends Observable implements Runnable{
 		}
 	}
 	
-	/** Carica il progetto
-	 * 
-	 * @param s stringa contenente la path del progetto da caricare
-	 * 
-	 * @return al ArrayList contenenti i nomi dei file del progetto
-	 */
-	public ArrayList <String> loadProject(String s){
-		if(s == null) return null;
-
-		parserXML = new ParserXML();
-		
-		SAXParserFactory spf = SAXParserFactory.newInstance();
-		
-		try{
-			fileProject = new ArrayList <ModelFile> ();
-			
-			workerProject = new ArrayList <Thread> ();
-			
-			nameProject = s.substring(0, s.length() - 4);
-			pathProject = "../"+savedProjectsDir+"/" + nameProject;
-			pathXML = pathProject + "/" + nameProject + ".xml"; 
-			pathCommonalitiesCandidates = pathProject + "/CommanalitiesC.log";
-			pathCommonalitiesSelected = pathProject + "/CommanalitiesS.log";
-			pathCommonalitiesSelectedHTML = pathProject + "/CommanalitiesS.html";
-
-			pathVariabilitiesCandidates = pathProject + "/VariabilitiesC.log";
-			pathVariabilitiesSelected = pathProject + "/VariabilitiesS.log";
-			pathVariabilitiesSelectedHTML = pathProject + "/VariabilitiesS.html";
-			
-			pathRelevantTerms = pathProject + "/RelevantTerms.log";
-			
-			SAXParser parser = spf.newSAXParser();
-			parser.parse(pathXML, parserXML);
-			
-			fileProject = new ArrayList <ModelFile> ();
-			
-			for(int i = 0; i < parserXML.readPathInput().size(); i++){		
-				fileProject.add(
-						new ModelFile(
-								parserXML.readPathInput().get(i), pathProject));
-				workerProject.add(
-						new Thread(
-								fileProject.get(i)));
-			}	
-			
-			commonalitiesCandidates = new ArrayList <String> ();
-			commonalitiesSelected = new ArrayList <String> ();
-			variabilitiesCandidates = new ArrayList <String> ();
-			variabilitiesSelected = new ArrayList <String> ();
-			
-			loadFeaturesList(commonalitiesCandidates, pathCommonalitiesCandidates);
-			loadFeaturesList(commonalitiesSelected, pathCommonalitiesSelected);
-			loadFeaturesList(variabilitiesCandidates, pathVariabilitiesCandidates);
-			loadFeaturesList(variabilitiesSelected, pathVariabilitiesSelected);
-			
-			if(!loadProjectRelevantTerms()) System.out.println("Relevant terms files corrupted!");
-			if(!loadProjectTermsInSentencesSets()) System.out.println("Sets of terms files corrupted!");
-            
-			return parserXML.readNameFile();
-		} 
-		catch (ParserConfigurationException e) 
-		{
-			System.out.println("Exception loadProject: " + e.getMessage());
-			return null;
-		}
-		catch (SAXException e) 
-		{
-			System.out.println("Exception loadProject: " + e.getMessage());
-			return null;
-		}
-		catch (IOException e) 
-		{
-			System.out.println("Exception loadProject: " + e.getMessage());
-			return null;
-		} 
-	}
-
 	/**
-	 * Loads a list of features from a file, one per line.
-	 * 
-	 * @param features - the feature list to be loaded
-	 * @param path - the path of the file to be used
-	 * @throws FileNotFoundException
-	 * @throws IOException
+	 * Loads the analisys files of the project.
 	 */
-	private void loadFeaturesList(ArrayList<String> features, String path)
-			throws FileNotFoundException, IOException {
-		String s1=null;		
-		BufferedReader br1 = new BufferedReader(new FileReader(path));
-		while( (s1 = br1.readLine()) != null ) features.add(s1);
-		br1.close();
-		return;
-	}
-	
-	/** Saves the project.
-	 * 
-	 * @return an xml file containing the project saved informations
-	 */
-	public File saveProject(){		
-		String s ="<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" + nameProject + "<node>Input";
-		
-		for(int i = 0; i < fileProject.size(); i++)
-			s +=  "<leaf>" + new File(fileProject.get(i).readPathFile()).getName()
-				  + "<path>" + fileProject.get(i).readPathFile() + "</path>" 
-			    + "</leaf>";
-		
-		s += "</node><node>Commonalities</node></root>";
-		
-		try{
-			PrintWriter pw1 =
-			        new PrintWriter(
-			        		new BufferedWriter(
-			        				new FileWriter(pathXML)));
-			pw1.print(s);
-			pw1.close();
-			
-			//saving feature lists on files
-			saveFeaturesList(commonalitiesCandidates, pathCommonalitiesCandidates);
-			saveFeaturesList(commonalitiesSelected, pathCommonalitiesSelected);
-			saveFeaturesList(variabilitiesCandidates, pathVariabilitiesCandidates);
-			saveFeaturesList(variabilitiesSelected, pathVariabilitiesSelected);
-			//saving selected feature lists on html tables	
-			saveSelectedFeaturesHTML(commonalitiesSelected, pathCommonalitiesSelectedHTML, "Commonalities Selected");
-			saveSelectedFeaturesHTML(variabilitiesSelected, pathVariabilitiesSelectedHTML, "Variabilities Selected");			
-			//saving occurrences of relevant terms
-			saveProjectRelevantTerms();
-//			//saving sets of relevant terms, one per sentence from all input files
-//			saveProjectRelevantTerms();
+	public ArrayList <String> loadAnalysisFileProject(){
+	  ArrayList <String> al = new ArrayList <String> ();
 
-			stateProject[0] = false;
-			stateProject[1] = false;
-		} 
-		catch (IOException e){
-			System.out.println("Exception saveProject: " + e.getMessage());
-			return null;
-		}
-		return new File(pathXML);
-	}
-
-	/**
-	 * Saves occurrences of relevant terms in every input files in a file, one term per line.
-	 * 
-	 * @throws IOException
-	 */
-	private void saveProjectRelevantTerms() throws IOException {
-		String tmpLine="";
-		HashMap<String, ArrayList<Integer>> tmpMap=null;
-		Iterator<Entry<String, HashMap<String, ArrayList<Integer>>>> termIter=null;
-		Entry<String, HashMap<String, ArrayList<Integer>>> termEntry=null;
-		Iterator<Entry<String, ArrayList<Integer>>> fileIter=null;
-		Entry<String, ArrayList<Integer>> fileEntry=null;
-		
-		PrintWriter pw2 = new PrintWriter(new BufferedWriter(new FileWriter(pathRelevantTerms)));
-		
-		if(relevantTerms != null){
-		  termIter=relevantTerms.entrySet().iterator();
-		  while(termIter.hasNext()){
-			termEntry=termIter.next();
-			
-			tmpLine=termEntry.getKey()+" ";
-			tmpMap=termEntry.getValue();
-			fileIter=tmpMap.entrySet().iterator();
-			while(fileIter.hasNext()){
-			  fileEntry=fileIter.next();
-			  
-			  tmpLine+="f: "+fileEntry.getKey()+" i: ";
-			  for(int index : fileEntry.getValue()) tmpLine+=index+" ";		
+	  for(int i = 0; i < fileProject.size(); i++){
+		if(new File(fileProject.get(i).readPathFileUTF8()).exists()){
+		  if(workerProject.get(i).getState() != Thread.State.TERMINATED){
+			workerProject.get(i).start();
+			al.add(String.valueOf(i));
+			try{
+			  workerProject.get(i).join();
+			}catch (InterruptedException e){
+			  System.out.println("Exception loadAnalysisFileProject: " + e.getMessage());
 			}
-			pw2.print(tmpLine+"\n");
-			
 		  }
-		}
-		pw2.close();
-		return;
-	}	
-
-	/**
-	 * Loads occurrences of relevant terms for every input files from a file, one term per line.
-	 * 
-	 * @return - true if successful, false otherwise
-	 * @throws IOException
-	 */
-	private boolean loadProjectRelevantTerms() throws IOException {
-		String termName=null;
-		String fileName=null;
-		String[] tokens=null;
-		HashMap<String, ArrayList<Integer>> fileMap=null;
-		ArrayList<Integer> occurrences=null;
-		BufferedReader br1 =null;
-		
-		String s1=null;		
-		
-		try{
-		  br1 = new BufferedReader(new FileReader(pathRelevantTerms));			
-		}catch(FileNotFoundException e){ return true;}
-		relevantTerms=new HashMap<String, HashMap<String,ArrayList<Integer>>>();
-		
-		while( (s1 = br1.readLine()) != null ){
-		  fileMap=new HashMap<String, ArrayList<Integer>>();
-		  tokens=s1.split(" ");
-		  
-		  /* ***VERBOSE*** */
-		  if(verbose3){
-			System.out.println("Stampo i tokens!");
-			for(String str:tokens) System.out.println(str);
-			termName=tokens[0];
-			System.out.println("Trovato termine: "+termName);
-		  }
-		  /* ***VERBOSE*** */
-
-		  for(int i=1;i<tokens.length; ++i){
-			//a new file name has been found
-			if(tokens[i].compareTo("f:")==0){ 
-			  occurrences=new ArrayList<Integer>();
-			  
-			  ++i; fileName=tokens[i]; ++i;
-			  while(tokens[i].compareTo("i:")!=0){
-				fileName+=" "+tokens[i]; ++i;
-			  }
-			  
-			  if(verbose3) System.out.println("\tTrovato file: "+fileName);
-			  if(tokens[i].compareTo("i:")!=0){
-				  if(verbose3) System.out.println("Uncorrect format for relevant terms file");
-				  br1.close();
-				  return false;
-			  }
-			  else ++i;
-			  //loading occurrence indexes of this file
-			  for(; i<tokens.length; ++i){
-				if(verbose3) System.out.println("***Token: "+tokens[i]);
-				if(tokens[i].compareTo("f:")==0){
-				  fileMap.put(fileName, occurrences);
-				  break;
-				}
-				occurrences.add(Integer.valueOf(tokens[i]));
-				if(verbose3) System.out.println("\t\tTrovata occorrenza: "+tokens[i]);
-			  }
+		  else{
+			workerProject.set(i, new Thread(fileProject.get(i)));
+			workerProject.get(i).start();
+			al.add(String.valueOf(i));
+			try{
+			  workerProject.get(i).join();
+			}catch (InterruptedException e){
+			  System.out.println("Exception loadAnalysisFileProject: " + e.getMessage());
 			}
-			fileMap.put(fileName, occurrences);
 		  }
-		  relevantTerms.put(termName, fileMap);
 		}
-		br1.close();
-		return true;
-	}	
-
-	/**
-	 * Loads the sets of relevant terms for each sentence of the input file of a model from a file, for all models.
-	 * 
-	 * @return - true if successful, false otherwise
-	 * @throws IOException
-	 */
-	private boolean loadProjectTermsInSentencesSets() throws IOException {
-		BufferedReader br1 =null;
-		String s1=null;		
-
-		ArrayList<ArrayList<String>> termsSetsSet=null;
-		ArrayList<String> termSet=null;
-
-		try{
-		  for(ModelFile model : fileProject){
- 			br1 = new BufferedReader(new FileReader(model.readPathFileSets()));						  
- 			termSet=null;
- 			termsSetsSet=new ArrayList<ArrayList<String>>();
- 			
- 			while( (s1 = br1.readLine()) != null ){
- 			  if(s1.startsWith(ModelFile.SENTENCE_PREFIX)){
- 				//a new sentence is starting, adding termSet general set for this model
- 				if(termSet!=null) termsSetsSet.add(termSet);
- 				termSet=new ArrayList<String>();
- 			  }
- 			  else termSet.add(s1);
- 			  
- 			  /* ***VERBOSE*** */
- 			  if(verbose3) System.out.println("loadProjectTermsInSentencesSets() - Ho letto: "+s1);
- 			  /* ***VERBOSE*** */
- 			  
- 			}
- 			//adding last termSet to general set for this model
- 			if(termSet!=null) termsSetsSet.add(termSet);
- 			
- 			//adding terms sets to the model
- 			model.setTermsInSentencesSet(termsSetsSet);
- 			br1.close();
-		  }
-		  
-		  //creating a global set, containing a set of terms for each sentence in all input files
-		  termsInSentencesSet=new ArrayList<ArrayList<String>>();
-		  for(ModelFile model : fileProject)
-			for(ArrayList<String> set : model.getTermsInSentencesSet())
-			  termsInSentencesSet.add(set);
-		  
-		}catch(FileNotFoundException e){ 
-		  e.printStackTrace();
-		  return true;
-		}
-		
-		return false;
-	}
-
-	/**
-	 * Stores a list of features in a file, one per line.
-	 * 
-	 * @param features - the feature list to be stored
-	 * @param path - the path of the file to be used
-	 * @throws IOException
-	 */
-	private void saveFeaturesList(ArrayList<String> features, String path) throws IOException {
-		PrintWriter pw2 = new PrintWriter(new BufferedWriter(new FileWriter(path)));
-		if(features != null) 
-		  for(int i = 0; i < features.size(); i++) pw2.print(features.get(i) + "\n");
-		pw2.close();
-		return;
-	}
-
-	/**
-	 * Saves a list of selected features in a table of an HTML file.
-	 * 
-	 * @param features - the feature list to be stored
-	 * @param path - the path of the file  to be used
-	 * @param tableHeader - string used as table header
-	 * @throws IOException
-	 */
-	private void saveSelectedFeaturesHTML(ArrayList<String> features, String path, String tableHeader) throws IOException {
-		String s=null;
-		PrintWriter pw4 = new PrintWriter(new BufferedWriter(new FileWriter(path)));
-		
-		if(features != null){
-			s = "<table border=\"2\" align=\"center\">";
-//			s = "<table border=" + String.valueOf('"') + String.valueOf('2') + String.valueOf('"') + "align=" + String.valueOf('"') + "center" + String.valueOf('"') + ">";
-			s += "<tr><th>n.</th><th>"+tableHeader+"</th></tr>";
-			
-			for(int i = 0; i < features.size(); i++)
-				s += "<tr><td>" +i+ "</td><td>" + features.get(i) + "</td></tr>";
-			
-			s += "</table>";		
-			pw4.print(s);	
-			pw4.close();
-		}
+	  }
+	  return al;
 	}
 	
 	/** Cancella il progetto
@@ -761,40 +611,6 @@ public class ModelProject extends Observable implements Runnable{
 		variabilitiesExtraction.start();
 
 	}
-
-
-	
-	/**
-	 * Loads the analisys files of the project.
-	 */
-	public ArrayList <String> loadAnalysisFileProject(){
-	  ArrayList <String> al = new ArrayList <String> ();
-
-	  for(int i = 0; i < fileProject.size(); i++){
-		if(new File(fileProject.get(i).readPathFileUTF8()).exists()){
-		  if(workerProject.get(i).getState() != Thread.State.TERMINATED){
-			workerProject.get(i).start();
-			al.add(String.valueOf(i));
-			try{
-			  workerProject.get(i).join();
-			}catch (InterruptedException e){
-			  System.out.println("Exception loadAnalysisFileProject: " + e.getMessage());
-			}
-		  }
-		  else{
-			workerProject.set(i, new Thread(fileProject.get(i)));
-			workerProject.get(i).start();
-			al.add(String.valueOf(i));
-			try{
-			  workerProject.get(i).join();
-			}catch (InterruptedException e){
-			  System.out.println("Exception loadAnalysisFileProject: " + e.getMessage());
-			}
-		  }
-		}
-	  }
-	  return al;
-	}
 	
 	/** Aggiunge un elemento al progetto
 	 * 
@@ -815,18 +631,21 @@ public class ModelProject extends Observable implements Runnable{
 	 * @param i - index of the file
 	 */
 	public void removeFileProject(int i){
-	  File logFile =null;
+	  File termLogFile =null;
+	  //deleting UTF8 version of input file
 	  if(fileProject.get(i).readPathFileUTF8() != null)
 		  new File(fileProject.get(i).readPathFileUTF8()).delete();
 		
+	  //deleting html analisys files
 	  if(fileProject.get(i).readPathFileHTML() != null)
 		  for(int j = 0; j < fileProject.get(i).readPathFileHTML().size(); j++)
 			  new File(fileProject.get(i).readPathFileHTML().get(j)).delete();
 
-	  logFile=new File(
+	  //deleting relevant terms file
+	  termLogFile=new File(
 		(fileProject.get(i).readPathFileUTF8().substring(0, fileProject.get(i).readPathFileUTF8().length()-4)) + ".log");
 	  
-	  if(logFile.exists()) logFile.delete();
+	  if(termLogFile.exists()) termLogFile.delete();
 
 	  fileProject.remove(i);
 	  workerProject.remove(i);
@@ -922,26 +741,26 @@ public class ModelProject extends Observable implements Runnable{
 		return variabilitiesSelected;
 	}
 	
-//	/** Legge la stringa contenente il percorso della pagina HTML delle commonalities selected
-//	 * 
-//	 * @return pathCommanalitiesSelectedHTML
-//	 */
-//	public String readPathCommonalitiesSelectedHTML()
-//	{
-//		return pathCommonalitiesSelectedHTML;
-//	}
-	
-	/** Legge la stringa contenente il percorso della pagina HTML delle commonalities selected
+	/** 
+	 * Returns the String containing the path to the commonalities selected HTML page
 	 * 
-	 * @return pathCommanalitiesSelectedHTML
+	 * @return - the String pathCommanalitiesSelectedHTML
 	 */
-	public String readPathVariabilitiesSelectedHTML()
-	{
-		return pathVariabilitiesSelectedHTML;
+	public String readPathCommonalitiesSelectedHTML(){
+	  return pathCommonalitiesSelectedHTML;
+	}
+	
+	/** 
+	 * Returns the String containing the path to the variabilities selected HTML page
+	 * 
+	 * @return - the String pathVariabilitiesSelectedHTML
+	 */
+	public String readPathVariabilitiesSelectedHTML(){
+	  return pathVariabilitiesSelectedHTML;
 	}
 
 	/** 
-	 * Create the HTML file containing the selected features
+	 * Create the HTML file containing the selected features and the related structure.
 	 * 
 	 * @param al - ArrayList containing the selected features
 	 * @param type - type of the selected features, a constant from ViewPanelCentral.FeatureType
@@ -963,17 +782,41 @@ public class ModelProject extends Observable implements Runnable{
 			else
 				pw = new PrintWriter(new BufferedWriter(new FileWriter(pathVariabilitiesSelectedHTML)));
 			
-			String s = "<table border=\"2\" align=\"center\">";
+			String s = 
+			  "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"it\" lang=\"it\"><head>"			
+			
+			  +"<style type=\"text/css\">html { overflow-y: scroll; }"
+			  +"body{	font-family: Arial, Verdana, sans-serif;	font-size: 100%;}"
+			  +"input.tt_button{border: 1px solid #006;}"
+			  +"table.tt_footer{text-align: center; font-family: Verdana, Geneva, Arial, Helvetica, sans-serif ;"
+			  +"font-size: 10px;	color: #444;}"
+			  +"#wrapper{	margin: 0 auto;	width: 800px;}#content{	width: 100%;}"	
+			  +"</style></head><body>"			
+
+			  +"<table border=\"2\" align=\"center\">";
+			
+//			String s = "<table border=\"2\" align=\"center\">";
 			
 			if(type==ViewPanelCentral.FeatureType.COMMONALITIES)
-				s += "<tr><th>n.</th><th>Selected Commonalities</th></tr>";
+				s += "<tr><th>n.</th><th>Selected Commonalities</th><th>Color</th></tr>";
 			else
-				s += "<tr><th>n.</th><th>Selected Variabilities</th></tr>";
+				s += "<tr><th>n.</th><th>Selected Variabilities</th><th>Color</th></tr>";
 				
 			for(int i = 0; i < tmp.size(); i++)
-				s += "<tr><td style=\"width: auto;\">" +(i+1)+ "</td><td style=\"width: auto;\">" + tmp.get(i) + "</td></tr>";
+//				s += "<tr><td style=\"width: auto;\">" +(i+1)
+//				       + "</td><td style=\"width: auto;\">" + tmp.get(i) 
+//				       + "</td><td style=\"width: auto; background: #"+getHexRGB(termsColor.get(tmp.get(i)))
+//				       + ";\"></td></tr>";
+				s += "<tr><td style=\"width: auto;\">" +(i+1)
+					   + "</td><td style=\"width: auto;\">" + tmp.get(i) 
+				       + "</td><td style=\"width: auto; background: #"+getHexRGB(termsColor.get(tmp.get(i)))
+				       + ";\"></td></tr>";
+
 			
-			s += "</table>";		
+//			s += "</table>";	
+			s += "</table></body></html>";	
+			
+			
 			pw.print(s);
 	        pw.close();
 	        setChanged();
@@ -989,15 +832,33 @@ public class ModelProject extends Observable implements Runnable{
 		}
 	}
 	
-	/** Legge la path in cui risiede il file HTML contenente le commonalities selezionate
-	 * 
-	 * @return Stringa contenente la path corrispondente
+	/**
+	 * Returns a String representing color in hexadecimal RGB form, like 'ffffff' for pure white.
+
+	 * @param color - an int[] of length 3, containing RGB integer values of the color
+	 * @return - the String representing the color in hexadecimal RGB form
 	 */
-	public String readPathCommonalitiesSelectedHTML()
-	{
-		return pathCommonalitiesSelectedHTML;
+	private String getHexRGB(int[] color) {
+		String red=null, green=null, blue=null;
+
+		red=Integer.toHexString(color[0]);
+		green=Integer.toHexString(color[1]);
+		blue=Integer.toHexString(color[2]);
+		
+		if(red.length()==1) red="0"+red;
+		if(green.length()==1) green="0"+green;
+		if(blue.length()==1) blue="0"+blue;
+		
+//		System.out.println("red is: "+red);
+//		System.out.println("green is: "+green);
+//		System.out.println("blue is: "+blue);
+
+//		return Integer.toHexString(color[0])
+//				   +Integer.toHexString(color[1])
+//				   +Integer.toHexString(color[2]);
+		return red+green+blue;
 	}
-	
+
 	/** Legge lo stato del progetto
 	 * 
 	 * @return stateProject
@@ -1046,10 +907,333 @@ public class ModelProject extends Observable implements Runnable{
 	}
 
 	/**
+	 * Returns the HashMap containing the relevant terms colors for the project input files.
+	 * 
+	 * @return - relevantTerms, an object having type HashMap<String, HashMap<String, ArrayList<Integer>>>
+	 */
+	public HashMap<String, int[]> getTermsColor() {		
+		return termsColor;
+	}
+
+	/**
 	 * Returns the path used for saving the project.
 	 * @return - the path used for saving the project
 	 */
 	public String getPathProject() {
 		return pathProject;
 	}
+	
+	/** Saves the project.
+	 * 
+	 * @return an xml file containing the project saved informations
+	 */
+	public File saveProject(){		
+		String s ="<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" + nameProject + "<node>Input";
+		
+		for(int i = 0; i < fileProject.size(); i++)
+			s +=  "<leaf>" + new File(fileProject.get(i).readPathFile()).getName()
+				  + "<path>" + fileProject.get(i).readPathFile() + "</path>" 
+			    + "</leaf>";
+		
+		s += "</node><node>Commonalities</node></root>";
+		
+		try{
+			PrintWriter pw1 =
+			        new PrintWriter(
+			        		new BufferedWriter(
+			        				new FileWriter(pathXML)));
+			pw1.print(s);
+			pw1.close();
+			
+			//saving feature lists on files
+			saveFeaturesList(commonalitiesCandidates, pathCommonalitiesCandidates);
+			saveFeaturesList(commonalitiesSelected, pathCommonalitiesSelected);
+			saveFeaturesList(variabilitiesCandidates, pathVariabilitiesCandidates);
+			saveFeaturesList(variabilitiesSelected, pathVariabilitiesSelected);
+			//saving selected feature lists on html tables	
+			setFeaturesSelected(commonalitiesSelected, FeatureType.COMMONALITIES);
+			setFeaturesSelected(variabilitiesSelected, FeatureType.VARIABILITIES);
+			
+//			saveSelectedFeaturesHTML(commonalitiesSelected, pathCommonalitiesSelectedHTML, "Commonalities Selected");
+//			saveSelectedFeaturesHTML(variabilitiesSelected, pathVariabilitiesSelectedHTML, "Variabilities Selected");			
+
+			//saving occurrences of relevant terms
+			saveProjectRelevantTerms();
+			//saving models state
+			saveProjectModelsState();
+
+			stateProject[0] = false;
+			stateProject[1] = false;
+		} 
+		catch (IOException e){
+			System.out.println("Exception saveProject: " + e.getMessage());
+			return null;
+		}
+		return new File(pathXML);
+	}
+	
+	/**
+	 * Saves occurrences of relevant terms in every input files in a file, one term per line.
+	 * 
+	 * @throws IOException
+	 */
+	private void saveProjectRelevantTerms() throws IOException {
+		String tmpLine="";
+		HashMap<String, ArrayList<Integer>> tmpMap=null;
+		Iterator<Entry<String, HashMap<String, ArrayList<Integer>>>> termIter=null;
+		Entry<String, HashMap<String, ArrayList<Integer>>> termEntry=null;
+		Iterator<Entry<String, ArrayList<Integer>>> fileIter=null;
+		Entry<String, ArrayList<Integer>> fileEntry=null;
+		
+		PrintWriter pw2 = new PrintWriter(new BufferedWriter(new FileWriter(pathRelevantTerms)));
+		
+		if(relevantTerms != null){
+		  termIter=relevantTerms.entrySet().iterator();
+		  while(termIter.hasNext()){
+			termEntry=termIter.next();
+			
+			tmpLine=termEntry.getKey()+" ";
+			tmpMap=termEntry.getValue();
+			fileIter=tmpMap.entrySet().iterator();
+			while(fileIter.hasNext()){
+			  fileEntry=fileIter.next();
+			  
+			  tmpLine+="f: "+fileEntry.getKey()+" i: ";
+			  for(int index : fileEntry.getValue()) tmpLine+=index+" ";		
+			}
+			pw2.print(tmpLine+"\n");
+			
+		  }
+		}
+		pw2.close();
+		return;		
+	}	
+	
+	/**
+	 * Saves the models state on files.
+	 * 
+	 * @throws IOException
+	 */
+	private void saveProjectModelsState() throws IOException {
+	  for(ModelFile model : fileProject) model.saveState();
+	}
+
+	/**
+	 * Stores a list of features in a file, one per line.
+	 * 
+	 * @param features - the feature list to be stored
+	 * @param path - the path of the file to be used
+	 * @throws IOException
+	 */
+	private void saveFeaturesList(ArrayList<String> features, String path) throws IOException {
+		PrintWriter pw2 = new PrintWriter(new BufferedWriter(new FileWriter(path)));
+		if(features != null) 
+		  for(int i = 0; i < features.size(); i++) pw2.print(features.get(i) + "\n");
+		pw2.close();
+		return;
+	}
+
+	/**
+	 * Saves a list of selected features in a table of an HTML file.
+	 * 
+	 * @param features - the feature list to be stored
+	 * @param path - the path of the file  to be used
+	 * @param tableHeader - string used as table header
+	 * @throws IOException
+	 */
+	private void saveSelectedFeaturesHTML(ArrayList<String> features, String path, String tableHeader) throws IOException {
+		String s=null;
+		PrintWriter pw4 = new PrintWriter(new BufferedWriter(new FileWriter(path)));
+		
+		if(features != null){
+			s = "<table border=\"2\" align=\"center\">";
+//			s = "<table border=" + String.valueOf('"') + String.valueOf('2') + String.valueOf('"') + "align=" + String.valueOf('"') + "center" + String.valueOf('"') + ">";
+			s += "<tr><th>n.</th><th>"+tableHeader+"</th></tr>";
+			
+			for(int i = 0; i < features.size(); i++)
+				s += "<tr><td>" +i+ "</td><td>" + features.get(i) + "</td></tr>";
+			
+			s += "</table>";		
+			pw4.print(s);	
+			pw4.close();
+		}
+	}
+	
+	/** Carica il progetto
+	 * 
+	 * @param s stringa contenente la path del progetto da caricare
+	 * 
+	 * @return al ArrayList contenenti i nomi dei file del progetto
+	 */
+	public ArrayList <String> loadProject(String s){
+		if(s == null) return null;
+
+		parserXML = new ParserXML();
+		
+		SAXParserFactory spf = SAXParserFactory.newInstance();
+		
+		try{
+			fileProject = new ArrayList <ModelFile> ();
+			
+			workerProject = new ArrayList <Thread> ();
+			
+			nameProject = s.substring(0, s.length() - 4);
+			pathProject = "../"+savedProjectsDir+"/" + nameProject;
+			pathXML = pathProject + "/" + nameProject + ".xml"; 
+			pathCommonalitiesCandidates = pathProject + "/CommanalitiesC.log";
+			pathCommonalitiesSelected = pathProject + "/CommanalitiesS.log";
+			pathCommonalitiesSelectedHTML = pathProject + "/CommanalitiesS.html";
+
+			pathVariabilitiesCandidates = pathProject + "/VariabilitiesC.log";
+			pathVariabilitiesSelected = pathProject + "/VariabilitiesS.log";
+			pathVariabilitiesSelectedHTML = pathProject + "/VariabilitiesS.html";
+			
+			pathRelevantTerms = pathProject + "/RelevantTerms.log";
+			
+			SAXParser parser = spf.newSAXParser();
+			parser.parse(pathXML, parserXML);
+			
+			fileProject = new ArrayList <ModelFile> ();
+			
+			for(int i = 0; i < parserXML.readPathInput().size(); i++){		
+				fileProject.add(
+						new ModelFile(
+								parserXML.readPathInput().get(i), pathProject));
+				workerProject.add(
+						new Thread(
+								fileProject.get(i)));
+			}	
+			
+			commonalitiesCandidates = new ArrayList <String> ();
+			commonalitiesSelected = new ArrayList <String> ();
+			variabilitiesCandidates = new ArrayList <String> ();
+			variabilitiesSelected = new ArrayList <String> ();
+			
+			loadFeaturesList(commonalitiesCandidates, pathCommonalitiesCandidates);
+			loadFeaturesList(commonalitiesSelected, pathCommonalitiesSelected);
+			loadFeaturesList(variabilitiesCandidates, pathVariabilitiesCandidates);
+			loadFeaturesList(variabilitiesSelected, pathVariabilitiesSelected);
+			
+			if(!loadProjectRelevantTerms()) System.out.println("Relevant terms files corrupted!");
+			
+			loadProjectModelsState();
+			
+			//building global structures to calculate terms colors, after load
+			buildColorStructures();
+            
+			return parserXML.readNameFile();
+		} 
+		catch (ParserConfigurationException e) 
+		{
+			System.out.println("Exception loadProject: " + e.getMessage());
+			return null;
+		}
+		catch (SAXException e) 
+		{
+			System.out.println("Exception loadProject: " + e.getMessage());
+			return null;
+		}
+		catch (IOException e) 
+		{
+			System.out.println("Exception loadProject: " + e.getMessage());
+			return null;
+		} 
+	}
+
+	/**
+	 * Loads a list of features from a file, one per line.
+	 * 
+	 * @param features - the feature list to be loaded
+	 * @param path - the path of the file to be used
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	private void loadFeaturesList(ArrayList<String> features, String path)
+			throws FileNotFoundException, IOException {
+		String s1=null;		
+		BufferedReader br1 = new BufferedReader(new FileReader(path));
+		while( (s1 = br1.readLine()) != null ) features.add(s1);
+		br1.close();
+		return;
+	}	
+
+	/**
+	 * Loads the models state from files.
+	 * 
+	 * @throws IOException
+	 */
+	private void loadProjectModelsState() throws IOException {
+		for(ModelFile model : fileProject) model.loadState();
+	}
+
+	/**
+	 * Loads occurrences of relevant terms for every input files from a file, one term per line.
+	 * 
+	 * @return - true if successful, false otherwise
+	 * @throws IOException
+	 */
+	private boolean loadProjectRelevantTerms() throws IOException {
+		String termName=null;
+		String fileName=null;
+		String[] tokens=null;
+		HashMap<String, ArrayList<Integer>> fileMap=null;
+		ArrayList<Integer> occurrences=null;
+		BufferedReader br1 =null;
+		
+		String s1=null;		
+		
+		try{
+		  br1 = new BufferedReader(new FileReader(pathRelevantTerms));			
+		}catch(FileNotFoundException e){ return true;}
+		relevantTerms=new HashMap<String, HashMap<String,ArrayList<Integer>>>();
+		
+		while( (s1 = br1.readLine()) != null ){
+		  fileMap=new HashMap<String, ArrayList<Integer>>();
+		  tokens=s1.split(" ");
+		  
+		  /* ***VERBOSE*** */
+		  if(verbose3){
+			System.out.println("Stampo i tokens!");
+			for(String str:tokens) System.out.println(str);
+			termName=tokens[0];
+			System.out.println("Trovato termine: "+termName);
+		  }
+		  /* ***VERBOSE*** */
+
+		  for(int i=1;i<tokens.length; ++i){
+			//a new file name has been found
+			if(tokens[i].compareTo("f:")==0){ 
+			  occurrences=new ArrayList<Integer>();
+			  
+			  ++i; fileName=tokens[i]; ++i;
+			  while(tokens[i].compareTo("i:")!=0){
+				fileName+=" "+tokens[i]; ++i;
+			  }
+			  
+			  if(verbose3) System.out.println("\tTrovato file: "+fileName);
+			  if(tokens[i].compareTo("i:")!=0){
+				  if(verbose3) System.out.println("Uncorrect format for relevant terms file");
+				  br1.close();
+				  return false;
+			  }
+			  else ++i;
+			  //loading occurrence indexes of this file
+			  for(; i<tokens.length; ++i){
+				if(verbose3) System.out.println("***Token: "+tokens[i]);
+				if(tokens[i].compareTo("f:")==0){
+				  fileMap.put(fileName, occurrences);
+				  break;
+				}
+				occurrences.add(Integer.valueOf(tokens[i]));
+				if(verbose3) System.out.println("\t\tTrovata occorrenza: "+tokens[i]);
+			  }
+			}
+			fileMap.put(fileName, occurrences);
+		  }
+		  relevantTerms.put(termName, fileMap);
+		}
+		br1.close();
+		return true;
+	}
+	
 }
