@@ -6,6 +6,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -625,18 +626,33 @@ public class EditorModel extends Observable{
 	 * @param pathProject - the directory path where to save the model
 	 * @param s - the name of the file in which to save the model
 	 */
-	public ArrayList<String> saveModel(String pathProject, String s) {
+	public ArrayList<String> saveModel(String pathProject, final String s) {
 	  String xml = null;
-	  String savePathPrefix = pathProject + "/" + s + "_DiagModel"; 
+	  final String savePathPrefix = pathProject + "/" + s + "_DiagModel"; 
 	  String savePathSuffix= ".xml";
 	  String date=null;
 	  ArrayList<String> modelPaths=new ArrayList<String>();
-
+	  File[] oldSaveFiles=null;
+	  File saveDir=null;
+	  
 	  //calculating save time in a 'yyyyy-mm-dd hh:mm' format
 	  Calendar cal= Calendar.getInstance();
 	  date=cal.get(Calendar.YEAR)+"-"+cal.get(Calendar.MONTH+1)
 			  +"-"+cal.get(Calendar.DAY_OF_MONTH)+" "+cal.get(Calendar.HOUR_OF_DAY)+":"+cal.get(Calendar.MINUTE);
 
+	  //cleaning previous model save files
+	  System.out.println("About to delete files starting with: "+s + "_DiagModel");
+	  saveDir = new File(pathProject);
+	  oldSaveFiles = saveDir.listFiles(new FilenameFilter() {
+	    public boolean accept(File dir, String name) {
+	      return name.startsWith(s + "_DiagModel") && name.endsWith(".xml");
+	    }
+	  });
+	  for(File oldFile : oldSaveFiles){
+		  System.out.println("About to delete file: "+oldFile.getName()
+			+"\nDelete done?"+(oldFile.delete()?"yes":"no"));
+	  }
+	  
 	  for(Map.Entry<String,FeatureNode> feature : unrootedFeatures.entrySet()){
 	    //skipping features that have a parent feature
 		if(feature.getValue().getParent()!=null) continue;

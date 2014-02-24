@@ -115,10 +115,54 @@ public class EditorView extends JFrame implements Observer{
 	private static boolean debug=true;
 	private static boolean debug2=false;
 	private static boolean debug3=false;
-	private static boolean debug4=true;
+	private static boolean debug4=false;
 //	private static Robot eventsRobot = null;
 	
 	private static final long serialVersionUID = 1L;
+
+	/** Class used to implement the draw area of the editor . */
+	class ScrollLayeredPane extends JLayeredPane implements Scrollable{
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public Dimension getPreferredScrollableViewportSize() {
+	      return getPreferredSize();
+		}
+
+		@Override
+		public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+		  if(orientation==SwingConstants.HORIZONTAL)
+			return getWidth()/15;
+		  else return getHeight()/15;
+		}
+
+		@Override
+		public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+		  if(orientation==SwingConstants.HORIZONTAL)
+			return getWidth()/5;
+		  else return getHeight()/5;
+		}
+
+		@Override
+		public boolean getScrollableTracksViewportWidth() {
+		  return false;
+		}
+
+		@Override
+		public boolean getScrollableTracksViewportHeight() {
+		  return false;
+		}
+		
+		@Override
+		public void paint(Graphics g){
+		  Graphics2D g2 = (Graphics2D)g.create();		
+		  paintComponent(g);
+		  paintBorder(g);
+		  drawAllConnectors(g2);
+		  paintChildren(g);//panels in the diagram panel are drawn over lines			  
+		}
+	}
 
 	/** Class used to implement the editor contained in the frame. */
 	class EditorSplitPane extends JSplitPane{
@@ -288,6 +332,10 @@ public class EditorView extends JFrame implements Observer{
 	private int lastPositionX=-1;
 	/** Y coordinate of last mouse pression*/
 	private int lastPositionY=-1;
+	/** X amount of last mouse move*/
+	private int lastMoveX=0;
+	/** Y amount of last mouse move*/
+	private int lastMoveY=0;
 	
 	/** Top level frame*/
 	private JFrame frameRoot = null;//frame root		
@@ -307,12 +355,12 @@ public class EditorView extends JFrame implements Observer{
 	private int verticalShift=0;
 	
 	/** The panel containing the diagram */
-	private JLayeredPane diagramPanel=null;
+//	private JLayeredPane diagramPanel=null;
+	/** The panel containing the diagram */
+	private ScrollLayeredPane diagramPanel=null;	
 	
 	/** The JScrollPane containing the diagramPanel */
 	private JScrollPane diagramScroller=null;
-	
-//	private ScrollLayeredPane diagramPanel=null;
 	
 	/** The panel containing the tools */
 	private JPanel toolsPanel=null;
@@ -340,7 +388,11 @@ public class EditorView extends JFrame implements Observer{
 	private Point startSelectionRect=new Point(), endSelectionRect=new Point();
 	/** Variable used to draw selection rectangle on the diagram */
 	private Rectangle selectionRect=new Rectangle();
-	
+	/** Variable used to track elements that collided with horizontal border during group drag*/
+	private ArrayList<JComponent> collidedElementX=new ArrayList<JComponent>();
+	/** Variable used to track elements that collided with vertical border during group drag*/
+	private ArrayList<JComponent> collidedElementY=new ArrayList<JComponent>();
+
 	public EditorView(){}
 	
 	public EditorView(ArrayList<String> commonalitiesSelected,
@@ -513,21 +565,21 @@ public class EditorView extends JFrame implements Observer{
 		}
 
 		//creating diagram panel, that will be inserted in the scroller
-		diagramPanel = new JLayeredPane(){
-
-		  private static final long serialVersionUID = 1L;
-			
-		  @Override
-		  public void paint(Graphics g){
-			Graphics2D g2 = (Graphics2D)g.create();		
-			paintComponent(g);
-			paintBorder(g);
-			drawAllConnectors(g2);
-			paintChildren(g);//panels in the diagram panel are drawn over lines			  
-		  }
-		};
+//		diagramPanel = new JLayeredPane(){
+//
+//		  private static final long serialVersionUID = 1L;
+//			
+//		  @Override
+//		  public void paint(Graphics g){
+//			Graphics2D g2 = (Graphics2D)g.create();		
+//			paintComponent(g);
+//			paintBorder(g);
+//			drawAllConnectors(g2);
+//			paintChildren(g);//panels in the diagram panel are drawn over lines			  
+//		  }
+//		};
 		
-//		diagramPanel = new ScrollLayeredPane();
+		diagramPanel = new ScrollLayeredPane();
 		diagramPanel.setName(diagramPanelName);
 //		diagramPanel = new OrderedListPaintJPanel();
 //		diagramPanel = new OrderedListPaintJPanel(visibleOrderDraggables);
@@ -1315,56 +1367,188 @@ public class EditorView extends JFrame implements Observer{
 	 * @param e - the current MouseEvent
 	 */
 	public void dragSelectionGroup(MouseEvent e) {
-		  int moveX=0, moveY=0;
-		  int adjustedMoveX=0, adjustedMoveY=0;	  
-		  int newLocationX=0, newLocationY=0;
-		  boolean normalUpdateX=true, normalUpdateY=true;
+	  int moveX=0, moveY=0;
+	  int adjustedMoveX=0, adjustedMoveY=0;	  
+	  int newLocationX=0, newLocationY=0;
+	  boolean leftCollision=false, upperCollision=false;
+	  boolean rightCollision=false, bottomCollision=false;
+	  JComponent nearestElementX=null, nearestElementY=null;
+	  Point location=null;
 
-		  moveX = e.getX()-lastPositionX;
-		  moveY = e.getY()-lastPositionY;
-		  
+	  moveX = e.getX()-lastPositionX;
+	  moveY = e.getY()-lastPositionY;
 
-		for(JComponent element : selectionGroupFocused){		  
-		  newLocationX=element.getX()+moveX;
-		  newLocationY=element.getY()+moveY;
-		  
-		  //the feature must not be dragged beyond the borders of the diagram panel
-		  
-		  //checking horizontal borders
-		  if( newLocationX<0 ){
-			newLocationX=1;
-			normalUpdateX=false;
-			adjustedMoveX=newLocationX-element.getX();
-		  }
-		  if( diagramPanel.getWidth()<=newLocationX+element.getWidth() ){
-			newLocationX=diagramPanel.getWidth()-element.getWidth()-1;
-			normalUpdateX=false;
-			adjustedMoveX=newLocationX-element.getX();
-		  }
-		  
-		  //checking vertical borders
-		  if( newLocationY<0 ){
-			newLocationY=1;
-			normalUpdateY=false;
-			adjustedMoveY=newLocationY-element.getY();
-		  }
-		  if( diagramPanel.getHeight()<=newLocationY+element.getHeight() ){
-			newLocationY=diagramPanel.getHeight()-element.getHeight()-1;
-			normalUpdateY=false;
-			adjustedMoveY=newLocationY-element.getY();
-		  }
+	  collidedElementX.clear();
+	  collidedElementY.clear();
 
-		  //adjusting last drag position depending on eventual border collisions
-		  if(normalUpdateX) lastPositionX=e.getX();
-		  else lastPositionX=lastPositionX+adjustedMoveX;
-
-		  if(normalUpdateY) lastPositionY=e.getY();
-		  else lastPositionY=lastPositionY+adjustedMoveY;
-
-		  if(!normalUpdateX&&!normalUpdateY) break;
-		  element.setLocation(newLocationX, newLocationY);
+	  //checking if an element of the group collides with borders
+	  for(JComponent element : selectionGroupFocused){	
+		newLocationX=element.getX()+moveX;
+		newLocationY=element.getY()+moveY;
+		if(newLocationX<0){
+		  leftCollision=true; collidedElementX.add(element);
 		}
-		frameRoot.repaint();	
+		if(newLocationX+element.getWidth()>diagramPanel.getWidth()){
+		  rightCollision=true; collidedElementX.add(element);
+		}
+		if(newLocationY<0){
+		  upperCollision=true; collidedElementY.add(element);
+		}
+		if(newLocationY+element.getHeight()>diagramPanel.getHeight()){
+		  bottomCollision=true; collidedElementY.add(element);
+		}
+		System.out.println("Component "+element.getName()+" collisions:\n"
+			+(leftCollision? "left ":"")+(rightCollision? "right ":"")
+			+(upperCollision? "upper ":"")+(bottomCollision? "bottom ":""));
+	  }
+		  
+	  //if there is a collision, the element nearest to the border is used for group move
+	  if(leftCollision){
+		nearestElementX=collidedElementX.get(0);
+		for(int k=1; k<collidedElementX.size(); ++k)
+		  if(collidedElementX.get(k).getX()< nearestElementX.getX()) nearestElementX=collidedElementX.get(k);
+			
+		newLocationX=nearestElementX.getX()+moveX;
+			
+		//resizing diagram and moving out-of-selection components
+		if(newLocationX<-10 && moveX<=lastMoveX){
+		  Dimension diagramSize= diagramPanel.getPreferredSize();
+		  diagramSize.width+=20;
+		  diagramPanel.setPreferredSize(diagramSize);
+		  diagramPanel.revalidate();
+		  shiftAllDraggablesButGroupHorizontal(20, selectionGroupFocused);
+		}
+		adjustedMoveX=-nearestElementX.getX();
+		lastPositionX=lastPositionX+adjustedMoveX;
+	  }
+	  if(rightCollision){
+		nearestElementX=collidedElementX.get(0);
+		for(int k=1; k<collidedElementX.size(); ++k)
+		  if(collidedElementX.get(k).getX()+collidedElementX.get(k).getWidth()>
+		  	 nearestElementX.getX()+nearestElementX.getWidth()) nearestElementX=collidedElementX.get(k);				
+			
+		newLocationX=nearestElementX.getX()+moveX;
+			
+		//resizing diagram and setting scrollbar to max
+		if(newLocationX+nearestElementX.getWidth()>diagramPanel.getWidth()+10 
+		   && moveX>=lastMoveX){
+		  Dimension diagramSize= diagramPanel.getPreferredSize();
+		  diagramSize.width+=20;
+		  diagramPanel.setPreferredSize(diagramSize);
+		  diagramPanel.revalidate();
+		  diagramScroller.getHorizontalScrollBar().setValue(
+				  diagramScroller.getHorizontalScrollBar().getMaximum());				
+		}
+		adjustedMoveX=diagramPanel.getWidth()-(nearestElementX.getX()+nearestElementX.getWidth());
+		lastPositionX=lastPositionX+adjustedMoveX;
+	  }
+	  if(upperCollision){
+		nearestElementY=collidedElementY.get(0);
+		for(int k=1; k<collidedElementY.size(); ++k)
+		  if(collidedElementY.get(k).getY()< nearestElementY.getY()) nearestElementY=collidedElementY.get(k);
+			
+		newLocationY=nearestElementY.getY()+moveY;
+			
+		//resizing diagram and moving out-of-selection components
+		if(newLocationY<-10 && moveY<=lastMoveY){
+		  Dimension diagramSize= diagramPanel.getPreferredSize();
+		  diagramSize.height+=20;
+		  diagramPanel.setPreferredSize(diagramSize);
+		  diagramPanel.revalidate();
+		  shiftAllDraggablesButGroupVertical(20, selectionGroupFocused);
+		}
+		adjustedMoveY=-nearestElementY.getY();
+		lastPositionY=lastPositionY+adjustedMoveY;
+	  }
+	  if(bottomCollision){
+		nearestElementY=collidedElementY.get(0);
+		for(int k=1; k<collidedElementY.size(); ++k)
+		  if( collidedElementY.get(k).getY()+collidedElementY.get(k).getHeight()>
+		  	  nearestElementY.getY()+nearestElementY.getHeight()) nearestElementY=collidedElementY.get(k);				
+			
+		newLocationY=nearestElementY.getY()+moveY;
+			
+		//resizing diagram and setting scrollbar to max
+		if(newLocationY+nearestElementY.getHeight()>diagramPanel.getHeight()+10 
+		   && moveY>=lastMoveY){
+		  Dimension diagramSize= diagramPanel.getPreferredSize();
+		  diagramSize.height+=20;
+		  diagramPanel.setPreferredSize(diagramSize);
+		  diagramPanel.revalidate();
+		  diagramScroller.getVerticalScrollBar().setValue(
+				  diagramScroller.getVerticalScrollBar().getMaximum());				
+		}
+		adjustedMoveY=diagramPanel.getHeight()-(nearestElementY.getY()+nearestElementY.getHeight());
+		lastPositionY=lastPositionY+adjustedMoveY;
+	  }		  
+
+	  System.out.println("nearestElementX "+nearestElementX+" newLocationX: "+newLocationX);
+	  System.out.println("nearestElementY "+nearestElementY+" newLocationY: "+newLocationY);
+		
+	  if(!leftCollision && !rightCollision) adjustedMoveX=moveX;
+	  if(!upperCollision && !bottomCollision) adjustedMoveY=moveY;
+
+	  System.out.println("adjustedMoveX "+adjustedMoveX+" moveX: "+moveX);
+	  System.out.println("adjustedMoveY "+adjustedMoveY+" moveY: "+moveY);
+	  
+	  //moving selection components
+	  if(adjustedMoveX!=0 || adjustedMoveY!=0) for(JComponent element : selectionGroupFocused){		
+		location=element.getLocation();
+		location.x+=adjustedMoveX;
+		location.y+=adjustedMoveY;
+		element.setLocation(location);		  
+	  }
+			  
+			  
+//		for(JComponent element : selectionGroupFocused){		  
+//		  newLocationX=element.getX()+moveX;
+//		  newLocationY=element.getY()+moveY;
+//		  
+//		  //the feature must not be dragged beyond the borders of the diagram panel
+//		  
+//		  //checking horizontal borders
+//		  if( newLocationX<0 ){
+//			newLocationX=1;
+//			leftCollision=false;
+//			adjustedMoveX=newLocationX-element.getX();
+//		  }
+//		  if( diagramPanel.getWidth()<=newLocationX+element.getWidth() ){
+//			newLocationX=diagramPanel.getWidth()-element.getWidth()-1;
+//			leftCollision=false;
+//			adjustedMoveX=newLocationX-element.getX();
+//		  }
+//		  
+//		  //checking vertical borders
+//		  if( newLocationY<0 ){
+//			newLocationY=1;
+//			upperCollision=false;
+//			adjustedMoveY=newLocationY-element.getY();
+//		  }
+//		  if( diagramPanel.getHeight()<=newLocationY+element.getHeight() ){
+//			newLocationY=diagramPanel.getHeight()-element.getHeight()-1;
+//			upperCollision=false;
+//			adjustedMoveY=newLocationY-element.getY();
+//		  }
+//
+//		  //adjusting last drag position depending on eventual border collisions
+//		  if(leftCollision) lastPositionX=e.getX();
+//		  else lastPositionX=lastPositionX+adjustedMoveX;
+//
+//		  if(upperCollision) lastPositionY=e.getY();
+//		  else lastPositionY=lastPositionY+adjustedMoveY;
+//
+//		  if(!leftCollision&&!upperCollision) break;
+//		  element.setLocation(newLocationX, newLocationY);
+//		}
+//		
+
+	  if(!leftCollision && !rightCollision) lastPositionX=e.getX();
+	  if(!upperCollision && !bottomCollision) lastPositionY=e.getY();
+
+	  lastMoveX=moveX;
+	  lastMoveY=moveY;
+		
+	  frameRoot.repaint();	
 		
 	}
 
@@ -1376,70 +1560,68 @@ public class EditorView extends JFrame implements Observer{
 	 */
 	private void dragDiagramElement(JComponent element, MouseEvent e) {
 		  int moveX=0, moveY=0;
-		  int adjustedMoveX=0, adjustedMoveY=0;	  
 		  int newLocationX=0, newLocationY=0;
 		  boolean normalUpdateX=true, normalUpdateY=true;
-		  int enlargeX=0, enlargeY=0;
 
 		  moveX = e.getX()-lastPositionX;
 		  moveY = e.getY()-lastPositionY;
 		  newLocationX=element.getX()+moveX;
 		  newLocationY=element.getY()+moveY;
 		  
-		  //the feature must not be dragged beyond the borders of the diagram panel
-
 		  //checking horizontal borders
 		  if( newLocationX<0 ){
-			Dimension diagramSize= diagramPanel.getPreferredSize();
-			enlargeX=-newLocationX;
-			diagramSize.width+=enlargeX;
-			diagramPanel.setPreferredSize(diagramSize);
-			diagramPanel.setSize(diagramSize);
-			shiftAllDraggablesButOneHorizontal(enlargeX, element);
+			if(newLocationX<-10 && moveX<=lastMoveX){
+			  Dimension diagramSize= diagramPanel.getPreferredSize();
+			  diagramSize.width+=20;
+			  diagramPanel.setPreferredSize(diagramSize);
+			  diagramPanel.revalidate();
+			  shiftAllDraggablesButOneHorizontal(20, element);
+			}
 			newLocationX=0;
+			lastPositionX=lastPositionX-element.getX();
+			normalUpdateX=false;
 		  }
-		  if( diagramPanel.getWidth()<=newLocationX+element.getWidth() ){
-			Dimension diagramSize= diagramPanel.getPreferredSize();
-			enlargeX=newLocationX+element.getWidth()-diagramPanel.getWidth();
-//			enlargeX=moveX+20;
-			diagramSize.width+=enlargeX;
-			diagramPanel.setPreferredSize(diagramSize);
-			diagramPanel.setSize(diagramSize);
-			diagramScroller.getHorizontalScrollBar().setValue(
-					enlargeX+diagramScroller.getHorizontalScrollBar().getValue());
-			
-//			newLocationX=diagramPanel.getWidth()-element.getWidth()-1;
-//			normalUpdateX=false;
-//			adjustedMoveX=newLocationX-element.getX();
+		  else if( newLocationX+element.getWidth()>diagramPanel.getWidth() ){
+			if( newLocationX+element.getWidth()>diagramPanel.getWidth()+10 
+				&& moveX>=lastMoveX){
+			  Dimension diagramSize= diagramPanel.getPreferredSize();
+			  diagramSize.width+=20;
+			  diagramPanel.setPreferredSize(diagramSize);
+			  diagramPanel.revalidate();
+			  diagramScroller.getHorizontalScrollBar().setValue(
+				diagramScroller.getHorizontalScrollBar().getMaximum());				
+			}
+			newLocationX=diagramPanel.getWidth()-element.getWidth();
+			lastPositionX=lastPositionX+(newLocationX-element.getX());
+			normalUpdateX=false;
 		  }
+		  
 		  //checking vertical borders
-
 		  if( newLocationY<0 ){
-			Dimension diagramSize= diagramPanel.getPreferredSize();
-			enlargeY=-newLocationY;
-			diagramSize.height+=enlargeY;
-			diagramPanel.setPreferredSize(diagramSize);
-			diagramPanel.setSize(diagramSize);
-			shiftAllDraggablesButOneVertical(enlargeY, element);
+			if(newLocationY<-10 && moveY<=lastMoveY){
+			  Dimension diagramSize= diagramPanel.getPreferredSize();
+			  diagramSize.height+=20;
+			  diagramPanel.setPreferredSize(diagramSize);
+			  diagramPanel.revalidate();
+			  shiftAllDraggablesButOneVertical(20, element);
+			}
 			newLocationY=0;
-//			newLocationY=1;
-//			normalUpdateY=false;
-//			adjustedMoveY=newLocationY-element.getY();
+			lastPositionY=lastPositionY-element.getY();
+			normalUpdateY=false;
 		  }
-
-		  if( diagramPanel.getHeight()<=newLocationY+element.getHeight() ){
-			Dimension diagramSize= diagramPanel.getPreferredSize();
-			enlargeY=newLocationY+element.getHeight()-diagramPanel.getHeight();
-//			enlargeY=moveY+20;
-			diagramSize.height+=enlargeY;
-			diagramPanel.setPreferredSize(diagramSize);
-			diagramPanel.setSize(diagramSize);
-			diagramScroller.getVerticalScrollBar().setValue(
-					enlargeY+diagramScroller.getVerticalScrollBar().getValue());
-
-//			newLocationY=diagramPanel.getHeight()-element.getHeight()-1;
-//			normalUpdateY=false;
-//			adjustedMoveY=newLocationY-element.getY();
+		  else if( newLocationY+element.getHeight()>=diagramPanel.getHeight() ){
+			if( newLocationY+element.getHeight()>diagramPanel.getHeight()+10 
+				&& moveY>=lastMoveY){
+			  Dimension diagramSize= diagramPanel.getPreferredSize();
+			  diagramSize.height+=20;
+			  diagramPanel.setPreferredSize(diagramSize);
+			  diagramPanel.revalidate();
+			  diagramScroller.getVerticalScrollBar().setValue(
+					  diagramScroller.getVerticalScrollBar().getMaximum());				
+			}
+			newLocationY=diagramPanel.getHeight()-element.getHeight();
+			lastPositionY=lastPositionY+(newLocationY-element.getY());
+			normalUpdateY=false;			  
 		  }
 
 		  /* ***DEBUG*** */
@@ -1450,16 +1632,11 @@ public class EditorView extends JFrame implements Observer{
 		  }
 		  /* ***DEBUG*** */
 		  
-		  if(newLocationX>0) lastPositionX=e.getX();
-		  if(newLocationY>0) lastPositionY=e.getY();
-		  
-//		  //adjusting last drag position depending on eventual border collisions
-//		  if(normalUpdateX) lastPositionX=e.getX();
-//		  else lastPositionX=lastPositionX+adjustedMoveX;
-//
-//		  if(normalUpdateY) lastPositionY=e.getY();
-//		  else lastPositionY=lastPositionY+adjustedMoveY;
-		  
+		  //adjusting last drag position depending on eventual border collisions
+		  if(normalUpdateX) lastPositionX=e.getX();
+		  if(normalUpdateY) lastPositionY=e.getY();
+		  lastMoveX=moveX;
+		  lastMoveY=moveY;
 		  element.setLocation(newLocationX, newLocationY);
 	}
 
@@ -1485,6 +1662,27 @@ public class EditorView extends JFrame implements Observer{
 	}
 
 	/**
+	 * Shifts horizontally the position of all draggables in the diagram panel.<br>
+	 * If group is not null, its elements are not shifted.
+	 * 
+	 * @param enlargeX - the amount of horizontal shift
+	 * @param group - the ArrayList<JComponent> of elements that must not be shifted
+	 */
+	private void shiftAllDraggablesButGroupHorizontal(int enlargeX, ArrayList<JComponent> group) {
+	  OrderedListNode tmp= visibleOrderDraggables.getFirst();
+	  Point location=null;
+	  while (tmp!=null){
+		if( !group.contains((JComponent)tmp.getElement()) 
+			&& ((JComponent)tmp.getElement()).getParent().getName().startsWith(EditorView.diagramPanelName)){
+		  location=((JComponent)tmp.getElement()).getLocation();
+		  location.x+=enlargeX;
+		  ((JComponent)tmp.getElement()).setLocation(location);
+		}
+		tmp=tmp.getNext();
+	  }	
+	}
+
+	/**
 	 * Shifts vertically the position of all draggables in the diagram panel.<br>
 	 * If element is not null and is a draggable, it is not shifted.
 	 * 
@@ -1503,6 +1701,27 @@ public class EditorView extends JFrame implements Observer{
 		}
 		tmp=tmp.getNext();
 	  }		
+	}
+
+	/**
+	 * Shifts vertically the position of all draggables in the diagram panel.<br>
+	 * If group is not null, its elements are not shifted.
+	 * 
+	 * @param enlargeY - the amount of vertical shift
+	 * @param group - the ArrayList<JComponent> of elements that must not be shifted
+	 */
+	private void shiftAllDraggablesButGroupVertical(int enlargeY, ArrayList<JComponent> group) {
+	  OrderedListNode tmp= visibleOrderDraggables.getFirst();
+	  Point location=null;
+	  while (tmp!=null){
+		if( !group.contains((JComponent)tmp.getElement()) 
+			&& ((JComponent)tmp.getElement()).getParent().getName().startsWith(EditorView.diagramPanelName)){
+		  location=((JComponent)tmp.getElement()).getLocation();
+		  location.y+=enlargeY;
+		  ((JComponent)tmp.getElement()).setLocation(location);
+		}
+		tmp=tmp.getNext();
+	  }	
 	}
 
 	/**
