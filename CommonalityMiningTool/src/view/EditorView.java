@@ -1372,16 +1372,20 @@ public class EditorView extends JFrame implements Observer{
 	  int newLocationX=0, newLocationY=0;
 	  boolean leftCollision=false, upperCollision=false;
 	  boolean rightCollision=false, bottomCollision=false;
+	  boolean mustResizeX=false, mustResizeY=false;
+	  boolean mustScrollX=false, mustScrollY=false;
+	  boolean mustShiftX=false, mustShiftY=false;
 	  JComponent nearestElementX=null, nearestElementY=null;
 	  Point location=null;
-
+	  Dimension diagramSize=null;
+	  
+	  //calculating move
 	  moveX = e.getX()-lastPositionX;
 	  moveY = e.getY()-lastPositionY;
 
+	  //checking if some elements in the group collide with borders
 	  collidedElementX.clear();
 	  collidedElementY.clear();
-
-	  //checking if an element of the group collides with borders
 	  for(JComponent element : selectionGroupFocused){	
 		newLocationX=element.getX()+moveX;
 		newLocationY=element.getY()+moveY;
@@ -1412,11 +1416,12 @@ public class EditorView extends JFrame implements Observer{
 			
 		//resizing diagram and moving out-of-selection components
 		if(newLocationX<-10 && moveX<=lastMoveX){
-		  Dimension diagramSize= diagramPanel.getPreferredSize();
-		  diagramSize.width+=20;
-		  diagramPanel.setPreferredSize(diagramSize);
-		  diagramPanel.revalidate();
-		  shiftAllDraggablesButGroupHorizontal(20, selectionGroupFocused);
+		  mustResizeX=true; mustShiftX=true;
+//		  Dimension diagramSize= diagramPanel.getPreferredSize();
+//		  diagramSize.width+=20;
+//		  diagramPanel.setPreferredSize(diagramSize);
+//		  diagramPanel.revalidate();
+//		  shiftAllDraggablesButGroupHorizontal(20, selectionGroupFocused);
 		}
 		adjustedMoveX=-nearestElementX.getX();
 		lastPositionX=lastPositionX+adjustedMoveX;
@@ -1430,14 +1435,14 @@ public class EditorView extends JFrame implements Observer{
 		newLocationX=nearestElementX.getX()+moveX;
 			
 		//resizing diagram and setting scrollbar to max
-		if(newLocationX+nearestElementX.getWidth()>diagramPanel.getWidth()+10 
-		   && moveX>=lastMoveX){
-		  Dimension diagramSize= diagramPanel.getPreferredSize();
-		  diagramSize.width+=20;
-		  diagramPanel.setPreferredSize(diagramSize);
-		  diagramPanel.revalidate();
-		  diagramScroller.getHorizontalScrollBar().setValue(
-				  diagramScroller.getHorizontalScrollBar().getMaximum());				
+		if(newLocationX+nearestElementX.getWidth()>diagramPanel.getWidth()+10 && moveX>=lastMoveX){
+		  mustResizeX=true; mustScrollX=true;
+//		  Dimension diagramSize= diagramPanel.getPreferredSize();
+//		  diagramSize.width+=20;
+//		  diagramPanel.setPreferredSize(diagramSize);
+//		  diagramPanel.revalidate();
+//		  diagramScroller.getHorizontalScrollBar().setValue(
+//				  diagramScroller.getHorizontalScrollBar().getMaximum());				
 		}
 		adjustedMoveX=diagramPanel.getWidth()-(nearestElementX.getX()+nearestElementX.getWidth());
 		lastPositionX=lastPositionX+adjustedMoveX;
@@ -1451,11 +1456,12 @@ public class EditorView extends JFrame implements Observer{
 			
 		//resizing diagram and moving out-of-selection components
 		if(newLocationY<-10 && moveY<=lastMoveY){
-		  Dimension diagramSize= diagramPanel.getPreferredSize();
-		  diagramSize.height+=20;
-		  diagramPanel.setPreferredSize(diagramSize);
-		  diagramPanel.revalidate();
-		  shiftAllDraggablesButGroupVertical(20, selectionGroupFocused);
+		  mustResizeY=true; mustShiftY=true;
+//		  Dimension diagramSize= diagramPanel.getPreferredSize();
+//		  diagramSize.height+=20;
+//		  diagramPanel.setPreferredSize(diagramSize);
+//		  diagramPanel.revalidate();
+//		  shiftAllDraggablesButGroupVertical(20, selectionGroupFocused);
 		}
 		adjustedMoveY=-nearestElementY.getY();
 		lastPositionY=lastPositionY+adjustedMoveY;
@@ -1469,18 +1475,35 @@ public class EditorView extends JFrame implements Observer{
 		newLocationY=nearestElementY.getY()+moveY;
 			
 		//resizing diagram and setting scrollbar to max
-		if(newLocationY+nearestElementY.getHeight()>diagramPanel.getHeight()+10 
-		   && moveY>=lastMoveY){
-		  Dimension diagramSize= diagramPanel.getPreferredSize();
-		  diagramSize.height+=20;
-		  diagramPanel.setPreferredSize(diagramSize);
-		  diagramPanel.revalidate();
-		  diagramScroller.getVerticalScrollBar().setValue(
-				  diagramScroller.getVerticalScrollBar().getMaximum());				
+		if(newLocationY+nearestElementY.getHeight()>diagramPanel.getHeight()+10 && moveY>=lastMoveY){
+		  mustResizeY=true; mustScrollY=true;
+//		  Dimension diagramSize= diagramPanel.getPreferredSize();
+//		  diagramSize.height+=20;
+//		  diagramPanel.setPreferredSize(diagramSize);
+//		  diagramPanel.revalidate();
+//		  diagramScroller.getVerticalScrollBar().setValue(
+//				  diagramScroller.getVerticalScrollBar().getMaximum());				
 		}
 		adjustedMoveY=diagramPanel.getHeight()-(nearestElementY.getY()+nearestElementY.getHeight());
 		lastPositionY=lastPositionY+adjustedMoveY;
 	  }		  
+	  
+	  //resizing diagram if necessary
+	  if(mustResizeX || mustResizeY){
+		diagramSize= diagramPanel.getPreferredSize();
+		if(mustResizeX) diagramSize.width+=20;
+		if(mustResizeY) diagramSize.height+=20;
+		diagramPanel.setPreferredSize(diagramSize);
+		diagramPanel.revalidate();		  
+	  }
+	  //shifting out-of-selection components if necessary
+	  if(mustShiftX || mustShiftY)
+		shiftAllDraggablesButGroupBothDirections(mustResizeX? 20:0, mustResizeY? 20:0, selectionGroupFocused);
+	  //setting scrollbars to max if necessary
+	  if(mustScrollX)
+		diagramScroller.getHorizontalScrollBar().setValue(diagramScroller.getHorizontalScrollBar().getMaximum());
+	  if(mustScrollY)
+		diagramScroller.getVerticalScrollBar().setValue(diagramScroller.getVerticalScrollBar().getMaximum());
 
 	  System.out.println("nearestElementX "+nearestElementX+" newLocationX: "+newLocationX);
 	  System.out.println("nearestElementY "+nearestElementY+" newLocationY: "+newLocationY);
@@ -1490,7 +1513,7 @@ public class EditorView extends JFrame implements Observer{
 
 	  System.out.println("adjustedMoveX "+adjustedMoveX+" moveX: "+moveX);
 	  System.out.println("adjustedMoveY "+adjustedMoveY+" moveY: "+moveY);
-	  
+	  	  
 	  //moving selection components
 	  if(adjustedMoveX!=0 || adjustedMoveY!=0) for(JComponent element : selectionGroupFocused){		
 		location=element.getLocation();
@@ -1666,11 +1689,12 @@ public class EditorView extends JFrame implements Observer{
 	 * If group is not null, its elements are not shifted.
 	 * 
 	 * @param enlargeX - the amount of horizontal shift
-	 * @param group - the ArrayList<JComponent> of elements that must not be shifted
+	 * @param group - the ArrayList<JComponent> of elements that must not be shifted. If null, all components will be shifted
 	 */
 	private void shiftAllDraggablesButGroupHorizontal(int enlargeX, ArrayList<JComponent> group) {
 	  OrderedListNode tmp= visibleOrderDraggables.getFirst();
 	  Point location=null;
+	  if(group==null) group = new ArrayList<JComponent>();
 	  while (tmp!=null){
 		if( !group.contains((JComponent)tmp.getElement()) 
 			&& ((JComponent)tmp.getElement()).getParent().getName().startsWith(EditorView.diagramPanelName)){
@@ -1708,11 +1732,12 @@ public class EditorView extends JFrame implements Observer{
 	 * If group is not null, its elements are not shifted.
 	 * 
 	 * @param enlargeY - the amount of vertical shift
-	 * @param group - the ArrayList<JComponent> of elements that must not be shifted
+	 * @param group - the ArrayList<JComponent> of elements that must not be shifted. If null, all components will be shifted
 	 */
 	private void shiftAllDraggablesButGroupVertical(int enlargeY, ArrayList<JComponent> group) {
 	  OrderedListNode tmp= visibleOrderDraggables.getFirst();
 	  Point location=null;
+	  if(group==null) group = new ArrayList<JComponent>();
 	  while (tmp!=null){
 		if( !group.contains((JComponent)tmp.getElement()) 
 			&& ((JComponent)tmp.getElement()).getParent().getName().startsWith(EditorView.diagramPanelName)){
@@ -1722,6 +1747,30 @@ public class EditorView extends JFrame implements Observer{
 		}
 		tmp=tmp.getNext();
 	  }	
+	}
+
+	/**
+	 * Shifts in both direction the position of all draggables in the diagram panel.<br>
+	 * If group is not null, its elements are not shifted.
+	 * 
+	 * @param enlargeY - the amount of vertical shift
+	 * @param enlargeY - the amount of horizontal shift
+	 * @param group - the ArrayList<JComponent> of elements that must not be shifted. If null, all components will be shifted
+	 */
+	private void shiftAllDraggablesButGroupBothDirections(int enlargeX, int enlargeY, ArrayList<JComponent> group) {
+	  OrderedListNode tmp= visibleOrderDraggables.getFirst();
+	  Point location=null;
+	  if(group==null) group = new ArrayList<JComponent>();
+	  while (tmp!=null){
+		if( !group.contains((JComponent)tmp.getElement()) 
+			&& ((JComponent)tmp.getElement()).getParent().getName().startsWith(EditorView.diagramPanelName)){
+		  location=((JComponent)tmp.getElement()).getLocation();
+		  location.x+=enlargeX;
+		  location.y+=enlargeY;
+		  ((JComponent)tmp.getElement()).setLocation(location);
+		}
+		tmp=tmp.getNext();
+	  }			
 	}
 
 	/**
@@ -1884,9 +1933,9 @@ public class EditorView extends JFrame implements Observer{
 	public Component dropGroupOnDiagram(MouseEvent e) {
 	  OrderedListNode tmpNode=visibleOrderDraggables.getFirst();
 	  while(tmpNode!=null){	  
-	    if ( tmpNode.getElement().getClass().equals(FeaturePanel.class) &&
-			 ((FeaturePanel)tmpNode.getElement()).getName().startsWith(featureNamePrefix) &&
-		     ((Component)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY()) ){			
+	    if (tmpNode.getElement().getClass().equals(FeaturePanel.class) 
+	    	&& ((FeaturePanel)tmpNode.getElement()).getName().startsWith(featureNamePrefix)
+	    	&& ((Component)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY()) ){			
 	      underlyingComponent=(JComponent)tmpNode.getElement();
 	      return underlyingComponent;
 //		  addAnchorToFeature(lastAnchorFocused, underlyingPanel);
@@ -1950,18 +1999,17 @@ public class EditorView extends JFrame implements Observer{
 	  while(tmpNode!=null){
 		locOnScreen=((Component)tmpNode.getElement()).getLocationOnScreen();
 		if(selectionRect.contains(locOnScreen)){
-		  System.out.println("Checking: "+((Component)tmpNode.getElement()).getName());
+			
+		  /* ***DEBUG*** */
+		  if(debug)System.out.println("Checking: "+((Component)tmpNode.getElement()).getName());
+		  /* ***DEBUG*** */
 
 		  //if it's not a feature panel, we check that it's not anchored to a feature panel
 		  if (!((Component)tmpNode.getElement()).getName().startsWith(featureNamePrefix)){
 
-			  comp = (JComponent) diagramPanel.getComponentAt(				
-				(int)(locOnScreen.getX()-diagramPanel.getLocationOnScreen().getX()), 
-				(int)(locOnScreen.getY()-diagramPanel.getLocationOnScreen().getY()) );
-			  
-//			  comp=getUnderlyingComponent(
-//				(int)(locOnScreen.getX()-diagramPanel.getLocationOnScreen().getX()), 
-//				(int)(locOnScreen.getY()-diagramPanel.getLocationOnScreen().getY()) );
+			comp = (JComponent) diagramPanel.getComponentAt(				
+					(int)(locOnScreen.getX()-diagramPanel.getLocationOnScreen().getX()), 
+					(int)(locOnScreen.getY()-diagramPanel.getLocationOnScreen().getY()) );
 
 			System.out.println("Underlying comp: "+comp.getName());
 			if(comp!=null && comp.getName().startsWith(featureNamePrefix)){
@@ -1993,22 +2041,6 @@ public class EditorView extends JFrame implements Observer{
 		frameRoot.repaint();
 		return;
 	}
-
-//	/**
-//	 * Removes a starting connector anchor from the diagram panel and attach it to a group.<br>
-//	 * 
-//	 * @param startAnchor - the starting connector anchor to be added
-//	 * @param group - the group 
-//	 */
-//	private static void addStartAnchorToGroup(AnchorPanel startAnchor, GroupPanel group) {
-//		group.getMembers().add((AnchorPanel)startAnchor.getOtherEnd());
-//		((AnchorPanel)startAnchor.getOtherEnd()).setOtherEnd(group);
-//		diagramPanel.remove(startAnchor);
-//		diagramPanel.validate();
-//		visibleOrderDraggables.remove(startAnchor);
-//		startConnectorDots.remove(startAnchor);
-//		return;
-//	}
 
 	/**
 	 * Adds a new feature to the diagram panel, incrementing featuresCount.
@@ -2080,8 +2112,6 @@ public class EditorView extends JFrame implements Observer{
 	 * @param e - MouseEvent of the type Mouse Released.
 	 */
 	public void addConnectorToDiagram(MouseEvent e) {
-//		int actualPositionX=((int)(e.getLocationOnScreen().getX()-diagramPanel.getLocationOnScreen().getX()));
-//		int actualPositionY=((int)(e.getLocationOnScreen().getY()-diagramPanel.getLocationOnScreen().getY()));
 		int actualPositionX;
 		int actualPositionY;
 		boolean startDotInsertedInPanel=false;
@@ -2191,8 +2221,6 @@ public class EditorView extends JFrame implements Observer{
 		newConnectorEndDot.setOtherEnd(newConnectorStartDot);
 
 		addConnectorsToDrawLists(newConnectorStartDot, newConnectorEndDot);
-//		++connectorsCount;
-
 		cancelToolDrag();
 	}
 
@@ -2420,9 +2448,7 @@ public class EditorView extends JFrame implements Observer{
 		imageLabel.setBounds(0,  +2, connectorIcon.getIconWidth(), connectorIcon.getIconHeight()+5);
 		imagePanel.setBounds(x,  y, connectorIcon.getIconWidth(), connectorIcon.getIconHeight()+5);
 		imagePanel.setLayout(null);
-//		imagePanel.setBackground(Color.RED);
 		imagePanel.add(imageLabel);
-//		imagePanel.add(new JPanel());
 		imagePanel.setOpaque(false);
 		imagePanel.setVisible(true);
 
@@ -2458,20 +2484,7 @@ public class EditorView extends JFrame implements Observer{
 	 */
 	private FeaturePanel buildFeaturePanel(String name, String containerName, int x, int y, Color color) {
 		int layer=-1;
-//		JLabel imageLabel = null, textLabel = null;
 		JTextField textLabel=null;
-//		ImageIcon newFeatureIcon = null;
-
-/*		
-		//creating image		
-		newFeatureIcon=new ImageIcon(newFeatureIconURL);		
-		imageLabel = new JLabel(newFeatureIcon);
-		imageLabel.setBounds(0+featureBorderS		//creating textize/2, +featureBorderSize/2,
-				newFeatureIcon.getIconWidth(), newFeatureIcon.getIconHeight());
-		imageLabel.setBackground(Color.BLACK);
-		imageLabel.setOpaque(true);
-		imageLabel.setVisible(true);
-*/
 		
 		//creating text		
 		textLabel=new JTextField(name){
@@ -2483,11 +2496,6 @@ public class EditorView extends JFrame implements Observer{
 			  if(!isEditable()) return false;
 			  else return super.contains(x, y);
 			}
-//			@Override
-//			protected void processEvent(AWTEvent e){
-//			  ((Component)e.getSource()).dispatchEvent(e);
-//			  return;
-//			}
 		};
 
 //		textLabel.getInputMap().remove(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ENTER, 0));
@@ -2520,41 +2528,21 @@ public class EditorView extends JFrame implements Observer{
 		textLabel.setBounds(featureBorderSize/2, featureBorderSize/2, 120, 60);
 		textLabel.setHorizontalAlignment(JTextField.CENTER);
 		textLabel.setOpaque(true);
-//		textLabel.setEnabled(false);
 		textLabel.setEditable(false);
 		textLabel.setFocusable(true);
-		textLabel.setName(textAreaNamePrefix);
-		
+		textLabel.setName(textAreaNamePrefix);		
 		
 		//creating text
-//		textLabel=new JLabel(name, SwingConstants.CENTER);
-//		textLabel.setForeground(Color.GRAY);
-//		textLabel.setBackground(Color.BLACK);
-//		textLabel.setBounds(0+featureBorderSize/2, newFeatureIcon.getIconHeight()+featureBorderSize/2,
-//			newFeatureIcon.getIconWidth(), 25);
-//		textLabel.setOpaque(true);
-		
-//		FeaturePanel container = new FeaturePanel(splitterPanel);
 		FeaturePanel container = new FeaturePanel(textLabel);
-//		container.setLabelName(name);
 		if(containerName==null) container.setName(featureNamePrefix+featuresCount);
 		else container.setName(containerName);
 		container.setLayout(null);
-//		container.setBounds(x,  y,  newFeatureIcon.getIconWidth()+featureBorderSize,
-//				newFeatureIcon.getIconHeight()+25+featureBorderSize);
 		container.setBounds(x,  y,  120+featureBorderSize,
 				60+featureBorderSize);
 		container.setOpaque(true);
 		System.out.println("Color of the new feature is: "+color.toString());
 		container.setBackground(color);
-
-/*
-		//adding the image
-		layer=container.getComponentCount();
-		container.setLayer(imageLabel, layer);
-		container.add(imageLabel);
-		container.setComponentZOrder(imageLabel, layer);
-*/
+		
 		//adding the text
 		layer=container.getComponentCount();
 		container.setLayer(textLabel, layer);
@@ -2565,10 +2553,6 @@ public class EditorView extends JFrame implements Observer{
 		/* ***DEBUG*** */
 		if(debug) System.out.println("container.getBounds(): "+container.getBounds());
 		/* ***DEBUG*** */
-
-//		textLabel.addMouseListener(editorController);
-//		textLabel.addMouseMotionListener(editorController);
-
 
 		return container;
 	}
@@ -2697,16 +2681,13 @@ public class EditorView extends JFrame implements Observer{
 	  startDotlocationX=(int)(anchor.getLocationOnScreen().getX()-diagramPanel.getLocationOnScreen().getX());
 	  startDotlocationY=(int)(anchor.getLocationOnScreen().getY()-diagramPanel.getLocationOnScreen().getY());
 	  group.getMembers().remove(anchor);
+	  
 	  if(startDotlocationX-(anchor.getWidth()*2)>0)
 		  startDotlocationX=startDotlocationX-(anchor.getWidth()*2);
 	  else startDotlocationX=startDotlocationX+(anchor.getWidth()*2);
-//	  if(startDotlocationX>=diagramPanel.getWidth()-startConnectorDot.getWidth())
-//		  startDotlocationX=diagramPanel.getWidth()-startConnectorDot.getWidth();
 	  if(startDotlocationY-(anchor.getHeight()*2)>0)
 		  startDotlocationY=startDotlocationY-(anchor.getHeight()*2);
 	  else startDotlocationY=startDotlocationY+(anchor.getHeight()*2);
-//	  if(startDotlocationY>=diagramPanel.getHeight()-startConnectorDot.getHeight())
-//		  startDotlocationY=diagramPanel.getHeight()-startConnectorDot.getHeight();
 	  
 	  startConnectorDot.setLocation(startDotlocationX, startDotlocationY);
 	  startConnectorDot.setName(startConnectorsNamePrefix+anchor.getName().substring(anchor.getName().indexOf("#")+1));
@@ -2734,12 +2715,10 @@ public class EditorView extends JFrame implements Observer{
 		anchorPanelOnScreenY=(int)anchor.getLocationOnScreen().getY();
 		feature.remove(anchor);
 		feature.validate();
-		System.out.println("feature="+feature.getName());
-		System.out.println("anchor="+anchor.getName());
-//		System.out.println("lastFeatureFocused="+lastFeatureFocused);
-//		System.out.println("lastAnchorFocused="+lastAnchorFocused);
-//		lastFeatureFocused.remove(lastAnchorFocused);
-//		lastFeatureFocused.validate();
+		
+		/* ****DEBUG*** */
+		if(debug) System.out.println("feature="+feature.getName()+"\tanchor="+anchor.getName());
+		/* ****DEBUG*** */
 		
 		anchor.setLocation(
 		  (int)(anchorPanelOnScreenX-diagramPanel.getLocationOnScreen().getX()),
@@ -2747,7 +2726,6 @@ public class EditorView extends JFrame implements Observer{
 		diagramPanel.setLayer(anchor, 0);
 		diagramPanel.add(anchor);
 		diagramPanel.setComponentZOrder(anchor, 0);
-//		EditorView.moveComponentToTop(anchor);
 		moveComponentToTop(anchor);
 	}
 	
@@ -2780,12 +2758,10 @@ public class EditorView extends JFrame implements Observer{
         if(anchor.getParent().getName().startsWith(diagramPanelName)){
     	  diagramPanel.remove(anchor);
     	  visibleOrderDraggables.remove(anchor);
-//    	  diagramPanel.validate();
         }
         else if(anchor.getParent().getName().startsWith(featureNamePrefix)){
           anchor.getParent().remove(anchor);
       	  visibleOrderDraggables.remove(anchor);
-//          anchor.getParent().validate();
         }
 
         if (anchor.getName().startsWith(startConnectorsNamePrefix)) startConnectorDots.remove(anchor);
@@ -3151,33 +3127,6 @@ public class EditorView extends JFrame implements Observer{
 		}
 		else if(arg.equals("Direct Link Not Destroyed") ) resetActiveItems();
 	}
-
-	/*
-	/**
-	 * Main Method.
-	 * @param args
-	 */
-	/*
-	public static void main(String[] args){
-		//creating model
-		EditorModel editorModel= new EditorModel();
-		//creating view
-		EditorView editorView= new EditorView();
-		//creating controller
-		EditorController editorController =new EditorController(editorView, editorModel);
-		//adding the view as observer to the model
-		editorModel.addObserver(editorView);
-
-		if( !editorView.prepareUI(editorController) ) System.out.println("Controller not set. Closing...");
-		else editorView.setVisible(true);
-//		editor.setResizable(false);
-		editorView.setExtendedState(editorView.getExtendedState() | JFrame.MAXIMIZED_BOTH);
-		System.out.println("Ready! frameRoot.getLocationOnScreen(): "+frameRoot.getLocationOnScreen());
-		
-
-
-	}*/
-
 	
 	/** 
 	 * Assigns a name to the diagram to be saved.
@@ -3245,13 +3194,10 @@ public class EditorView extends JFrame implements Observer{
     		return null;
     	}
 
-    	
-//	    d.setDirectory(".");
-	    d.setDirectory(pathProject);
+    	d.setDirectory(pathProject);
 	    d.setVisible(true);
 	    
 	    if(d.getFile() == null) return null;
-
 	    return d.getFile().toString();
 	}
 	
@@ -3414,27 +3360,6 @@ public class EditorView extends JFrame implements Observer{
 		  e.printStackTrace();
 		  return null;
 		}
-		
-//		//saving colors-features association on file
-//		savePath = pathProject + "/" + s + "_ColorsView.log"; 
-//		try{
-//		  PrintWriter pw1 = new PrintWriter(new BufferedWriter(new FileWriter(savePath)));
-//		  colorIter = termsColor.entrySet().iterator();
-//		  while(colorIter.hasNext()){
-//			colorEntry=colorIter.next();
-//			color=colorEntry.getValue();
-//			xml=colorEntry.getKey()+"\t"+color[0]+"."+color[1]+"."+color[2];
-//			pw1.println(xml);
-//		  }			
-//		  pw1.close();
-//			
-//		}catch(IOException e){
-//		  System.out.println("Exception saveDiagram for save file "+savePath+" : " + e.getMessage());
-//		  e.printStackTrace();
-//		  return null;
-//		}
-
-		
 		return savePath;
 	}
 
@@ -3448,16 +3373,11 @@ public class EditorView extends JFrame implements Observer{
 	  InputStream stream = null;
 	  SAXParserFactory saxFactory = SAXParserFactory.newInstance();
 	  ViewXMLHandler xmlHandler = new ViewXMLHandler();
-
-
+	  int diagramMinX=0, diagramMinY=0;
+	  int diagramMaxX=0, diagramMaxY=0;
+	  OrderedListNode tmp=null;
 	  try {
 		stream=new FileInputStream(diagramDataPath);
-		  
-//		  BufferedReader br1 = new BufferedReader(new FileReader(diagramDataPath));
-//		  while( (s = br1.readLine()) != null ) xml+=s;
-//		  br1.close();
-//		  stream = new ByteArrayInputStream(xml.getBytes());
-		  
 		System.out.println("EditorView: *** PARSING: "+diagramDataPath+" ***");
 		saxParser = saxFactory.newSAXParser();
 		saxParser.parse(stream, xmlHandler);
@@ -3479,6 +3399,39 @@ public class EditorView extends JFrame implements Observer{
 		loadMiscellaneous(xmlHandler.misc);
 		loadStartingCommonalities(xmlHandler.startingComm);
 		loadStartingVariabilities(xmlHandler.startingVars);
+
+		//resizing diagram to fit all components
+		tmp=visibleOrderDraggables.getFirst();
+		while(tmp!=null){
+		  if (((JComponent)tmp.getElement()).getParent().getName().startsWith(EditorView.diagramPanelName)) break;
+		  tmp=tmp.getNext();
+		}
+		if(tmp==null) return;//no draggables found
+		diagramMinX=((JComponent)tmp.getElement()).getX();
+		diagramMinY=((JComponent)tmp.getElement()).getY();
+		diagramMaxX=((JComponent)tmp.getElement()).getX()+((JComponent)tmp.getElement()).getWidth();
+		diagramMaxY=((JComponent)tmp.getElement()).getY()+((JComponent)tmp.getElement()).getHeight();
+
+		while(tmp!=null){
+		  if (((JComponent)tmp.getElement()).getParent().getName().startsWith(EditorView.diagramPanelName)){
+			if (((JComponent)tmp.getElement()).getX()<diagramMinX)
+			  diagramMinX=((JComponent)tmp.getElement()).getX();
+			if (((JComponent)tmp.getElement()).getY()<diagramMinY)
+			  diagramMinY=((JComponent)tmp.getElement()).getY();
+			if (((JComponent)tmp.getElement()).getX()+((JComponent)tmp.getElement()).getWidth()>diagramMaxX)
+			  diagramMaxX=((JComponent)tmp.getElement()).getX()+((JComponent)tmp.getElement()).getWidth();
+			if (((JComponent)tmp.getElement()).getY()+((JComponent)tmp.getElement()).getHeight()>diagramMaxY)
+			  diagramMaxY=((JComponent)tmp.getElement()).getY()+((JComponent)tmp.getElement()).getHeight();			
+		  }
+		  tmp=tmp.getNext();
+		}
+		//moving components and resizing diagram
+		shiftAllDraggablesButGroupBothDirections(-diagramMinX, -diagramMinY, null);
+		Dimension diagramSize = diagramPanel.getPreferredSize();
+		diagramSize.width=diagramMaxX-diagramMinX;
+		diagramSize.height=diagramMaxY-diagramMinY;
+		diagramPanel.setPreferredSize(diagramSize);
+		diagramPanel.revalidate();		  		
 	  } catch (Exception e) {
 		System.out.println("Error while loading saved diagram");
 		e.printStackTrace(); 
