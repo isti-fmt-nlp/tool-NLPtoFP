@@ -28,6 +28,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -63,7 +64,7 @@ public class ViewProject implements Observer, Runnable{
 					  menuProjectExit=null;
 
 	//Files Management Menu items	
-	private JMenuItem menuFilesLoad=null, menuFilesDelete=null;
+	private JMenuItem menuFilesLoad=null, menuFilesDelete=null, menuFilesLoadFolder=null;
 
 
 	//Features Management Menu items
@@ -223,8 +224,13 @@ public class ViewProject implements Observer, Runnable{
 		menuFilesDelete.addActionListener(controllerProject);
 		menuFilesDelete.setEnabled(false);
 		
+		menuFilesLoadFolder = new JMenuItem("Load Analisys Folder");
+		menuFilesLoadFolder.addActionListener(controllerProject);
+		menuFilesLoadFolder.setEnabled(false);
+				
 		menuFiles.add(menuFilesLoad);		
 		menuFiles.add(menuFilesDelete);
+		menuFiles.add(menuFilesLoadFolder);
 		
 		menu.add(menuFiles);
 		
@@ -447,6 +453,9 @@ public class ViewProject implements Observer, Runnable{
 		else if(o.equals("Input File Deleted")){
 //			if (panelLateralProject.getAnalysisLeafTree().size())
 		}
+		else if(o.equals("Analisys folder can't be accepted")){
+		  errorDialog("Analisys folder can't be accepted");
+		}
 		
 		frameProject.repaint(); 	
 	}
@@ -547,6 +556,8 @@ public class ViewProject implements Observer, Runnable{
 	    d.setVisible(true);
 	    
 	    if(d.getFile() == null) return null;
+//	    System.out.println("File: "+d.getFile());
+//	    System.out.println("Dir: "+d.getDirectory());
 	    
 	//	    if(!buttonProjectEC.isEnabled())
 	//    		buttonProjectEC.setEnabled(true);
@@ -602,13 +613,12 @@ public class ViewProject implements Observer, Runnable{
 			return 0;
 	}
 	
-	/** Carica un file nel progetto
+	/** 
+ 	 * Loads a file into the project.
 	 * 
-	 * @return s[2] array di stringhe contenente rispettivamente il nome del file e la path
-	 * 			    del file
+	 * @return - a String[] containing the file name and the file path
 	 */
-	public String [] loadFileDialog()
-	{
+	public String [] loadFileDialog(){
 		String [] s = new String[2];
 		
 		FileDialog d = new FileDialog(new JFrame("Load File"));
@@ -617,26 +627,18 @@ public class ViewProject implements Observer, Runnable{
 	    d.setDirectory("../"+savedProjectsDir);
 	    d.setVisible(true);
 	    
-//	    System.out.println("1]d.getFile()="+d.getFile());
-	    
-	    if(d.getFile() == null)
-	    	return null;
-	    
-//	    System.out.println("1]d.getFile()="+d.getFile());
+	    if(d.getFile() == null) return null;
 
 	    s[0] = d.getFile().toString();
-    	s[1] = d.getDirectory() + d.getFile().toString();
-    	
-//    	buttonProjectEC.setEnabled(true);
+    	s[1] = d.getDirectory() + d.getFile().toString();    	
     	
     	//activating menu items
     	menuFilesDelete.setEnabled(true);
     	menuFeaturesExtractComm.setEnabled(true);
     	
     	
-    	if((panelLateralProject.addNodeInput(s[0])) == false)
-    	{
-    		errorDialog("The file" + s[0] + " has been inserted");
+    	if((panelLateralProject.addNodeInput(s[0])) == false){
+    		errorDialog("The file" + s[0] + " has already been inserted");
     		return null;
     	}
     	
@@ -645,6 +647,58 @@ public class ViewProject implements Observer, Runnable{
 	    return s;
 	}
 	
+	/** 
+ 	 * Loads analisys files from a folder into the project.
+	 * 
+	 * @return - a String[] containing the paths to the analisys files, <br>
+	 * or null if the content is not correct.
+	 */
+	public String [] loadFolderDialog(){		
+		String [] analisysFiles = new String[3];
+	    JFileChooser chooser = new JFileChooser();
+	    File analisysDir=null;
+	    //used to check if 1 and only one of such files exist inside selected folder
+	    boolean txtFound=false;
+	    boolean termTmpFound=false;
+	    boolean posFound=false;
+	    
+	    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+	    int returnVal = chooser.showOpenDialog(new JFrame("Select Analisys Folder"));
+
+	    if(returnVal == JFileChooser.APPROVE_OPTION) {
+		       System.out.println("Path: " +chooser.getSelectedFile().getAbsolutePath());
+		       System.out.println("name: " +chooser.getSelectedFile().getName());           
+	    }
+
+	    analisysDir=new File(chooser.getSelectedFile().getAbsolutePath());
+    	for(File file : analisysDir.listFiles()){
+      	  if(file.getName().endsWith(".txt")){
+      		if(txtFound) return null;
+      		else{
+      		  txtFound=true;
+      		  analisysFiles[0]=file.getAbsolutePath();
+      		}
+      	  }      	  
+    	  if(file.getName().endsWith(".term.tmp")){
+    		if(termTmpFound) return null;
+      		else{
+      		  termTmpFound=true;
+      		  analisysFiles[1]=file.getAbsolutePath();
+      		}
+    	  }
+    	  if(file.getName().endsWith(".pos")){
+    		if(posFound) return null;
+      		else{
+      		  posFound=true;
+      		  analisysFiles[2]=file.getAbsolutePath();
+      		}
+    	  }
+    	}
+    	
+    	if(!txtFound || !termTmpFound || !posFound) return null;
+	    return analisysFiles;
+	}
+
 	/** 
 	 * Delete from the project the current selected input file in the project tree
 	 *  
@@ -661,7 +715,7 @@ public class ViewProject implements Observer, Runnable{
 	  if(i == 1){
 		if((i = panelLateralProject.deleteSelectedInputNode()) != -1){
 		  if(panelLateralProject.getAnalysisLeafTree().size() == 0){
-			  //				  buttonProjectEC.setEnabled(false);
+
 			  //activating menu items
 			  menuFilesDelete.setEnabled(false);
 			  menuFeaturesExtractComm.setEnabled(false);
@@ -720,7 +774,7 @@ public class ViewProject implements Observer, Runnable{
 		
 		if(i == 1){
 			frameProject.setEnabled(false);
-			modelProject.analizesFileProject();
+			modelProject.analyzesFileProject();
 			setStateThrobber(false);
 			throbber = new Thread(this);
 			throbber.start();
@@ -794,8 +848,9 @@ public class ViewProject implements Observer, Runnable{
 		//activating menu items
 		menuProjectDelete.setEnabled(true);
     	menuProjectSave.setEnabled(true);
-    	
+
     	menuFilesLoad.setEnabled(true);
+    	menuFilesLoadFolder.setEnabled(true);
     	if (panelLateralProject.getAnalysisLeafTree().size()>0){
     	  menuFilesDelete.setEnabled(true);
     	  menuFeaturesExtractComm.setEnabled(true);
@@ -847,31 +902,35 @@ public class ViewProject implements Observer, Runnable{
 		modelProject.setFeaturesSelected(panelCentralProject.getSelectedFeatures(), type);
 	}
 	
-	/** Chiude il progetto
-	 * 
+	/** 
+	 * Closes the project.
 	 */
-	public void closeProject() 
-	{
+	public void closeProject(){
 		frameProject.dispose();
 		System.exit(0);
 	}
 
-	/** Assegna il filtro ai file di Input*/
-	class FilterFileInput implements FilenameFilter 
-	{
+	/** Class used to filter input files*/
+	class FilterFileInput implements FilenameFilter{
 		@Override
-		public boolean accept(File dir, String name) 
-		{
+		public boolean accept(File dir, String name){
 			return name.endsWith( ".pdf" ) || name.endsWith(".txt");
 	    }
 	}
-	
-	/** Assegna il filtro ai file del progetto*/
-	class FilterFileProject implements FilenameFilter 
-	{
+
+	/** Class used to filter input folders containing analisys files*/
+	class FilterFolderInput implements FilenameFilter{
 		@Override
-		public boolean accept(File dir, String name) 
-		{
+		public boolean accept(File dir, String name){
+			return true;
+	    }
+	}
+	
+	/** Class used to filter project files*/
+	class FilterFileProject implements FilenameFilter{
+		@Override
+		public boolean accept(File dir, String name){
+//			System.out.println("loadFileDialog: "+dir.getAbsolutePath()+name);
 			return name.endsWith( ".xml" );
 	    }
 	}

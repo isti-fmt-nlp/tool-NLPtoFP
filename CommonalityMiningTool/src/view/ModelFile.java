@@ -7,56 +7,45 @@ package view;
 
 import java.io.File;
 
-public class ModelFile extends ModelAnalysis implements Runnable
-{
-	/* Boolean che indica l'esito dell'analisi */
+public class ModelFile extends ModelAnalysis implements Runnable{
+	/** Tells about the result of the analisys */
 	private boolean result = false;
 	
-	/** Costruttore
+	/** 
+	 * Constructor.
 	 * 
-	 * @param pathFile
-	 * @param pathProject
+	 * @param pathFile - input file path
+	 * @param pathProject - project path
 	 */
-	public ModelFile(String pathFile, String pathProject)
-	{
+	public ModelFile(String pathFile, String pathProject){
 		super(pathFile, pathProject);
 	}
 	
-	/** Thread: Analizza il file
-	 * 
+	/** 
+	 * Thread: Analyzes the file.
 	 */
 	@Override
-	public void run() 
-	{
-		/* Controlla se il file � stato analizzato in precedenza */
+	public void run(){
+		/* Checks if the file has already been analyzed*/
 		if( (new File(readPathFileUTF8()).exists()) 
-			 && (new File(readPathFileUTF8()).lastModified() > new File(readPathFile()).lastModified()))
-		{
-			/* Carica i dati del file */
-			if(loadAnalysisFile())
-				result = true;
-            
-            else 
-            	result = false;
-			
+			 && (new File(readPathFileUTF8()).lastModified() > new File(readPathFile()).lastModified())){
+			/* Loads file data*/
+			if(loadAnalysisFile()) result = true;            
+            else  result = false;			
 		}
-		else
-		{
-			/* Effettua analisi del file */
-			if(runAnalysisFile())
-				result = true;
-            
-            else 
-            	result = false;
+		else{
+			/* Analyzes the file */
+			if(runAnalysisFile()) result = true;            
+            else  result = false;
 		}
 	}
 	
-	/** Lettura dell'esito del'analisi
+	/** 
+	 * Tells if the analisys has been successfully done.
 	 * 
-	 * @return result
+	 * @return result - a boolean indicating analisys results
 	 */
-	public boolean readResult()
-	{
+	public boolean readResult(){
 		return result;
 	}
 }

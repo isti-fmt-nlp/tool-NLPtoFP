@@ -8,12 +8,18 @@ package view;
 import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,8 +40,17 @@ import view.ViewPanelCentral.FeatureType;
 
 
 public class ModelProject extends Observable implements Runnable{
-	
 
+	private static boolean verbose=false;//variable used to activate prints in the code
+	
+	private static boolean verbose2=false;//variable used to activate prints in the code
+
+	private static boolean verbose3=false;//variable used to activate prints in the code
+	
+	private static boolean debug=false;//variable used to activate debug prints in the code
+
+	private static boolean debug2=true;//variable used to activate debug prints in the code
+	
 	private static final String savedProjectsDir = "Usage Tries";
 	
 	/* Stringa contenente il nome del progetto */
@@ -51,7 +66,7 @@ public class ModelProject extends Observable implements Runnable{
 	private ParserXML parserXML = null;
 	
 	/* ArrayList contenente i file del progetto */
-	private ArrayList <ModelFile> fileProject = null;
+	private ArrayList <ModelFile> filesProject = null;
 	
 	/* ArrayList contenente i thread assegnati ai file */
 	private ArrayList <Thread> workerProject = null;
@@ -111,12 +126,6 @@ public class ModelProject extends Observable implements Runnable{
 	/** Minimum intersection size required to join two sets of terms into one, used to assign color to terms */
 	private static int minimumIntersectionSize=10;
 	
-	private static boolean verbose=false;//variabile usata per attivare stampe nel codice
-	
-	private static boolean verbose2=false;//variabile usata per attivare stampe nel codice
-
-	private static boolean verbose3=true;//variabile usata per attivare stampe nel codice
-	
 	/** 
 	 * Waits for threads workerProject to end their work, and computes commonalities candidates
 	 */
@@ -128,9 +137,6 @@ public class ModelProject extends Observable implements Runnable{
 	  int charcount=0;							//starting position of a line in the file
 	  int index=0;								//index of a possible relevant term occurence in line
 
-	  //variables used to calculate terms color
-	  int intersectionSize=0;
-		
 	  commonalitiesCandidates = new ArrayList <String> ();
 
 	  for(int i = 0; i < workerProject.size(); i++){
@@ -161,27 +167,27 @@ public class ModelProject extends Observable implements Runnable{
 		
 	  //saving the positions in input files of relevant terms occurences 
 	  relevantTerms=new HashMap<String, HashMap<String, ArrayList<Integer>>>();
-	  for(int k=0; k<fileProject.size(); k++){//for each file
+	  for(int k=0; k<filesProject.size(); k++){//for each file
 		BufferedReader reader = null;
 		try {
-		  reader = new BufferedReader(new FileReader(fileProject.get(k).readPathFileUTF8()));
+		  reader = new BufferedReader(new FileReader(filesProject.get(k).readPathFileUTF8()));
 		  charcount=0;
 		  while((line = reader.readLine()) != null){//for each line
-			for(int h=0; h<fileProject.get(k).readTermRelevant().size(); h++){//for each relevant term
+			for(int h=0; h<filesProject.get(k).readTermRelevant().size(); h++){//for each relevant term
 			  index=0;
 			  while(index<line.length()){//for each occurrence
 				//get next occurrence
-				index = line.toUpperCase().indexOf(fileProject.get(k).readTermRelevant().get(h).toUpperCase(), index);
+				index = line.toUpperCase().indexOf(filesProject.get(k).readTermRelevant().get(h).toUpperCase(), index);
 
 				if (index == -1) break;//start checking next relevant term occurrences in this line
 
 				//add occurrence to relevantTerms, if it is valid
 				//  				  if (isValidOccurrence(fileProject.get(k).readTermRelevant().get(h), line, index))
-				addCharIndexToOccursList(fileProject.get(k).readTermRelevant().get(h),
-						  fileProject.get(k).readPathFileUTF8(), charcount+index);
+				addCharIndexToOccursList(filesProject.get(k).readTermRelevant().get(h),
+						  filesProject.get(k).readPathFileUTF8(), charcount+index);
 
 				//incrementing index to search for next occurrence
-				index+=fileProject.get(k).readTermRelevant().get(h).length();
+				index+=filesProject.get(k).readTermRelevant().get(h).length();
 			  }
 			}
 			charcount+=line.length()+1;
@@ -196,11 +202,10 @@ public class ModelProject extends Observable implements Runnable{
 	  }
 	  
 	  //calculating relevant terms colors
-
 	  /* ***DEBUG*** */
-	  for(int k=0; k<fileProject.size(); k++){//for each file
-	    termsInSentencesSet=fileProject.get(k).getTermsInSentencesSet();
-	    System.out.println("\n***Printing all sentences sets for file "+fileProject.get(k).readPathFile()+":\n");
+	  if(debug) for(int k=0; k<filesProject.size(); k++){//for each file
+	    termsInSentencesSet=filesProject.get(k).getTermsInSentencesSet();
+	    System.out.println("\n***Printing all sentences sets for file "+filesProject.get(k).readPathFile()+":\n");
 	    for(int i=0; i<termsInSentencesSet.size(); ++i){
 		  System.out.println("Set#"+i+":\n");
 		  for(String relTerm: termsInSentencesSet.get(i)) System.out.println(relTerm);
@@ -213,9 +218,9 @@ public class ModelProject extends Observable implements Runnable{
 	  buildColorStructures();
 
 	  //extracting communalities candidates from first input File
-	  for(int j = 0; j < fileProject.get(0).readTermRelevant().size(); j = j + 1)
-       	if(intersectTermRelevant(fileProject.get(0).readTermRelevant().get(j)))
-       		  commonalitiesCandidates.add(fileProject.get(0).readTermRelevant().get(j));
+	  for(int j = 0; j < filesProject.get(0).readTermRelevant().size(); j = j + 1)
+       	if(intersectTermRelevant(filesProject.get(0).readTermRelevant().get(j)))
+       		  commonalitiesCandidates.add(filesProject.get(0).readTermRelevant().get(j));
 		
 	  //removing duplicates among communalities candidates
 	  for(int i = 0; i < commonalitiesCandidates.size(); i++)
@@ -228,7 +233,7 @@ public class ModelProject extends Observable implements Runnable{
 		System.out.println("Sono ModelProject.run(): inizio a stampare le occorrenze delle communalitiesCandidates");
 		for(String comm: commonalitiesCandidates){
 		  System.out.println("***["+comm+"]***");
-		  for(ModelFile file: fileProject){
+		  for(ModelFile file: filesProject){
 			if (relevantTerms.get(comm)!=null && relevantTerms.get(comm).get(file.readPathFileUTF8())!=null){
 			  System.out.println("----File: "+file.readPathFileUTF8());
 			  for(int lineNum: relevantTerms.get(comm).get(file.readPathFileUTF8())){
@@ -277,7 +282,7 @@ public class ModelProject extends Observable implements Runnable{
 	  //creating a color map for all relevant terms
 	  termsColor= new HashMap<String, int[]>();
 
-	  for(ModelFile model: fileProject ){
+	  for(ModelFile model: filesProject ){
 		for(ArrayList<String> set : model.getTermsInSentencesSet()) termsInSentencesSet.add(set);
 		arityIterator=model.getTermsAriety().entrySet().iterator();
 		while(arityIterator.hasNext()){
@@ -290,15 +295,20 @@ public class ModelProject extends Observable implements Runnable{
 
 	  card=Math.pow(termsInSentencesSet.size(), 1.0/3);
 	  cardUpper=((int)card<card)? (int)card+1: (int)card;
-	  System.out.println("\n\nNumero totale di insiemi: "+termsInSentencesSet.size());
-	  System.out.println("Radice cubica: "+card);
-	  System.out.println("Radice cubica[UPPER]: "+cardUpper);
-	  System.out.println("\n\nLista delle arietà totali dei termini: ");
-	  arityIterator=termsArity.entrySet().iterator();
-	  while(arityIterator.hasNext()){
-		arityEntry=arityIterator.next();
-		System.out.println(arityEntry.getKey()+": "+arityEntry.getValue());		  
+	  
+	  /* ***DEBUG*** */
+	  if(debug){
+	    System.out.println("\n\nNumero totale di insiemi: "+termsInSentencesSet.size());
+	    System.out.println("Radice cubica: "+card);
+	    System.out.println("Radice cubica[UPPER]: "+cardUpper);
+	    System.out.println("\n\nLista delle arietà totali dei termini: ");
+	    arityIterator=termsArity.entrySet().iterator();
+	    while(arityIterator.hasNext()){
+	      arityEntry=arityIterator.next();
+	      System.out.println(arityEntry.getKey()+": "+arityEntry.getValue());		  
+	    }
 	  }
+	  /* ***DEBUG*** */
 
 	  //joining all intersected sets until only disjointed sets remains
 	  for(int k=0; k<termsInSentencesSet.size(); ++k){
@@ -332,19 +342,20 @@ public class ModelProject extends Observable implements Runnable{
 	  colors=CombinatoryUtils.threePositionsCombinationsAsIntegers(values);
 		  
 	  /* ***DEBUG*** */
-	  System.out.println("\n\nNumero totale di insiemi: "+termsInSentencesSet.size());
-	  System.out.println("Radice cubica: "+card);
-	  System.out.println("Radice cubica[UPPER]: "+cardUpper);
-	  System.out.println("Elenco elementi per ogni insieme: ");
-	  for(int k=0; k<termsInSentencesSet.size(); ++k){
-		System.out.println("**Set#"+k);
-		for(String term : termsInSentencesSet.get(k)) System.out.println(term);
-	  }
-	  for(int k=0; k<colors.length; ++k){
-		System.out.println("**Color#"+k+": "+colors[k][0]+"."+colors[k][1]+"."+colors[k][2]);
+	  if(debug2){
+	    System.out.println("\n\nNumero totale di insiemi: "+termsInSentencesSet.size());
+	    System.out.println("Radice cubica: "+card);
+	    System.out.println("Radice cubica[UPPER]: "+cardUpper);
+	    System.out.println("Elenco elementi per ogni insieme: ");
+	    for(int k=0; k<termsInSentencesSet.size(); ++k){
+		  System.out.println("**Set#"+k);
+		  for(String term : termsInSentencesSet.get(k)) System.out.println(term);
+	    }
+	    for(int k=0; k<colors.length; ++k){
+		  System.out.println("**Color#"+k+": "+colors[k][0]+"."+colors[k][1]+"."+colors[k][2]);
+	    }
 	  }
 	  /* ***DEBUG*** */
-
 		  
 	  //assigning colors to terms
 	  maxColorReduction=((double)colorOffset/2.0)/255.0;
@@ -370,9 +381,13 @@ public class ModelProject extends Observable implements Runnable{
 		  termColor[1]=(int)((double)baseColor[1]*(1.0-colorReductionUnit*(maxArity-termsArity.get(term))));			
 		  termColor[2]=(int)((double)baseColor[2]*(1.0-colorReductionUnit*(maxArity-termsArity.get(term))));			
 		  termsColor.put(term, termColor);
-		  System.out.println("Base Color for term '"+term+"' is: ("+baseColor[0]+"."+baseColor[1]+"."+baseColor[2]+")");
-		  System.out.println("maxArity: "+maxArity+"\ttermsArity.get(term): "+termsArity.get(term)+"\tcolorReductionUnit: "+colorReductionUnit);
-		  System.out.println("Exact Color for term '"+term+"' is: ("+termColor[0]+"."+termColor[1]+"."+termColor[2]+")");
+		  
+		  /* ***DEBUG*** */
+		  if(debug2)
+		    System.out.println("Base Color for term '"+term+"' is: ("+baseColor[0]+"."+baseColor[1]+"."+baseColor[2]+")"
+			+"\nmaxArity: "+maxArity+"\ttermsArity.get(term): "+termsArity.get(term)+"\tcolorReductionUnit: "+colorReductionUnit
+		    +"\nExact Color for term '"+term+"' is: ("+termColor[0]+"."+termColor[1]+"."+termColor[2]+")");
+		  /* ***DEBUG*** */
 		}
 	  }
 		  
@@ -382,7 +397,8 @@ public class ModelProject extends Observable implements Runnable{
 	  colorEntry=null;
 	  while(colorIter.hasNext()){
 		colorEntry=colorIter.next();
-		System.out.println(colorEntry.getKey()+": "+colorEntry.getValue());
+		termColor=colorEntry.getValue();
+		System.out.println(colorEntry.getKey()+": "+termColor[0]+"."+termColor[1]+"."+termColor[2]);
 	  }
 	  /* ***VERBOSE*** */
 
@@ -486,7 +502,7 @@ public class ModelProject extends Observable implements Runnable{
 	 */
 	public boolean createProject(String s)
 	{
-		fileProject = new ArrayList <ModelFile> ();
+		filesProject = new ArrayList <ModelFile> ();
 		
 		workerProject = new ArrayList <Thread> ();
 		
@@ -522,8 +538,8 @@ public class ModelProject extends Observable implements Runnable{
 	public ArrayList <String> loadAnalysisFileProject(){
 	  ArrayList <String> al = new ArrayList <String> ();
 
-	  for(int i = 0; i < fileProject.size(); i++){
-		if(new File(fileProject.get(i).readPathFileUTF8()).exists()){
+	  for(int i = 0; i < filesProject.size(); i++){
+		if(new File(filesProject.get(i).readPathFileUTF8()).exists()){
 		  if(workerProject.get(i).getState() != Thread.State.TERMINATED){
 			workerProject.get(i).start();
 			al.add(String.valueOf(i));
@@ -534,7 +550,7 @@ public class ModelProject extends Observable implements Runnable{
 			}
 		  }
 		  else{
-			workerProject.set(i, new Thread(fileProject.get(i)));
+			workerProject.set(i, new Thread(filesProject.get(i)));
 			workerProject.get(i).start();
 			al.add(String.valueOf(i));
 			try{
@@ -570,11 +586,11 @@ public class ModelProject extends Observable implements Runnable{
 	/**
 	 * Analizes project input files.
 	 */
-	public void analizesFileProject(){
-	  for(int i = 0; i < fileProject.size(); i++){
+	public void analyzesFileProject(){
+	  for(int i = 0; i < filesProject.size(); i++){
 		if(workerProject.get(i).getState() != Thread.State.TERMINATED) workerProject.get(i).start();
 		else{
-		  workerProject.set(i, new Thread(fileProject.get(i)));
+		  workerProject.set(i, new Thread(filesProject.get(i)));
 		  workerProject.get(i).start();
 		}
 	  }
@@ -595,11 +611,11 @@ public class ModelProject extends Observable implements Runnable{
 		  @Override
 		  public void run() {
 		    //extracting variabilities candidates from first input File
-			for(int i = 0; i < fileProject.size(); i++){
-			  for(int j = 0; j < fileProject.get(i).readTermRelevant().size(); j = j + 1){
-			    if( !commonalitiesCandidates.contains(fileProject.get(i).readTermRelevant().get(j)) &&
-			    	!variabilitiesCandidates.contains(fileProject.get(i).readTermRelevant().get(j)))
-				  variabilitiesCandidates.add(fileProject.get(i).readTermRelevant().get(j));
+			for(int i = 0; i < filesProject.size(); i++){
+			  for(int j = 0; j < filesProject.get(i).readTermRelevant().size(); j = j + 1){
+			    if( !commonalitiesCandidates.contains(filesProject.get(i).readTermRelevant().get(j)) &&
+			    	!variabilitiesCandidates.contains(filesProject.get(i).readTermRelevant().get(j)))
+				  variabilitiesCandidates.add(filesProject.get(i).readTermRelevant().get(j));
 			  }
 		  	}
 			setChanged();
@@ -612,19 +628,83 @@ public class ModelProject extends Observable implements Runnable{
 
 	}
 	
-	/** Aggiunge un elemento al progetto
+	/** 
+ 	 * Adds an input file to the  project.
 	 * 
-	 * @param s path del file 
+	 * @param s - file path 
 	 */
-	public void addFileProject(String s)
-	{
-		fileProject.add(new ModelFile(s, pathProject));
-		workerProject.add(
-				new Thread(
-						fileProject.get(fileProject.size()-1)));
+	public void addFileProject(String s){
+		filesProject.add(new ModelFile(s, pathProject));
+		workerProject.add(new Thread(filesProject.get(filesProject.size()-1)));
 		stateProject[1] = true;
 	}
 	
+	/** 
+ 	 * Adds an analisys folder to the  project, generating input file and analisys files.
+	 * 
+	 * @param s - analisys folder path 
+	 */
+	public void addAnalisysFolderProject(String[] files){
+		//creating model
+		ModelFile newModel=new ModelFile(files[0], pathProject);
+		filesProject.add(newModel);
+		workerProject.add(new Thread(newModel));
+		stateProject[1] = true;
+
+		//creating model UTF8 input file
+		ArrayList<String> pathPageHTML = new ArrayList<String>();
+		if(newModel.filterFile()==null){
+		  setChanged();
+		  notifyObservers("Analisys folder can't be accepted");
+		  return;
+		};         
+        
+        //creating result html pages as project files
+		newModel.createResultFileInputText(files[0]);
+		newModel.createResultFileTermExtractor(files[1]);
+		newModel.createResultFilePostTagging(files[2]);
+/*		
+		String s2 = "", s3 = null, s4 = null;
+
+		//cleaning HTML result file
+		if(stringURL.contains(URL_SENTENCE_SPLITTER_PART)) s4 = cleanSentenceSplitterHTML(s2);
+		else if(stringURL.contains(URL_TOKENIZER_PART)) s4 = cleanSentenceSplitterHTML(s2);
+		else if(stringURL.contains(URL_PARSER_PART)) s4 = cleanSentenceSplitterHTML(s2);
+		else s4 = cleanAnalysisTextHTML(s2);
+
+		if(s4!= null){
+		    // Create project file containing the html result page 
+		    PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(path, false)));
+		    pw.print(s4);
+		    pw.close();   
+					
+		    // Adding file path of html result page 
+		    pathPageHTML.add(path);   
+
+		}
+		else return false;
+		return true;
+*/		
+		
+		
+		
+		
+		
+		
+/*        
+        
+        ****CREARE I FILES HTML E ESTRARRE LE ROBE...****
+        try{
+        	if (!saveResultPage(URL_ANALYSIS+jid, pathPrefix+0+".html")) return false;
+        	if (!saveResultPage(URL_ANALYSIS+jid+URL_SENTENCE_SPLITTER_PART, pathPrefix+1+".html")) return false;
+        	if (!saveResultPage(URL_ANALYSIS+jid+URL_TOKENIZER_PART, pathPrefix+2+".html")) return false;
+        	if (!saveResultPage(URL_ANALYSIS+jid+URL_PARSER_PART, pathPrefix+3+".html")) return false;
+        	//extracting relevant terms of this input file
+        	if(!extractTermRelevant(new File(pathPrefix+2+".html"))) return false;
+            return true;
+		 */
+	}
+
 	/**
 	 * Removes an input file from the project.
 	 * 
@@ -633,21 +713,21 @@ public class ModelProject extends Observable implements Runnable{
 	public void removeFileProject(int i){
 	  File termLogFile =null;
 	  //deleting UTF8 version of input file
-	  if(fileProject.get(i).readPathFileUTF8() != null)
-		  new File(fileProject.get(i).readPathFileUTF8()).delete();
+	  if(filesProject.get(i).readPathFileUTF8() != null)
+		  new File(filesProject.get(i).readPathFileUTF8()).delete();
 		
 	  //deleting html analisys files
-	  if(fileProject.get(i).readPathFileHTML() != null)
-		  for(int j = 0; j < fileProject.get(i).readPathFileHTML().size(); j++)
-			  new File(fileProject.get(i).readPathFileHTML().get(j)).delete();
+	  if(filesProject.get(i).readPathFileHTML() != null)
+		  for(int j = 0; j < filesProject.get(i).readPathFileHTML().size(); j++)
+			  new File(filesProject.get(i).readPathFileHTML().get(j)).delete();
 
 	  //deleting relevant terms file
 	  termLogFile=new File(
-		(fileProject.get(i).readPathFileUTF8().substring(0, fileProject.get(i).readPathFileUTF8().length()-4)) + ".log");
+		(filesProject.get(i).readPathFileUTF8().substring(0, filesProject.get(i).readPathFileUTF8().length()-4)) + ".log");
 	  
 	  if(termLogFile.exists()) termLogFile.delete();
 
-	  fileProject.remove(i);
+	  filesProject.remove(i);
 	  workerProject.remove(i);
 //	  stateProject[1] = false;
 	  stateProject[1] = true;
@@ -655,26 +735,24 @@ public class ModelProject extends Observable implements Runnable{
 	
 	/* -= FUNZIONI lettura parametri =- */
 	
-	/** Legge le path dell'analisi associate ad un file 
+	
+	/** 
+	 * Reads analisys files paths.
 	 * 
-	 * @param i intero contenente l'indice del file
-	 * 
-	 * @return s[4] stringhe contenenti le path dell'analisi associate al file scelto
+	 * @param i - input file index in the project
+	 * @return - a String[] containing the paths to the chosen input file analisys files
 	 */
 	
-	public String [] readAnalysisFile(int i)
-	{
-		String [] s = new String[4];
+	public String [] readAnalysisFile(int i){
+//		String [] s = new String[4];		
+		String [] s = new String[3];		
+		s[0] = filesProject.get(i).readPathFileUTF8();
 		
-		s[0] = fileProject.get(i).readPathFileUTF8();
+		if(filesProject.get(i).readPathFileHTML() == null) return null;
 		
-		if(fileProject.get(i).readPathFileHTML() == null)
-			return null;
-		
-		s[1] = fileProject.get(i).readPathFileHTML().get(1);
-		s[2] = fileProject.get(i).readPathFileHTML().get(2);
-		s[3] = fileProject.get(i).readPathFileHTML().get(3);
-		
+		s[1] = filesProject.get(i).readPathFileHTML().get(1);
+		s[2] = filesProject.get(i).readPathFileHTML().get(2);
+//		s[3] = filesProject.get(i).readPathFileHTML().get(3);		
 		return s;
 	}
 	
@@ -687,7 +765,7 @@ public class ModelProject extends Observable implements Runnable{
 	
 	public ArrayList <String> readTermRelevantFile(int i)
 	{
-		return fileProject.get(i).readTermRelevant();
+		return filesProject.get(i).readTermRelevant();
 	}
 	
 	/** Legge le path dei file HTML contenenti i termini rilevanti 
@@ -698,9 +776,9 @@ public class ModelProject extends Observable implements Runnable{
 	{
 		ArrayList <String> al = new ArrayList <String> ();
 		
-		for(int i = 0; i < fileProject.size(); i++)
-			if(fileProject.get(i).readPathFileHTML() != null)
-				al.add(fileProject.get(i).readPathFileHTML().get(2));
+		for(int i = 0; i < filesProject.size(); i++)
+			if(filesProject.get(i).readPathFileHTML() != null)
+				al.add(filesProject.get(i).readPathFileHTML().get(2));
 		
 		return al;
 	}
@@ -879,19 +957,19 @@ public class ModelProject extends Observable implements Runnable{
 	
 	private boolean intersectTermRelevant(String s)
 	{
-		for(int i = 1; i < fileProject.size(); i++)
+		for(int i = 1; i < filesProject.size(); i++)
 		{
 			int j = 0;
 			
-			while(j < fileProject.get(i).readTermRelevant().size())
+			while(j < filesProject.get(i).readTermRelevant().size())
 			{
-				if(fileProject.get(i).readTermRelevant().get(j).equals(s))
+				if(filesProject.get(i).readTermRelevant().get(j).equals(s))
 					break;
 				
 				j++;
 			}
 			
-			if(j >= fileProject.get(i).readTermRelevant().size())
+			if(j >= filesProject.get(i).readTermRelevant().size())
 				return false;
 		}
 		return true;
@@ -930,9 +1008,9 @@ public class ModelProject extends Observable implements Runnable{
 	public File saveProject(){		
 		String s ="<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" + nameProject + "<node>Input";
 		
-		for(int i = 0; i < fileProject.size(); i++)
-			s +=  "<leaf>" + new File(fileProject.get(i).readPathFile()).getName()
-				  + "<path>" + fileProject.get(i).readPathFile() + "</path>" 
+		for(int i = 0; i < filesProject.size(); i++)
+			s +=  "<leaf>" + new File(filesProject.get(i).readPathFile()).getName()
+				  + "<path>" + filesProject.get(i).readPathFile() + "</path>" 
 			    + "</leaf>";
 		
 		s += "</node><node>Commonalities</node></root>";
@@ -1015,7 +1093,7 @@ public class ModelProject extends Observable implements Runnable{
 	 * @throws IOException
 	 */
 	private void saveProjectModelsState() throws IOException {
-	  for(ModelFile model : fileProject) model.saveState();
+	  for(ModelFile model : filesProject) model.saveState();
 	}
 
 	/**
@@ -1065,7 +1143,7 @@ public class ModelProject extends Observable implements Runnable{
 	 * 
 	 * @return al ArrayList contenenti i nomi dei file del progetto
 	 */
-	public ArrayList <String> loadProject(String s){
+	public ArrayList<String> loadProject(String s){
 		if(s == null) return null;
 
 		parserXML = new ParserXML();
@@ -1073,7 +1151,7 @@ public class ModelProject extends Observable implements Runnable{
 		SAXParserFactory spf = SAXParserFactory.newInstance();
 		
 		try{
-			fileProject = new ArrayList <ModelFile> ();
+			filesProject = new ArrayList <ModelFile> ();
 			
 			workerProject = new ArrayList <Thread> ();
 			
@@ -1093,15 +1171,15 @@ public class ModelProject extends Observable implements Runnable{
 			SAXParser parser = spf.newSAXParser();
 			parser.parse(pathXML, parserXML);
 			
-			fileProject = new ArrayList <ModelFile> ();
+			filesProject = new ArrayList <ModelFile> ();
 			
 			for(int i = 0; i < parserXML.readPathInput().size(); i++){		
-				fileProject.add(
+				filesProject.add(
 						new ModelFile(
 								parserXML.readPathInput().get(i), pathProject));
 				workerProject.add(
 						new Thread(
-								fileProject.get(i)));
+								filesProject.get(i)));
 			}	
 			
 			commonalitiesCandidates = new ArrayList <String> ();
@@ -1163,7 +1241,7 @@ public class ModelProject extends Observable implements Runnable{
 	 * @throws IOException
 	 */
 	private void loadProjectModelsState() throws IOException {
-		for(ModelFile model : fileProject) model.loadState();
+		for(ModelFile model : filesProject) model.loadState();
 	}
 
 	/**

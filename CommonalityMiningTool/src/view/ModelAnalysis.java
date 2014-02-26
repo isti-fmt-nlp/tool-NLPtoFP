@@ -30,9 +30,8 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ModelAnalysis extends ModelParserUTF8
-{
-	private static boolean debug=true;//variabile usata per attivare stampe nel codice
+public class ModelAnalysis extends ModelParserUTF8{
+	private static boolean debug=false;//variable used to activate prints in the code
 	
 	/** If true, the relevant terms file will be created after analisys, otherwise it will be created after save*/
 	private static final boolean SAVE_RELEVANT_TERMS_IMMEDIATELY = true;
@@ -81,40 +80,35 @@ public class ModelAnalysis extends ModelParserUTF8
 	 * @return true if loading has been successful, false otherwise
 	 */
 	public boolean loadAnalysisFile(){
-		termRelevant = new ArrayList <String> ();
+      String s=null;
+        
+      termRelevant = new ArrayList <String> ();		
+      pathPageHTML = new ArrayList <String> ();
 		
-		pathPageHTML = new ArrayList <String> ();
+      // inserting html path 
+      for(int i = 0; i < 4; i++)
+    	pathPageHTML.add(new String(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + i +".html"));
 		
-		// inserting html path 
-		for(int i = 0; i < 4; i++)
-			pathPageHTML.add(
-					new String(
-							readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + i +".html"));
-		
-		//loading relevant terms
-		try{
-            String s;
+      //loading relevant terms
+      try{
+    	BufferedReader br = 
+    	  new BufferedReader(new FileReader(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + ".log"));
 
-            BufferedReader br = 
-            		new BufferedReader(
-            				new FileReader(
-            						readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + ".log"));
+    	while( (s = br.readLine()) != null )
+    	  if(!s.equals("") && !s.equals("\n") && !s.equals(" ")) termRelevant.add(s);
 
-            while( (s = br.readLine()) != null )
-                if(!s.equals("") && !s.equals("\n") && !s.equals(" "))
-                	termRelevant.add(s);
-
-            br.close(); 
-        }
-        catch (FileNotFoundException ex){
-            System.out.println("Exception LoadAnalysis: " + ex.getMessage());
-            return false;
-        }catch (IOException ex){
-            System.out.println("Exception LoadAnalysis: " + ex.getMessage());
-            return false;
-        }        
-        Collections.sort(termRelevant);	
-		return true;
+    	br.close(); 
+      }
+      catch (FileNotFoundException ex){
+    	System.out.println("Exception LoadAnalysis: " + ex.getMessage());
+    	return false;
+      }catch (IOException ex){
+    	System.out.println("Exception LoadAnalysis: " + ex.getMessage());
+    	return false;
+      }        
+      
+      Collections.sort(termRelevant);	
+      return true;
 	}
 	
 	/** Analyzes the input file.
@@ -134,7 +128,7 @@ public class ModelAnalysis extends ModelParserUTF8
         	if (!saveResultPage(URL_ANALYSIS+jid, pathPrefix+0+".html")) return false;
         	if (!saveResultPage(URL_ANALYSIS+jid+URL_SENTENCE_SPLITTER_PART, pathPrefix+1+".html")) return false;
         	if (!saveResultPage(URL_ANALYSIS+jid+URL_TOKENIZER_PART, pathPrefix+2+".html")) return false;
-        	if (!saveResultPage(URL_ANALYSIS+jid+URL_PARSER_PART, pathPrefix+3+".html")) return false;
+//        	if (!saveResultPage(URL_ANALYSIS+jid+URL_PARSER_PART, pathPrefix+3+".html")) return false;
         	//extracting relevant terms of this input file
         	if(!extractTermRelevant(new File(pathPrefix+2+".html"))) return false;
             return true;
@@ -197,8 +191,7 @@ public class ModelAnalysis extends ModelParserUTF8
 		else if(stringURL.contains(URL_PARSER_PART)) s4 = cleanSentenceSplitterHTML(s2);
 		else s4 = cleanAnalysisTextHTML(s2);
 
-		System.out.println("s2=\n"+s2);
-		System.out.println("Html cleaned=\n"+s4);
+		if(debug) System.out.println("s2=\n"+s2+"\nHtml cleaned=\n"+s4);
 
 		if(s4!= null){
 		    /* Create project file containing the html result page */
@@ -207,8 +200,7 @@ public class ModelAnalysis extends ModelParserUTF8
 		    pw.close();   
 					
 		    /* Adding file path of html result page */
-		    pathPageHTML.add(path);   
-
+		    pathPageHTML.add(path);
 		}
 		else return false;
 
@@ -288,17 +280,13 @@ public class ModelAnalysis extends ModelParserUTF8
      *	
      * @return jid - a String representing the jabber ID assigned by the server, or null if an errore occurred
      */
-	private String connectAnalysis()
-	{
+	private String connectAnalysis(){
 		String s1 = " ", s2 = null, jid = null;
 
         ArrayList <String> al = new ArrayList<String>();
 
         try{
-            String query = /*"input_text=" +*/ 
-            		"tt_text=" 
-            		+ URLEncoder.encode(readTextUTF8()
-            		, "UTF-8");
+            String query = /*"input_text=" +*/ "tt_text="+URLEncoder.encode(readTextUTF8(), "UTF-8");
 
             query+="&tt_textlang=it&tt_settext=Avvia+l%27analisi+del+testo...";
             
@@ -306,9 +294,7 @@ public class ModelAnalysis extends ModelParserUTF8
 
             URL url = new URL(URL_ANALYSIS);
 
-            HttpURLConnection huc =
-            		(HttpURLConnection)
-                    		url.openConnection();
+            HttpURLConnection huc = (HttpURLConnection)url.openConnection();
             huc.setRequestMethod("POST");
             huc.setRequestProperty("REFERER", "http://www.ilc.cnr.it/dylanlab/apps/texttools/");
             huc.setRequestProperty("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:26.0) Gecko/20100101 Firefox/26.0");
@@ -318,9 +304,7 @@ public class ModelAnalysis extends ModelParserUTF8
             huc.setDoOutput(true);
             huc.setDoInput(true);
             
-            DataOutputStream dos =
-            		new DataOutputStream(
-            				huc.getOutputStream());
+            DataOutputStream dos = new DataOutputStream(huc.getOutputStream());
             dos.writeBytes(query);
             dos.close();
 
@@ -364,19 +348,13 @@ public class ModelAnalysis extends ModelParserUTF8
             huc.disconnect();
 
             return jid;
-        }
-        catch (MalformedURLException ex)
-        {
+        }catch (MalformedURLException ex){
             System.out.println("Exception ConnectionAnalysis_1: " + ex.getMessage());
             ex.printStackTrace(); return null;
-        }
-        catch (UnsupportedEncodingException ex)
-        {
+        }catch (UnsupportedEncodingException ex){
             System.out.println("Exception ConnectionAnalysis_2: " + ex.getMessage());
             ex.printStackTrace(); return null;
-        }
-        catch (IOException ex)
-        {
+        }catch (IOException ex){
             System.out.println("Exception ConnectionAnalysis_3: " + ex.getMessage());
             ex.printStackTrace(); return null;
         }
@@ -519,11 +497,11 @@ public class ModelAnalysis extends ModelParserUTF8
         boolean extracted=false;
         
 //        //extracting relevant terms
-//        extracted=extractTerms(f);
+//        extracted=extractTermsFrom_DylanLabTermExtractor(f);
 //        if(!extracted) return false;        
         
         //extracting relevant terms
-        extracted=extractTerms2(f);
+        extracted=extractTermsFrom_TextTools(f);
         
         //saving relevant terms on file, so sequent analisys operation can simply read from that
         if (SAVE_RELEVANT_TERMS_IMMEDIATELY) try {
@@ -542,7 +520,7 @@ public class ModelAnalysis extends ModelParserUTF8
 	 * @param f - the file containing the relevant terms
 	 * @return - true if extraction was successful, false otherwise
 	 */
-	private boolean extractTerms(File f){
+	private boolean extractTermsFrom_DylanLabTermExtractor(File f){
 
         int i = 2;
 
@@ -560,12 +538,9 @@ public class ModelAnalysis extends ModelParserUTF8
                              "single terms relevance"};
 
         try{
-            BufferedReader reader =
-            		new BufferedReader(
-            				new FileReader(f.getPath()));
+            BufferedReader reader = new BufferedReader(new FileReader(f.getPath()));
 
-            while( (s1 = reader.readLine()) != null )
-                s2 = s2 + s1;
+            while( (s1 = reader.readLine()) != null ) s2 = s2 + s1;
 
             reader.close();
 
@@ -594,13 +569,7 @@ public class ModelAnalysis extends ModelParserUTF8
                     
                 i = i + 1;
             }
-        }
-        catch(FileNotFoundException e){
-            System.out.println("extractTerms - Exception during read: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
-        catch (IOException e){
+        }catch (IOException e){
             System.out.println("extractTerms - Exception during read: " + e.getMessage());
             e.printStackTrace();
             return false;
@@ -614,7 +583,7 @@ public class ModelAnalysis extends ModelParserUTF8
 	 * @param f - the file containing the relevant terms
 	 * @return - true if extraction was successful, false otherwise
 	 */
-	private boolean extractTerms2(File f){
+	private boolean extractTermsFrom_TextTools(File f){
 		String html="", s1=null;
 		int startIndex=0, endIndex=0;
 		
@@ -709,6 +678,77 @@ public class ModelAnalysis extends ModelParserUTF8
 
         termsInSentencesSet.add(termSet);
         return true;
+	}
+
+	/**
+	 * Creates the HTML analisys result file containing the input text, using the filePath as source. 
+	 * 
+	 * @param filePath - a String representing the path of input text file
+	 */
+	public void createResultFileInputText(String filePath) {
+	  File tmp=null;
+	  PrintWriter printer=null;
+	  BufferedReader reader=null;		
+	  String line=null;
+	  String fileContent="";
+      String pathPrefix = readPathFileUTF8().substring(0, readPathFileUTF8().length()-4);
+	  
+	  //reading input text file content
+	  tmp=new File(filePath);
+	  try {
+		reader=new BufferedReader(new FileReader(tmp));
+		while((line=reader.readLine())!=null) fileContent+=line+"\n";
+		reader.close();	  
+	  } catch (IOException e1) {
+		System.out.println("createResultFileInputText(): File Read Problem!");
+		e1.printStackTrace(); return;
+	  }
+	  
+	  //creating html content of the result file
+	  fileContent=
+	   "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" "
+	  +"\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"
+	  +"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"it\" lang=\"it\">"
+	  +"<head><title>DyLan - TextTools</title></head><body>"
+	  +fileContent
+	  +"</body></html>";
+	  
+	  //printing html result file
+	  try {
+		tmp=new File(pathPrefix+0+".html");
+		printer = new PrintWriter(tmp);
+		printer.print(fileContent);
+		printer.close();			
+	  } catch (IOException e1) {
+		System.out.println("createResultFileInputText(): File Write Problem!");
+		e1.printStackTrace(); return;
+	  }
+
+	}
+	
+	
+	/*
+	if (!saveResultPage(URL_ANALYSIS+jid, pathPrefix+0+".html")) return false;
+	if (!saveResultPage(URL_ANALYSIS+jid+URL_SENTENCE_SPLITTER_PART, pathPrefix+1+".html")) return false;
+	if (!saveResultPage(URL_ANALYSIS+jid+URL_TOKENIZER_PART, pathPrefix+2+".html")) return false;
+	*/
+
+	/**
+	 * Creates the HTML analisys result file containing the term extraction, using filePath as source. 
+	 * 
+	 * @param filePath - a String representing the path of term extraction file
+	 */
+	public void createResultFileTermExtractor(String string) {
+		
+	}
+
+	/**
+	 * Creates the HTML analisys result file containing the post tagging, using filePath as source. 
+	 * 
+	 * @param filePath - a String representing the path of post tagging file
+	 */
+	public void createResultFilePostTagging(String string) {
+		
 	}
 	
 	/**

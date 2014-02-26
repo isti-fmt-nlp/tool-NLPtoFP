@@ -21,8 +21,7 @@ import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
 
-public class ModelParserUTF8
-{
+public class ModelParserUTF8{
 	private static boolean verbose=true;//variabile usata per attivare stampe nel codice
 
 	/* Stringa contenente il percorso del file */
@@ -34,163 +33,109 @@ public class ModelParserUTF8
 	/* Stringa contenente il contenuto del nuovo file */
 	private String textUTF8 = null;
 	
-	/** Costruttore
+	/** 
+	 * Constructor.
 	 * 
-	 * @param pathFile path del file da analizzare
-	 * @param pathProject path del progetto
+	 * @param pathFile - input file path
+	 * @param pathProject - project path
 	 */
-	public ModelParserUTF8(String pathFile, String pathProject) 
-	{
+	public ModelParserUTF8(String pathFile, String pathProject){
 		this.pathFile = pathFile;
-		this.pathFileUTF8 = 
-				new String(pathProject + "/" + new File(pathFile).getName().substring(0, new File(pathFile).getName().length() - 4) + ".txt");
+		this.pathFileUTF8 = pathProject+"/"
+		  + new File(pathFile).getName().substring(0, new File(pathFile).getName().length() - 4) + ".txt";
 	}
 	
-	/** Filtra il file in modo da rendere il suo contenuto compatibile con la codifica UTF-8.
+	/** 
+	 * Cleans the file content and creates an UTF8-compatible version.
 	 * 
-	 * @return f file contenente le specifiche citate in precedenza
-	 * @return null se si � verificato un errore
+	 * @return - a File representing UTF8 file created, or null if an error occurred
 	 */
-	public File filterFile()
-	{
-		/* ***VERBOSE****/
-		if (verbose){
-			System.out.println("Sono ModelParserUTF8.filterFile(): appena antrato nel metodo");
-			System.out.flush();
-		}
-		/* ***VERBOSE****/            
-		
-		File f = new File(pathFileUTF8);
-        /*   
-            Estrae e pulisce il contenuto del file
-        */
-        if((textUTF8 = cleanString(encodeFileToStringUTF8()))==null){
-
-    		/* ***VERBOSE****/
-    		if (verbose){
-            	System.out.println("Sono ModelParser.filterFile(): textUTF8="+textUTF8);
-    			System.out.flush();
-    		}
-    		/* ***VERBOSE****/     
-
-    		return null;
+	public File filterFile(){          		
+        //Clean the file content
+        if((textUTF8 = cleanString(encodeFileToStringUTF8()))==null) return null;        
+        try{
+          //writes UTF8 version file
+          PrintStream ps = new PrintStream(new FileOutputStream(pathFileUTF8),false,"UTF-8");      	
+          ps.print(textUTF8);
+          ps.close();
+        }catch (UnsupportedEncodingException ex){
+          System.out.println("Exception filterFile: " + ex.getMessage());
+          return null;
+        }catch (FileNotFoundException ex){
+          System.out.println("Exception filterFile: " + ex.getMessage());
+          return null;
         }
-        
-        try
-        {
-            /*
-               Apre in scrittura il nuovo file inserendoci
-               il contenuto ottenuto
-            */
-        	PrintStream ps =
-            		new PrintStream(
-            				new FileOutputStream(pathFileUTF8),false,"UTF-8");      	
-        	ps.print(textUTF8);
-            ps.close();
-        }
-        catch (UnsupportedEncodingException ex)
-        {
-            System.out.println("Exception filterFile: " + ex.getMessage());
-            return null;
-        }
-        catch (FileNotFoundException ex)
-        {
-            System.out.println("Exception filterFile: " + ex.getMessage());
-            return null;
-        }
-        return f;
+      return new File(pathFileUTF8);
 	}
 	
-	/** Lettura del percorso in cui si trova il file
+	/**
+	 * Returns the file path.
 	 * 
-	 * @return pathFile
+	 * @return - a String representing the file path
 	 */
-	public String readPathFile()
-	{
+	public String readPathFile(){
 		return pathFile;
 	}
 	
-	/** Lettura del percorso in cui viene creato il nuovo file
+	/** 
+	 * Returns the path to UTF8 version of the input file.
 	 * 
-	 * @return pathFileUTF8
+	 * @return - a String representing the file path
 	 */
-	public String readPathFileUTF8()
-	{
+	public String readPathFileUTF8(){
 		return pathFileUTF8;
 	}
 	
-	/** Lettura del contenuto del nuovo file
+	/** 
+	 * Returns the content of UTF8 version of the input file.
 	 * 
-	 * @return textUTF8
+	 * @return - a String containing the text of UTF8 version of the input file
 	 */
-	public String readTextUTF8()
-	{
+	public String readTextUTF8(){
 		return textUTF8;
 	}
 	
+	
 	/* -= FUNZIONI Ausiliarie =- */
 	
-	/** Codifica il contenuto del file 
+	/** 
+	 * Encode file content.
 	 * 
-	 * @return s stringa con codifica UTF-8
+	 * @return - a String representing the file content encoded as UTF-8
 	 */
 	private String encodeFileToStringUTF8(){
-		File f = new File(pathFile);
+	  File f = new File(pathFile);	    
+	  String s = "";
 	    
-	    String s = "";
-	    
-	    if(pathFile.substring(pathFile.length() - 4, pathFile.length()).equals(".pdf")){
-	        PDFParser pp = null;
-			
-	        try{
-	            /* 
-	               Estrae il contenuto del file pdf con codifica UTF-8
-	            */
-	            pp = new PDFParser(new FileInputStream(f));				
-	            pp.parse();              
+	  if(pathFile.substring(pathFile.length() - 4, pathFile.length()).equals(".pdf")){
+		PDFParser pp = null;			
+		try{
+		  //Extracts the content of the PDF file using UTF-8 encoder
+		  pp = new PDFParser(new FileInputStream(f));				
+		  pp.parse();              
 	            
-	            s = new String(
-	            		new PDFTextStripper().getText(
-	            			new PDDocument(pp.getDocument())).getBytes(),"UTF-8");
+		  s = new String(new PDFTextStripper().getText(new PDDocument(pp.getDocument())).getBytes(),"UTF-8");
+		}catch (IOException e){
+		  System.out.println("Exception encodeFileToStringUTF8: " + e.getMessage());
+		  return null;
+		}
+	  }
+	  else try{
+		String s1, s2 = "";
+		BufferedReader reader = new BufferedReader(new FileReader(f.getAbsolutePath()));
+				
+		//Estrae il contenuto del file txt con codifica UTF-8
+		while((s1 = reader.readLine()) != null) s2+=s1+"\n";
 
-	        }catch (FileNotFoundException e){
-	            System.out.println("Exception encodeFileToStringUTF8: " + e.getMessage());
-	            return null;
-	        }catch (IOException e){
-	            System.out.println("Exception encodeFileToStringUTF8: " + e.getMessage());
-	            return null;
-	        }
-	    }
-	    else{
-	      try{
-	    		String s1, s2 = "";
-	    		
-				BufferedReader reader =
-				        new BufferedReader(
-				        		new FileReader(f.getAbsolutePath()));
+		s = new String(s2.getBytes(), "UTF-8");
 				
-				/* 
-	               Estrae il contenuto del file txt con codifica UTF-8
-	            */
-				while((s1 = reader.readLine()) != null)
-					s2 = s2 + s1;
-				
-				s = new String(s2.getBytes(), "UTF-8");
-				
-				reader.close();
-			} 
-	    	catch (FileNotFoundException e) 
-			{
-	    		System.out.println("Exception encodeFileToStringUTF8: " + e.getMessage());
-	            return null;
-			} 
-	    	catch (IOException e) 
-	    	{
-	    		System.out.println("Exception encodeFileToStringUTF8: " + e.getMessage());
-	            return null;
-			}
-	    }
-	    return s;
+		reader.close();
+	  }catch (IOException e){
+		System.out.println("Exception encodeFileToStringUTF8: " + e.getMessage());
+		return null;
+	  }
+	  
+	  return s;
 	}
 	
 	/** Pulisce il contenuto del file

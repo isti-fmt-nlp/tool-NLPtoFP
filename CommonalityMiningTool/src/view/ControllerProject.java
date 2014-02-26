@@ -84,12 +84,24 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 				modelProject.addFileProject(s[1]);
 			
 	  }
+	  else if(ae.getActionCommand().equals("Load Analisys Folder")){
+			String [] s = null;
+			
+			if((s = viewProject.loadFolderDialog()) != null){
+			  
+			  /* ***DEBUG*** */
+			  if(verbose) for(String file : s) System.out.println("file: "+file);
+			  /* ***DEBUG*** */
+
+			  modelProject.addAnalisysFolderProject(s);				
+			}
+
+	  }
 	  else if(ae.getActionCommand().equals("Delete Selected File")){
 			int i = -1;
 			
 			if((i = viewProject.deleteSelectedFileDialog()) != -1)
 				modelProject.removeFileProject(i);
-//			System.out.println("i="+i);
 	  }
 	  else if(ae.getActionCommand().equals("Delete File")){
 			int i = -1;

@@ -11,79 +11,56 @@ import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 
 	/** Effettua il parsing del file xml */
- 	public class ParserXML extends DefaultHandler
-    {  	
-    	private  boolean r = false, n = false, l = false, p = false;
+ 	public class ParserXML extends DefaultHandler{  	
+    	private  boolean root = false, node = false, leaf = false, p = false;
     	
     	private int i = 0;
 
-    	private ArrayList <String> nameInput = new ArrayList <String> (), pathInput = new ArrayList <String> ();
+    	private ArrayList<String> nameInput = new ArrayList <String> ();
+    	private ArrayList<String> pathInput = new ArrayList <String> ();
     	
     	@Override
-        public void startElement(String uri, String localName, String gName, Attributes attributes)
-        {
-    		if(gName.equals("root"))
-	        	r = true;
-        	
-        	else if(gName.equals("node"))
-        		n = true;
-        	
-        	else if(gName.equals("leaf"))
-        		l = true;
-        	
-        	else
-        		p = true;
+        public void startElement(String uri, String localName, String gName, Attributes attributes){
+    		if(gName.equals("root")) root = true;        	
+        	else if(gName.equals("node")) node = true;        	
+        	else if(gName.equals("leaf")) leaf = true;        	
+        	else p = true;
         }
         
     	@Override
-        public void characters(char [] ch, int start, int length)
-        {
-    		if(p)
-    			pathInput.add(new String(ch,start,length));
-        	
-        	else if(i == 0 && l && !p)
-        		nameInput.add(new String(ch, start, length));
-        		
-        	else 
-        	{
-        		n = r;
-        		r = n;
+        public void characters(char [] ch, int start, int length){
+    		if(p) pathInput.add(new String(ch,start,length));        	
+        	else if(i == 0 && leaf) nameInput.add(new String(ch, start, length));        		
+        	else{
+        		node = root;
+        		root = node;
         	}
         }
     	
     	@Override
-        public void endElement(String uri, String localName, String gName)
-        {
-    		if(gName.equals("root"))
-	        	r = false;
-        	
-        	else if(gName.equals("node"))
-        	{
-        		i = i + 1;
-        		n = false;
-        	}
-        	else if(gName.equals("leaf"))
-        		l = false;
-        	
-        	else
-        		p = false;
+        public void endElement(String uri, String localName, String gName){
+    		if(gName.equals("root")) root = false;        	
+        	else if(gName.equals("node")){ ++i; node = false;}
+        	else if(gName.equals("leaf"))leaf = false;        	
+        	else p = false;
         }
     	
-    	/** Lettura delle path dei file 
+    	/**
+    	 * Reads files paths.
     	 * 
-    	 * @return pathInput
+    	 * @return - a ArrayList<String> containing the files paths.
     	 */
-    	public ArrayList <String> readPathInput()
-    	{
+    	public ArrayList<String> readPathInput(){
     		return pathInput;
     	}
     	
-    	/** Lettura dei nomi dei file
+    	/** 
+    	 * Reads files names.
     	 * 
-    	 * @return
+    	 * @return - a ArrayList<String> containing the files names.
     	 */
-    	public ArrayList <String> readNameFile()
-    	{
+    	public ArrayList<String> readNameFile(){
+    		for(String name : nameInput) System.out.println("Input file name: "+name);
     		return nameInput;
     	}
     }

@@ -158,7 +158,7 @@ public class ViewPanelCentral{
 
 		tabFile.addTab("Sentence splitting", getTabHTMLFile(s[1])); 
 		tabFile.addTab("Term extraction", getTabHTMLFile(s[2])); 
-		tabFile.addTab("Annotation", getTabHTMLFile(s[3])); 
+//		tabFile.addTab("Annotation", getTabHTMLFile(s[3])); 
 
 		panelAnalysis.removeAll();
 		panelAnalysis.add(tabFile);
@@ -182,8 +182,7 @@ public class ViewPanelCentral{
 			FeatureType fType, ArrayList<String> alFeaturesToHighlight, JButton buttonSelectionEnd){
 		
 		String displayText = fType==FeatureType.COMMONALITIES? "Commonality":"Variability";
-		if(alF == null || alFeaturesCand == null)
-			return;
+		if(alF == null || alFeaturesCand == null) return;
 		
 //		JTabbedPane tmpTab= new JTabbedPane();
 //		tmpTab.setLayout();
