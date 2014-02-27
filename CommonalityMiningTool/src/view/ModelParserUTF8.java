@@ -52,7 +52,7 @@ public class ModelParserUTF8{
 	 */
 	public File filterFile(){          		
         //Clean the file content
-        if((textUTF8 = cleanString(encodeFileToStringUTF8()))==null) return null;        
+        if((textUTF8 = /*cleanString*/(encodeFileToStringUTF8()))==null) return null;        
         try{
           //writes UTF8 version file
           PrintStream ps = new PrintStream(new FileOutputStream(pathFileUTF8),false,"UTF-8");      	

@@ -135,7 +135,8 @@ public class ViewPanelCentral{
 //		panelAnalysis.setBounds(320, 60, 1100, 652); 
 	}
 	
-	/** Create the analysis tabs of a file
+	/** 
+	 * Create the analysis tabs of a file
 	 * 
 	 * @param s - String array containing analysis result files paths of the chosen file
 	 * @param relevantTerm ArrayList containing file relevant terms 
@@ -932,7 +933,6 @@ public class ViewPanelCentral{
 	 * @param alFeaturesToHighlight - if not null, the terms in alFeaturesToHighlight will be highlighted 
 	 * @return the new ActionListener
 	 */
-//	private MouseAdapter getCheckBoxMouseListener(String type) {
 	private MouseListener getTermSearchIconListener(String type, final String term, final ArrayList<String> alFeaturesToHighlight) {
 		
 	  if (type=="Extracted") return new MouseAdapter(){			

@@ -1,0 +1,67 @@
+Hi. I have a similar but different problem:
+I would like to calculate all possible combinations of colors in the form of RGB code(that means a 3 positions: Red, Green, Blue, with values ranging from 0 to 255 per position).
+Actually, i will reduce the value range a lot, splitting it in fractions like: 0-128-255(3 values) or (0-85-170-255), but the problem remains the same.
+
+The problem is different because repetitions matter(255, 255, 0), order matter(0, 255, 255) but r can be lower than n
+
+(single value)
+0.0.0
+255.255.255
+128.128.128
+
+(255 and 0)
+255.0.0
+0.255.0
+0.0.255
+255.255.0
+255.0.255
+0.255.255
+
+(128 and 0)
+128.0.0
+0.128.0
+0.0.128
+128.128.0
+128.0.128
+0.128.128
+
+(255 and 128)
+128.255.0
+255.128.0
+128.0.255
+255.0.128
+0.128.255
+0.255.128
+
+(255, 128 and 0)
+255.128.0
+255.0.128
+128.255.0
+128.0.255
+0.255.128
+0.128.255
+
+
+Steps:
+[Dove MaxX=255 e MinX è il valore appena sopra 0]
+
+1)VALORE SINGOLO
+for(x: da MaxX a MinX){
+  -generate all combinations with x, 0, 0;
+  -generate all combinations with x, x, 0;
+}
+
+2)DUE VALORI
+for(x: da MaxX a MinX)
+  for(y: dal valore sotto MaxX a MinX){
+    -generate all combinations with x, y, 0;
+}
+
+3)TRE VALORI
+for(x: da MaxX a MinX)
+  for(y: da MaxX a MinX){
+    for(z: da MaxX a MinX){
+      -generate all combinations with x, y, z;
+}
+
+

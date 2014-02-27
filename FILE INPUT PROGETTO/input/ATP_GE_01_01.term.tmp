@@ -1,0 +1,139 @@
+Lemma_of_Term	Domain_relavance	Frequency
+atp	100.0	63
+on-board equipment	99.9999999361	56
+ATC/ATP	99.9999997702	44
+tram	99.9999995235	34
+emergency brake	99.999999452	32
+service brake	99.999999452	32
+response time	99.9999994122	31
+driver 's cab/at driver	99.9999992722	28
+equipment in driver	99.9999992722	28
+km/h	99.9999991574	26
+track area	99.9999990917	25
+tramcar	99.9999990917	25
+speed atp	99.9999989395	23
+non interlock-controlled area	99.9999988509	22
+maximum speed limit	99.999998752	21
+fault information	99.9999986411	20
+vehicle logic	99.9999985159	19
+public transport signal facility	99.9999983737	18
+Signal/public transport signal	99.9999983737	18
+signal V-signal	99.9999983737	18
+train lenght delay	99.9999980227	16
+Caution "	99.9999980227	16
+public transport signal	99.9999980227	16
+equipment in track area	99.9999978033	15
+driver	99.9999976565	127
+km/h.	99.9999975446	14
+continuous updating	99.9999975446	14
+main signal	99.9999972356	13
+signal in " stop	99.9999968609	12
+Speed monitoring	99.9999968609	12
+mmi	99.9999964653	25
+stretch of line	99.9999963985	11
+target speed	99.9999963985	11
+Missing feedback	99.9999963985	11
+button	99.9999958744	28
+communication between ATC/ATP track	99.9999958154	10
+driver 's cab	99.9999958154	10
+next signal	99.9999958154	10
+Sealed button	99.9999958154	10
+overspeed warning	99.9999958154	10
+red signal	99.9999958154	10
+speed reduction	99.9999958154	10
+ATC/ATP track	99.9999958154	10
+equipment	99.9999956482	194
+signal	99.9999952428	60
+board equipment	99.9999950609	9
+black cross	99.9999950609	9
+ATC/ATP on-board equipment	99.9999950609	9
+ATC/ATP equipment	99.9999950609	9
+level crossings	99.9999950609	9
+cab	99.9999943113	18
+fault information atp	99.9999940524	8
+ceiling speed	99.9999940524	8
+speed	99.9999938772	87
+stop	99.9999937483	39
+train	99.9999933537	34
+maximum speed	99.999993317	12
+rail vehicle	99.9999926468	7
+Target braking	99.9999926468	7
+traction cut-off	99.9999926468	7
+traffic safety	99.9999926468	7
+confirmation box	99.9999926468	7
+sealed button	99.9999926468	7
+track equipment	99.9999926468	7
+auxiliary speedometer	99.9999926468	7
+second in bad case conditions.	99.999990575	6
+track area atp equipment	99.999990575	6
+axle counter detection point	99.999990575	6
+continuous updating of ATC/ATP	99.999990575	6
+capacity of on-board equipment	99.999990575	6
+Indication for brake release	99.999990575	6
+indication of maximum speed	99.999990575	6
+processing of data	99.999990575	6
+on-board equipment atp	99.999990575	6
+Priority button	99.999990575	6
+road vehicle	99.999990575	6
+Start-up/restart of equipment	99.999990575	6
+base supervision	99.999990575	6
+level crossing	99.999990575	6
+Tramcar log	99.999990575	6
+emergency stop	99.999990575	6
+vehicle	99.999990528	115
+power supply	99.9999877	8
+continuous updating of on-board equipment	99.9999872728	5
+ACK button atp	99.9999872728	5
+tramcar atp equipment	99.9999872728	5
+Mixed traffic zone	99.9999872728	5
+traffic signal facility	99.9999872728	5
+text indication	99.9999872728	5
+atp Wayside	99.9999872728	5
+low service brake value	99.9999872728	5
+acoustic signal	99.9999872728	5
+line atp	99.9999872728	5
+error message	99.9999872728	5
+printed circuit board	99.9999848887	7
+fault	99.9999822233	21
+Missing feedback from service brake	99.9999813476	4
+speed atp with respect	99.9999813476	4
+full service brake reaction	99.9999813476	4
+communication between track equipment	99.9999813476	4
+calculated stopping distance	99.9999813476	4
+transmission system equipment	99.9999813476	4
+transmission of data	99.9999813476	4
+railway engineering sense	99.9999813476	4
+equipment for speed	99.9999813476	4
+presentation of fault	99.9999813476	4
+indication of speed	99.9999813476	4
+configurable value	99.9999813476	4
+status	99.9999796264	19
+function	99.999977095	22
+track area atp the equipment	99.9999683414	3
+Missing feedback from emergency brake	99.9999683414	3
+brake release after emergency brake	99.9999683414	3
+case of data communication channel	99.9999683414	3
+disconnection of on-board equipment	99.9999683414	3
+" distant signalling distance	99.9999683414	3
+transition from full supervision	99.9999683414	3
+" ACK " function	99.9999683414	3
+certain predefined max speed	99.9999683414	3
+respect	99.9999652999	17
+communication	99.9999587178	17
+indication	99.9999580743	20
+line	99.999938473	42
+level	99.999879296	31
+system	99.9998626616	23
+case	99.9998466212	52
+information	99.9998314624	17
+service	99.9997871301	18
+order	99.9996353033	20
+time	99.9986521025	16
+
+
+Configuration:
+POS_Start	c:NN c:JJ
+POS_Internal	c:NN c:JJ p:IN p:POS
+POS_End	c:NN
+Ortografic unit	L
+Max term length	5

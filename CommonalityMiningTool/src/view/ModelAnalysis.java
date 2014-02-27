@@ -725,29 +725,160 @@ public class ModelAnalysis extends ModelParserUTF8{
 	  }
 
 	}
-	
-	
-	/*
-	if (!saveResultPage(URL_ANALYSIS+jid, pathPrefix+0+".html")) return false;
-	if (!saveResultPage(URL_ANALYSIS+jid+URL_SENTENCE_SPLITTER_PART, pathPrefix+1+".html")) return false;
-	if (!saveResultPage(URL_ANALYSIS+jid+URL_TOKENIZER_PART, pathPrefix+2+".html")) return false;
-	*/
-
-	/**
-	 * Creates the HTML analisys result file containing the term extraction, using filePath as source. 
-	 * 
-	 * @param filePath - a String representing the path of term extraction file
-	 */
-	public void createResultFileTermExtractor(String string) {
-		
-	}
 
 	/**
 	 * Creates the HTML analisys result file containing the post tagging, using filePath as source. 
 	 * 
 	 * @param filePath - a String representing the path of post tagging file
 	 */
-	public void createResultFilePostTagging(String string) {
+	public void createResultFilePostTagging(String filePath) {
+	  File tmp=null;
+	  PrintWriter printer=null;
+	  BufferedReader reader=null;		
+	  String line=null;
+	  String fileContent="", inputTextContent="", sentenceBoundaries="";
+      String pathPrefix = readPathFileUTF8().substring(0, readPathFileUTF8().length()-4);
+      int sentencesCount=0;
+      int inputTextIndex=0;
+      String[] elementData=null;
+      String lastToken=null;
+      ArrayList<String> arStr=new ArrayList<String>();
+	  
+	  //reading input text file content, it will be used to compute sentences boundaries
+	  tmp=new File(readPathFileUTF8());
+	  try {
+		reader=new BufferedReader(new FileReader(tmp));
+		while((line=reader.readLine())!=null) inputTextContent+=line+"\n";
+		reader.close();	  
+	  } catch (IOException e1) {
+		System.out.println("createResultFilePostTagging(): Input Text File Read Problem!");
+		e1.printStackTrace(); return;
+	  }
+/*	  
+	  fileContent+=
+		"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\""
+		+"\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"
+		+"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"it\" lang=\"it\">"
+		+"<head>"
+		+"<title>DyLan - TextTools</title>"
+		+"</head>"
+		+"<body>"
+		+"<table style=\"width: 100%; margin: 0px; padding: 0px;\">"
+		+"<tr>"
+		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>SID</b></td>"
+		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>Token</b></td>"
+		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>token</b></td>"
+		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>data1</b></td>"
+		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>data2</b></td>"
+		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>data3</b></td>"
+		+"</tr>";
+*/	  
+	  arStr.add(
+		"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\""
+		+"\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"
+		+"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"it\" lang=\"it\">"
+		+"<head>"
+		+"<title>DyLan - TextTools</title>"
+		+"</head>"
+		+"<body>"
+		+"<table style=\"width: 100%; margin: 0px; padding: 0px;\">"
+		+"<tr>"
+		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>SID</b></td>"
+		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>Token</b></td>"
+		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>token</b></td>"
+		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>data1</b></td>"
+		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>data2</b></td>"
+		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>data3</b></td>"
+		+"</tr>");
+	  
+	  //creating html content of the result file
+	  tmp=new File(filePath);
+	  try {
+		reader=new BufferedReader(new FileReader(tmp));
+		sentenceBoundaries+="0\t0";//da guardare se il file è vuoto, non deve scrivere la prima riga(errata poi...)
+		while((line=reader.readLine())!=null){
+		  if(line.length()>0){//new token found
+			elementData=line.split("\t");
+			arStr.add("<tr>"
+					+"<td bgcolor=\"#cccccc\" valign=\"top\" width=\"50px\" align=\"left\"><b>"+elementData[0]+"</b></td>"
+					+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[1]+"</td>"
+					+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[2]+"</td>"
+					+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[3]+"</td>"
+					+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[4]+"</td>"
+					+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[5]+"</td></tr>");
+/*			
+			fileContent+="<tr>"
+				+"<td bgcolor=\"#cccccc\" valign=\"top\" width=\"50px\" align=\"left\"><b>"+elementData[0]+"</b></td>"
+				+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[1]+"</td>"
+				+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[2]+"</td>"
+				+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[3]+"</td>"
+				+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[4]+"</td>"
+				+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[5]+"</td></tr>";
+*/			
+			if(lastToken==null){//this is the first found token after the end of last sentence
+			  sentenceBoundaries+=sentencesCount+"\t"+inputTextContent.indexOf(elementData[1], inputTextIndex);
+			}
+			//moving in input text to reach current token index
+			lastToken=elementData[1];
+			inputTextIndex=inputTextContent.indexOf(lastToken, inputTextIndex);
+		  }
+		  else{//found a newLine, calculating sentence boundaries
+			if(sentencesCount%100==0)System.out.println("Found newLine! #"+sentencesCount);
+			sentenceBoundaries+="\t"+(inputTextIndex+lastToken.length()-1)+"\n";
+			++sentencesCount; lastToken=null;
+		  }
+		}
+
+		//adding last part to result file html content
+		arStr.add("</table></body></html>");
+/*		
+		fileContent+="</table></body></html>";
+*/
+		//adding last end boundary to sentenceBoundaries
+		if(lastToken!=null) sentenceBoundaries+="\t"+(inputTextIndex+lastToken.length()-1)+"\n";
+	  
+	  } catch (IOException e1) {
+		System.out.println("createResultFilePostTagging(): File Read Problem!");
+		e1.printStackTrace(); return;
+	  }
+	  
+	  System.out.println("sentenceBoundaries: \n"+sentenceBoundaries);
+	  //printing files
+	  try {
+		//printing html result file
+		tmp=new File(pathPrefix+1+".html");
+		printer = new PrintWriter(tmp);
+		for(String a: arStr) printer.print(a);
+/*		
+		printer.print(fileContent);
+*/
+		printer.close();			
+		//printing sentences boundaries file
+		tmp=new File(pathPrefix+"SENTENCES_BOUNDS.html");
+		printer = new PrintWriter(tmp);
+		printer.print(sentenceBoundaries);
+		printer.close();	
+	  } catch (IOException e1) {
+		System.out.println("createResultFileInputText(): File Write Problem!");
+		e1.printStackTrace(); return;
+	  }
+
+	  
+	}
+	
+	
+	/*
+	if (!saveResultPage(URL_ANALYSIS+jid+URL_SENTENCE_SPLITTER_PART, pathPrefix+1+".html")) return false;
+	if (!saveResultPage(URL_ANALYSIS+jid+URL_TOKENIZER_PART, pathPrefix+2+".html")) return false;
+	*/
+
+	/**
+	 * Creates the HTML analisys result file containing the term extraction, using filePath as source. <br>
+	 * The other 2 analisys result files must already be present.
+	 * 
+	 * @param filePath - a String representing the path of term extraction file
+	 */
+	public void createResultFileTermExtractor(String string) {
 		
 	}
 	
@@ -775,7 +906,14 @@ public class ModelAnalysis extends ModelParserUTF8{
 	
 	/**
 	 * Saves relevant terms of this model on file.
-	 */	private void saveRelevantTerms() throws IOException {
+	 */
+	private void saveRelevantTerms() throws IOException {
+	  if(termRelevant==null){//just creating an empty file
+		File emptyFile=new File(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + ".log");
+		emptyFile.getParentFile().mkdir(); emptyFile.createNewFile();
+		return;
+	  }
+	  
 	  Collections.sort(termRelevant);
 	  PrintWriter writer =
 		new PrintWriter(
@@ -791,7 +929,13 @@ public class ModelAnalysis extends ModelParserUTF8{
 	 * Saves relevant terms sets of this model on file, one per sentence.
 	 */
 	private void saveRelevantTermsSets() throws IOException {
-	  PrintWriter writer;
+	  PrintWriter writer=null;
+	  if(termsInSentencesSet==null){//just creating an empty file
+		File emptyFile=new File(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + "SETS.log");
+		emptyFile.getParentFile().mkdir(); emptyFile.createNewFile();
+		return;
+	  }
+			  
 	  writer =
 		new PrintWriter(
 		  new BufferedWriter(
@@ -809,7 +953,12 @@ public class ModelAnalysis extends ModelParserUTF8{
 	 * Saves relevant terms arities of this model on file.
 	 */
 	private void saveRelevantTermsArities() throws IOException {
-	  PrintWriter writer;
+	  PrintWriter writer=null;
+	  if(termsArity==null){//just creating an empty file
+		File emptyFile=new File(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + "ARITY.log");
+		emptyFile.getParentFile().mkdirs(); emptyFile.createNewFile();
+		return;
+	  }
 	  writer =
 		new PrintWriter(
 		  new BufferedWriter(

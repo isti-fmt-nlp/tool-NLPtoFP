@@ -292,6 +292,9 @@ public class ModelProject extends Observable implements Runnable{
 		  else termsArity.put(arityEntry.getKey(), termsArity.get(arityEntry.getKey())+arityEntry.getValue());
 		}
 	  }
+	  
+	  //analisys phase is still to be done
+	  if(termsInSentencesSet.size()==0) return;
 
 	  card=Math.pow(termsInSentencesSet.size(), 1.0/3);
 	  cardUpper=((int)card<card)? (int)card+1: (int)card;
@@ -332,7 +335,7 @@ public class ModelProject extends Observable implements Runnable{
 	  card=Math.pow(termsInSentencesSet.size(), 1.0/3);
 	  cardUpper=((int)card<card)? (int)card+1: (int)card;
 	  values=new int[cardUpper];
-	  colorOffset=255/cardUpper;
+	  colorOffset=255/(cardUpper-1);
 	  values[0]=0;
 	  for(int i=1; i<values.length-1; ++i){
 		values[i]=colorOffset*i;
@@ -661,8 +664,9 @@ public class ModelProject extends Observable implements Runnable{
         
         //creating result html pages as project files
 		newModel.createResultFileInputText(files[0]);
-		newModel.createResultFileTermExtractor(files[1]);
 		newModel.createResultFilePostTagging(files[2]);
+		//post tagging HTML file is needed to build term extractor HTML file
+		newModel.createResultFileTermExtractor(files[1]);
 /*		
 		String s2 = "", s3 = null, s4 = null;
 
@@ -843,70 +847,65 @@ public class ModelProject extends Observable implements Runnable{
 	 * @param al - ArrayList containing the selected features
 	 * @param type - type of the selected features, a constant from ViewPanelCentral.FeatureType
 	 */
-	public void setFeaturesSelected(ArrayList<String> al, ViewPanelCentral.FeatureType type)
-	{
+	public void setFeaturesSelected(ArrayList<String> al, ViewPanelCentral.FeatureType type){
 		ArrayList<String> tmp = new ArrayList<String> ();
 		
-		PrintWriter pw = null;
-		
-		for(int i = 0; i < al.size(); i++) tmp.add(al.get(i));
+		if(al!=null) for(int i = 0; i < al.size(); i++) tmp.add(al.get(i));
 
 		if(type==ViewPanelCentral.FeatureType.COMMONALITIES) commonalitiesSelected=tmp;
 		else variabilitiesSelected=tmp;
 
+		saveFeaturesSelected(tmp, type);
+		setChanged();
+		if(type==ViewPanelCentral.FeatureType.COMMONALITIES)
+		  notifyObservers("End Commonalities Selected");
+		else
+		  notifyObservers("End Variabilities Selected");
+	}
+
+	/**
+	 * Writes selected feature on a save file.
+	 * 
+	 * @param al - ArrayList containing the selected features
+	 * @param type - type of the selected features, a constant from ViewPanelCentral.FeatureType
+	 */
+	private void saveFeaturesSelected(ArrayList<String> al, ViewPanelCentral.FeatureType type) {
+		PrintWriter pw=null;
 		try {
-			if(type==ViewPanelCentral.FeatureType.COMMONALITIES)
-				pw = new PrintWriter(new BufferedWriter(new FileWriter(pathCommonalitiesSelectedHTML)));
-			else
-				pw = new PrintWriter(new BufferedWriter(new FileWriter(pathVariabilitiesSelectedHTML)));
+		  if(type==ViewPanelCentral.FeatureType.COMMONALITIES)
+			pw = new PrintWriter(new BufferedWriter(new FileWriter(pathCommonalitiesSelectedHTML)));
+		  else
+			pw = new PrintWriter(new BufferedWriter(new FileWriter(pathVariabilitiesSelectedHTML)));
 			
-			String s = 
-			  "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"it\" lang=\"it\"><head>"			
+		  String s = 
+			"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"it\" lang=\"it\"><head>"						
+			+"<style type=\"text/css\">html { overflow-y: scroll; }"
+			+"body{	font-family: Arial, Verdana, sans-serif;	font-size: 100%;}"
+			+"input.tt_button{border: 1px solid #006;}"
+			+"table.tt_footer{text-align: center; font-family: Verdana, Geneva, Arial, Helvetica, sans-serif ;"
+			+"font-size: 10px;	color: #444;}"
+			+"#wrapper{	margin: 0 auto;	width: 800px;}#content{	width: 100%;}"	
+			+"</style></head><body>"			
+			+"<table border=\"2\" align=\"center\">";
 			
-			  +"<style type=\"text/css\">html { overflow-y: scroll; }"
-			  +"body{	font-family: Arial, Verdana, sans-serif;	font-size: 100%;}"
-			  +"input.tt_button{border: 1px solid #006;}"
-			  +"table.tt_footer{text-align: center; font-family: Verdana, Geneva, Arial, Helvetica, sans-serif ;"
-			  +"font-size: 10px;	color: #444;}"
-			  +"#wrapper{	margin: 0 auto;	width: 800px;}#content{	width: 100%;}"	
-			  +"</style></head><body>"			
-
-			  +"<table border=\"2\" align=\"center\">";
-			
-//			String s = "<table border=\"2\" align=\"center\">";
-			
-			if(type==ViewPanelCentral.FeatureType.COMMONALITIES)
-				s += "<tr><th>n.</th><th>Selected Commonalities</th><th>Color</th></tr>";
-			else
-				s += "<tr><th>n.</th><th>Selected Variabilities</th><th>Color</th></tr>";
+		  if(type==ViewPanelCentral.FeatureType.COMMONALITIES)
+			s += "<tr><th>n.</th><th>Selected Commonalities</th><th>Color</th></tr>";
+		  else
+			s += "<tr><th>n.</th><th>Selected Variabilities</th><th>Color</th></tr>";
 				
-			for(int i = 0; i < tmp.size(); i++)
-//				s += "<tr><td style=\"width: auto;\">" +(i+1)
-//				       + "</td><td style=\"width: auto;\">" + tmp.get(i) 
-//				       + "</td><td style=\"width: auto; background: #"+getHexRGB(termsColor.get(tmp.get(i)))
-//				       + ";\"></td></tr>";
-				s += "<tr><td style=\"width: auto;\">" +(i+1)
-					   + "</td><td style=\"width: auto;\">" + tmp.get(i) 
-				       + "</td><td style=\"width: auto; background: #"+getHexRGB(termsColor.get(tmp.get(i)))
-				       + ";\"></td></tr>";
+		  if(al!=null) for(int i = 0; i < al.size(); i++)
+			s += "<tr><td style=\"width: auto;\">" +(i+1)
+			   + "</td><td style=\"width: auto;\">" + al.get(i) 
+			   + "</td><td style=\"width: auto; background: #"+getHexRGB(termsColor.get(al.get(i)))
+			   + ";\"></td></tr>";
 
+		  s += "</table></body></html>";	
 			
-//			s += "</table>";	
-			s += "</table></body></html>";	
-			
-			
-			pw.print(s);
-	        pw.close();
-	        setChanged();
-			if(type==ViewPanelCentral.FeatureType.COMMONALITIES)
-				notifyObservers("End Commonalities Selected");
-			else
-				notifyObservers("End Variabilities Selected");
-		} 
-		catch (IOException e) 
-		{
-			System.out.println("Exception readCommonalitiesSelectedFileHTML: " + e.getMessage());
-			return;
+		  pw.print(s);
+		  pw.close();
+		}catch (IOException e){
+		  System.out.println("Exception readCommonalitiesSelectedFileHTML: " + e.getMessage());
+		  return;
 		}
 	}
 	
@@ -1029,8 +1028,8 @@ public class ModelProject extends Observable implements Runnable{
 			saveFeaturesList(variabilitiesCandidates, pathVariabilitiesCandidates);
 			saveFeaturesList(variabilitiesSelected, pathVariabilitiesSelected);
 			//saving selected feature lists on html tables	
-			setFeaturesSelected(commonalitiesSelected, FeatureType.COMMONALITIES);
-			setFeaturesSelected(variabilitiesSelected, FeatureType.VARIABILITIES);
+			saveFeaturesSelected(commonalitiesSelected, FeatureType.COMMONALITIES);
+			saveFeaturesSelected(variabilitiesSelected, FeatureType.VARIABILITIES);
 			
 //			saveSelectedFeaturesHTML(commonalitiesSelected, pathCommonalitiesSelectedHTML, "Commonalities Selected");
 //			saveSelectedFeaturesHTML(variabilitiesSelected, pathVariabilitiesSelectedHTML, "Variabilities Selected");			
