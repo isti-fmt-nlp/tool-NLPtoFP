@@ -79,7 +79,8 @@ public class ModelAnalysis extends ModelParserUTF8{
 		super(pathFile, pathProject);
 	}
 	
-	/** Loads a file analisys 
+	/**
+	 * Loads analisys data for the already analyzed input file 
 	 * 
 	 * @return true if loading has been successful, false otherwise
 	 */
@@ -89,6 +90,11 @@ public class ModelAnalysis extends ModelParserUTF8{
       termRelevant = new ArrayList <String> ();		
       pathPageHTML = new ArrayList <String> ();
 		
+      
+//		//this model represents an analisys directory, analisys is already done
+//		if (isAnalisysDir){ result=true; return;}
+
+      
       // inserting html path 
       for(int i = 0; i < 4; i++)
     	pathPageHTML.add(new String(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + i +".html"));
@@ -758,7 +764,6 @@ public class ModelAnalysis extends ModelParserUTF8{
       Point tempPoint=null;
 	  
 	  //reading input text file content, it will be used to compute sentences boundaries      
-//      inputTextContent=readTextUTF8().toUpperCase();
       inputTextContent=cleanTextContent(readTextUTF8());
     		  
 	  arStr.add(
@@ -781,12 +786,11 @@ public class ModelAnalysis extends ModelParserUTF8{
 	  
 	  //creating html content of the result file
 	  tmp=new File(filePath);
-//	  tmp=new File("/home/natan/git_REPOSITORIES/tool-NLPtoFP/FILE INPUT PROGETTO/input/FAKE_ATP_GE_01_01_FAKE");
 	  
 	  try {
 		reader=new BufferedReader(new FileReader(tmp));
 		tempPoint=new Point(0, 0);
-		sentenceBoundaries+="0\t0";//da guardare se il file è vuoto, non deve scrivere la prima riga(errata poi...)
+//		sentenceBoundaries+="0\t0";//da guardare se il file è vuoto, non deve scrivere la prima riga(errata poi...)
 		while((line=reader.readLine())!=null){
 		  if(line.length()>0){//new token found
 			elementData=line.split("\t");
@@ -800,26 +804,22 @@ public class ModelAnalysis extends ModelParserUTF8{
 					 +"</tr>");
 			
 			if(currentToken==null && sentencesCount>0){//this is the first token found after the end of last sentence
-			  sentenceBoundaries+=sentencesCount+"\t"+inputTextContent.indexOf(elementData[1], inputTextIndex);
+//			  sentenceBoundaries+=sentencesCount+"\t"+inputTextContent.indexOf(elementData[1], inputTextIndex);
 			  tempPoint=new Point(inputTextContent.indexOf(elementData[1], inputTextIndex), 0);
-//			  sentenceBoundaries+=sentencesCount+"\t"+inputTextContent.indexOf(elementData[1].toUpperCase(), inputTextIndex);
-//			  tempPoint=new Point(inputTextContent.indexOf(elementData[1].toUpperCase(), inputTextIndex), 0);
 
 			}
 			//moving in input text to reach current token index
 			previousToken=currentToken; currentToken=elementData[1];
 			inputTextIndex=inputTextContent.indexOf(currentToken, inputTextIndex);
-//			inputTextIndex=inputTextContent.indexOf(lastToken.toUpperCase(), inputTextIndex);
 			if(inputTextIndex<0) System.out.println("Got index <0! Term was: "+currentToken+"\tPrevious: "+previousToken);
 			inputTextIndex+=currentToken.length();
 		  }
 		  else{//found a newLine, calculating sentence boundaries
 			if(sentencesCount%100==0)System.out.println("Found newLine! #"+sentencesCount);
-			sentenceBoundaries+="\t"+(inputTextIndex/*+currentToken.length()*/-1)+"\n";
-			tempPoint.y=(inputTextIndex/*+currentToken.length()*/-1);
+//			sentenceBoundaries+="\t"+(inputTextIndex-1)+"\n";
+			tempPoint.y=(inputTextIndex-1);
 			sentencesBounds.add(tempPoint);
 			++sentencesCount;
-//			if(lastToken!=null) inputTextIndex+=lastToken.length();
 			previousToken=currentToken; currentToken=null;
 		  }
 		}
@@ -829,7 +829,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 		
 		//adding last end boundary to sentenceBoundaries
 		if(currentToken!=null){
-		  sentenceBoundaries+="\t"+(inputTextIndex/*+currentToken.length()*/-1)+"\n";
+//		  sentenceBoundaries+="\t"+(inputTextIndex/*+currentToken.length()*/-1)+"\n";
 		  tempPoint.y=(inputTextIndex/*+currentToken.length()*/-1);
 		  sentencesBounds.add(tempPoint);		  
 		}
@@ -850,11 +850,11 @@ public class ModelAnalysis extends ModelParserUTF8{
 		printer = new PrintWriter(tmp);
 		for(String a: arStr) printer.print(a);
 		printer.close();			
-		//printing sentences boundaries file
-		tmp=new File(pathPrefix+"SENTENCES_BOUNDS.log");
-		printer = new PrintWriter(tmp);
-		printer.print(sentenceBoundaries);
-		printer.close();	
+//		//printing sentences boundaries file
+//		tmp=new File(pathPrefix+"SENTENCES_BOUNDS.log");
+//		printer = new PrintWriter(tmp);
+//		printer.print(sentenceBoundaries);
+//		printer.close();	
 	  } catch (IOException e1) {
 		System.out.println("createResultFileInputText(): File Write Problem!");
 		if(printer!=null) printer.close();	
@@ -961,17 +961,34 @@ public class ModelAnalysis extends ModelParserUTF8{
 	  //reading input text file content
       inputTextContent=readTextUTF8();
 	  
+      /* ***DEBUG*** */
+      String newTermForm=null;
+      try {
+    	printer=new PrintWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4)+".TERMCLEANING");
+      } catch (FileNotFoundException e) {
+    	System.out.println("debug problem for file writing");
+    	e.printStackTrace();
+      }
+      /* ***DEBUG*** */
+      
 	  //saving the positions in input file of relevant terms occurences 
 	  relevantTerms=new HashMap<String, ArrayList<Integer>>();
 	  try {
-		reader = new BufferedReader(new StringReader(inputTextContent));
+		reader = new BufferedReader(new StringReader(cleanTextContent(inputTextContent)));
+//		reader = new BufferedReader(new StringReader(inputTextContent));
 		charcount=0;
 		while((line = reader.readLine()) != null){//for each line
 		  for(int h=0; h<termRelevant.size(); h++){//for each relevant term
 			index=0;
+
+			/* ***DEBUG*** */
+			newTermForm=cleanTermRelevant(termRelevant.get(h));
+			printer.println("Original Term: "+termRelevant.get(h)+"\nModified: "+newTermForm+"\n");
+			/* ***DEBUG*** */
+			  
 			while(index<line.length()){//for each occurrence
 			  //get next occurrence
-			  index = line.toUpperCase().indexOf(termRelevant.get(h).toUpperCase(), index);			  
+			  index = line.toUpperCase().indexOf(cleanTermRelevant(termRelevant.get(h)).toUpperCase(), index);			  
 			  if (index == -1) break;//start checking next relevant term occurrences in this line
 			  //add occurrence to relevantTerms, if it is valid
 			  if (ModelProject.isValidOccurrence(termRelevant.get(h), line, index));
@@ -988,6 +1005,10 @@ public class ModelAnalysis extends ModelParserUTF8{
 		try{ reader.close();}catch(Exception e2){}
 		e.printStackTrace();
 	  }
+	  
+	  
+
+	  
 
 //	  Iterator<Entry<String, ArrayList<Integer>>> iter = relevantTerms.entrySet().iterator();
 //	  Entry<String, ArrayList<Integer>> entry=null;
@@ -1028,13 +1049,57 @@ public class ModelAnalysis extends ModelParserUTF8{
 			
 		}
 	  }
-	  
-	  
+	   
 	  pathPageHTML.add(pathPrefix+2+".html");
 	  
-	  
+	  if (SAVE_RELEVANT_TERMS_IMMEDIATELY) try {
+		saveRelevantTerms();
+	  } catch (IOException e) {
+		System.out.println("Relevant terms file could not be saved");
+		e.printStackTrace();
+	  }
+
 	}
 	
+	/**
+	 * Returns a cleaned version of term, calling cleanTextContent to make substitutions, <br>
+	 * and removes whitespaces between an alphanumeric characters and quotation marks.
+	 * 
+	 * @param inputTextContent - the String to be cleaned
+	 * @return - a new cleaned String
+	 */
+	private String cleanTermRelevant(String term) {
+		char[] chars, newChars=null;
+		int k=0, l=0, i=0;
+		if (term==null) return null;
+		String res=cleanTextContent(term);
+		chars=res.toCharArray();
+		newChars=new char[chars.length];
+		for(i=0, l=0; i<chars.length; ++i, ++l){
+		  //found a whitespace in the term
+		  if(chars[i]==' '){			  
+			//checking if next non-space char is a quotation mark
+			for(k=i+1; k<chars.length; ++k){
+			  switch(chars[k]){
+			    case '"': case '\'': System.out.println("Found a quotation mark! Term is: "+term); break;
+			    case ' ': System.out.println("About to continue! Term is: "+term); continue;
+			    default: k=chars.length; break;
+			  }
+		  	}
+			
+			//if next non-space char is a quotation mark whitespaces are skipped
+			if(k<chars.length) i=k;			
+		  }
+		  
+		  //copying next char in the new String char array
+		  newChars[l]=chars[i];
+		}
+		if (l<chars.length) newChars[l]='\0';		
+
+		res=new String(newChars);
+		return res;
+	}
+
 	/**
 	 * Returns a cleaned version of inputTextContent, making the following substitutions:<br>
 	 * -each ' • ' become ' . '<br>
@@ -1055,6 +1120,8 @@ public class ModelAnalysis extends ModelParserUTF8{
         Pattern p2 = Pattern.compile("“");//"
         Pattern p3 = Pattern.compile("–");//-
         Pattern p4 = Pattern.compile("’");//'
+        Pattern p5 = Pattern.compile("‘");//'
+         
         
         
         m = p0.matcher(inputTextContent);
@@ -1070,6 +1137,9 @@ public class ModelAnalysis extends ModelParserUTF8{
         inputTextContent = m.replaceAll("-");		
 
         m = p4.matcher(inputTextContent);
+        inputTextContent = m.replaceAll("'");		
+
+        m = p5.matcher(inputTextContent);
         inputTextContent = m.replaceAll("'");			
         
         return inputTextContent;

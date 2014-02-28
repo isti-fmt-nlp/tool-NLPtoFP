@@ -398,15 +398,26 @@ public class EditorView extends JFrame implements Observer{
 	public EditorView(ArrayList<String> commonalitiesSelected,
 			   		  ArrayList<String> variabilitiesSelected,
 			   		  HashMap<String, int[]> colorsMap) {
-	  for(String name : commonalitiesSelected) startingCommonalities.add(name);
-	  for(String name : variabilitiesSelected) startingVariabilities.add(name);
-
+		
 	  this.termsColor = new HashMap<String, int[]>();
+		  
+		  
+	  if(commonalitiesSelected!=null)
+		for(String name : commonalitiesSelected){
+		  startingCommonalities.add(name);
+		  this.termsColor.put(name, colorsMap.get(name));
+		}
 	  
-	  for(String name : commonalitiesSelected) 
-		/*if(startingCommonalities.contains(name))*/ this.termsColor.put(name, colorsMap.get(name));
-	  for(String name : variabilitiesSelected)
-	  	/*if(startingVariabilities.contains(name))*/ this.termsColor.put(name, colorsMap.get(name));
+	  if(variabilitiesSelected!=null)
+		for(String name : variabilitiesSelected){
+		  startingVariabilities.add(name);
+		  this.termsColor.put(name, colorsMap.get(name));		  
+		}
+	  
+//	  for(String name : commonalitiesSelected) 
+		/*if(startingCommonalities.contains(name))*/
+//	  for(String name : variabilitiesSelected)
+	  	/*if(startingVariabilities.contains(name))*/
 	}
 
 	/**

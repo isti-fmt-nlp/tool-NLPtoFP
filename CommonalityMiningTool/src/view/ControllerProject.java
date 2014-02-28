@@ -123,7 +123,7 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 			viewProject.extractVariabilitiesDialog();
 	  }
 	  else if(ae.getActionCommand().equals("Select Commonalities")){
-		  System.out.println("Son io! Select Commonalities");
+//		  System.out.println("Son io! Select Commonalities");
 			viewProject.showFeaturesSelected(ViewPanelCentral.FeatureType.COMMONALITIES);
 	  }
 	  else if(ae.getActionCommand().equals("Select Variabilities")){

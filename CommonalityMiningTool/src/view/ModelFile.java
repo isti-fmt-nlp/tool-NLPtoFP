@@ -28,8 +28,6 @@ public class ModelFile extends ModelAnalysis implements Runnable{
 	 */
 	@Override
 	public void run(){
-		//this model represents an analisys directory, analisys is already done
-		if (isAnalisysDir){ result=true; return;}
 		/* Checks if the file has already been analyzed*/
 		if( (new File(readPathFileUTF8()).exists()) 
 			 && (new File(readPathFileUTF8()).lastModified() > new File(readPathFile()).lastModified())){

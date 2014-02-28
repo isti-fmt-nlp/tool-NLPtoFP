@@ -202,6 +202,27 @@ public class ModelProject extends Observable implements Runnable{
 		}		
 	  }
 	  
+	  
+	  
+	  Iterator<Entry<String, HashMap<String, ArrayList<Integer>>>> termIter = relevantTerms.entrySet().iterator();
+	  Entry<String, HashMap<String, ArrayList<Integer>>> termEntry=null;
+	  
+	  Iterator<Entry<String, ArrayList<Integer>>> fileIter = null;
+	  Entry<String, ArrayList<Integer>> fileEntry=null;
+
+//	  ArrayList<Integer> tmpList=null;
+	  String termName=null;
+	  while(termIter.hasNext()){
+		termEntry=termIter.next();
+		termName=termEntry.getKey();
+		System.out.println("\n***Term: "+termName);
+		fileIter=termEntry.getValue().entrySet().iterator();
+		while(fileIter.hasNext()){
+		  fileEntry=fileIter.next();
+		  System.out.println("******File: "+fileEntry.getKey());
+		}
+	  }	  
+	  
 	  //calculating relevant terms colors
 	  /* ***DEBUG*** */
 	  if(debug) for(int k=0; k<filesProject.size(); k++){//for each file
@@ -443,7 +464,7 @@ public class ModelProject extends Observable implements Runnable{
 
 	/**
 	 * Check if c is a valid before-start or after-end character for a relevant term occurrence.<br>
-	 * To be valid, c must be ' ', '.', ',', '(', ')', '[', ']', '{', '}', '<', '>', '-' or newline.
+	 * To be valid, c must be ' ', '.', ',', '(', ')', '[', ']', '{', '}', '<', '>', '-', '"' or newline.
 	 * 
 	 * @param c - the character to be checked
 	 * @return true if c is valid, false otherwise
@@ -451,7 +472,8 @@ public class ModelProject extends Observable implements Runnable{
 	protected static boolean isValidPrevOrSeqOccurrChar(char c) {
 		  switch(c){
 		  	case ' ': case '.': case ',': case '(': case ')': case '[': case ']': 
-		  	case '{': case '}': case '<': case '>': case '-': case '\n': case ':' : return true;
+		  	case '{': case '}': case '<': case '>': case '-': case ':': case '"':
+		  	case '\n': return true;
 		  	default: return false;
 		  }
 	}
