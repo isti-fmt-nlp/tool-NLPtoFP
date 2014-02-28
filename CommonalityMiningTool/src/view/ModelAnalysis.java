@@ -6,6 +6,7 @@
  */
 package view;
 
+import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
@@ -16,6 +17,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -29,6 +31,8 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.imageio.IIOException;
 
 public class ModelAnalysis extends ModelParserUTF8{
 	private static boolean debug=false;//variable used to activate prints in the code
@@ -219,6 +223,15 @@ public class ModelAnalysis extends ModelParserUTF8{
 	}
 	
 	/**
+	 * Sets the ArrayList<String> containing the paths to html analysis result files.
+	 * 
+	 * @param al - the ArrayList<String> containing the paths
+	 */
+	public void setPathFileHTML(ArrayList<String> al){
+		pathPageHTML=al;
+	}
+	
+	/**
 	 * Returns a String representing the path to the file containing the relevant terms sets, <br>
 	 * one set per sentence in the input file.
 	 * 
@@ -247,9 +260,9 @@ public class ModelAnalysis extends ModelParserUTF8{
 	}
 	
 	/**
-	 * Returns an ArrayList<ArrayList<String>> containing the sets of relevant terms, one per sentence.
+	 * Returns an ArrayList&ltArrayList&ltString>> containing the sets of relevant terms, one per sentence.
 	 * 
-	 * @return the ArrayList<String> containing the paths
+	 * @return the ArrayList&ltString> containing the paths
 	 */
 	public ArrayList<ArrayList<String>> getTermsInSentencesSet(){
 		return termsInSentencesSet;
@@ -460,13 +473,11 @@ public class ModelAnalysis extends ModelParserUTF8{
 	{
 		int headBeforeMetaAttr, styleStartIndex;
 		int i1, i2, i3;
-		char c=0;
         if(s == null){
             System.out.println("Error not find page html");
             return null;
         }
 
-        
         headBeforeMetaAttr = s.indexOf("</title>")+8;
         
         styleStartIndex = s.indexOf("<style");
@@ -480,8 +491,6 @@ public class ModelAnalysis extends ModelParserUTF8{
         
         System.out.println("Indici della clean:\ni1="+i1+"\ti2="+i2+"\ti3="+i3);
         
-//        return s;
-//        return s.substring(0, i1) + s.substring(i2, i3) + "</div></div></body></html>";
         return s.substring(0, headBeforeMetaAttr) + s.substring(styleStartIndex, i1) 
         	 + s.substring(i2, i3) + "</div></div></body></html>";
 	}
@@ -688,21 +697,20 @@ public class ModelAnalysis extends ModelParserUTF8{
 	public void createResultFileInputText(String filePath) {
 	  File tmp=null;
 	  PrintWriter printer=null;
-	  BufferedReader reader=null;		
-	  String line=null;
 	  String fileContent="";
       String pathPrefix = readPathFileUTF8().substring(0, readPathFileUTF8().length()-4);
 	  
 	  //reading input text file content
-	  tmp=new File(filePath);
-	  try {
-		reader=new BufferedReader(new FileReader(tmp));
-		while((line=reader.readLine())!=null) fileContent+=line+"\n";
-		reader.close();	  
-	  } catch (IOException e1) {
-		System.out.println("createResultFileInputText(): File Read Problem!");
-		e1.printStackTrace(); return;
-	  }
+      fileContent=readTextUTF8();
+//	  tmp=new File(filePath);
+//	  try {
+//		reader=new BufferedReader(new FileReader(tmp));
+//		while((line=reader.readLine())!=null) fileContent+=line+"\n";
+//		reader.close();	  
+//	  } catch (IOException e1) {
+//		System.out.println("createResultFileInputText(): File Read Problem!");
+//		e1.printStackTrace(); return;
+//	  }
 	  
 	  //creating html content of the result file
 	  fileContent=
@@ -718,11 +726,13 @@ public class ModelAnalysis extends ModelParserUTF8{
 		tmp=new File(pathPrefix+0+".html");
 		printer = new PrintWriter(tmp);
 		printer.print(fileContent);
-		printer.close();			
+		printer.close();
 	  } catch (IOException e1) {
 		System.out.println("createResultFileInputText(): File Write Problem!");
 		e1.printStackTrace(); return;
 	  }
+	  
+	  pathPageHTML.add(pathPrefix+0+".html");
 
 	}
 
@@ -730,49 +740,27 @@ public class ModelAnalysis extends ModelParserUTF8{
 	 * Creates the HTML analisys result file containing the post tagging, using filePath as source. 
 	 * 
 	 * @param filePath - a String representing the path of post tagging file
+	 * @return - an ArrayList<Point>, representing start and end indexes of each sentence in the input file
 	 */
-	public void createResultFilePostTagging(String filePath) {
+	public ArrayList<Point> createResultFilePostTagging(String filePath) {
 	  File tmp=null;
 	  PrintWriter printer=null;
 	  BufferedReader reader=null;		
 	  String line=null;
-	  String fileContent="", inputTextContent="", sentenceBoundaries="";
+	  String inputTextContent="", sentenceBoundaries="";
       String pathPrefix = readPathFileUTF8().substring(0, readPathFileUTF8().length()-4);
       int sentencesCount=0;
       int inputTextIndex=0;
       String[] elementData=null;
-      String lastToken=null;
+      String currentToken=null, previousToken=null;
       ArrayList<String> arStr=new ArrayList<String>();
+      ArrayList<Point> sentencesBounds=new ArrayList<Point>();
+      Point tempPoint=null;
 	  
-	  //reading input text file content, it will be used to compute sentences boundaries
-	  tmp=new File(readPathFileUTF8());
-	  try {
-		reader=new BufferedReader(new FileReader(tmp));
-		while((line=reader.readLine())!=null) inputTextContent+=line+"\n";
-		reader.close();	  
-	  } catch (IOException e1) {
-		System.out.println("createResultFilePostTagging(): Input Text File Read Problem!");
-		e1.printStackTrace(); return;
-	  }
-/*	  
-	  fileContent+=
-		"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\""
-		+"\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"
-		+"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"it\" lang=\"it\">"
-		+"<head>"
-		+"<title>DyLan - TextTools</title>"
-		+"</head>"
-		+"<body>"
-		+"<table style=\"width: 100%; margin: 0px; padding: 0px;\">"
-		+"<tr>"
-		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>SID</b></td>"
-		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>Token</b></td>"
-		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>token</b></td>"
-		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>data1</b></td>"
-		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>data2</b></td>"
-		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>data3</b></td>"
-		+"</tr>";
-*/	  
+	  //reading input text file content, it will be used to compute sentences boundaries      
+//      inputTextContent=readTextUTF8().toUpperCase();
+      inputTextContent=cleanTextContent(readTextUTF8());
+    		  
 	  arStr.add(
 		"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\""
 		+"\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"
@@ -783,7 +771,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 		+"<body>"
 		+"<table style=\"width: 100%; margin: 0px; padding: 0px;\">"
 		+"<tr>"
-		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>SID</b></td>"
+		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>TID</b></td>"
 		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>Token</b></td>"
 		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>token</b></td>"
 		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>data1</b></td>"
@@ -793,94 +781,313 @@ public class ModelAnalysis extends ModelParserUTF8{
 	  
 	  //creating html content of the result file
 	  tmp=new File(filePath);
+//	  tmp=new File("/home/natan/git_REPOSITORIES/tool-NLPtoFP/FILE INPUT PROGETTO/input/FAKE_ATP_GE_01_01_FAKE");
+	  
 	  try {
 		reader=new BufferedReader(new FileReader(tmp));
+		tempPoint=new Point(0, 0);
 		sentenceBoundaries+="0\t0";//da guardare se il file è vuoto, non deve scrivere la prima riga(errata poi...)
 		while((line=reader.readLine())!=null){
 		  if(line.length()>0){//new token found
 			elementData=line.split("\t");
 			arStr.add("<tr>"
-					+"<td bgcolor=\"#cccccc\" valign=\"top\" width=\"50px\" align=\"left\"><b>"+elementData[0]+"</b></td>"
-					+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[1]+"</td>"
-					+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[2]+"</td>"
-					+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[3]+"</td>"
-					+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[4]+"</td>"
-					+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[5]+"</td></tr>");
-/*			
-			fileContent+="<tr>"
-				+"<td bgcolor=\"#cccccc\" valign=\"top\" width=\"50px\" align=\"left\"><b>"+elementData[0]+"</b></td>"
-				+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[1]+"</td>"
-				+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[2]+"</td>"
-				+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[3]+"</td>"
-				+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[4]+"</td>"
-				+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[5]+"</td></tr>";
-*/			
-			if(lastToken==null){//this is the first found token after the end of last sentence
+			+"<td bgcolor=\"#cccccc\" valign=\"top\" width=\"50px\" align=\"left\"><b>"+elementData[0]+"</b></td>"
+			+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[1]+"</td>"
+			+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[2]+"</td>"
+			+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[3]+"</td>"
+			+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[4]+"</td>"
+			+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[5]+"</td>"
+					 +"</tr>");
+			
+			if(currentToken==null && sentencesCount>0){//this is the first token found after the end of last sentence
 			  sentenceBoundaries+=sentencesCount+"\t"+inputTextContent.indexOf(elementData[1], inputTextIndex);
+			  tempPoint=new Point(inputTextContent.indexOf(elementData[1], inputTextIndex), 0);
+//			  sentenceBoundaries+=sentencesCount+"\t"+inputTextContent.indexOf(elementData[1].toUpperCase(), inputTextIndex);
+//			  tempPoint=new Point(inputTextContent.indexOf(elementData[1].toUpperCase(), inputTextIndex), 0);
+
 			}
 			//moving in input text to reach current token index
-			lastToken=elementData[1];
-			inputTextIndex=inputTextContent.indexOf(lastToken, inputTextIndex);
+			previousToken=currentToken; currentToken=elementData[1];
+			inputTextIndex=inputTextContent.indexOf(currentToken, inputTextIndex);
+//			inputTextIndex=inputTextContent.indexOf(lastToken.toUpperCase(), inputTextIndex);
+			if(inputTextIndex<0) System.out.println("Got index <0! Term was: "+currentToken+"\tPrevious: "+previousToken);
+			inputTextIndex+=currentToken.length();
 		  }
 		  else{//found a newLine, calculating sentence boundaries
 			if(sentencesCount%100==0)System.out.println("Found newLine! #"+sentencesCount);
-			sentenceBoundaries+="\t"+(inputTextIndex+lastToken.length()-1)+"\n";
-			++sentencesCount; lastToken=null;
+			sentenceBoundaries+="\t"+(inputTextIndex/*+currentToken.length()*/-1)+"\n";
+			tempPoint.y=(inputTextIndex/*+currentToken.length()*/-1);
+			sentencesBounds.add(tempPoint);
+			++sentencesCount;
+//			if(lastToken!=null) inputTextIndex+=lastToken.length();
+			previousToken=currentToken; currentToken=null;
 		  }
 		}
 
 		//adding last part to result file html content
 		arStr.add("</table></body></html>");
-/*		
-		fileContent+="</table></body></html>";
-*/
+		
 		//adding last end boundary to sentenceBoundaries
-		if(lastToken!=null) sentenceBoundaries+="\t"+(inputTextIndex+lastToken.length()-1)+"\n";
+		if(currentToken!=null){
+		  sentenceBoundaries+="\t"+(inputTextIndex/*+currentToken.length()*/-1)+"\n";
+		  tempPoint.y=(inputTextIndex/*+currentToken.length()*/-1);
+		  sentencesBounds.add(tempPoint);		  
+		}
 	  
+		reader.close();
 	  } catch (IOException e1) {
-		System.out.println("createResultFilePostTagging(): File Read Problem!");
-		e1.printStackTrace(); return;
+		System.out.println("createResultFilePostTagging(): File Write Problem!");
+		try{ reader.close();}catch(IOException e){}
+		e1.printStackTrace(); return null;
 	  }
 	  
-	  System.out.println("sentenceBoundaries: \n"+sentenceBoundaries);
+//	  for(Point p : sentencesBounds) System.out.println(p.x+"-"+p.y);
+	  
 	  //printing files
 	  try {
 		//printing html result file
 		tmp=new File(pathPrefix+1+".html");
 		printer = new PrintWriter(tmp);
 		for(String a: arStr) printer.print(a);
-/*		
-		printer.print(fileContent);
-*/
 		printer.close();			
 		//printing sentences boundaries file
-		tmp=new File(pathPrefix+"SENTENCES_BOUNDS.html");
+		tmp=new File(pathPrefix+"SENTENCES_BOUNDS.log");
 		printer = new PrintWriter(tmp);
 		printer.print(sentenceBoundaries);
 		printer.close();	
 	  } catch (IOException e1) {
 		System.out.println("createResultFileInputText(): File Write Problem!");
-		e1.printStackTrace(); return;
+		if(printer!=null) printer.close();	
+		e1.printStackTrace(); return null;
 	  }
 
 	  
+//	  inputTextIndex=inputTextContent.indexOf(";");
+//	  System.out.println("Index of ';' - "+inputTextIndex);
+//	  while ( (inputTextIndex=inputTextContent.indexOf(";", inputTextIndex+1))!=-1)
+//		  System.out.println("Index of ';' - "+inputTextIndex);
+
+	  pathPageHTML.add(pathPrefix+1+".html");
+
+	  return sentencesBounds;
 	}
-	
-	
-	/*
-	if (!saveResultPage(URL_ANALYSIS+jid+URL_SENTENCE_SPLITTER_PART, pathPrefix+1+".html")) return false;
-	if (!saveResultPage(URL_ANALYSIS+jid+URL_TOKENIZER_PART, pathPrefix+2+".html")) return false;
-	*/
 
 	/**
 	 * Creates the HTML analisys result file containing the term extraction, using filePath as source. <br>
 	 * The other 2 analisys result files must already be present.
 	 * 
 	 * @param filePath - a String representing the path of term extraction file
+	 * @param sentencesBoundaries - an ArrayList<Point>, representing start and end indexes of each sentence in the input file
 	 */
-	public void createResultFileTermExtractor(String string) {
+	public void createResultFileTermExtractor(String filePath, ArrayList<Point> sentencesBoundaries) {
+	  File tmp=null;
+	  PrintWriter printer=null;
+	  BufferedReader reader=null;		
+	  String line=null;
+      String[] elementData=null;
+	  String inputTextContent="";
+      ArrayList<String> arStr=new ArrayList<String>();
+      String pathPrefix = readPathFileUTF8().substring(0, readPathFileUTF8().length()-4);
+      HashMap<String, ArrayList<Integer>> relevantTerms=null;
+      int charcount=0, index=0;
+      Iterator<Entry<String, ArrayList<Integer>>> termsIter=null;
+      Entry<String, ArrayList<Integer>> termsEntry=null;
+      
+	  termRelevant=new ArrayList<String>();
+	  
+	  //creating html content of the result file
+	  tmp=new File(filePath);
+	  
+	  arStr.add(
+		"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\""
+		+"\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"
+		+"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"it\" lang=\"it\">"
+		+"<head>"
+		+"<title>DyLan - TextTools</title>"
+		+"</head>"
+		+"<body>"
+		+"<table style=\"width: 100%; margin: 0px; padding: 0px;\">"
+		+"<tr>"
+		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>Lemma of Term</b></td>"
+		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>Domain Relevance</b></td>"
+		+"<td style=\"color: #ffffff; background: #fe6531; text-align: center;\"><b>Frequency</b></td>"
+		+"</tr>");
+	  
+	  try {
+		reader=new BufferedReader(new FileReader(tmp));
+		//skipping first line, it's the header
+		if((line=reader.readLine())==null) return;
 		
+		while((line=reader.readLine())!=null){
+		  if(line.length()==0) break;//terms list is over
+		  
+		  elementData=line.split("\t");
+		  if(elementData.length<3) break;
+		  arStr.add("<tr>"
+			+"<td bgcolor=\"#cccccc\" valign=\"top\" width=\"50px\" align=\"left\"><b>"+elementData[0]+"</b></td>"
+			+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[1]+"</td>"
+			+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[2]+"</td>"
+				   +"</tr>");
+
+		  //adding term to relevant terms list
+		  termRelevant.add(elementData[0]);
+		}
+		
+		//adding last div to html result file
+		arStr.add("</table><div>");
+		if(line!=null) arStr.add(line+"<br>");
+		while((line=reader.readLine())!=null) arStr.add(line+"<br>");
+		arStr.add("</div></body></html>");
+
+		reader.close();			
+	  }catch(IOException e){
+		try { reader.close();}catch(Exception e1){}
+		System.out.println("createResultFileTermExtractor(): File Read Problem!");
+		e.printStackTrace();
+	  }
+
+	  //printing html result file
+	  try {
+		tmp=new File(pathPrefix+2+".html");
+		printer = new PrintWriter(tmp);
+		for(String a: arStr) printer.print(a);
+		printer.close();
+	  } catch (IOException e1) {
+		System.out.println("createResultFileTermExtractor(): File Write Problem!");
+		if(printer!=null) printer.close();
+		e1.printStackTrace(); return;
+	  }	
+	  
+	  //reading input text file content
+      inputTextContent=readTextUTF8();
+	  
+	  //saving the positions in input file of relevant terms occurences 
+	  relevantTerms=new HashMap<String, ArrayList<Integer>>();
+	  try {
+		reader = new BufferedReader(new StringReader(inputTextContent));
+		charcount=0;
+		while((line = reader.readLine()) != null){//for each line
+		  for(int h=0; h<termRelevant.size(); h++){//for each relevant term
+			index=0;
+			while(index<line.length()){//for each occurrence
+			  //get next occurrence
+			  index = line.toUpperCase().indexOf(termRelevant.get(h).toUpperCase(), index);			  
+			  if (index == -1) break;//start checking next relevant term occurrences in this line
+			  //add occurrence to relevantTerms, if it is valid
+			  if (ModelProject.isValidOccurrence(termRelevant.get(h), line, index));
+				addIndexToOccursList(relevantTerms, charcount+index, h);
+			  //incrementing index to search for next occurrence
+			  index+=termRelevant.get(h).length();
+			}
+		  }
+		  charcount+=line.length()+1;
+		}
+		
+		reader.close();
+	  } catch (IOException e) {
+		try{ reader.close();}catch(Exception e2){}
+		e.printStackTrace();
+	  }
+
+//	  Iterator<Entry<String, ArrayList<Integer>>> iter = relevantTerms.entrySet().iterator();
+//	  Entry<String, ArrayList<Integer>> entry=null;
+//	  ArrayList<Integer> tmpList=null;
+//	  String tmpTerm=null;
+//	  while(iter.hasNext()){
+//		entry=iter.next();
+//		tmpTerm=entry.getKey();
+//		tmpList=entry.getValue();
+//		System.out.println("\n***Term: "+tmpTerm);
+//		for(int i : tmpList) System.out.println(i);
+//	  }
+
+	  //calculating sentences sets and terms arities
+	  termsInSentencesSet = new ArrayList<ArrayList<String>>();
+	  for(int i=0; i<sentencesBoundaries.size(); ++i) termsInSentencesSet.add(new ArrayList<String>());
+	  termsArity= new HashMap<String, Integer>();
+	  
+	  termsIter = relevantTerms.entrySet().iterator();
+	  termsEntry=null;
+	  ArrayList<Integer> occurrsList=null;
+	  String termName=null;
+	  while(termsIter.hasNext()){//for each relevant term
+		termsEntry=termsIter.next();
+		termName=termsEntry.getKey();
+		occurrsList=termsEntry.getValue();
+//		System.out.println("\n***Term: "+termName);
+		for(int i=0, l=0; i<sentencesBoundaries.size() && l<occurrsList.size(); ){
+//		  for(int occurrence : occurrsList){//for each occurrence//for each sentence
+		  if(occurrsList.get(l)>=sentencesBoundaries.get(i).x && occurrsList.get(l)<=sentencesBoundaries.get(i).y){
+			termsInSentencesSet.get(i).add(termName);
+			if(termsArity.get(termName)==null) termsArity.put(termName, 1);
+			else termsArity.put(termName, termsArity.get(termName)+1);
+			++i; ++l;
+		  }
+		  else if(occurrsList.get(l)<sentencesBoundaries.get(i).x) ++l;
+		  else if(occurrsList.get(l)>sentencesBoundaries.get(i).y) ++i;
+			
+		}
+	  }
+	  
+	  
+	  pathPageHTML.add(pathPrefix+2+".html");
+	  
+	  
 	}
+	
+	/**
+	 * Returns a cleaned version of inputTextContent, making the following substitutions:<br>
+	 * -each ' • ' become ' . '<br>
+	 * -each ' ” ' become ' " '<br>
+	 * -each ' “ ' become ' " '<br>
+	 * -each ' – ' become ' - '<br>
+	 * -each ' ’ ' become ' ' '
+	 * 
+	 * @param inputTextContent - the String to be cleaned
+	 * @return - a new cleaned String
+	 */
+	private static String cleanTextContent(String inputTextContent) {
+
+		Matcher m = null;
+		
+        Pattern p0 = Pattern.compile("•");//.
+        Pattern p1 = Pattern.compile("”");//"
+        Pattern p2 = Pattern.compile("“");//"
+        Pattern p3 = Pattern.compile("–");//-
+        Pattern p4 = Pattern.compile("’");//'
+        
+        
+        m = p0.matcher(inputTextContent);
+        inputTextContent = m.replaceAll(".");		
+        
+        m = p1.matcher(inputTextContent);
+        inputTextContent = m.replaceAll("\"");	
+
+        m = p2.matcher(inputTextContent);
+        inputTextContent = m.replaceAll("\"");		
+        
+        m = p3.matcher(inputTextContent);
+        inputTextContent = m.replaceAll("-");		
+
+        m = p4.matcher(inputTextContent);
+        inputTextContent = m.replaceAll("'");			
+        
+        return inputTextContent;
+	}
+	
+	/**
+	 * Adds to relevantTerms the starting index of an occurrence of a relevant term.
+	 * 
+	 * @param relevantTerms - the occurrences list
+	 * @param position - the index of starting character of this occurrence in the file
+	 * @param h - the index of the relevant term in the global field 'termRelevant'
+	 */
+	private void addIndexToOccursList(HashMap<String, ArrayList<Integer>> relevantTerms, int position, int h) {
+	  if(relevantTerms.get(termRelevant.get(h))==null)
+		relevantTerms.put(termRelevant.get(h), new ArrayList<Integer>());
+	  relevantTerms.get(termRelevant.get(h)).add(position);
+	}
+	  
 	
 	/**
 	 * Saves the state of this model on file.

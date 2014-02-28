@@ -149,20 +149,20 @@ public class ViewPanelLateral extends JFrame
 	  };
 	}
 	
-	/** Aggiunge un elemento al nodo Input
+	/** 
+	 * Adds an element to the Input node
 	 * 
-	 * @param s stringa contenente il nome del nodo da aggiungere
+	 * @param s - Stringa containing the name of the node to be added
+	 * @return - true if the node can be added, false if a node with the same name is already present
 	 */
-	public boolean addNodeInput(String s)
-	{
-		for(int i = 0; i < rootTree.getChildAt(0).getChildCount(); i++)
-		{
+	public boolean addNodeInput(String s){
+		for(int i = 0; i < rootTree.getChildAt(0).getChildCount(); i++){
 			if(rootTree.getChildAt(0).getChildAt(i).toString().equals(s.toString()))
 				return false;
 		}
 		
 		treeModel.insertNodeInto(
-				new DefaultMutableTreeNode(s), (MutableTreeNode) rootTree.getChildAt(0), rootTree.getChildAt(0).getChildCount());	
+			new DefaultMutableTreeNode(s), (MutableTreeNode) rootTree.getChildAt(0), rootTree.getChildAt(0).getChildCount());	
 		analysisLeafTree.add("NO");
 		return true;
 	}

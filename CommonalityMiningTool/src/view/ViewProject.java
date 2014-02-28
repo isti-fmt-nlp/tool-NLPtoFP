@@ -117,12 +117,11 @@ public class ViewProject implements Observer, Runnable{
 		frameProject.setJMenuBar(menu);
 	}
 	
-	/** Thread: Gestisce la funzionalit� del throbber
-	 * 
+	/** 
+	 * Thread: Manages the throbber.
 	 */
 	@Override
-	public void run() 
-	{
+	public void run() {
 		JLabel jl1 = new JLabel("Analysing input files...");
 		jl1.setBounds(new Rectangle(20,10,250,30));
 		
@@ -149,7 +148,7 @@ public class ViewProject implements Observer, Runnable{
 		jl2.setBounds(new Rectangle(270,10,35,35));
 		jl2.setIcon(i);		
 		
-		JFrame jf = new JFrame("Extracting commonalities...");
+		JFrame jf = new JFrame("Loading...");
 		jf.setLayout(null);
 		jf.setBackground(Color.WHITE);
 		jf.setBounds(375, 375, 350, 80);
@@ -157,8 +156,7 @@ public class ViewProject implements Observer, Runnable{
 		jf.add(jl2);
 		jf.setVisible(true);
 		
-		while(!stateThrobber)
-			jf.repaint();
+		while(!stateThrobber) jf.repaint();
 		
 		jf.setVisible(false);
 		jf.dispose();
@@ -348,16 +346,16 @@ public class ViewProject implements Observer, Runnable{
 	@Override
 	public void update(Observable os, Object o){
 		if(o.equals("End Extract Commonalities")){
+			//stopping throbber
 			frameProject.setEnabled(true);
 			setStateThrobber(true);
-//			buttonProjectEC.setEnabled(false);
-//			buttonProjectEV.setEnabled(true);
+			//colouring of Green all input file nodes in the tree
+			panelLateralProject.setAnalysisLeafTree();	
 			
 	    	//activating menu items
 	    	menuFeaturesExtractComm.setEnabled(false);
 			menuFeaturesExtractVari.setEnabled(true);
 	    	
-			panelLateralProject.setAnalysisLeafTree();	
 			
 //			File f = new File("./src/DATA/Sound/analysis.wav");
 //		    AudioInputStream ais;
@@ -393,7 +391,6 @@ public class ViewProject implements Observer, Runnable{
 		else if(o.equals("End Extract Variabilities")){
 			frameProject.setEnabled(true);
 			setStateThrobber(true);
-//			buttonProjectEV.setEnabled(false);
 
 	    	//activating menu items
 			menuFeaturesExtractVari.setEnabled(false);
@@ -452,6 +449,18 @@ public class ViewProject implements Observer, Runnable{
 		}
 		else if(o.equals("Input File Deleted")){
 //			if (panelLateralProject.getAnalysisLeafTree().size())
+		}
+		else if(o.equals("New Analisys Folder Loaded")){
+		  //stopping throbber
+		  frameProject.setEnabled(true);
+		  setStateThrobber(true);
+
+		  //colouring of Green all input file nodes in the tree
+		  panelLateralProject.setAnalysisLeafTree();	
+
+		  //activating menu items
+		  menuFeaturesExtractComm.setEnabled(true);
+			
 		}
 		else if(o.equals("Analisys folder can't be accepted")){
 		  errorDialog("Analisys folder can't be accepted");
@@ -665,11 +674,21 @@ public class ViewProject implements Observer, Runnable{
 	    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 	    int returnVal = chooser.showOpenDialog(new JFrame("Select Analisys Folder"));
 
-	    if(returnVal == JFileChooser.APPROVE_OPTION) {
-		       System.out.println("Path: " +chooser.getSelectedFile().getAbsolutePath());
-		       System.out.println("name: " +chooser.getSelectedFile().getName());           
-	    }
+//	    if(returnVal == JFileChooser.APPROVE_OPTION) {
+//	    }
 
+	    if(returnVal == JFileChooser.CANCEL_OPTION) return null;
+	    
+	    System.out.println("Path: " +chooser.getSelectedFile().getAbsolutePath());
+	    System.out.println("name: " +chooser.getSelectedFile().getName());           
+
+    	if(panelLateralProject.addNodeInput(chooser.getSelectedFile().getName()) == false){
+    	  errorDialog("The file "+chooser.getSelectedFile().getName()+" has already been loaded");
+    	  return null;
+    	}    	
+    	frameProject.repaint();	    	    
+	    
+	    //no more than 1 file per type(suffix) will be accepted
 	    analisysDir=new File(chooser.getSelectedFile().getAbsolutePath());
     	for(File file : analisysDir.listFiles()){
       	  if(file.getName().endsWith(".txt")){
@@ -694,8 +713,17 @@ public class ViewProject implements Observer, Runnable{
       		}
     	  }
     	}
-    	
+
+    	//1 file per type(suffix) is needed
     	if(!txtFound || !termTmpFound || !posFound) return null;
+
+    	//activating throbber
+	    frameProject.setEnabled(false);
+	    setStateThrobber(false);
+	    throbber = new Thread(this);
+	    throbber.start();
+	    frameProject.repaint();
+
 	    return analisysFiles;
 	}
 

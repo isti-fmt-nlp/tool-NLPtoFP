@@ -6,6 +6,7 @@
 package view;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
@@ -245,7 +246,6 @@ public class ModelProject extends Observable implements Runnable{
 	  }
 	  /* ***VERBOSE****/
 	  
-	  
 	  setChanged();
 	  notifyObservers("End Extract Commonalities");
 	}
@@ -464,7 +464,6 @@ public class ModelProject extends Observable implements Runnable{
 	 * @param position - the index of starting character of this occurrence in the file
 	 */
 	private void addCharIndexToOccursList(String relevantTerm, String readPathFileUTF8, int position) {
-
 		HashMap<String, ArrayList<Integer>> occurrFilesListTmp=null;
 		ArrayList<Integer> occurrLinesListTmp=null;
 
@@ -648,6 +647,8 @@ public class ModelProject extends Observable implements Runnable{
 	 * @param s - analisys folder path 
 	 */
 	public void addAnalisysFolderProject(String[] files){
+		ArrayList<Point> sentencesBoundaries=null;
+		
 		//creating model
 		ModelFile newModel=new ModelFile(files[0], pathProject);
 		filesProject.add(newModel);
@@ -655,7 +656,7 @@ public class ModelProject extends Observable implements Runnable{
 		stateProject[1] = true;
 
 		//creating model UTF8 input file
-		ArrayList<String> pathPageHTML = new ArrayList<String>();
+		newModel.setPathFileHTML(new ArrayList<String>());
 		if(newModel.filterFile()==null){
 		  setChanged();
 		  notifyObservers("Analisys folder can't be accepted");
@@ -664,49 +665,28 @@ public class ModelProject extends Observable implements Runnable{
         
         //creating result html pages as project files
 		newModel.createResultFileInputText(files[0]);
-		newModel.createResultFilePostTagging(files[2]);
+		sentencesBoundaries=newModel.createResultFilePostTagging(files[2]);
 		//post tagging HTML file is needed to build term extractor HTML file
-		newModel.createResultFileTermExtractor(files[1]);
-/*		
-		String s2 = "", s3 = null, s4 = null;
+		newModel.createResultFileTermExtractor(files[1], sentencesBoundaries);
 
-		//cleaning HTML result file
-		if(stringURL.contains(URL_SENTENCE_SPLITTER_PART)) s4 = cleanSentenceSplitterHTML(s2);
-		else if(stringURL.contains(URL_TOKENIZER_PART)) s4 = cleanSentenceSplitterHTML(s2);
-		else if(stringURL.contains(URL_PARSER_PART)) s4 = cleanSentenceSplitterHTML(s2);
-		else s4 = cleanAnalysisTextHTML(s2);
+		setChanged();
+		notifyObservers("New Analisys Folder Loaded");
+		
+//		frameProject.setEnabled(false);
+//		modelProject.analyzesFileProject();
+//		setStateThrobber(false);
+//		throbber = new Thread(this);
+//		throbber.start();
+//		frameProject.repaint();
 
-		if(s4!= null){
-		    // Create project file containing the html result page 
-		    PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(path, false)));
-		    pw.print(s4);
-		    pw.close();   
-					
-		    // Adding file path of html result page 
-		    pathPageHTML.add(path);   
+//		frameProject.setEnabled(false);
+//		modelProject.analyzesFileProject();
+//		setStateThrobber(false);
+//		throbber = new Thread(this);
+//		throbber.start();
+//		frameProject.repaint();
+		        
 
-		}
-		else return false;
-		return true;
-*/		
-		
-		
-		
-		
-		
-		
-/*        
-        
-        ****CREARE I FILES HTML E ESTRARRE LE ROBE...****
-        try{
-        	if (!saveResultPage(URL_ANALYSIS+jid, pathPrefix+0+".html")) return false;
-        	if (!saveResultPage(URL_ANALYSIS+jid+URL_SENTENCE_SPLITTER_PART, pathPrefix+1+".html")) return false;
-        	if (!saveResultPage(URL_ANALYSIS+jid+URL_TOKENIZER_PART, pathPrefix+2+".html")) return false;
-        	if (!saveResultPage(URL_ANALYSIS+jid+URL_PARSER_PART, pathPrefix+3+".html")) return false;
-        	//extracting relevant terms of this input file
-        	if(!extractTermRelevant(new File(pathPrefix+2+".html"))) return false;
-            return true;
-		 */
 	}
 
 	/**
