@@ -13,6 +13,7 @@ import java.awt.Component;
 import java.awt.FileDialog;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -183,6 +184,7 @@ public class ViewProject implements Observer, Runnable{
 		
 		/*MenuProject*/
 		menuProject = new JMenu("Project");
+		menuProject.setMnemonic(KeyEvent.VK_P);
 
 		menuProjectCreate = new JMenuItem("Create Project");
 		menuProjectCreate.addActionListener(controllerProject);
@@ -213,6 +215,7 @@ public class ViewProject implements Observer, Runnable{
 
 		/*MenuFiles*/
 		menuFiles=new JMenu("Files");
+		menuFiles.setMnemonic(KeyEvent.VK_F);
 
 		menuFilesLoad = new JMenuItem("Load File");
 		menuFilesLoad.addActionListener(controllerProject);
@@ -234,6 +237,7 @@ public class ViewProject implements Observer, Runnable{
 		
 		/*MenuFeatures*/
 		menuFeatures=new JMenu("Features");
+		menuFeatures.setMnemonic(KeyEvent.VK_E);
 
 		menuFeaturesExtractComm = new JMenuItem("Extract Commonalities");
 		menuFeaturesExtractComm.addActionListener(controllerProject);
@@ -261,6 +265,7 @@ public class ViewProject implements Observer, Runnable{
 
 		/*MenuDiagram*/
 		menuDiagram=new JMenu("Diagram");
+		menuDiagram.setMnemonic(KeyEvent.VK_D);
 
 		menuDiagramOpen = new JMenuItem("New Diagram");
 		menuDiagramOpen.addActionListener(controllerProject);

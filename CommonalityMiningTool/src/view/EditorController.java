@@ -46,6 +46,9 @@ public class EditorController implements
 	
 	/** Suffix of the path where SXFM exported files will be saved*/
 	private static String sxfmSubPath="_SXFM"; 
+	
+	/** Suffix of the path where SXFM exported files will be saved*/
+	private static String pngSubPath="_PNG"; 
 
 	/** Path where diagram files will be saved*/
 	private String diagramPath = null;		
@@ -55,6 +58,9 @@ public class EditorController implements
 
 	/** Path where SXFM exported files will be saved*/
 	private String sxfmPath = null;		
+	
+	/** Path where SXFM exported files will be saved*/
+	private String pngPath = null;		
 		
 	private EditorView editorView = null;
 		
@@ -783,6 +789,12 @@ public class EditorController implements
     	}    	  
     	  
       }
+      else if(e.getActionCommand().equals("Export as PNG")){
+    	editorView.exportAsImageFile(pngPath, "PNG");
+      }
+      else if(e.getActionCommand().equals("Export as JPEG")){
+    	editorView.exportAsImageFile(pngPath, "JPEG");
+      }
       else if(e.getActionCommand().equals("Delete Diagram")){
     	  
       }
@@ -1001,6 +1013,7 @@ public class EditorController implements
 	public void setSavePath(String pathProject) {
 		this.diagramPath=pathProject;		
 		this.sxfmPath=pathProject+sxfmSubPath;
+		this.pngPath=pathProject+pngSubPath;
 	}
 
 	/**

@@ -47,7 +47,7 @@ public class ModelProject extends Observable implements Runnable{
 	
 	private static boolean verbose2=false;//variable used to activate prints in the code
 
-	private static boolean verbose3=false;//variable used to activate prints in the code
+	private static boolean verbose3=true;//variable used to activate prints in the code
 	
 	private static boolean debug=false;//variable used to activate debug prints in the code
 
@@ -115,6 +115,9 @@ public class ModelProject extends Observable implements Runnable{
 	
 	/** String representing the path of variabilities selected HTML page*/
 	private String pathRelevantTerms = null;
+	
+	/** String representing the path of variabilities selected HTML page*/
+	private String pathTermsVersions = null;
 	
 	/** ArrayList containing the commonalities candidates */
 	private ArrayList <String> commonalitiesCandidates = null;
@@ -619,6 +622,8 @@ public class ModelProject extends Observable implements Runnable{
 		
 		pathRelevantTerms = pathProject + "/RelevantTerms.log";
 		
+		pathTermsVersions = pathProject + "/TermsVersions.log";
+		
 		stateProject[0] = true;
 		stateProject[1] = true;
 		
@@ -1121,6 +1126,7 @@ public class ModelProject extends Observable implements Runnable{
 
 			//saving occurrences of relevant terms
 			saveProjectRelevantTerms();
+			saveRelevantTermsVersions();
 			//saving models state
 			saveProjectModelsState();
 
@@ -1154,7 +1160,7 @@ public class ModelProject extends Observable implements Runnable{
 		  while(termIter.hasNext()){
 			termEntry=termIter.next();
 			
-			tmpLine=termEntry.getKey()+" ";
+			tmpLine=termEntry.getKey()+"\t";
 			tmpMap=termEntry.getValue();
 			fileIter=tmpMap.entrySet().iterator();
 			while(fileIter.hasNext()){
@@ -1167,6 +1173,18 @@ public class ModelProject extends Observable implements Runnable{
 			
 		  }
 		}
+		pw2.close();
+		return;		
+	}
+	
+	/**
+	 * Saves the associations between relevant terms in original and extracted versions, one per line.
+	 * 
+	 * @throws IOException
+	 */
+	private void saveRelevantTermsVersions() throws IOException {
+		PrintWriter pw2 = new PrintWriter(new BufferedWriter(new FileWriter(pathTermsVersions)));		
+		if(relevantTermsVersions != null) for(String[] str: relevantTermsVersions) pw2.println(str[0]+"\t"+str[1]);
 		pw2.close();
 		return;		
 	}	
@@ -1252,6 +1270,8 @@ public class ModelProject extends Observable implements Runnable{
 			
 			pathRelevantTerms = pathProject + "/RelevantTerms.log";
 			
+			pathTermsVersions = pathProject + "/TermsVersions.log";
+			
 			SAXParser parser = spf.newSAXParser();
 			parser.parse(pathXML, parserXML);
 			
@@ -1277,9 +1297,10 @@ public class ModelProject extends Observable implements Runnable{
 			loadFeaturesList(variabilitiesSelected, pathVariabilitiesSelected);
 			
 			if(!loadProjectRelevantTerms()) System.out.println("Relevant terms files corrupted!");
+			loadProjectTermsVersions();
 			
 			loadProjectModelsState();
-			
+
 			//building global structures to calculate terms colors, after load
 			buildColorStructures();
             
@@ -1326,6 +1347,36 @@ public class ModelProject extends Observable implements Runnable{
 	 */
 	private void loadProjectModelsState() throws IOException {
 		for(ModelFile model : filesProject) model.loadState();
+	}
+	
+	/**
+	 * Loads associations between relevant terms in original and extracted versions, one per line.
+	 * 
+	 * @return - true if successful, false otherwise
+	 * @throws IOException
+	 */
+	private boolean loadProjectTermsVersions() throws IOException {
+		BufferedReader br1 =null;
+		String s1=null;				
+		relevantTermsVersions=new ArrayList<String[]>();
+		
+		try{
+		  br1 = new BufferedReader(new FileReader(pathTermsVersions));			
+		}catch(FileNotFoundException e){ return true;}
+		
+		relevantTermsVersions=new ArrayList<String[]>();
+		
+		while( (s1 = br1.readLine()) != null ) relevantTermsVersions.add(s1.split("\t"));
+
+		/* ***VERBOSE*** */
+		if(verbose3){
+		  System.out.println("Printing relevant terms versions!");
+		  for(String str[] :relevantTermsVersions) System.out.println("Original: "+str[0]+"\nExtracted: "+str[1]);
+		}
+		/* ***VERBOSE*** */
+
+		br1.close();
+		return true;
 	}
 
 	/**

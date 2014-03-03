@@ -28,6 +28,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -258,6 +259,7 @@ public class EditorView extends JFrame implements Observer{
 	private JMenuItem popMenuItemDeleteConnector = new JMenuItem("Delete Connector");
 	private JMenuItem popMenuItemDeleteGroup = new JMenuItem("Delete Group");
 	private JMenuItem popMenuItemUngroup = new JMenuItem("Ungroup");
+
 	private JMenuItem popMenuItemPrintModelDebug = new JMenuItem("Print Model[DEBUG COMMAND]");
 	
 	/** Popup menu coordinates*/
@@ -274,9 +276,9 @@ public class EditorView extends JFrame implements Observer{
 	private JMenu menuModify=null;//Diagram Properties Management Menu
 	
 	/** Files Menu items*/
-	private JMenuItem menuFilesSave=null, 	   menuFilesOpen=null,
-					  menuFilesExportXML=null, menuFilesDelete=null, menuFilesExit=null;
-	
+	private JMenuItem menuFilesSave=null, menuFilesOpen=null, menuFilesExportXML=null,
+					  menuFilesDelete=null, menuFilesExit=null, menuFilesExportAsPNG=null, menuFilesExportAsJPEG=null;
+
 	/** View Menu items*/
 	private JMenuItem menuViewColored=null, menuViewCommsOrVars=null, 
 					  menuViewExtrOrInsert=null, menuViewFields=null,
@@ -435,8 +437,13 @@ public class EditorView extends JFrame implements Observer{
 
 		/* initializing JMenuBar */		
 		menuFiles = new JMenu("Files");
+		menuFiles.setMnemonic(KeyEvent.VK_F);
+
 		menuView = new JMenu("View");
-		menuModify = new JMenu("Modify");
+		menuView.setMnemonic(KeyEvent.VK_V);
+
+		menuFiles = new JMenu("Modify");
+		menuFiles.setMnemonic(KeyEvent.VK_M);
 
 		/*Menu Files items*/
 		menuFilesSave = new JMenuItem("Save Diagram");
@@ -454,9 +461,18 @@ public class EditorView extends JFrame implements Observer{
 		menuFilesExit = new JMenuItem("Exit");
 		menuFilesExit.addActionListener(editorController);
 		
+		menuFilesExportAsPNG = new JMenuItem("Export as PNG");
+		menuFilesExportAsPNG.addActionListener(editorController);
+		
+		menuFilesExportAsJPEG = new JMenuItem("Export as JPEG");
+		menuFilesExportAsJPEG.addActionListener(editorController);
+
+		
 		menuFiles.add(menuFilesSave);
 		menuFiles.add(menuFilesOpen);
 		menuFiles.add(menuFilesExportXML);
+		menuFiles.add(menuFilesExportAsPNG);
+		menuFiles.add(menuFilesExportAsJPEG);
 		menuFiles.add(menuFilesDelete);
 		menuFiles.add(menuFilesExit);
 
@@ -488,10 +504,6 @@ public class EditorView extends JFrame implements Observer{
 		
 		menuModifyAdvancedFM = new JRadioButtonMenuItem("Advanced Feature Model");
 		menuModifyAdvancedFM.addActionListener(editorController);	
-		
-		ButtonGroup basicExtendedGroup = new ButtonGroup();
-		basicExtendedGroup.add(menuModifyBasicFM);
-		basicExtendedGroup.add(menuModifyAdvancedFM);
 		
 		menuModify.add(menuModifyBasicFM);
 		menuModify.add(menuModifyAdvancedFM);
@@ -3166,6 +3178,15 @@ public class EditorView extends JFrame implements Observer{
 	public String assignNameSXFMDialog(){				
 	  return assignNameDialog("SXFM filename: ");	  
 	}
+	
+	/** 
+	 * Assigns a name to the SXFM file to be created as result of model exportation.
+	 * 
+	 * @return s - String representing the SXFM name, or null if dialog has been aborted
+	 */
+	public String assignNamePNGMDialog(){				
+	  return assignNameDialog("PNG filename: ");	  
+	}
 
 	/** 
 	 * opens a dialog to ask user for a name.
@@ -3234,6 +3255,35 @@ public class EditorView extends JFrame implements Observer{
 		JOptionPane.showOptionDialog(f, s, "Error", 
 				JOptionPane.OK_OPTION, JOptionPane.NO_OPTION, null, options, options[0]);
 	}
+	
+	/** 
+	 * Export the content of the diagram panel as a PNG file.
+	 */
+	public void exportAsImageFile(String pngPath, String type){
+	  String fileName=assignNamePNGMDialog();
+	  //saving xml string on file
+	  try{
+		//checking if the diagrams save directory must be created
+		File dir=new File(pngPath);		
+		if(!dir.isDirectory() && !dir.mkdir() ) throw new IOException("Save Directory can't be created.");
+	  }catch(IOException e){
+		System.out.println("Can't create PNG save directory");
+		e.printStackTrace();
+	  }	  
+	  
+	  BufferedImage bi = new BufferedImage(diagramPanel.getSize().width,
+			diagramPanel.getSize().height, BufferedImage.TYPE_INT_ARGB); 
+	  Graphics g = bi.createGraphics();
+	  diagramPanel.paint(g);  //this == JComponent
+	  g.dispose();
+	  try{
+		if(type.compareTo("PNG")==0) ImageIO.write(bi,"png", new File(pngPath+"/"+fileName+".png"));
+		else if(type.compareTo("JPEG")==0) ImageIO.write(bi,"jpg", new File(pngPath+"/"+fileName+".jpg"));
+	  }catch(Exception e) {
+		System.out.println("Error while exporting to "+type+" format");
+		e.printStackTrace();
+	  }
+	}	
 
 	/**
 	 * Saves the visual elements of the digram and the diagram state on file.
@@ -3785,8 +3835,5 @@ public class EditorView extends JFrame implements Observer{
 	  }
 	  
 	}
-	
-	
-	
 	
 }
