@@ -21,7 +21,7 @@ import javax.swing.JFrame;
 
 public class ControllerProject implements ActionListener, WindowListener, MouseListener{
 	
-	private static boolean verbose=true;//variabile usata per attivare stampe nel codice
+	private static boolean verbose=false;//variabile usata per attivare stampe nel codice
 	
 	/** path used to save diagrams and feature models xml files*/
 	private static String diagramPath="/DIAGRAMS";

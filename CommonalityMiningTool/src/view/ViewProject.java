@@ -42,6 +42,8 @@ import view.EditorView.FilterFileProject;
 
 
 public class ViewProject implements Observer, Runnable{
+
+	private static boolean verbose=false;//variable used to activate prints in the code
 	
 	private static final String savedProjectsDir = "Usage Tries";
 	
@@ -94,8 +96,6 @@ public class ViewProject implements Observer, Runnable{
 	private ViewPanelLateral panelLateralProject = null;
 	
 	private ViewPanelCentral panelCentralProject = null;
-
-	private static boolean verbose=true;//variabile usata per attivare stampe nel codice
 	
 	/** Costruttore
 	 * 
@@ -663,13 +663,14 @@ public class ViewProject implements Observer, Runnable{
 	 * or null if the content is not correct.
 	 */
 	public String [] loadFolderDialog(){		
-		String [] analisysFiles = new String[3];
+		String [] analisysFiles = new String[4];
 	    JFileChooser chooser = new JFileChooser();
 	    File analisysDir=null;
 	    //used to check if 1 and only one of such files exist inside selected folder
 	    boolean txtFound=false;
 	    boolean termTmpFound=false;
 	    boolean posFound=false;
+	    boolean conllFound=false;
 	    
 	    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 	    int returnVal = chooser.showOpenDialog(new JFrame("Select Analisys Folder"));
@@ -712,10 +713,17 @@ public class ViewProject implements Observer, Runnable{
       		  analisysFiles[2]=file.getAbsolutePath();
       		}
     	  }
+    	  if(file.getName().endsWith(".index.conll")){
+    		if(conllFound) return null;
+      		else{
+      			conllFound=true;
+      		  analisysFiles[3]=file.getAbsolutePath();
+      		}
+    	  }
     	}
 
     	//1 file per type(suffix) is needed
-    	if(!txtFound || !termTmpFound || !posFound) return null;
+    	if(!txtFound || !termTmpFound || !posFound || !conllFound) return null;
 
     	//activating throbber
 	    frameProject.setEnabled(false);
@@ -900,21 +908,23 @@ public class ViewProject implements Observer, Runnable{
 		if((i = panelLateralProject.getAnalysisLeaf()) != -1){
 			if(i >= 0){//an input file node has been selected
 				panelCentralProject.createTabFile(
-						modelProject.readAnalysisFile(i), modelProject.readTermRelevantFile(i));
+					modelProject.readAnalysisFile(i), modelProject.readTermRelevantFile(i));
 			}
 			else if(i==-2){//the commonality node has been selected
 				lastButtonSelectionEnd=buttonCommonalitiesSelectionEnd;
 				panelCentralProject.createTabFeatures( modelProject.readPathHTMLTermRelevantFile(), 
 				  modelProject.readCommonalitiesCandidates(), modelProject.readCommonalitiesSelected(),
 				  modelProject.readPathCommonalitiesSelectedHTML(), modelProject.getRelevantTerms(), 
-				  ViewPanelCentral.FeatureType.COMMONALITIES, null, lastButtonSelectionEnd);
+				  modelProject.getRelevantTermsVersions(), ViewPanelCentral.FeatureType.COMMONALITIES, 
+				  null, lastButtonSelectionEnd);
 			}
 			else if(i==-3){//the variability node has been selected
 				lastButtonSelectionEnd=buttonVariabilitiesSelectionEnd;
 				panelCentralProject.createTabFeatures( modelProject.readPathHTMLTermRelevantFile(), 
-				  modelProject.readVariabilitiesCandidates(), modelProject.readVariabilitiesSelected(),
+				  modelProject.readVariabilitiesCandidates(), modelProject.readVariabilitiesSelected(), 
 				  modelProject.readPathVariabilitiesSelectedHTML(), modelProject.getRelevantTerms(), 
-				  ViewPanelCentral.FeatureType.VARIABILITIES, modelProject.readCommonalitiesCandidates(), lastButtonSelectionEnd);
+				  modelProject.getRelevantTermsVersions(), ViewPanelCentral.FeatureType.VARIABILITIES, 
+				  modelProject.readCommonalitiesCandidates(), lastButtonSelectionEnd);
 			}
 
 			frameProject.remove(panelCentralProject.getPanelAnalysis());

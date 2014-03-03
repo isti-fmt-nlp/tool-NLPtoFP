@@ -5,7 +5,6 @@
  */
 package view;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
@@ -53,7 +52,7 @@ public class ViewPanelCentral{
 	private static boolean verbose=false;
 
 	/**variable used to activate debug prints in the code*/
-	private static boolean debug=true;
+	private static boolean debug=false;
 
 	private JPanel panelAnalysis = null;
 	
@@ -87,6 +86,9 @@ public class ViewPanelCentral{
 	/**(MANUEL M.) relevant terms set, each term X has a list of input files
 	 and each file has a list of characters indexex, which are the start positions of X occorrences*/
 	private HashMap<String, HashMap<String, ArrayList<Integer>>> relevantTerms=null;
+	
+	/** Contains all project's relevant terms, in both original version and term-extraction version*/
+	private HashMap<String, String> originalTermsVersions=null; 
 
 	/**current selected checkbox*/
 	private String currentSelectedCheckBox=null;
@@ -180,7 +182,8 @@ public class ViewPanelCentral{
 	 */
 	public void createTabFeatures(ArrayList<String> alF, ArrayList<String> alFeaturesCand, ArrayList<String> alFeaturesSel,
 			String selectFilePath, HashMap<String, HashMap<String, ArrayList<Integer>>> relevantTerms,
-			FeatureType fType, ArrayList<String> alFeaturesToHighlight, JButton buttonSelectionEnd){
+			ArrayList<String[]> relevantTermsBothVersions, FeatureType fType,
+			ArrayList<String> alFeaturesToHighlight, JButton buttonSelectionEnd){
 		
 		String displayText = fType==FeatureType.COMMONALITIES? "Commonality":"Variability";
 		if(alF == null || alFeaturesCand == null) return;
@@ -189,6 +192,9 @@ public class ViewPanelCentral{
 //		tmpTab.setLayout();
 		
 		this.relevantTerms=relevantTerms;
+		this.originalTermsVersions=new HashMap<String, String>();
+		for(String[] str : relevantTermsBothVersions) originalTermsVersions.put(str[0], str[1]);
+		
 		tabFeatures = new JTabbedPane[2];
 		
 		tabFeatures[0] = new JTabbedPane(); 
@@ -544,13 +550,14 @@ public class ViewPanelCentral{
 		return new JScrollPane(ep);
 	}
 	
-	/** (Manuel M.) Returns a tab for commonalities candidates using JCheckBox to add terms.
+	/** 
+	 * Returns a tab for commonalities candidates using JCheckBox to add terms.
 	 * 
 	 * @param alFeaturesCand - ArrayList containing le commonalities candidates
 	 * @param alFeaturesSel - ArrayList containing le commonalities selected
 	 * @param alFeaturesToHighlight - if not null, the terms in alFeaturesToHighlight will be highlighted 
 	 * @param fType - a FeatureType constant representing the type of features
-	 * @return the JPanel created
+	 * @return - the JScrollPane created
 	 */
 	private JScrollPane getTabFeaturesCandidates(ArrayList <String> alFeaturesCand, ArrayList <String> alFeaturesSel,
 				ArrayList <String> alFeaturesToHighlight, JButton buttonSelectionEnd, FeatureType fType){
@@ -1106,16 +1113,18 @@ public class ViewPanelCentral{
 			  //checking what highlighted tags already are in next occurrence text interval
 			  commTagsToRemove = new ArrayList<Highlight>();
 			  for (Highlight tmp: hilite.getHighlights())
-				if (tmp.getStartOffset()>=occurrenceIndex && tmp.getEndOffset()<=occurrenceIndex+currentSelectedCheckBox.length())
-				  commTagsToRemove.add(tmp);
+//				if (tmp.getStartOffset()>=occurrenceIndex && tmp.getEndOffset()<=occurrenceIndex+currentSelectedCheckBox.length())
+//				  commTagsToRemove.add(tmp);
+				if (tmp.getStartOffset()>=occurrenceIndex 
+					&& tmp.getEndOffset()<=occurrenceIndex+originalTermsVersions.get(currentSelectedCheckBox).length())
+					  commTagsToRemove.add(tmp);
 
 			  //removing highlighted tags that already are in next occurrence text interval
 			  for (Highlight tmp: commTagsToRemove) hilite.removeHighlight(tmp);
 			  
 			  //saving last removed Commonality tags in lastRemovedCommHighlights
 			  lastRemovedCommHighlights.get(currentSelectedCheckBox).put((
-			    (JScrollPane)occursTabbedPane.getSelectedComponent()).getName(), 
-			    commTagsToRemove);
+			    (JScrollPane)occursTabbedPane.getSelectedComponent()).getName(), commTagsToRemove);
 			  
 			  
 			  //initializing of lastHighlightedTag, if necessary
@@ -1128,17 +1137,17 @@ public class ViewPanelCentral{
 				  
 			  if(highlightTag!=null) hilite.removeHighlight(highlightTag);
 
-
-//			  if(lastHighlightedTag!=null) hilite.removeHighlight(lastHighlightedTag);
-			  
-//			  hilite.removeHighlight(tag);
 			  
 			  //highlighting current occurrence and saving it in lastHighlightedTag
 			  try {
+//				  lastHighlightedTag.get(currentSelectedCheckBox).put(
+//				    ((JScrollPane)occursTabbedPane.getSelectedComponent()).getName(),
+//				    hilite.addHighlight(occurrenceIndex, occurrenceIndex+currentSelectedCheckBox.length(), highlightPainter[1]));
 				  lastHighlightedTag.get(currentSelectedCheckBox).put(
-				    ((JScrollPane)occursTabbedPane.getSelectedComponent()).getName(),
-				    hilite.addHighlight(occurrenceIndex, occurrenceIndex+currentSelectedCheckBox.length(), highlightPainter[1]));
-				
+					((JScrollPane)occursTabbedPane.getSelectedComponent()).getName(),
+					hilite.addHighlight(occurrenceIndex, 
+					occurrenceIndex+originalTermsVersions.get(currentSelectedCheckBox).length(), highlightPainter[1]));
+				  				
 			  } catch (BadLocationException e) {
 				System.out.println("BadLocationException\nTerm: "+currentSelectedCheckBox+" - occurrence: "+occurrenceIndex);
 				e.printStackTrace();
@@ -1160,7 +1169,8 @@ public class ViewPanelCentral{
 //				  		((JScrollPane)occursTabbedPane.getSelectedComponent()).getName(), currentIndex);
 
 			  //updating occurrences label
-			  occurrsLabel.setText( (currentIndex+1)+""+"/"+occurrIndexesList.size()+"[Line: "+occurrIndexesList.get(currentIndex)+"]");
+			  occurrsLabel.setText( (currentIndex+1)+""+"/"+occurrIndexesList.size()
+					  +"[Line: "+occurrIndexesList.get(currentIndex)+"]");
 
 
 			  /* ***VERBOSE****/					
@@ -1228,7 +1238,8 @@ public class ViewPanelCentral{
 		  //checking what highlighted tags already are in next occurrence text interval
 		  commTagsToRemove = new ArrayList<Highlight>();
 		  for (Highlight tmp: hilite.getHighlights())
-			if (tmp.getStartOffset()>=occurrenceIndex && tmp.getEndOffset()<=occurrenceIndex+currentSelectedCheckBox.length())
+			if (tmp.getStartOffset()>=occurrenceIndex 
+				&& tmp.getEndOffset()<=occurrenceIndex+originalTermsVersions.get(currentSelectedCheckBox).length())
 			  commTagsToRemove.add(tmp);
 
 		  //removing highlighted tags that already are in next occurrence text interval
@@ -1257,7 +1268,8 @@ public class ViewPanelCentral{
 		  try {
 			lastHighlightedTag.get(currentSelectedCheckBox).put(
 			  ((JScrollPane)occursTabbedPane.getSelectedComponent()).getName(),
-			  hilite.addHighlight(occurrenceIndex, occurrenceIndex+currentSelectedCheckBox.length(), highlightPainter[1]));
+			  hilite.addHighlight(occurrenceIndex, 
+				occurrenceIndex+originalTermsVersions.get(currentSelectedCheckBox).length(), highlightPainter[1]));
 			  
 //			lastHighlightedTag=hilite.addHighlight(occurrenceIndex, occurrenceIndex+currentSelectedCheckBox.length(),
 //				highlightPainter[1]);

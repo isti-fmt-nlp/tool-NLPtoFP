@@ -22,7 +22,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
 
 public class ModelParserUTF8{
-	private static boolean verbose=true;//variabile usata per attivare stampe nel codice
+	private static boolean verbose=false;//variable used to activate prints in the code
 
 	/* Stringa contenente il percorso del file */
 	private String pathFile = null;
@@ -32,6 +32,8 @@ public class ModelParserUTF8{
 	
 	/* Stringa contenente il contenuto del nuovo file */
 	private String textUTF8 = null;
+	
+	private boolean isAnalisysDir=false;
 	
 	/** 
 	 * Constructor.
@@ -45,6 +47,81 @@ public class ModelParserUTF8{
 		  + new File(pathFile).getName().substring(0, new File(pathFile).getName().length() - 4) + ".txt";
 	}
 	
+	/**
+	 * Sets the 'isAnalisysDir' property, which tells if this model <br>
+	 * is that of an analisys directory or an input file. Default property value is false.
+	 * 
+	 * @param value - the boolean value, if true this model represents an analisys directory
+	 */
+	public void setIsAnalisysDir(boolean value){
+	  isAnalisysDir=value;
+	}
+	
+	/**
+	 * Returns the 'isAnalisysDir' property, which tells if this model <br>
+	 * is that of an analisys directory or an input file. Default property value is false.
+	 * 
+	 * @return - a boolean value, true if this model represents an analisys directory, false otherwise
+	 */
+	public boolean isAnalisysDir(){
+	  return isAnalisysDir;
+	}
+
+	/**
+	 * Returns a cleaned version of inputTextContent, making the following substitutions:<br>
+	 * -each ' • ' become ' . '<br>
+	 * -each ' ” ' become ' " '<br>
+	 * -each ' “ ' become ' " '<br>
+	 * -each ' – ' become ' - '<br>
+	 * -each ' ’ ' become ' ' '
+	 * 
+	 * @param inputTextContent - the String to be cleaned
+	 * @return - a new cleaned String
+	 */
+	protected static String cleanTextContent(String inputTextContent) {
+		Matcher m = null;
+		
+        Pattern p0 = Pattern.compile("•");//.
+        Pattern p1 = Pattern.compile("”");//"
+        Pattern p2 = Pattern.compile("“");//"
+        Pattern p3 = Pattern.compile("–");//-
+        Pattern p4 = Pattern.compile("’");//'
+        Pattern p5 = Pattern.compile("‘");//'        
+
+		Pattern p6 = Pattern.compile("([^\\s])\"");
+		Pattern p7 = Pattern.compile("\"([^\\s])");
+//		Pattern p8 = Pattern.compile("([^\\s])'");
+         
+        m = p0.matcher(inputTextContent);
+        inputTextContent = m.replaceAll(".");		
+        
+        m = p1.matcher(inputTextContent);
+        inputTextContent = m.replaceAll("\"");	
+
+        m = p2.matcher(inputTextContent);
+        inputTextContent = m.replaceAll("\"");		
+        
+        m = p3.matcher(inputTextContent);
+        inputTextContent = m.replaceAll("-");		
+
+        m = p4.matcher(inputTextContent);
+        inputTextContent = m.replaceAll("'");		
+
+        m = p5.matcher(inputTextContent);
+        inputTextContent = m.replaceAll("'");		
+
+        m = p6.matcher(inputTextContent);
+        inputTextContent = m.replaceAll("$1 \"");		
+
+        m = p7.matcher(inputTextContent);
+        inputTextContent = m.replaceAll("\" $1");		
+
+//        m = p8.matcher(inputTextContent);
+//        inputTextContent = m.replaceAll("$1 '");		
+        
+        return inputTextContent;
+	}
+	
 	/** 
 	 * Cleans the file content and creates an UTF8-compatible version.
 	 * 
@@ -52,7 +129,10 @@ public class ModelParserUTF8{
 	 */
 	public File filterFile(){          		
         //Clean the file content
-        if((textUTF8 = /*cleanString*/(encodeFileToStringUTF8()))==null) return null;        
+		if (isAnalisysDir()){
+	      if((textUTF8 = /*cleanString*/cleanTextContent(encodeFileToStringUTF8()))==null) return null;   
+		}	
+		else if((textUTF8 = /*cleanString*/(encodeFileToStringUTF8()))==null) return null;        
         try{
           //writes UTF8 version file
           PrintStream ps = new PrintStream(new FileOutputStream(pathFileUTF8),false,"UTF-8");      	

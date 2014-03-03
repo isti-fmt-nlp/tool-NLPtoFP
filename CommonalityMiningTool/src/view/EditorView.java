@@ -250,6 +250,10 @@ public class EditorView extends JFrame implements Observer{
 	/** Popup menu items*/
 	private JMenuItem popMenuItemDelete = new JMenuItem("Delete Element");
 	private JMenuItem popMenuItemDeleteFeature = new JMenuItem("Delete Feature");
+
+	private ImageIcon colorIcon = new ImageIcon(getClass().getResource("/Color/color.png"));
+	private JMenuItem popMenuItemChangeColor=new JMenuItem("Change Color", colorIcon);	
+
 	private JMenuItem popMenuItemRenameFeature = new JMenuItem("Rename Feature");
 	private JMenuItem popMenuItemDeleteConnector = new JMenuItem("Delete Connector");
 	private JMenuItem popMenuItemDeleteGroup = new JMenuItem("Delete Group");
@@ -504,6 +508,7 @@ public class EditorView extends JFrame implements Observer{
 		popMenuItemDeleteFeature.addActionListener(editorController);
 		
 		popMenuItemRenameFeature.addActionListener(editorController);
+		popMenuItemChangeColor.addActionListener(editorController);
 		
 		popMenuItemDeleteConnector.setText("Delete Connector");
 		popMenuItemDeleteConnector.setActionCommand("Delete Element");
@@ -2824,6 +2829,11 @@ public class EditorView extends JFrame implements Observer{
 	public JMenuItem getPopMenuItemRenameFeature(){
 		return popMenuItemRenameFeature;
 	};	
+
+	/** Returns the 'Change Color' popup menu item */
+	public JMenuItem getPopMenuItemChangeColor() {
+		return popMenuItemChangeColor;
+	}
 	
 	/** Returns the 'Delete Connector' popup menu item */
 	public JMenuItem getPopMenuItemDeleteConnector(){

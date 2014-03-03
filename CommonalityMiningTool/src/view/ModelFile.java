@@ -8,10 +8,9 @@ package view;
 import java.io.File;
 
 public class ModelFile extends ModelAnalysis implements Runnable{
+	
 	/** Tells about the result of the analisys */
 	private boolean result = false;
-	
-	private boolean isAnalisysDir=false;
 	
 	/** 
 	 * Constructor.
@@ -49,15 +48,5 @@ public class ModelFile extends ModelAnalysis implements Runnable{
 	 */
 	public boolean readResult(){
 		return result;
-	}
-	
-	/**
-	 * Sets the 'isAnalisysDir' property, which tells if this model <br>
-	 * is that of an analisys directory or an input file. Default property value is false.
-	 * 
-	 * @param value - the boolean value, if true this model represents an analisys directory
-	 */
-	public void setIsAnalisysDir(boolean value){
-	  isAnalisysDir=value;
 	}
 }

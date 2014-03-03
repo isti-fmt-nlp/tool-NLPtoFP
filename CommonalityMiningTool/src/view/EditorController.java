@@ -1,5 +1,6 @@
 package view;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
+import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
 
@@ -220,6 +222,7 @@ public class EditorController implements
           if(popupElement.getName().startsWith(EditorView.featureNamePrefix)){
         	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemDeleteFeature());
         	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemRenameFeature());
+        	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemChangeColor());
           }
           //clicked on a group
           if(popupElement.getName().startsWith(EditorView.altGroupNamePrefix)
@@ -678,6 +681,12 @@ public class EditorController implements
         System.out.println("Renaming: "+popupElement.getName()); 
         ((FeaturePanel)popupElement).getTextArea().setEditable(true);
         
+      }
+	  //popup menu command: Change Color
+      else if(e.getActionCommand().equals("Change Color")){    	  
+        Color color = JColorChooser.showDialog(null, "Choose Color", Color.white);  
+        if (color==null) return;
+        else ((FeaturePanel)popupElement).setBackground(color);        
       }
 	  //popup menu command: Ungroup Element
       else if(e.getActionCommand().equals("Ungroup")){

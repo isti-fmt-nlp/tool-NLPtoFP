@@ -37,6 +37,8 @@ import javax.imageio.IIOException;
 public class ModelAnalysis extends ModelParserUTF8{
 	private static boolean debug=false;//variable used to activate prints in the code
 	
+	private static boolean debug2=false;//variable used to activate prints in the code
+	
 	/** If true, the relevant terms file will be created after analisys, otherwise it will be created after save*/
 	private static final boolean SAVE_RELEVANT_TERMS_IMMEDIATELY = true;
 
@@ -59,7 +61,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 	
 	
 	/** ArrayList containing the relevant terms of input file */
-	private ArrayList <String> termRelevant = null;
+	private ArrayList <String[]> termRelevant = null;
 	
 	/** Contains the arity for all terms of the input file */
 	private HashMap<String, Integer> termsArity=null;
@@ -87,7 +89,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 	public boolean loadAnalysisFile(){
       String s=null;
         
-      termRelevant = new ArrayList <String> ();		
+      termRelevant = new ArrayList <String[]> ();		
       pathPageHTML = new ArrayList <String> ();
 		
       
@@ -104,8 +106,11 @@ public class ModelAnalysis extends ModelParserUTF8{
     	BufferedReader br = 
     	  new BufferedReader(new FileReader(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + ".log"));
 
+//    	while( (s = br.readLine()) != null )
+//      	  if(!s.equals("") && !s.equals("\n") && !s.equals(" ")) termRelevant.add(s);
     	while( (s = br.readLine()) != null )
-    	  if(!s.equals("") && !s.equals("\n") && !s.equals(" ")) termRelevant.add(s);
+          if(!s.equals("") && !s.equals("\n") && !s.equals(" "))
+        	termRelevant.add(s.split("\t"));    		
 
     	br.close(); 
       }
@@ -117,7 +122,7 @@ public class ModelAnalysis extends ModelParserUTF8{
     	return false;
       }        
       
-      Collections.sort(termRelevant);	
+//      Collections.sort(termRelevant);	
       return true;
 	}
 	
@@ -261,7 +266,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 	 * 
 	 * @return - the ArrayList<String> containing the paths
 	 */
-	public ArrayList<String> readTermRelevant(){
+	public ArrayList<String[]> readTermRelevant(){
 		return termRelevant;
 	}
 	
@@ -536,7 +541,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 	 * @return - true if extraction was successful, false otherwise
 	 */
 	private boolean extractTermsFrom_DylanLabTermExtractor(File f){
-
+		String[] termVersions=null;
         int i = 2;
 
         Pattern es1 = Pattern.compile("<[^<]+?>");
@@ -580,7 +585,12 @@ public class ModelAnalysis extends ModelParserUTF8{
             	//cos'è ciò?
                 if(!s3[i].equals("") && !s3[i].equals("\n") && !s3[i].equals(" ") && !s3[i].equals(" ")
                    && !s3[i].trim().equals(s4[0]) && !s3[i].trim().equals(s4[1]) && !s3[i].trim().equals(s4[2]) )
-                  if (!termRelevant.contains(s3[i].trim()) ) termRelevant.add(s3[i].trim());
+                  if (!termRelevant.contains(s3[i].trim()) ){
+                	termVersions=new String[2];
+                	termVersions[0]=s3[i].trim();
+                	termVersions[1]=s3[i].trim();
+                	termRelevant.add(termVersions);
+                  }
                     
                 i = i + 1;
             }
@@ -604,9 +614,10 @@ public class ModelAnalysis extends ModelParserUTF8{
 		
 		int startSidIndex=0, endSidIndex=0;
 		String sid=null, term=null; 
+		String[] termVersions=null;
 		ArrayList<String> termSet = new ArrayList<String>();
 
-		termRelevant = new ArrayList <String> ();
+		termRelevant = new ArrayList <String[]> ();
 		termsInSentencesSet = new ArrayList<ArrayList<String>>();
 		termsArity= new HashMap<String, Integer>();
 
@@ -676,7 +687,12 @@ public class ModelAnalysis extends ModelParserUTF8{
             //adding relevant term
             term=html.substring(startIndex, endIndex);
             System.out.println("Extracted term: "+term);
-            if(!termRelevant.contains(term)) termRelevant.add(term);
+            if(!termRelevant.contains(term)){
+              termVersions=new String[2];
+              termVersions[0]=term;
+              termVersions[1]=term;
+              termRelevant.add(termVersions);
+            }
             //adding term to sentence set and updating its arity
             if(!termSet.contains(term)){
               termSet.add(term);
@@ -753,7 +769,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 	  PrintWriter printer=null;
 	  BufferedReader reader=null;		
 	  String line=null;
-	  String inputTextContent="", sentenceBoundaries="";
+	  String inputTextContent=""/*, sentenceBoundaries=""*/;
       String pathPrefix = readPathFileUTF8().substring(0, readPathFileUTF8().length()-4);
       int sentencesCount=0;
       int inputTextIndex=0;
@@ -763,8 +779,9 @@ public class ModelAnalysis extends ModelParserUTF8{
       ArrayList<Point> sentencesBounds=new ArrayList<Point>();
       Point tempPoint=null;
 	  
-	  //reading input text file content, it will be used to compute sentences boundaries      
-      inputTextContent=cleanTextContent(readTextUTF8());
+//	  //reading input text file content, it will be used to compute sentences boundaries      
+////      inputTextContent=cleanTextContent(readTextUTF8());
+//      inputTextContent=readTextUTF8();
     		  
 	  arStr.add(
 		"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\""
@@ -789,10 +806,11 @@ public class ModelAnalysis extends ModelParserUTF8{
 	  
 	  try {
 		reader=new BufferedReader(new FileReader(tmp));
-		tempPoint=new Point(0, 0);
+//		tempPoint=new Point(0, 0);
 //		sentenceBoundaries+="0\t0";//da guardare se il file è vuoto, non deve scrivere la prima riga(errata poi...)
 		while((line=reader.readLine())!=null){
 		  if(line.length()>0){//new token found
+			//building html content of the result file
 			elementData=line.split("\t");
 			arStr.add("<tr>"
 			+"<td bgcolor=\"#cccccc\" valign=\"top\" width=\"50px\" align=\"left\"><b>"+elementData[0]+"</b></td>"
@@ -803,22 +821,22 @@ public class ModelAnalysis extends ModelParserUTF8{
 			+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[5]+"</td>"
 					 +"</tr>");
 			
-			if(currentToken==null && sentencesCount>0){//this is the first token found after the end of last sentence
-//			  sentenceBoundaries+=sentencesCount+"\t"+inputTextContent.indexOf(elementData[1], inputTextIndex);
-			  tempPoint=new Point(inputTextContent.indexOf(elementData[1], inputTextIndex), 0);
-
-			}
+//			if(currentToken==null && sentencesCount>0){//this is the first token found after the end of last sentence
+////			  sentenceBoundaries+=sentencesCount+"\t"+inputTextContent.indexOf(elementData[1], inputTextIndex);
+//			  tempPoint=new Point(inputTextContent.indexOf(elementData[1], inputTextIndex), 0);
+//			}
+			
 			//moving in input text to reach current token index
 			previousToken=currentToken; currentToken=elementData[1];
-			inputTextIndex=inputTextContent.indexOf(currentToken, inputTextIndex);
-			if(inputTextIndex<0) System.out.println("Got index <0! Term was: "+currentToken+"\tPrevious: "+previousToken);
-			inputTextIndex+=currentToken.length();
+//			inputTextIndex=inputTextContent.indexOf(currentToken, inputTextIndex);
+//			if(inputTextIndex<0) System.out.println("Got index <0! Term was: "+currentToken+"\tPrevious: "+previousToken);
+//			inputTextIndex+=currentToken.length();
 		  }
 		  else{//found a newLine, calculating sentence boundaries
 			if(sentencesCount%100==0)System.out.println("Found newLine! #"+sentencesCount);
-//			sentenceBoundaries+="\t"+(inputTextIndex-1)+"\n";
-			tempPoint.y=(inputTextIndex-1);
-			sentencesBounds.add(tempPoint);
+////			sentenceBoundaries+="\t"+(inputTextIndex-1)+"\n";
+//			tempPoint.y=(inputTextIndex-1);
+//			sentencesBounds.add(tempPoint);
 			++sentencesCount;
 			previousToken=currentToken; currentToken=null;
 		  }
@@ -827,12 +845,12 @@ public class ModelAnalysis extends ModelParserUTF8{
 		//adding last part to result file html content
 		arStr.add("</table></body></html>");
 		
-		//adding last end boundary to sentenceBoundaries
-		if(currentToken!=null){
-//		  sentenceBoundaries+="\t"+(inputTextIndex/*+currentToken.length()*/-1)+"\n";
-		  tempPoint.y=(inputTextIndex/*+currentToken.length()*/-1);
-		  sentencesBounds.add(tempPoint);		  
-		}
+//		//adding last end boundary to sentenceBoundaries
+//		if(currentToken!=null){
+////		  sentenceBoundaries+="\t"+(inputTextIndex/*+currentToken.length()*/-1)+"\n";
+//		  tempPoint.y=(inputTextIndex/*+currentToken.length()*/-1);
+//		  sentencesBounds.add(tempPoint);		  
+//		}
 	  
 		reader.close();
 	  } catch (IOException e1) {
@@ -853,7 +871,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 //		//printing sentences boundaries file
 //		tmp=new File(pathPrefix+"SENTENCES_BOUNDS.log");
 //		printer = new PrintWriter(tmp);
-//		printer.print(sentenceBoundaries);
+//		for(Point p : sentencesBounds) printer.println(p.x+" - "+p.y);
 //		printer.close();	
 	  } catch (IOException e1) {
 		System.out.println("createResultFileInputText(): File Write Problem!");
@@ -877,9 +895,10 @@ public class ModelAnalysis extends ModelParserUTF8{
 	 * The other 2 analisys result files must already be present.
 	 * 
 	 * @param filePath - a String representing the path of term extraction file
+	 * @param conllPath - a String representing the path of CoNLL file
 	 * @param sentencesBoundaries - an ArrayList<Point>, representing start and end indexes of each sentence in the input file
 	 */
-	public void createResultFileTermExtractor(String filePath, ArrayList<Point> sentencesBoundaries) {
+	public void createResultFileTermExtractor(String filePath, String conllPath, ArrayList<Point> sentencesBoundaries) {
 	  File tmp=null;
 	  PrintWriter printer=null;
 	  BufferedReader reader=null;		
@@ -892,8 +911,17 @@ public class ModelAnalysis extends ModelParserUTF8{
       int charcount=0, index=0;
       Iterator<Entry<String, ArrayList<Integer>>> termsIter=null;
       Entry<String, ArrayList<Integer>> termsEntry=null;
-      
-	  termRelevant=new ArrayList<String>();
+      String currentTerm=null;
+      ArrayList<String> termsFromExtractor=new ArrayList<String>();
+      boolean inSequence=false;
+      ArrayList<String> originalTokensInSequence=null;
+      ArrayList<String> modifiedTokensInSequence=null;
+      String possibleRelevantTerm=null, computedRelevantTerm=null;
+      int start=0, limit=0;
+      HashMap<String, String> termsVersions=null;
+      ArrayList<String> termSet =null;    		  
+	  termRelevant=new ArrayList<String[]>();
+	  String[] singleTermBothVersions=null;
 	  
 	  //creating html content of the result file
 	  tmp=new File(filePath);
@@ -930,7 +958,9 @@ public class ModelAnalysis extends ModelParserUTF8{
 				   +"</tr>");
 
 		  //adding term to relevant terms list
-		  termRelevant.add(elementData[0]);
+//		  termRelevant.add(elementData[0]);
+		  termsFromExtractor.add(elementData[0]);
+//		  termRelevant.add(cleanTermRelevant(elementData[0]));		  
 		}
 		
 		//adding last div to html result file
@@ -958,41 +988,148 @@ public class ModelAnalysis extends ModelParserUTF8{
 		e1.printStackTrace(); return;
 	  }	
 	  
+	  //computing original versions of relevant terms, terms in sentences and terms arities
+	  tmp=new File(conllPath);	  
+	  termSet = new ArrayList<String>();
+	  termsInSentencesSet = new ArrayList<ArrayList<String>>();
+	  termsArity= new HashMap<String, Integer>();
+	  originalTokensInSequence=new ArrayList<String>();
+	  modifiedTokensInSequence=new ArrayList<String>();
+	  termsVersions=new HashMap<String, String>();
+	  try {
+		reader=new BufferedReader(new FileReader(tmp));
+		while((line=reader.readLine())!=null){
+		  if(line.length()>0){//new token found
+			elementData=line.split("\t");
+			if (elementData[8].startsWith("B")){
+			  if(inSequence){
+				//testing possible modified relevant terms computed from originale tokens				  
+				for(start=0; start<modifiedTokensInSequence.size(); ++start){
+				  for(limit=modifiedTokensInSequence.size()-1; limit>=start; --limit){
+					possibleRelevantTerm=modifiedTokensInSequence.get(start);
+					for(int l=start+1; l<=limit; ++l) possibleRelevantTerm+=" "+modifiedTokensInSequence.get(l);
+
+					if(termsFromExtractor.contains(possibleRelevantTerm)){//found a relevant term
+					  //computing the original version of the term
+					  computedRelevantTerm=originalTokensInSequence.get(start);
+					  for(int l=start+1; l<=limit; ++l) computedRelevantTerm+=" "+originalTokensInSequence.get(l);
+					  possibleRelevantTerm=cleanTermRelevant(possibleRelevantTerm);
+					  computedRelevantTerm=cleanTermRelevant(computedRelevantTerm);
+
+					  /* ***DEBUG*** */
+					  if(debug2) System.out.println("\n***Found term: "+possibleRelevantTerm+"\n***Original:"+ computedRelevantTerm);
+					  /* ***DEBUG*** */
+
+					  //adding cleaned original version term to sentence set and updating its arity
+					  if(!termSet.contains(possibleRelevantTerm)){						
+						termSet.add(possibleRelevantTerm);
+						if(termsArity.get(possibleRelevantTerm)==null) termsArity.put(possibleRelevantTerm, 1);
+						else termsArity.put(possibleRelevantTerm, termsArity.get(possibleRelevantTerm)+1);
+					  }
+					  //adding relevant term if it is not already been added
+					  if(termsVersions.get(possibleRelevantTerm)==null){
+						//adding cleaned original version term to versions association map
+						termsVersions.put(possibleRelevantTerm, computedRelevantTerm);
+
+						/* ***DEBUG*** */
+						if(debug2) System.out.println("Added term: "+possibleRelevantTerm);
+						/* ***DEBUG*** */
+
+						singleTermBothVersions=new String[2];
+						singleTermBothVersions[0]=possibleRelevantTerm;
+						singleTermBothVersions[1]=computedRelevantTerm;
+						termRelevant.add(singleTermBothVersions);
+					  }
+					}
+				  }
+				}				  
+				  
+			  }//previous sequence is ended
+			  //start of a new token sequence for a possible relevant term
+			  inSequence=true;
+			  originalTokensInSequence.clear();
+			  modifiedTokensInSequence.clear();
+			  originalTokensInSequence.add(elementData[1]);
+			  modifiedTokensInSequence.add(elementData[2]);
+			}
+			else if (elementData[8].startsWith("I")){
+			  //building the token sequence for a possible relevant term
+			  originalTokensInSequence.add(elementData[1]);
+			  modifiedTokensInSequence.add(elementData[2]);
+			}
+			else{
+			  if(!inSequence) continue;//there are currently no tokens sequence to test
+			  //testing possible modified relevant terms computed from originale tokens
+			  inSequence=false;
+			  for(start=0; start<modifiedTokensInSequence.size(); ++start){
+				for(limit=modifiedTokensInSequence.size()-1; limit>=start; --limit){
+				  possibleRelevantTerm=modifiedTokensInSequence.get(start);
+				  for(int l=start+1; l<=limit; ++l) possibleRelevantTerm+=" "+modifiedTokensInSequence.get(l);
+
+				  if(termsFromExtractor.contains(possibleRelevantTerm)){//found a relevant term
+					//computing the original version of the term
+					computedRelevantTerm=originalTokensInSequence.get(start);
+					for(int l=start+1; l<=limit; ++l) computedRelevantTerm+=" "+originalTokensInSequence.get(l);
+					possibleRelevantTerm=cleanTermRelevant(possibleRelevantTerm);
+					computedRelevantTerm=cleanTermRelevant(computedRelevantTerm);
+					System.out.println("\n***Found term: "+possibleRelevantTerm+"\n***Original:"+ computedRelevantTerm);
+		            //adding cleaned original version term to sentence set and updating its arity
+		            if(!termSet.contains(possibleRelevantTerm)){						
+		              termSet.add(possibleRelevantTerm);
+		              if(termsArity.get(possibleRelevantTerm)==null) termsArity.put(possibleRelevantTerm, 1);
+		              else termsArity.put(possibleRelevantTerm, termsArity.get(possibleRelevantTerm)+1);
+		            }
+		            //adding relevant term if it is not already been added
+		            if(termsVersions.get(possibleRelevantTerm)==null){
+		              //adding cleaned original version term to versions association map
+		              termsVersions.put(possibleRelevantTerm, computedRelevantTerm);
+		              System.out.println("Added term: "+possibleRelevantTerm);
+		              singleTermBothVersions=new String[2];
+		              singleTermBothVersions[0]=possibleRelevantTerm;
+		              singleTermBothVersions[1]=computedRelevantTerm;
+		              termRelevant.add(singleTermBothVersions);
+		            }
+				  }
+				}
+			  }	
+			}
+		  }
+		  else{//found a newLine, changing the sentence set
+			if(termSet.size()>0) termsInSentencesSet.add(termSet);
+			termSet= new ArrayList<String>();
+		  }
+		}
+      }catch(Exception e){
+        System.out.println("createResultFileTermExtractor - Exception during read: " + e.getMessage());
+        e.printStackTrace();
+        return;
+      }	  
+	  
+	  
+/*	  
 	  //reading input text file content
       inputTextContent=readTextUTF8();
-	  
-      /* ***DEBUG*** */
-      String newTermForm=null;
-      try {
-    	printer=new PrintWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4)+".TERMCLEANING");
-      } catch (FileNotFoundException e) {
-    	System.out.println("debug problem for file writing");
-    	e.printStackTrace();
-      }
-      /* ***DEBUG*** */
       
 	  //saving the positions in input file of relevant terms occurences 
 	  relevantTerms=new HashMap<String, ArrayList<Integer>>();
 	  try {
-		reader = new BufferedReader(new StringReader(cleanTextContent(inputTextContent)));
-//		reader = new BufferedReader(new StringReader(inputTextContent));
+//		reader = new BufferedReader(new StringReader(cleanTextContent(inputTextContent)));
+		reader = new BufferedReader(new StringReader(inputTextContent));
 		charcount=0;
 		while((line = reader.readLine()) != null){//for each line
 		  for(int h=0; h<termRelevant.size(); h++){//for each relevant term
 			index=0;
-
-			/* ***DEBUG*** */
-			newTermForm=cleanTermRelevant(termRelevant.get(h));
-			printer.println("Original Term: "+termRelevant.get(h)+"\nModified: "+newTermForm+"\n");
-			/* ***DEBUG*** */
+//			currentTerm=cleanTermRelevant(termRelevant.get(h));
+			currentTerm=termRelevant.get(h);
 			  
 			while(index<line.length()){//for each occurrence
 			  //get next occurrence
-			  index = line.toUpperCase().indexOf(cleanTermRelevant(termRelevant.get(h)).toUpperCase(), index);			  
+			  index = line.toUpperCase().indexOf(currentTerm.toUpperCase(), index);			  
 			  if (index == -1) break;//start checking next relevant term occurrences in this line
 			  //add occurrence to relevantTerms, if it is valid
-			  if (ModelProject.isValidOccurrence(termRelevant.get(h), line, index));
+			  if (ModelProject.isValidOccurrence(currentTerm, line, index))
 				addIndexToOccursList(relevantTerms, charcount+index, h);
+			  else System.out.println("Not Valid Occurrence!\nterm: "+currentTerm+"\nline: "+line);
 			  //incrementing index to search for next occurrence
 			  index+=termRelevant.get(h).length();
 			}
@@ -1010,18 +1147,22 @@ public class ModelAnalysis extends ModelParserUTF8{
 
 	  
 
-//	  Iterator<Entry<String, ArrayList<Integer>>> iter = relevantTerms.entrySet().iterator();
-//	  Entry<String, ArrayList<Integer>> entry=null;
-//	  ArrayList<Integer> tmpList=null;
-//	  String tmpTerm=null;
-//	  while(iter.hasNext()){
-//		entry=iter.next();
-//		tmpTerm=entry.getKey();
-//		tmpList=entry.getValue();
-//		System.out.println("\n***Term: "+tmpTerm);
+	  Iterator<Entry<String, ArrayList<Integer>>> iter = relevantTerms.entrySet().iterator();
+	  Entry<String, ArrayList<Integer>> entry=null;
+	  ArrayList<Integer> tmpList=null;
+	  String tmpTerm=null;
+	  System.out.println("\n*****printing terms in relevantTerms: ");
+	  while(iter.hasNext()){
+		entry=iter.next();
+		tmpTerm=entry.getKey();
+		tmpList=entry.getValue();
+		System.out.println(tmpTerm);
 //		for(int i : tmpList) System.out.println(i);
-//	  }
+	  }
 
+	  System.out.println("\n*****printing terms in termRelevant: ");
+	  for(String term: termRelevant) System.out.println(term);
+	  
 	  //calculating sentences sets and terms arities
 	  termsInSentencesSet = new ArrayList<ArrayList<String>>();
 	  for(int i=0; i<sentencesBoundaries.size(); ++i) termsInSentencesSet.add(new ArrayList<String>());
@@ -1049,7 +1190,10 @@ public class ModelAnalysis extends ModelParserUTF8{
 			
 		}
 	  }
-	   
+*/
+	  
+	  
+	  
 	  pathPageHTML.add(pathPrefix+2+".html");
 	  
 	  if (SAVE_RELEVANT_TERMS_IMMEDIATELY) try {
@@ -1060,103 +1204,36 @@ public class ModelAnalysis extends ModelParserUTF8{
 	  }
 
 	}
-	
+
 	/**
-	 * Returns a cleaned version of term, calling cleanTextContent to make substitutions, <br>
-	 * and removes whitespaces between an alphanumeric characters and quotation marks.
+	 * Returns a cleaned version of term, removing a whitespace if it precedes an apex.
 	 * 
 	 * @param inputTextContent - the String to be cleaned
 	 * @return - a new cleaned String
 	 */
 	private String cleanTermRelevant(String term) {
-		char[] chars, newChars=null;
-		int k=0, l=0, i=0;
-		if (term==null) return null;
-		String res=cleanTextContent(term);
-		chars=res.toCharArray();
-		newChars=new char[chars.length];
-		for(i=0, l=0; i<chars.length; ++i, ++l){
-		  //found a whitespace in the term
-		  if(chars[i]==' '){			  
-			//checking if next non-space char is a quotation mark
-			for(k=i+1; k<chars.length; ++k){
-			  switch(chars[k]){
-			    case '"': case '\'': System.out.println("Found a quotation mark! Term is: "+term); break;
-			    case ' ': System.out.println("About to continue! Term is: "+term); continue;
-			    default: k=chars.length; break;
-			  }
-		  	}
-			
-			//if next non-space char is a quotation mark whitespaces are skipped
-			if(k<chars.length) i=k;			
-		  }
-		  
-		  //copying next char in the new String char array
-		  newChars[l]=chars[i];
-		}
-		if (l<chars.length) newChars[l]='\0';		
-
-		res=new String(newChars);
-		return res;
-	}
-
-	/**
-	 * Returns a cleaned version of inputTextContent, making the following substitutions:<br>
-	 * -each ' • ' become ' . '<br>
-	 * -each ' ” ' become ' " '<br>
-	 * -each ' “ ' become ' " '<br>
-	 * -each ' – ' become ' - '<br>
-	 * -each ' ’ ' become ' ' '
-	 * 
-	 * @param inputTextContent - the String to be cleaned
-	 * @return - a new cleaned String
-	 */
-	private static String cleanTextContent(String inputTextContent) {
-
-		Matcher m = null;
+		Matcher m = null;    
 		
-        Pattern p0 = Pattern.compile("•");//.
-        Pattern p1 = Pattern.compile("”");//"
-        Pattern p2 = Pattern.compile("“");//"
-        Pattern p3 = Pattern.compile("–");//-
-        Pattern p4 = Pattern.compile("’");//'
-        Pattern p5 = Pattern.compile("‘");//'
-         
-        
-        
-        m = p0.matcher(inputTextContent);
-        inputTextContent = m.replaceAll(".");		
-        
-        m = p1.matcher(inputTextContent);
-        inputTextContent = m.replaceAll("\"");	
+		Pattern p1 = Pattern.compile("\\s'");
 
-        m = p2.matcher(inputTextContent);
-        inputTextContent = m.replaceAll("\"");		
+        m = p1.matcher(term);
+        term = m.replaceAll("'");		
         
-        m = p3.matcher(inputTextContent);
-        inputTextContent = m.replaceAll("-");		
-
-        m = p4.matcher(inputTextContent);
-        inputTextContent = m.replaceAll("'");		
-
-        m = p5.matcher(inputTextContent);
-        inputTextContent = m.replaceAll("'");			
-        
-        return inputTextContent;
+		return term;
 	}
 	
-	/**
-	 * Adds to relevantTerms the starting index of an occurrence of a relevant term.
-	 * 
-	 * @param relevantTerms - the occurrences list
-	 * @param position - the index of starting character of this occurrence in the file
-	 * @param h - the index of the relevant term in the global field 'termRelevant'
-	 */
-	private void addIndexToOccursList(HashMap<String, ArrayList<Integer>> relevantTerms, int position, int h) {
-	  if(relevantTerms.get(termRelevant.get(h))==null)
-		relevantTerms.put(termRelevant.get(h), new ArrayList<Integer>());
-	  relevantTerms.get(termRelevant.get(h)).add(position);
-	}
+//	/**
+//	 * Adds to relevantTerms the starting index of an occurrence of a relevant term.
+//	 * 
+//	 * @param relevantTerms - the occurrences list
+//	 * @param position - the index of starting character of this occurrence in the file
+//	 * @param h - the index of the relevant term in the global field 'termRelevant'
+//	 */
+//	private void addIndexToOccursList(HashMap<String, ArrayList<Integer>> relevantTerms, int position, int h) {
+//	  if(relevantTerms.get(termRelevant.get(h))==null)
+//		relevantTerms.put(termRelevant.get(h), new ArrayList<Integer>());
+//	  relevantTerms.get(termRelevant.get(h)).add(position);
+//	}
 	  
 	
 	/**
@@ -1191,13 +1268,14 @@ public class ModelAnalysis extends ModelParserUTF8{
 		return;
 	  }
 	  
-	  Collections.sort(termRelevant);
+//	  Collections.sort(termRelevant);
 	  PrintWriter writer =
 		new PrintWriter(
 		  new BufferedWriter(
 				  new FileWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + ".log")));
 
-	  for(int j = 0; j< termRelevant.size(); j++) writer.print(termRelevant.get(j) + "\n");
+	  for(int j = 0; j< termRelevant.size(); j++) 
+		writer.print(termRelevant.get(j)[0]+"\t"+termRelevant.get(j)[1]+"\n");
 
 	  writer.close();
 	}
