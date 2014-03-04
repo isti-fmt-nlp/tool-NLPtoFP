@@ -278,19 +278,11 @@ public class ViewPanelCentral{
 	 * 
 	 * @return an ArrayList containing the selected commonalities
 	 */
-	public ArrayList <String> getSelectedFeatures()
-	{
+	public ArrayList <String> getSelectedFeatures(){
 		ArrayList <String> al = new ArrayList <String> ();
-		
-		
-		/* COLOR ASSOCIATION TO BE IMPLEMENTED ON THE BASIS OF DOCUMENT PHRASES*/
-		//must be added " featureColor" to each string
-		/* COLOR ASSOCIATION TO BE IMPLEMENTED ON THE BASIS OF DOCUMENT PHRASES*/
-		
-		
+
 		for(int i = 0; i < checkBoxFeatures.size(); i++)
-			if(checkBoxFeatures.get(i).isSelected())
-				al.add(checkBoxFeatures.get(i).getText());
+			if(checkBoxFeatures.get(i).isSelected()) al.add(checkBoxFeatures.get(i).getText());
 		
 		return al;
 	}

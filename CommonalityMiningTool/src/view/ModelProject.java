@@ -1402,18 +1402,25 @@ public class ModelProject extends Observable implements Runnable{
 		
 		while( (s1 = br1.readLine()) != null ){
 		  fileMap=new HashMap<String, ArrayList<Integer>>();
-		  tokens=s1.split(" ");
-		  
+		  tokens=s1.split("\t");
+
+		  if(tokens.length!=2){
+			if(verbose3) System.out.println("Uncorrect format for relevant terms file");
+			br1.close();
+			return false;			  
+		  }
+
+		  termName=tokens[0];
+		  tokens=tokens[1].split(" ");
 		  /* ***VERBOSE*** */
 		  if(verbose3){
 			System.out.println("Stampo i tokens!");
 			for(String str:tokens) System.out.println(str);
-			termName=tokens[0];
 			System.out.println("Trovato termine: "+termName);
 		  }
 		  /* ***VERBOSE*** */
 
-		  for(int i=1;i<tokens.length; ++i){
+		  for(int i=0;i<tokens.length; ++i){
 			//a new file name has been found
 			if(tokens[i].compareTo("f:")==0){ 
 			  occurrences=new ArrayList<Integer>();
@@ -1424,10 +1431,13 @@ public class ModelProject extends Observable implements Runnable{
 			  }
 			  
 			  if(verbose3) System.out.println("\tTrovato file: "+fileName);
+			  
 			  if(tokens[i].compareTo("i:")!=0){
-				  if(verbose3) System.out.println("Uncorrect format for relevant terms file");
-				  br1.close();
-				  return false;
+				  
+				if(verbose3) System.out.println("Uncorrect format for relevant terms file");
+
+				br1.close();
+				return false;
 			  }
 			  else ++i;
 			  //loading occurrence indexes of this file

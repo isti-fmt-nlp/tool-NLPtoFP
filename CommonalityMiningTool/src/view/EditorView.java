@@ -442,8 +442,11 @@ public class EditorView extends JFrame implements Observer{
 		menuView = new JMenu("View");
 		menuView.setMnemonic(KeyEvent.VK_V);
 
-		menuFiles = new JMenu("Modify");
+		menuFiles = new JMenu("Files");
 		menuFiles.setMnemonic(KeyEvent.VK_M);
+
+		menuModify = new JMenu("Modify");
+		menuModify.setMnemonic(KeyEvent.VK_M);
 
 		/*Menu Files items*/
 		menuFilesSave = new JMenuItem("Save Diagram");
