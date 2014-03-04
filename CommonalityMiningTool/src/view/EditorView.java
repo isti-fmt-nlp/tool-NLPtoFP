@@ -277,7 +277,7 @@ public class EditorView extends JFrame implements Observer{
 	
 	/** Files Menu items*/
 	private JMenuItem menuFilesSave=null, menuFilesOpen=null, menuFilesExportXML=null,
-					  menuFilesDelete=null, menuFilesExit=null, menuFilesExportAsPNG=null, menuFilesExportAsJPEG=null;
+					  menuFilesDelete=null, menuFilesExit=null, menuFilesExportAsPNG=null, menuFilesExportAsGIF=null;
 
 	/** View Menu items*/
 	private JMenuItem menuViewColored=null, menuViewCommsOrVars=null, 
@@ -442,9 +442,6 @@ public class EditorView extends JFrame implements Observer{
 		menuView = new JMenu("View");
 		menuView.setMnemonic(KeyEvent.VK_V);
 
-		menuFiles = new JMenu("Files");
-		menuFiles.setMnemonic(KeyEvent.VK_M);
-
 		menuModify = new JMenu("Modify");
 		menuModify.setMnemonic(KeyEvent.VK_M);
 
@@ -467,15 +464,17 @@ public class EditorView extends JFrame implements Observer{
 		menuFilesExportAsPNG = new JMenuItem("Export as PNG");
 		menuFilesExportAsPNG.addActionListener(editorController);
 		
-		menuFilesExportAsJPEG = new JMenuItem("Export as JPEG");
-		menuFilesExportAsJPEG.addActionListener(editorController);
+		menuFilesExportAsGIF = new JMenuItem("Export as GIF");
+		menuFilesExportAsGIF.addActionListener(editorController);
 
 		
 		menuFiles.add(menuFilesSave);
 		menuFiles.add(menuFilesOpen);
+		menuFiles.addSeparator();
 		menuFiles.add(menuFilesExportXML);
 		menuFiles.add(menuFilesExportAsPNG);
-		menuFiles.add(menuFilesExportAsJPEG);
+		menuFiles.add(menuFilesExportAsGIF);
+		menuFiles.addSeparator();
 		menuFiles.add(menuFilesDelete);
 		menuFiles.add(menuFilesExit);
 
@@ -3187,8 +3186,8 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @return s - String representing the SXFM name, or null if dialog has been aborted
 	 */
-	public String assignNamePNGMDialog(){				
-	  return assignNameDialog("PNG filename: ");	  
+	public String assignNameImageDialog(){				
+	  return assignNameDialog("Image filename: ");	  
 	}
 
 	/** 
@@ -3262,12 +3261,12 @@ public class EditorView extends JFrame implements Observer{
 	/** 
 	 * Export the content of the diagram panel as a PNG file.
 	 */
-	public void exportAsImageFile(String pngPath, String type){
-	  String fileName=assignNamePNGMDialog();
+	public void exportAsImageFile(String imagesPath, String type){
+	  String fileName=assignNameImageDialog();
 	  //saving xml string on file
 	  try{
 		//checking if the diagrams save directory must be created
-		File dir=new File(pngPath);		
+		File dir=new File(imagesPath);		
 		if(!dir.isDirectory() && !dir.mkdir() ) throw new IOException("Save Directory can't be created.");
 	  }catch(IOException e){
 		System.out.println("Can't create PNG save directory");
@@ -3278,10 +3277,23 @@ public class EditorView extends JFrame implements Observer{
 			diagramPanel.getSize().height, BufferedImage.TYPE_INT_ARGB); 
 	  Graphics g = bi.createGraphics();
 	  diagramPanel.paint(g);  //this == JComponent
-	  g.dispose();
+	  g.dispose();	  
+	  
 	  try{
-		if(type.compareTo("PNG")==0) ImageIO.write(bi,"png", new File(pngPath+"/"+fileName+".png"));
-		else if(type.compareTo("JPEG")==0) ImageIO.write(bi,"jpg", new File(pngPath+"/"+fileName+".jpg"));
+		if(type.compareTo("PNG")==0) ImageIO.write(bi,"png", new File(imagesPath+"/"+fileName+".png"));
+		else if(type.compareTo("GIF")==0){
+//		  ImageIO.write(bi,"BMP", new File(imagesPath+"/"+fileName+".BMP"));
+//		  ImageIO.write(bi,"bmp", new File(imagesPath+"/"+fileName+".bmp"));
+//		  ImageIO.write(bi,"jpg", new File(imagesPath+"/"+fileName+".jpg"));
+//		  ImageIO.write(bi,"JPG", new File(imagesPath+"/"+fileName+".JPG"));
+//		  ImageIO.write(bi,"jpeg", new File(imagesPath+"/"+fileName+".jpeg"));
+//		  ImageIO.write(bi,"wbmp", new File(imagesPath+"/"+fileName+".wbmp"));
+//		  ImageIO.write(bi,"PNG", new File(imagesPath+"/"+fileName+".PNG"));
+//		  ImageIO.write(bi,"JPEG", new File(imagesPath+"/"+fileName+".JPEG"));
+//		  ImageIO.write(bi,"WBMP", new File(imagesPath+"/"+fileName+".WBMP"));
+//		  ImageIO.write(bi,"GIF", new File(imagesPath+"/"+fileName+".GIF"));
+		  ImageIO.write(bi,"gif", new File(imagesPath+"/"+fileName+".gif"));
+		}
 	  }catch(Exception e) {
 		System.out.println("Error while exporting to "+type+" format");
 		e.printStackTrace();

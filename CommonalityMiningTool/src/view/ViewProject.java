@@ -247,6 +247,8 @@ public class ViewProject implements Observer, Runnable{
 		menuFeaturesExtractVari.addActionListener(controllerProject);
 		menuFeaturesExtractVari.setEnabled(false);
 
+		menuFeatures.addSeparator();
+		
 		menuFeaturesSelectComm = new JMenuItem("Select Commonalities");
 		menuFeaturesSelectComm.addActionListener(controllerProject);
 		menuFeaturesSelectComm.setEnabled(false);
