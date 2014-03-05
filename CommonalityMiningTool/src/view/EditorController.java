@@ -141,7 +141,8 @@ public class EditorController implements
 //		  case DRAGGING_TOOL_ALT_GROUP: EditorView.dragToolAltGroup(e); break;
 //		  case DRAGGING_TOOL_OR_GROUP: EditorView.dragToolOrGroup(e); break;
 		  case DRAGGING_TOOL_NEWFEATURE: editorView.dragToolNewFeature(e); break;
-		  case DRAGGING_TOOL_CONNECTOR: editorView.dragToolConnector(e); break;
+		  case DRAGGING_TOOL_MANDATORY_LINK: editorView.dragToolConnector(e); break;
+		  case DRAGGING_TOOL_OPTIONAL_LINK: editorView.dragToolConnector(e); break;		  
 		  case DRAGGING_TOOL_ALT_GROUP: editorView.dragToolAltGroup(e); break;
 		  case DRAGGING_TOOL_OR_GROUP: editorView.dragToolOrGroup(e); break;
 		  default: break;
@@ -214,12 +215,12 @@ public class EditorController implements
 //          }
 
           //clicked on a connector
-          if(popupElement.getName().startsWith(EditorView.startConnectorsNamePrefix)
-        	 || popupElement.getName().startsWith(EditorView.endConnectorsNamePrefix)){
+          if(popupElement.getName().startsWith(EditorView.startMandatoryNamePrefix)
+        	 || popupElement.getName().startsWith(EditorView.endMandatoryNamePrefix)){
         	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemDeleteConnector());
           }
           //clicked on an end feature
-          if(popupElement.getName().startsWith(EditorView.endConnectorsNamePrefix)
+          if(popupElement.getName().startsWith(EditorView.endMandatoryNamePrefix)
 				  && ( ((AnchorPanel)popupElement).getOtherEnd().getName().startsWith(EditorView.altGroupNamePrefix)
 					   || ((AnchorPanel)popupElement).getOtherEnd().getName().startsWith(EditorView.orGroupNamePrefix) ) ){
 	    	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemUngroup());			  
@@ -332,8 +333,8 @@ public class EditorController implements
 			}
 			
 			//mouse pressed on a feature panel in the diagram panel
-			if(tmpNode.getElement().getClass().equals(FeaturePanel.class) &&
-					((FeaturePanel)tmpNode.getElement()).getName().startsWith(EditorView.featureNamePrefix) ){
+			if(/*tmpNode.getElement().getClass().equals(FeaturePanel.class) &&*/
+					((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.featureNamePrefix) ){
 
 			  featurePanel=(FeaturePanel)tmpNode.getElement();
 			  featurePanelX=featurePanel.getX();
@@ -343,9 +344,11 @@ public class EditorController implements
 			  System.out.println("Mouse pressed on "+featurePanel.getName()+", on anchor "+anchorPanelName);
 
 			  //mouse pressed on an anchor inside the feature panel
-			  if(anchorPanelName!=null && anchorPanel.getClass().equals(AnchorPanel.class) &&(
-					  anchorPanelName.startsWith(EditorView.startConnectorsNamePrefix) ||
-					  anchorPanelName.startsWith(EditorView.endConnectorsNamePrefix) ) ){
+			  if(anchorPanelName!=null &&/* anchorPanel.getClass().equals(AnchorPanel.class) &&*/
+				  ( anchorPanelName.startsWith(EditorView.startMandatoryNamePrefix) ||
+					anchorPanelName.startsWith(EditorView.endMandatoryNamePrefix)   || 
+					anchorPanelName.startsWith(EditorView.startOptionalNamePrefix)  ||
+					anchorPanelName.startsWith(EditorView.endOptionalNamePrefix) )   ){
 
 				editorView.setActiveItem(activeItems.DRAGGING_EXTERN_ANCHOR);
 				editorView.setLastAnchorFocused(anchorPanel);
@@ -356,11 +359,14 @@ public class EditorController implements
 				
 				//the other end is attached to a feature
 				if(otherEndFeaturePanel.getName().startsWith(EditorView.featureNamePrefix) ){
-				  if(anchorPanelName.startsWith(EditorView.startConnectorsNamePrefix) )
+				  if(anchorPanelName.startsWith(EditorView.startMandatoryNamePrefix) 
+					 || anchorPanelName.startsWith(EditorView.startOptionalNamePrefix) )
 //						editorModel.removeLink(featurePanel.getName(), otherEndFeaturePanel.getName());
 					editorModel.removeLink(featurePanel.getID(), ((FeaturePanel)otherEndFeaturePanel).getID());
-				  if(anchorPanelName.startsWith(EditorView.endConnectorsNamePrefix) ){
-					if (otherEnd.getName().startsWith(EditorView.startConnectorsNamePrefix))
+				  if(anchorPanelName.startsWith(EditorView.endMandatoryNamePrefix) 
+					 || anchorPanelName.startsWith(EditorView.endOptionalNamePrefix) ){
+					if (otherEnd.getName().startsWith(EditorView.startMandatoryNamePrefix) 
+						|| otherEnd.getName().startsWith(EditorView.startOptionalNamePrefix))
 //						  editorModel.removeLink(otherEndFeaturePanel.getName(), featurePanel.getName());
 					  editorModel.removeLink(((FeaturePanel)otherEndFeaturePanel).getID(), featurePanel.getID());
 					if (otherEnd.getName().startsWith(EditorView.altGroupNamePrefix)
@@ -381,9 +387,9 @@ public class EditorController implements
 				else editorView.detachAnchor(featurePanel, anchorPanel);
 			  }
 			  //mouse pressed on a group inside the feature panel
-			  else if(anchorPanelName!=null && anchorPanel.getClass().equals(GroupPanel.class) && (
-				anchorPanelName.startsWith(EditorView.altGroupNamePrefix) ||
-				anchorPanelName.startsWith(EditorView.orGroupNamePrefix) ) ){
+			  else if(anchorPanelName!=null /*&& anchorPanel.getClass().equals(GroupPanel.class)*/ &&
+					   ( anchorPanelName.startsWith(EditorView.altGroupNamePrefix) ||
+						 anchorPanelName.startsWith(EditorView.orGroupNamePrefix)    ) ){
 
 				editorView.setActiveItem(activeItems.DRAGGING_EXTERN_GROUP);
 				editorView.setLastAnchorFocused(anchorPanel);
@@ -405,16 +411,18 @@ public class EditorController implements
 			  }
 			}
 			//mouse directly pressed on an anchor panel in the diagram panel
-			else if(tmpNode.getElement().getClass().equals(AnchorPanel.class) &&(
-					((AnchorPanel)tmpNode.getElement()).getName().startsWith(EditorView.startConnectorsNamePrefix) ||
-					((AnchorPanel)tmpNode.getElement()).getName().startsWith(EditorView.endConnectorsNamePrefix) ) ){
+			else if(/*tmpNode.getElement().getClass().equals(AnchorPanel.class) &&*/(
+					((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.startMandatoryNamePrefix) ||
+					((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.endMandatoryNamePrefix)  ||
+					((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.startOptionalNamePrefix)  ||
+					((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.endOptionalNamePrefix) ) ){
 			  editorView.setActiveItem(activeItems.DRAGGING_EXTERN_ANCHOR);
 			  editorView.setLastAnchorFocused((AnchorPanel)tmpNode.getElement());
 //			  EditorView.moveComponentToTop(editorView.getLastAnchorFocused());
 			  editorView.moveComponentToTop(editorView.getLastAnchorFocused());
 			}
 			//mouse directly pressed on a group panel in the diagram panel
-			else if(tmpNode.getElement().getClass().equals(GroupPanel.class) &&
+			else if(/*tmpNode.getElement().getClass().equals(GroupPanel.class) &&*/
 					//lastAnchorFocused?
 					((GroupPanel)tmpNode.getElement()).getName().startsWith(EditorView.altGroupNamePrefix) ||
 					((GroupPanel)tmpNode.getElement()).getName().startsWith(EditorView.orGroupNamePrefix) ){
@@ -482,8 +490,10 @@ public class EditorController implements
 		}
 		if (((JComponent)comp).getName()=="New Feature")
 			editorView.setActiveItem(activeItems.DRAGGING_TOOL_NEWFEATURE);
-		else if (((JComponent)comp).getName()=="Connector Line")
-			editorView.setActiveItem(activeItems.DRAGGING_TOOL_CONNECTOR);
+		else if ( ((JComponent)comp).getName()=="Mandatory Link")
+			editorView.setActiveItem(activeItems.DRAGGING_TOOL_MANDATORY_LINK);				
+		else if ( ((JComponent)comp).getName()=="Optional Link" )
+			editorView.setActiveItem(activeItems.DRAGGING_TOOL_OPTIONAL_LINK);
 		else if (((JComponent)comp).getName()=="Alternative Group")
 			editorView.setActiveItem(activeItems.DRAGGING_TOOL_ALT_GROUP);
 		else if (((JComponent)comp).getName()=="Or Group")
@@ -544,7 +554,12 @@ public class EditorController implements
 	    	  addNewFeature(e);
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
 	    	  editorView.setToolDragImage(null); break;
-	      case DRAGGING_TOOL_CONNECTOR:
+	      case DRAGGING_TOOL_MANDATORY_LINK:
+//	    	  EditorView.addConnectorToDiagram(e);
+	    	  editorView.addConnectorToDiagram(e);
+			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+	    	  editorView.setToolDragImage(null); break;
+	      case DRAGGING_TOOL_OPTIONAL_LINK:
 //	    	  EditorView.addConnectorToDiagram(e);
 	    	  editorView.addConnectorToDiagram(e);
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
@@ -644,15 +659,15 @@ public class EditorController implements
       		  /*+"\ncomp.getName()="+comp.getName()*/);
         /* ***DEBUG*** */
         
-        if(elementName!=null && elementName.startsWith(EditorView.startConnectorsNamePrefix)){
+        if(elementName!=null && elementName.startsWith(EditorView.startMandatoryNamePrefix)){
 //        	  EditorView.deleteAnchor(popupElement);
 //          	  EditorView.deleteAnchor(((AnchorPanel)popupElement).getOtherEnd());
           editorView.deleteAnchor(popupElement);
           editorView.deleteAnchor(((AnchorPanel)popupElement).getOtherEnd());
       	  editorView.repaintRootFrame();
         }
-        else if(elementName!=null && elementName.startsWith(EditorView.endConnectorsNamePrefix)){
-      	  if(((AnchorPanel)popupElement).getOtherEnd().getName().startsWith(EditorView.startConnectorsNamePrefix)){
+        else if(elementName!=null && elementName.startsWith(EditorView.endMandatoryNamePrefix)){
+      	  if(((AnchorPanel)popupElement).getOtherEnd().getName().startsWith(EditorView.startMandatoryNamePrefix)){
 //        		EditorView.deleteAnchor(popupElement);
 //          		EditorView.deleteAnchor(((AnchorPanel)popupElement).getOtherEnd());            		
       		editorView.deleteAnchor(popupElement);
@@ -859,14 +874,20 @@ public class EditorController implements
 		//anchor directly dropped on a feature inside the diagram panel
 		else if (comp.getName().startsWith(EditorView.featureNamePrefix)){
 			
-		  if(anchor.getName().startsWith(EditorView.endConnectorsNamePrefix)){
-			if( otherEnd.getName().startsWith(EditorView.startConnectorsNamePrefix) 
+		  if(anchor.getName().startsWith(EditorView.endMandatoryNamePrefix)||
+			 anchor.getName().startsWith(EditorView.endOptionalNamePrefix)){
+			if( ( otherEnd.getName().startsWith(EditorView.startMandatoryNamePrefix)
+				 || anchor.getName().startsWith(EditorView.startOptionalNamePrefix) ) 
 				&& otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix)){
 		      //about to link 2 features by a connector
 			  System.out.println("about to link 2 features by a connector_R");
 //			  editorModel.addMandatoryLink( (otherEnd.getParent().getName(), comp.getName() );
-			  editorModel.addMandatoryLink( ((FeaturePanel)otherEnd.getParent()).getID(), 
-					  						((FeaturePanel)comp).getID() );
+			  if(anchor.getName().startsWith(EditorView.endMandatoryNamePrefix))
+				editorModel.addMandatoryLink( ((FeaturePanel)otherEnd.getParent()).getID(), 
+					((FeaturePanel)comp).getID() );
+			  else if(anchor.getName().startsWith(EditorView.endOptionalNamePrefix))
+				editorModel.addOptionalLink( ((FeaturePanel)otherEnd.getParent()).getID(), 
+					((FeaturePanel)comp).getID() );
 			  return;
 			}
 			else if( otherEnd.getName().startsWith(EditorView.orGroupNamePrefix)
@@ -886,7 +907,7 @@ public class EditorController implements
 			  return;
 			}	
 		  }
-		  if (anchor.getName().startsWith(EditorView.startConnectorsNamePrefix)
+		  if (anchor.getName().startsWith(EditorView.startMandatoryNamePrefix)
 			  && otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix)){
 			//about to link 2 features by a connector
 			System.out.println("about to link 2 features by a connector");
@@ -1047,7 +1068,7 @@ public class EditorController implements
 				  EditorView.featureNamePrefix+editorView.getFeaturesCount(), FeatureTypes.VARIABILITY);
 		  i+=70;
 		}
-		
+		editorView.fitDiagram();
 	}
 	
 }

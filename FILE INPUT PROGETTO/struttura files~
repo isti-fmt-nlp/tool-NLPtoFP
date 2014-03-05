@@ -1,8 +1,0 @@
-pos - post tagging
-***qui c'è anche la suddivizione in parole, quando trovi una linea bianca e ricominciano i TID da 1 c'è il 'salto'.
-***i dati, riga per irga, sono separati da TABS.
-
-term - term extraction
-***la prima riga è d'intestazione, il resto è un risultato per riga separato da TABS.
-
-txt - input file

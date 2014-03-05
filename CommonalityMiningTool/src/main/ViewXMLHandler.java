@@ -13,13 +13,13 @@ public class ViewXMLHandler extends DefaultHandler {
 	boolean inStartingVars=false;
 	boolean inFeatureColors=false;	
 
-	public String featuresList="";
-	public String connectorsList="";
-	public String groupsList="";
-	public String misc="";
-	public String startingComm="";
-	public String startingVars="";
-	public String featureColors="";	
+	public String featuresList=null;
+	public String connectorsList=null;
+	public String groupsList=null;
+	public String misc=null;
+	public String startingComm=null;
+	public String startingVars=null;
+	public String featureColors=null;	
 	
 	public void startElement(String uri, String localName, String qName, Attributes atts) {
 	  if (qName.equals("features")) inFeaturesList=true;
@@ -52,13 +52,34 @@ public class ViewXMLHandler extends DefaultHandler {
 	  String tmp=new String(chars, start, length);
 	  System.out.println("Found String: "+tmp);
 	  
-	  if (inFeaturesList) featuresList+=tmp;
-	  else if (inConnectorsList) connectorsList+=tmp;
-	  else if (inGroupsList) groupsList+=tmp;
-	  else if (inMisc) misc+=tmp;
-	  else if (inStartingComm) startingComm+=tmp;
-	  else if (inStartingVars) startingVars+=tmp;
-	  else if (inFeatureColors) featureColors+=tmp;
+	  if (inFeaturesList){
+		if (featuresList==null) featuresList=tmp;
+		else featuresList+=tmp;
+	  }
+	  else if (inConnectorsList){
+		if (connectorsList==null) connectorsList=tmp;
+		else connectorsList+=tmp;		  
+	  }
+	  else if (inGroupsList){
+		if (groupsList==null) groupsList=tmp;
+		else groupsList+=tmp;		  
+	  }
+	  else if (inMisc){
+		if (misc==null) misc=tmp;
+		else misc+=tmp;		  
+	  }
+	  else if (inStartingComm){
+		if (startingComm==null) startingComm=tmp;
+		else startingComm+=tmp;		  
+	  }
+	  else if (inStartingVars){
+		if (startingVars==null) startingVars=tmp;
+		else startingVars+=tmp;		  
+	  }
+	  else if (inFeatureColors){
+		if (featureColors==null) featureColors=tmp;
+		else featureColors+=tmp;		  
+	  }
 	}
 }
 

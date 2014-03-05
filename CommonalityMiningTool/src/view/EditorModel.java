@@ -1,5 +1,6 @@
 package view;
 
+import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -282,7 +283,8 @@ public class EditorModel extends Observable{
 	
 	/**
 	 * Adds a mandatory link between parent feature and the sub feature.<br>
-	 * If the two features are already connected in any way, this method does nothing.
+	 * If the two features are already connected in any way, this method does nothing.<br>
+	 * As a side effect, if the minimum cardinality of subFeature is 0, it is set to 1.
 	 * 
 	 * @param parentFeature - the parent feature to link
 	 * @param subFeature - the sub-feature to link
@@ -290,19 +292,43 @@ public class EditorModel extends Observable{
 	public void addMandatoryLink(String parentFeature, String subFeature){
 	  FeatureNode parent= searchFeature(parentFeature);
 	  FeatureNode sub= searchFeature(subFeature);
-//	  boolean isDesc=false;
-//	  boolean isDescRev=false;
-//	  if ( parent!=null && sub!=null){
-//		  isDesc=isDescendantOf(parent, sub);
-//		  isDescRev=isDescendantOf(sub, parent);
-//		  System.out.println("parent="+parent.getName()+"\tsub="+sub.getName()
-//				 +"\nisDesc="+isDesc+"\tisDescRev="+isDescRev);
-//	  }
+	  Point subCard=null;
 	  
 	  if ( parent!=null && sub!=null && parent!=sub && sub.getParent()==null  
 		   && !isDescendantOf(parent, sub) && !isDescendantOf(sub, parent)){
 		parent.getSubFeatures().add(sub);
 		sub.setParent(parent);
+		//setting a mandatory cardinality
+		subCard=sub.getCardinality();
+		sub.setCardinality(subCard.x>0? subCard.x : 1, subCard.y);
+		setChanged();
+		notifyObservers("Two Features Directly Linked");			
+	  }
+	  else{
+		setChanged();
+		notifyObservers("Two Features Not Linked");			
+	  }
+
+	}
+	
+	/**
+	 * Adds a optional link between parent feature and the sub feature.<br>
+	 * If the two features are already connected in any way, this method does nothing.
+	 * As a side effect, the minimum cardinality of subFeature is set to 0.
+	 * 
+	 * @param parentFeature - the parent feature to link
+	 * @param subFeature - the sub-feature to link
+	 */
+	public void addOptionalLink(String parentFeature, String subFeature){
+	  FeatureNode parent= searchFeature(parentFeature);
+	  FeatureNode sub= searchFeature(subFeature);
+	  
+	  if ( parent!=null && sub!=null && parent!=sub && sub.getParent()==null  
+		   && !isDescendantOf(parent, sub) && !isDescendantOf(sub, parent)){
+		parent.getSubFeatures().add(sub);
+		sub.setParent(parent);
+		//setting an optional cardinality
+		sub.setCardinality(0, sub.getCardinality().y);
 		setChanged();
 		notifyObservers("Two Features Directly Linked");			
 	  }

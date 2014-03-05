@@ -197,9 +197,13 @@ public class EditorView extends JFrame implements Observer{
 	/** prefix of any text area owned by feature panels*/
 	public static String textAreaNamePrefix="---TEXTAREA---";
 	/** prefix of any connector starting dot name*/
-	public static String startConnectorsNamePrefix="---START_CONNECTOR---#";
+	public static String startMandatoryNamePrefix="---START_MANDATORY---#";
 	/** prefix of any connector ending dot name*/
-	public static String endConnectorsNamePrefix="---END_CONNECTOR---#";
+	public static String endMandatoryNamePrefix="---END_MANDATORY---#";
+	/** prefix of any connector starting dot name*/
+	public static String startOptionalNamePrefix="---START_OPTIONAL---#";
+	/** prefix of any connector ending dot name*/
+	public static String endOptionalNamePrefix="---END_OPTIONAL---#";
 	/** prefix of any group Alternative Gtarting dot name*/
 	public static String altGroupNamePrefix="---ALT_GROUP---#";
 	/** prefix of any Or Group starting dot name*/
@@ -208,16 +212,18 @@ public class EditorView extends JFrame implements Observer{
 	public static String diagramPanelName="---DIAGRAM_PANEL---";
 	
 	
-	/** URL of the new feature icon*/
-	private static URL newFeatureIconURL=EditorView.class.getResource("/feature rectangle2.png");
+//	/** URL of the new feature icon*/
+//	private static URL newFeatureIconURL=EditorView.class.getResource("/feature rectangle2.png");
 	/** URL of the connector starting dot icon*/
 	private static URL connectorStartDotIconURL=EditorView.class.getResource("/Connector Start Dot.png");
 	/** URL of the new group starting dot icon*/
 	private static URL ALTGroupDotIconURL=EditorView.class.getResource("/ALTGroup Start Dot.png");
 	/** URL of the new group starting dot icon*/
 	private static URL ORGroupDotIconURL=EditorView.class.getResource("/ORGroup Start Dot.png");
-	/** URL of the new connector ending dot icon*/
-	private static URL connectorEndDotIconURL=EditorView.class.getResource("/Connector End Dot.png");
+	/** URL of the new mandatory connector ending dot icon*/
+	private static URL mandatoryConnectorEndDotIconURL=EditorView.class.getResource("/Mandatory Connector End Dot.png");
+	/** URL of the new optional connector ending dot icon*/
+	private static URL optionalConnectorEndDotIconURL=EditorView.class.getResource("/Optional Connector End Dot.png");
 	/** URL of the connector line-only icon*/
 	private static URL connectorLineLengthIconURL=EditorView.class.getResource("/Connector Line Length.png");
 	/** URL of the group line-only icon*/
@@ -232,12 +238,14 @@ public class EditorView extends JFrame implements Observer{
 	public static enum activeItems {
 		NO_ACTIVE_ITEM, DRAGGING_FEATURE, DRAGGING_EXTERN_ANCHOR, DRAGGING_EXTERN_GROUP,
 		DRAGGING_SELECTION_RECT, DRAGGING_SELECTION_GROUP, 
-		DRAGGING_TOOL_NEWFEATURE, DRAGGING_TOOL_CONNECTOR, DRAGGING_TOOL_ALT_GROUP, DRAGGING_TOOL_OR_GROUP	
+		DRAGGING_TOOL_NEWFEATURE, DRAGGING_TOOL_MANDATORY_LINK, DRAGGING_TOOL_OPTIONAL_LINK, 
+		DRAGGING_TOOL_ALT_GROUP, DRAGGING_TOOL_OR_GROUP	
 	}
 
 	/** enumeration used to specify a item type through the program*/
 	public static enum ItemsType {
-		START_CONNECTOR, END_CONNECTOR, ALT_GROUP_START_CONNECTOR, OR_GROUP_START_CONNECTOR
+		START_CONNECTOR, END_MANDATORY_CONNECTOR, END_OPTIONAL_CONNECTOR,
+		ALT_GROUP_START_CONNECTOR, OR_GROUP_START_CONNECTOR
 	}
 	
 	/** Tells if the diagram has been modified after last save*/
@@ -566,33 +574,51 @@ public class EditorView extends JFrame implements Observer{
 		//creating tools items
 		toolIconPaths=new HashMap<String, String>();
 		toolIconPaths.put("New Feature", "/New Feature2.png");
-		toolIconPaths.put("Connector Line", "/Connector Line.png");
+		toolIconPaths.put("Mandatory Link", "/Mandatory Link.png");
+		toolIconPaths.put("Optional Link", "/Optional Link.png");
+		toolIconPaths.put("Excludes", "/Excludes.png");
+		toolIconPaths.put("Includes", "/Includes.png");
 		toolIconPaths.put("Alternative Group", "/Alternative Group.png");
 		toolIconPaths.put("Or Group", "/Or Group.png");
 		
 		
 		JComponent iconTmpPanel=null;
-		for(int i=0; i<4; ++i){
-		  iconTmpPanel=getToolIcon("New Feature", true);
-		  iconTmpPanel.addMouseListener(editorController);
-		  iconTmpPanel.addMouseMotionListener(editorController);
-		  toolsPanel.add(iconTmpPanel);
+//		for(int i=0; i<4; ++i){
+		iconTmpPanel=getToolIcon("Mandatory Link", true);
+		iconTmpPanel.addMouseListener(editorController);
+		iconTmpPanel.addMouseMotionListener(editorController);
+		toolsPanel.add(iconTmpPanel);
 
-		  iconTmpPanel=getToolIcon("Connector Line", true);
-		  iconTmpPanel.addMouseListener(editorController);
-		  iconTmpPanel.addMouseMotionListener(editorController);
-		  toolsPanel.add(iconTmpPanel);
+		iconTmpPanel=getToolIcon("Optional Link", true);
+		iconTmpPanel.addMouseListener(editorController);
+		iconTmpPanel.addMouseMotionListener(editorController);
+		toolsPanel.add(iconTmpPanel);
 
-		  iconTmpPanel=getToolIcon("Alternative Group", true);
-		  iconTmpPanel.addMouseListener(editorController);
-		  iconTmpPanel.addMouseMotionListener(editorController);
-		  toolsPanel.add(iconTmpPanel);
+		iconTmpPanel=getToolIcon("Includes", true);
+		iconTmpPanel.addMouseListener(editorController);
+		iconTmpPanel.addMouseMotionListener(editorController);
+		toolsPanel.add(iconTmpPanel);
 
-		  iconTmpPanel=getToolIcon("Or Group", true);
-		  iconTmpPanel.addMouseListener(editorController);
-		  iconTmpPanel.addMouseMotionListener(editorController);
-		  toolsPanel.add(iconTmpPanel);
-		}
+		iconTmpPanel=getToolIcon("Excludes", true);
+		iconTmpPanel.addMouseListener(editorController);
+		iconTmpPanel.addMouseMotionListener(editorController);
+		toolsPanel.add(iconTmpPanel);
+
+		iconTmpPanel=getToolIcon("Alternative Group", true);
+		iconTmpPanel.addMouseListener(editorController);
+		iconTmpPanel.addMouseMotionListener(editorController);
+		toolsPanel.add(iconTmpPanel);
+
+		iconTmpPanel=getToolIcon("Or Group", true);
+		iconTmpPanel.addMouseListener(editorController);
+		iconTmpPanel.addMouseMotionListener(editorController);
+		toolsPanel.add(iconTmpPanel);	
+
+		iconTmpPanel=getToolIcon("New Feature", true);
+		iconTmpPanel.addMouseListener(editorController);
+		iconTmpPanel.addMouseMotionListener(editorController);
+		toolsPanel.add(iconTmpPanel);
+//		}
 
 		//creating diagram panel, that will be inserted in the scroller
 //		diagramPanel = new JLayeredPane(){
@@ -620,10 +646,23 @@ public class EditorView extends JFrame implements Observer{
 		diagramPanel.setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width-160,
 		Toolkit.getDefaultToolkit().getScreenSize().height));
 		diagramPanel.setLayout(null);		
-		diagramPanel.setMinimumSize(new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width-160)/4,
+		diagramPanel.setMinimumSize(new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width-160)/6,
 				Toolkit.getDefaultToolkit().getScreenSize().height));
 		
-//		splitterPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+
+		//creating diagram scroller, which will fit the rest of the root frame		
+		diagramScroller=new JScrollPane( diagramPanel, 
+				   ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+				   ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
+		diagramScroller.setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width-160,
+		Toolkit.getDefaultToolkit().getScreenSize().height));
+		diagramScroller.setMinimumSize(new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width-160)/6,
+				Toolkit.getDefaultToolkit().getScreenSize().height));
+
+		toolsPanel.setMinimumSize(new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width-160)/12,
+				Toolkit.getDefaultToolkit().getScreenSize().height));
+		
 		splitterPanel = new EditorSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		splitterPanel.setContinuousLayout(true);
 //		splitterPanel.setOneTouchExpandable(true);
@@ -635,78 +674,9 @@ public class EditorView extends JFrame implements Observer{
 //		splitterPanel.setLocation(0,0);
 //		splitterPanel.setResizeWeight(0.5);
 		
-//		splitterPanel.add(diagramPanel);
 		splitterPanel.add(toolsPanel);
-		
-		
-		/* TEST */
-
-		//creating diagram scroller, which will fit the rest of the root frame
-//		JScrollPane diagramScroller=new JScrollPane( diagramPanel, 
-//				   ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-//				   ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		
-//		diagramScroller=new JScrollPane();
-		
-//		JScrollBar verticalScrollBar=new JScrollBar();
-//		verticalScrollBar.setOrientation(JScrollBar.VERTICAL);
-//		verticalScrollBar.setValue(0);
-//		verticalScrollBar.setVisibleAmount(2000);
-//		verticalScrollBar.setMinimum(0);
-//		verticalScrollBar.setMaximum(2000);
-//		
-//		diagramScroller.setVerticalScrollBar(verticalScrollBar);
-		
-//		diagramScroller.add(diagramPanel);
-		
-		
-		
-//		diagramScroller.setViewport(diagramPanel);
-//		splitterPanel.add(diagramScroller);
-		
-//		frameRoot.addMouseListener(editorController);
-//		frameRoot.addMouseMotionListener(editorController);
-
-//		splitterPanel.addMouseListener(editorController);
-//		splitterPanel.addMouseMotionListener(editorController);
-
-//		diagramScroller.addMouseListener(editorController);
-//		diagramScroller.addMouseMotionListener(editorController);
-
-		
-
-		
-		//creating diagram scroller, which will fit the rest of the root frame		
-		diagramScroller=new JScrollPane( diagramPanel, 
-				   ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-				   ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		
 		splitterPanel.add(diagramScroller);
-
 		
-//		System.out.println("diagramScroller.getVerticalScrollBar().getBlockIncrement(). "
-//		  +diagramScroller.getVerticalScrollBar().getBlockIncrement()
-//		  +"\ndiagramScroller.getVerticalScrollBar().getBlockIncrement(-1): "
-//		  +diagramScroller.getVerticalScrollBar().getBlockIncrement(-1));
-//		
-//		
-//		
-//		
-//		diagramScroller.getVerticalScrollBar().setBlockIncrement(
-//				diagramScroller.getVerticalScrollBar().getBlockIncrement()*2/3);
-//		diagramScroller.getHorizontalScrollBar().setBlockIncrement(
-//				diagramScroller.getHorizontalScrollBar().getBlockIncrement()*2/3);
-//		
-//
-//		
-//		System.out.println("diagramScroller.getVerticalScrollBar().getBlockIncrement(). "
-//		  +diagramScroller.getVerticalScrollBar().getBlockIncrement()
-//		  +"\ndiagramScroller.getVerticalScrollBar().getBlockIncrement(-1): "
-//		  +diagramScroller.getVerticalScrollBar().getBlockIncrement(-1));
-		
-		
-		
-		/* TEST */
 				
 		add(splitterPanel);
 
@@ -1305,6 +1275,9 @@ public class EditorView extends JFrame implements Observer{
 		ImageIcon toolImage=null;
 		
 		try{
+			System.out.println("\n***getIconImage()***\nName= "+name);
+			System.out.println("toolIconPaths.get(name)= "+toolIconPaths.get(name));
+			
 			toolImage = new ImageIcon(EditorView.class.getResource(toolIconPaths.get(name)));	
 			toolImage.setDescription(name);
 			/* ***DEBUG*** */
@@ -1843,7 +1816,6 @@ public class EditorView extends JFrame implements Observer{
 		  dragTool(e);
 	}
 	
-	
 	/**
 	 * Drags a generic tool.
 	 * @param e - the MouseEvent passed by the mouseDragged() method of a listener.
@@ -1879,7 +1851,8 @@ public class EditorView extends JFrame implements Observer{
 	/**
 	 * Drops an anchor on the diagram panel, adding it to the underlying feature panel, if any is present.
 	 * 
-	 * @param e - MouseEvent of the type Mouse Released.
+	 * @param e - MouseEvent of the type Mouse Released
+	 * @return - the anchor's underlying JComponent
 	 */
 	public Component dropAnchorOnDiagram(MouseEvent e) {
 	  Component comp = null;
@@ -1907,9 +1880,9 @@ public class EditorView extends JFrame implements Observer{
 		  if (((Component)tmpNode.getElement()).getName().startsWith(featureNamePrefix)){
 
 			//checking if an ending anchor has been dropped over a feature that already owns an ending anchor
-			if(lastAnchorFocused.getName().startsWith(endConnectorsNamePrefix)){
+			if(lastAnchorFocused.getName().startsWith(endMandatoryNamePrefix)){
 			  for( Component child : ((FeaturePanel)tmpNode.getElement()).getComponents())
-				if (child.getName()!=null && child.getName().startsWith(endConnectorsNamePrefix)) return null;				
+				if (child.getName()!=null && child.getName().startsWith(endMandatoryNamePrefix)) return null;				
 			}
 			
 //			underlyingPanel=(FeaturePanel)tmpNode.getElement();
@@ -1921,7 +1894,7 @@ public class EditorView extends JFrame implements Observer{
 			relativePosition = new Point((int)(anchorPanelOnScreenX-underlyingComponent.getLocationOnScreen().getX()),
 					(int)(anchorPanelOnScreenY-underlyingComponent.getLocationOnScreen().getY()) );	
 			  
-			if(lastAnchorFocused.getName().startsWith(startConnectorsNamePrefix)){
+			if(lastAnchorFocused.getName().startsWith(startMandatoryNamePrefix)){
 			  comp = underlyingComponent.getComponentAt(relativePosition);
 			  if (comp!=null && comp.getName()!=null && (comp.getName().startsWith(altGroupNamePrefix) 
 				  || comp.getName().startsWith(orGroupNamePrefix) )){
@@ -1940,7 +1913,7 @@ public class EditorView extends JFrame implements Observer{
 			return underlyingComponent;					  
 		  }
 		  //anchor dropped directly over the diagram panel
-		  if (lastAnchorFocused.getName().startsWith(startConnectorsNamePrefix) && 
+		  if (lastAnchorFocused.getName().startsWith(startMandatoryNamePrefix) && 
 			   (  ((Component)tmpNode.getElement()).getName().startsWith(altGroupNamePrefix)
 				|| ((Component)tmpNode.getElement()).getName().startsWith(orGroupNamePrefix)) ){
 			underlyingComponent=(JComponent)tmpNode.getElement();
@@ -1976,9 +1949,6 @@ public class EditorView extends JFrame implements Observer{
 	  }				
 	  return null;
 	}
-	
-
-
 
 	/**
 	 * Removes a visible anchor from the diagram panel and attach it to a feature panel.<br>
@@ -1994,7 +1964,8 @@ public class EditorView extends JFrame implements Observer{
 		moveComponentToTop(underlyingComponent);
 
 		//if it is an ending anchor, location is set to top-middle of underlying feature
-		if(lastAnchorFocused.getName().startsWith(endConnectorsNamePrefix)){
+		if( lastAnchorFocused.getName().startsWith(endMandatoryNamePrefix)
+			|| lastAnchorFocused.getName().startsWith(endOptionalNamePrefix) ){
 		  lastAnchorFocused.setLocation(underlyingComponent.getWidth()/2-lastAnchorFocused.getWidth()/2, 0);		
 		}
 		
@@ -2142,8 +2113,8 @@ public class EditorView extends JFrame implements Observer{
 	 * @param e - MouseEvent of the type Mouse Released.
 	 */
 	public void addConnectorToDiagram(MouseEvent e) {
-		int actualPositionX;
-		int actualPositionY;
+		int actualPositionX=0;
+		int actualPositionY=0;
 		boolean startDotInsertedInPanel=false;
 		AnchorPanel newConnectorStartDot=null;			
 		AnchorPanel newConnectorEndDot=null;
@@ -2217,9 +2188,15 @@ public class EditorView extends JFrame implements Observer{
 		ImageIcon lineLengthIcon = new ImageIcon(connectorLineLengthIconURL);
 		ImageIcon startConnectorIcon = new ImageIcon(connectorStartDotIconURL);
 
-		newConnectorEndDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.END_CONNECTOR,
-			actualPositionX+lineLengthIcon.getIconWidth()+startConnectorIcon.getIconWidth(),
-			actualPositionY-5+lineLengthIcon.getIconHeight()+startConnectorIcon.getIconHeight());
+		if(isActiveItem==activeItems.DRAGGING_TOOL_MANDATORY_LINK)
+			  newConnectorEndDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.END_MANDATORY_CONNECTOR,
+				  actualPositionX+lineLengthIcon.getIconWidth()+startConnectorIcon.getIconWidth(),
+				  actualPositionY-5+lineLengthIcon.getIconHeight()+startConnectorIcon.getIconHeight());
+
+		else if(isActiveItem==activeItems.DRAGGING_TOOL_OPTIONAL_LINK)
+			  newConnectorEndDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.END_OPTIONAL_CONNECTOR,
+				  actualPositionX+lineLengthIcon.getIconWidth()+startConnectorIcon.getIconWidth(),
+				  actualPositionY-5+lineLengthIcon.getIconHeight()+startConnectorIcon.getIconHeight());
 
 		/* ***DEBUG*** */
 		if(debug) System.out.println("Mouse released(Drag relative) on: ("+e.getX()+", "+e.getY()+")."
@@ -2252,6 +2229,7 @@ public class EditorView extends JFrame implements Observer{
 
 		addConnectorsToDrawLists(newConnectorStartDot, newConnectorEndDot);
 		cancelToolDrag();
+		
 	}
 
 	public void addOrGroupToDiagram(MouseEvent e) {
@@ -2357,12 +2335,12 @@ public class EditorView extends JFrame implements Observer{
 			newGroupStartDot=(GroupPanel)getDraggableConnectionDot(requestedType,
 				actualPositionX+groupIcon.getIconWidth()/2-startConnectorIcon.getIconWidth()/2, actualPositionY-5);			
 		
-		newGroupEndpoint1=(AnchorPanel)getDraggableConnectionDot(ItemsType.END_CONNECTOR,
+		newGroupEndpoint1=(AnchorPanel)getDraggableConnectionDot(ItemsType.END_MANDATORY_CONNECTOR,
 				actualPositionX+groupIcon.getIconWidth()/2-startConnectorIcon.getIconWidth()/2
 				+groupLineLengthIcon.getIconWidth(),
 				actualPositionY-5+groupLineLengthIcon.getIconHeight()+startConnectorIcon.getIconHeight());
 
-		newGroupEndpoint2=(AnchorPanel)getDraggableConnectionDot(ItemsType.END_CONNECTOR,
+		newGroupEndpoint2=(AnchorPanel)getDraggableConnectionDot(ItemsType.END_MANDATORY_CONNECTOR,
 				actualPositionX+groupIcon.getIconWidth()/2-startConnectorIcon.getIconWidth()/2
 				-groupLineLengthIcon.getIconWidth()/*-startConnectorIcon.getIconWidth()*/,
 				actualPositionY-5+groupLineLengthIcon.getIconHeight()+startConnectorIcon.getIconHeight());
@@ -2439,20 +2417,29 @@ public class EditorView extends JFrame implements Observer{
 			imagePanel = new AnchorPanel();  
 			if(name!=null) imagePanel.setName(name);
 			else{
-			  imagePanel.setName(startConnectorsNamePrefix+connectorsCount);
+			  imagePanel.setName(startMandatoryNamePrefix+connectorsCount);
 			  ++connectorsCount;
 			}
 			connectorIcon = new ImageIcon(connectorStartDotIconURL);
 			break;
-		  case END_CONNECTOR:
+		  case END_MANDATORY_CONNECTOR:
 			imagePanel = new AnchorPanel();  
 			if(name!=null) imagePanel.setName(name);
 			else{
-			  imagePanel.setName(endConnectorsNamePrefix+connectorsCount);
+			  imagePanel.setName(endMandatoryNamePrefix+connectorsCount);
 			  ++connectorsCount;
 			}
-			connectorIcon = new ImageIcon(connectorEndDotIconURL);
+			connectorIcon = new ImageIcon(mandatoryConnectorEndDotIconURL);
 			break;
+		  case END_OPTIONAL_CONNECTOR:
+			imagePanel = new AnchorPanel();  
+			if(name!=null) imagePanel.setName(name);
+			else{
+			  imagePanel.setName(endOptionalNamePrefix+connectorsCount);
+			  ++connectorsCount;
+			}
+			connectorIcon = new ImageIcon(optionalConnectorEndDotIconURL);
+			break;				
 		  case ALT_GROUP_START_CONNECTOR:
 			imagePanel = new GroupPanel();  
 			if(name!=null) imagePanel.setName(name);
@@ -2588,6 +2575,51 @@ public class EditorView extends JFrame implements Observer{
 	}
 	
 	/**
+	 * Resizes the diagram panel to fit all components in it.
+	 */
+	protected void fitDiagram() {
+		int diagramMinX=0;
+		int diagramMinY=0;
+		int diagramMaxX=0;
+		int diagramMaxY=0;
+		OrderedListNode tmp=null;
+
+		Dimension screenDim=Toolkit.getDefaultToolkit().getScreenSize();
+		
+		tmp=visibleOrderDraggables.getFirst();
+		while(tmp!=null){
+		  if (((JComponent)tmp.getElement()).getParent().getName().startsWith(EditorView.diagramPanelName)) break;
+		  tmp=tmp.getNext();
+		}
+		if(tmp==null) return;//no draggables found
+		diagramMinX=((JComponent)tmp.getElement()).getX();
+		diagramMinY=((JComponent)tmp.getElement()).getY();
+		diagramMaxX=((JComponent)tmp.getElement()).getX()+((JComponent)tmp.getElement()).getWidth();
+		diagramMaxY=((JComponent)tmp.getElement()).getY()+((JComponent)tmp.getElement()).getHeight();
+
+		while(tmp!=null){
+		  if (((JComponent)tmp.getElement()).getParent().getName().startsWith(EditorView.diagramPanelName)){
+			if (((JComponent)tmp.getElement()).getX()<diagramMinX)
+			  diagramMinX=((JComponent)tmp.getElement()).getX();
+			if (((JComponent)tmp.getElement()).getY()<diagramMinY)
+			  diagramMinY=((JComponent)tmp.getElement()).getY();
+			if (((JComponent)tmp.getElement()).getX()+((JComponent)tmp.getElement()).getWidth()>diagramMaxX)
+			  diagramMaxX=((JComponent)tmp.getElement()).getX()+((JComponent)tmp.getElement()).getWidth();
+			if (((JComponent)tmp.getElement()).getY()+((JComponent)tmp.getElement()).getHeight()>diagramMaxY)
+			  diagramMaxY=((JComponent)tmp.getElement()).getY()+((JComponent)tmp.getElement()).getHeight();			
+		  }
+		  tmp=tmp.getNext();
+		}
+		//moving components and resizing diagram
+		shiftAllDraggablesButGroupBothDirections(-diagramMinX, -diagramMinY, null);
+		Dimension diagramSize = diagramPanel.getPreferredSize();
+		diagramSize.width=(diagramMaxX-diagramMinX>screenDim.width)? diagramMaxX-diagramMinX : screenDim.width;
+		diagramSize.height=(diagramMaxY-diagramMinY>screenDim.height)? diagramMaxY-diagramMinY : screenDim.height;
+		diagramPanel.setPreferredSize(diagramSize);
+		diagramPanel.revalidate();
+	}
+	
+	/**
 	 * Returns the Component at the given position inside diagramPanel, if any.
 	 * 
 	 * @param x - x coordinate relative to diagramPanel
@@ -2670,8 +2702,8 @@ public class EditorView extends JFrame implements Observer{
   	  for(Component comp : feature.getComponents())
   		if(comp.getName()!=null 
   		   && ( comp.getName().startsWith(altGroupNamePrefix) || comp.getName().startsWith(orGroupNamePrefix) 
-  				|| comp.getName().startsWith(endConnectorsNamePrefix) 
-  				|| comp.getName().startsWith(startConnectorsNamePrefix)
+  				|| comp.getName().startsWith(endMandatoryNamePrefix) 
+  				|| comp.getName().startsWith(startMandatoryNamePrefix)
   			  ) ){
   		  detachAnchor((FeaturePanel)feature, (JComponent)comp);
   		}
@@ -2720,7 +2752,7 @@ public class EditorView extends JFrame implements Observer{
 	  else startDotlocationY=startDotlocationY+(anchor.getHeight()*2);
 	  
 	  startConnectorDot.setLocation(startDotlocationX, startDotlocationY);
-	  startConnectorDot.setName(startConnectorsNamePrefix+anchor.getName().substring(anchor.getName().indexOf("#")+1));
+	  startConnectorDot.setName(startMandatoryNamePrefix+anchor.getName().substring(anchor.getName().indexOf("#")+1));
 	  startConnectorDot.setOtherEnd(anchor);
 	  anchor.setOtherEnd(startConnectorDot);
 	  visibleOrderDraggables.addToTop(startConnectorDot);
@@ -2794,7 +2826,7 @@ public class EditorView extends JFrame implements Observer{
       	  visibleOrderDraggables.remove(anchor);
         }
 
-        if (anchor.getName().startsWith(startConnectorsNamePrefix)) startConnectorDots.remove(anchor);
+        if (anchor.getName().startsWith(startMandatoryNamePrefix)) startConnectorDots.remove(anchor);
         
 	}
 
@@ -3459,8 +3491,6 @@ public class EditorView extends JFrame implements Observer{
 	  InputStream stream = null;
 	  SAXParserFactory saxFactory = SAXParserFactory.newInstance();
 	  ViewXMLHandler xmlHandler = new ViewXMLHandler();
-	  int diagramMinX=0, diagramMinY=0;
-	  int diagramMaxX=0, diagramMaxY=0;
 	  OrderedListNode tmp=null;
 	  try {
 		stream=new FileInputStream(diagramDataPath);
@@ -3478,46 +3508,16 @@ public class EditorView extends JFrame implements Observer{
 				+"\nFeatures Colors:\n"+xmlHandler.featureColors
 				+"\n");
 
-		loadStartingTermsColor(xmlHandler.featureColors);
-		loadFeatures(xmlHandler.featuresList);
-		loadConnectors(xmlHandler.connectorsList);
-		loadGroups(xmlHandler.groupsList);
-		loadMiscellaneous(xmlHandler.misc);
-		loadStartingCommonalities(xmlHandler.startingComm);
-		loadStartingVariabilities(xmlHandler.startingVars);
+		if(xmlHandler.featureColors!=null) loadStartingTermsColor(xmlHandler.featureColors);
+		if(xmlHandler.featuresList!=null) loadFeatures(xmlHandler.featuresList);
+		if(xmlHandler.connectorsList!=null) loadConnectors(xmlHandler.connectorsList);
+		if(xmlHandler.groupsList!=null) loadGroups(xmlHandler.groupsList);
+		if(xmlHandler.misc!=null) loadMiscellaneous(xmlHandler.misc);
+		if(xmlHandler.startingComm!=null) loadStartingCommonalities(xmlHandler.startingComm);
+		if(xmlHandler.startingVars!=null) loadStartingVariabilities(xmlHandler.startingVars);
 
 		//resizing diagram to fit all components
-		tmp=visibleOrderDraggables.getFirst();
-		while(tmp!=null){
-		  if (((JComponent)tmp.getElement()).getParent().getName().startsWith(EditorView.diagramPanelName)) break;
-		  tmp=tmp.getNext();
-		}
-		if(tmp==null) return;//no draggables found
-		diagramMinX=((JComponent)tmp.getElement()).getX();
-		diagramMinY=((JComponent)tmp.getElement()).getY();
-		diagramMaxX=((JComponent)tmp.getElement()).getX()+((JComponent)tmp.getElement()).getWidth();
-		diagramMaxY=((JComponent)tmp.getElement()).getY()+((JComponent)tmp.getElement()).getHeight();
-
-		while(tmp!=null){
-		  if (((JComponent)tmp.getElement()).getParent().getName().startsWith(EditorView.diagramPanelName)){
-			if (((JComponent)tmp.getElement()).getX()<diagramMinX)
-			  diagramMinX=((JComponent)tmp.getElement()).getX();
-			if (((JComponent)tmp.getElement()).getY()<diagramMinY)
-			  diagramMinY=((JComponent)tmp.getElement()).getY();
-			if (((JComponent)tmp.getElement()).getX()+((JComponent)tmp.getElement()).getWidth()>diagramMaxX)
-			  diagramMaxX=((JComponent)tmp.getElement()).getX()+((JComponent)tmp.getElement()).getWidth();
-			if (((JComponent)tmp.getElement()).getY()+((JComponent)tmp.getElement()).getHeight()>diagramMaxY)
-			  diagramMaxY=((JComponent)tmp.getElement()).getY()+((JComponent)tmp.getElement()).getHeight();			
-		  }
-		  tmp=tmp.getNext();
-		}
-		//moving components and resizing diagram
-		shiftAllDraggablesButGroupBothDirections(-diagramMinX, -diagramMinY, null);
-		Dimension diagramSize = diagramPanel.getPreferredSize();
-		diagramSize.width=diagramMaxX-diagramMinX;
-		diagramSize.height=diagramMaxY-diagramMinY;
-		diagramPanel.setPreferredSize(diagramSize);
-		diagramPanel.revalidate();		  		
+		fitDiagram();		  		
 	  } catch (Exception e) {
 		System.out.println("Error while loading saved diagram");
 		e.printStackTrace(); 
@@ -3595,6 +3595,14 @@ public class EditorView extends JFrame implements Observer{
 	  FeaturePanel owner=null;
 	  for(String connector : connectors){
 		connectorData=connector.split(" ");
+		
+		System.out.println("Printing connectorFata strings:");
+		for (String s : connectorData) System.out.println("s: "+s);
+		System.out.println("startConnectorName="+connectorData[0].substring(10));
+		System.out.println("startOwnerName="+connectorData[2].substring(11));
+		System.out.println("endConnectorName="+connectorData[3].substring(8));
+		System.out.println("endOwnerName="+connectorData[5].substring(9));
+
 
 		//getting data of start anchor of this connector
 		startConnectorName=connectorData[0].substring(10);
@@ -3616,7 +3624,7 @@ public class EditorView extends JFrame implements Observer{
 		
 		//adding start connector
 		startConnector=(AnchorPanel)buildConnectionDot(ItemsType.START_CONNECTOR, startConnectorName, startX, startY);
-		if(startOwnerName==""){//adding connector to the diagram panel directly
+		if(startOwnerName.length()==0){//adding connector to the diagram panel directly
 		  visibleOrderDraggables.addToTop(startConnector);
 		  diagramPanel.setLayer(startConnector, 0);
 		  diagramPanel.add(startConnector);
@@ -3631,7 +3639,7 @@ public class EditorView extends JFrame implements Observer{
 			tmp=tmp.getNext();
 		  }
 		  if(owner==null)
-			throw new RuntimeException("Couldn't find feature '"+startOwnerName+"' as owner of '"+startConnectorName);
+			throw new RuntimeException("Couldn't find feature '"+startOwnerName+"' as owner of '"+startConnectorName+"'");
 
 		  visibleOrderDraggables.addToTop(startConnector);
 		  owner.setLayer(startConnector, 0);
@@ -3641,8 +3649,11 @@ public class EditorView extends JFrame implements Observer{
 		
 		
 		//adding end connector
-		endConnector=(AnchorPanel)buildConnectionDot(ItemsType.END_CONNECTOR, endConnectorName, endX, endY);
-		if(endOwnerName==""){//adding connector to the diagram panel directly
+		if(endConnectorName.contains("OPTIONAL"))
+			endConnector=(AnchorPanel)buildConnectionDot(ItemsType.END_OPTIONAL_CONNECTOR, endConnectorName, endX, endY);
+		if(endConnectorName.contains("MANDATORY")) 
+			endConnector=(AnchorPanel)buildConnectionDot(ItemsType.END_MANDATORY_CONNECTOR, endConnectorName, endX, endY);
+		if(endOwnerName.length()==0){//adding connector to the diagram panel directly
 		  visibleOrderDraggables.addToTop(endConnector);
 		  diagramPanel.setLayer(endConnector, 0);
 		  diagramPanel.add(endConnector);
@@ -3748,7 +3759,7 @@ public class EditorView extends JFrame implements Observer{
 		  memberOwnerName=groupData[k+2].substring(9);		
 
 		  //adding member
-		  member=(AnchorPanel)buildConnectionDot(ItemsType.END_CONNECTOR, memberName, memberX, memberY);
+		  member=(AnchorPanel)buildConnectionDot(ItemsType.END_MANDATORY_CONNECTOR, memberName, memberX, memberY);
 		  if(memberOwnerName==""){//adding member to the diagram panel directly
 			visibleOrderDraggables.addToTop(member);
 			diagramPanel.setLayer(member, 0);

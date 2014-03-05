@@ -700,28 +700,28 @@ public class ViewProject implements Observer, Runnable{
 	    analisysDir=new File(chooser.getSelectedFile().getAbsolutePath());
     	for(File file : analisysDir.listFiles()){
       	  if(file.getName().endsWith(".txt")){
-      		if(txtFound) return null;
+      		if(txtFound){ System.out.println("Double .txt file!"); return null;}
       		else{
       		  txtFound=true;
       		  analisysFiles[0]=file.getAbsolutePath();
       		}
       	  }      	  
     	  if(file.getName().endsWith(".term.tmp")){
-    		if(termTmpFound) return null;
+    		if(termTmpFound){ System.out.println("Double .term.tmp file!"); return null;}
       		else{
       		  termTmpFound=true;
       		  analisysFiles[1]=file.getAbsolutePath();
       		}
     	  }
     	  if(file.getName().endsWith(".pos")){
-    		if(posFound) return null;
+    		if(posFound){ System.out.println("Double .pos file!"); return null;}
       		else{
       		  posFound=true;
       		  analisysFiles[2]=file.getAbsolutePath();
       		}
     	  }
-    	  if(file.getName().endsWith(".index.conll")){
-    		if(conllFound) return null;
+    	  if(file.getName().endsWith(".conll")){
+    		if(conllFound){ System.out.println("Double .conll file!"); return null;}
       		else{
       			conllFound=true;
       		  analisysFiles[3]=file.getAbsolutePath();
@@ -730,7 +730,9 @@ public class ViewProject implements Observer, Runnable{
     	}
 
     	//1 file per type(suffix) is needed
-    	if(!txtFound || !termTmpFound || !posFound || !conllFound) return null;
+    	if(!txtFound || !termTmpFound || !posFound || !conllFound){
+    	  System.out.println("one kind of file is missing!"); return null;
+    	}
 
     	//activating throbber
 	    frameProject.setEnabled(false);
