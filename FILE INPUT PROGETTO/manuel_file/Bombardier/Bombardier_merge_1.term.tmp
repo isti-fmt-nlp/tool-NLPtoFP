@@ -1,0 +1,139 @@
+Lemma_of_Term	Domain_relavance	Frequency
+CITYFLO	100.0	53
+atc	99.9999983743	21
+train	99.999998118	57
+train control system	99.9999978397	18
+Region ato	99.9999976096	17
+CBTC	99.9999973439	16
+CBTC system	99.9999966684	14
+Region atp	99.9999957024	12
+atp	99.999995049	11
+Muzha line	99.9999942253	10
+Muzha vehicle	99.9999942253	10
+OCC	99.9999931593	9
+Phase	99.9999931593	9
+central control network	99.9999917344	8
+system Overview	99.9999897484	7
+Stover CITYFLO	99.9999897484	7
+Neihu vehicle	99.9999897484	7
+atc system	99.9999897484	7
+ATS	99.9999897484	7
+train control	99.9999897484	7
+wayside	99.999987741	10
+wayside atc	99.9999868213	6
+revenue service	99.9999868213	6
+Wayside network	99.9999821557	5
+central control	99.9999821557	5
+installation	99.999980621	18
+train operation	99.9999787872	7
+base data radio	99.9999737841	4
+train Registry system	99.9999737841	4
+track circuit	99.9999737841	4
+Muzha depot	99.9999737841	4
+vehicle atp	99.9999737841	4
+block CITYFLO	99.9999737841	4
+system operation	99.9999737841	4
+wayside equipment	99.9999737841	4
+coaxial cable	99.9999737841	4
+jeffrey s	99.9999737841	4
+communication	99.9999568649	7
+distance	99.9999562573	14
+vehicle tag reader	99.9999554081	3
+automatic train protection	99.9999554081	3
+line of Sight	99.9999554081	3
+mass transit system	99.9999554081	3
+railway network	99.9999554081	3
+Neihu system	99.9999554081	3
+vehicle ato	99.9999554081	3
+system architecture	99.9999554081	3
+Neihu extension	99.9999554081	3
+mainline solution	99.9999554081	3
+ato system	99.9999554081	3
+TWC equipment	99.9999554081	3
+atc equipment	99.9999554081	3
+system performance	99.9999554081	3
+CITYFLO system	99.9999554081	3
+interlocking system	99.9999554081	3
+Bombardier inc	99.9999554081	3
+atp system	99.9999554081	3
+vehicle atc	99.9999554081	3
+test track	99.9999554081	3
+train movement	99.9999554081	3
+Bombardier CITYFLO	99.9999554081	3
+Neihu line	99.9999554081	3
+system	99.9999100986	59
+route	99.9999020591	7
+phase	99.9999019831	8
+number of region	99.999893008	2
+passenger information system	99.999893008	2
+Operational central control	99.999893008	2
+central control system	99.999893008	2
+mobile data radio	99.999893008	2
+automatic train control	99.999893008	2
+customer s need	99.999893008	2
+end of line	99.999893008	2
+Wayside network backbone	99.999893008	2
+ATP/ATO maintenance data	99.999893008	2
+line system INTERFLO	99.999893008	2
+train control product	99.999893008	2
+train control data	99.999893008	2
+line speed limit	99.999893008	2
+cost of fuel	99.999893008	2
+train occupancy	99.999893008	2
+head footprint	99.999893008	2
+Wayside communication	99.999893008	2
+cab signalling	99.999893008	2
+rail industry	99.999893008	2
+railway industry	99.999893008	2
+ATS functionality	99.999893008	2
+radio frequency	99.999893008	2
+Region Number	99.999893008	2
+moving-block system	99.999893008	2
+initialization process	99.999893008	2
+ERTMS level	99.999893008	2
+los antennas	99.999893008	2
+safety restriction	99.999893008	2
+occupancy generation	99.999893008	2
+movement authority	99.999893008	2
+station sign	99.999893008	2
+car wash	99.999893008	2
+service brake	99.999893008	2
+radio system	99.999893008	2
+frequency band	99.999893008	2
+location data	99.999893008	2
+Distribution Amplifiers	99.999893008	2
+transition area	99.999893008	2
+Neihu depot	99.999893008	2
+position error	99.999893008	2
+testing program	99.999893008	2
+service history	99.999893008	2
+CITYFLO solution	99.999893008	2
+metro installation	99.999893008	2
+overlay project	99.999893008	2
+UTO system	99.999893008	2
+operation	99.9998865392	22
+track	99.9998645396	10
+vehicle	99.9998386025	10
+location	99.9998365551	11
+figure	99.9997744074	14
+service	99.9996976263	14
+line	99.9996324106	19
+equipment	99.9996290601	13
+project	99.9995818327	11
+information	99.9994141303	13
+auto operation	99.9992467984	2
+ability	99.998834099	6
+risk	99.9988169037	7
+work	99.9983565347	7
+october	99.9975286063	6
+time	99.9967812401	13
+south korea	99.9951541381	2
+san francisco	99.9878304303	2
+
+
+Configuration:
+POS_Start	p:NN p:NNP p:NNPS
+POS_Internal	p:JJ p:IN p:NN p:NNP p:NNS p:POS
+POS_End	p:NN p:NNP p:NNS
+Ortografic unit	L
+Max term length	3

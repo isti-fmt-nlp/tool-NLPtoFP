@@ -1,0 +1,253 @@
+# Broader-Narrower Terms:
+
+# Head based:
+
+ATO
+-->  station in ATO
+
+CBTC
+-->  group of CBTC
+-->  operating in CBTC
+-->  operating within CBTC
+-->  performance of CBTC
+-->  track in CBTC
+-->  track within CBTC
+
+CBTC-equipped
+-->  group of CBTC-equipped
+
+application
+-->  emergency brake application
+-->  transit application
+
+authority
+-->  CBTC movement authority
+-->  movement authorities
+
+equipment
+-->  CBTC equipment
+
+fault reporting
+-->  CBTC fault reporting
+-->  Train fault reporting
+
+information
+-->  Train location information
+-->  passenger information
+-->  skip station information
+-->  train arrival information
+-->  train stop information
+
+interface
+-->  ATS user interface
+-->  information system interfaces
+-->  user interface
+
+location
+-->  CBTC train location
+-->  train location
+
+movement authorities
+-->  CBTC movement authority
+
+operating
+-->  CBTC-equipped train operating
+
+regulation
+-->  Automatic train regulation
+-->  train regulation
+
+regulation function
+-->  speed regulation function
+-->  train regulation functions
+
+service
+-->  ATS user-directed service
+-->  train service
+
+station
+-->  group of stations
+-->  profile between stations
+-->  train at station
+
+system
+-->  ATS system
+-->  CBTC system
+-->  passenger information system
+-->  transit system
+
+track
+-->  section of track
+
+train
+-->  CBTC train
+-->  CBTC-equipped trains
+-->  coordination of train
+-->  direction of trains
+-->  movement of trains
+-->  position of trains
+-->  rerouting of trains
+-->  type of train
+-->  work trains
+
+train identification
+-->  CBTC train identification
+
+train location
+-->  CBTC train location
+
+train regulation
+-->  Automatic train regulation
+
+user
+-->  ATS user
+
+user interface
+-->  ATS user interface
+
+work
+-->  protection of work
+
+# Modifier based:
+
+ATO
+-->  ATO mode
+
+ATS
+-->  ATS functions
+-->  ATS system
+-->  ATS train stop
+-->  ATS user
+-->  ATS user interface
+-->  ATS user-directed service
+
+ATS user
+-->  ATS user interface
+
+CBTC
+-->  CBTC equipment
+-->  CBTC fault reporting
+-->  CBTC functionality
+-->  CBTC movement authority
+-->  CBTC system
+-->  CBTC territory
+-->  CBTC train
+-->  CBTC train identification
+-->  CBTC train location
+
+CBTC train
+-->  CBTC train identification
+-->  CBTC train location
+
+CBTC-equipped
+-->  CBTC-equipped train operating
+-->  CBTC-equipped trains
+
+CBTC-equipped trains
+-->  CBTC-equipped train operating
+
+Energy optimization
+-->  energy optimization algorithms
+
+IEEE Std
+-->  IEEE Std 1474.2-2003.
+
+control
+-->  Control action confirmation
+-->  control actions
+-->  control of run
+
+control actions
+-->  Control action confirmation
+
+group
+-->  group of CBTC
+-->  group of CBTC-equipped
+-->  group of stations
+
+information
+-->  information system interfaces
+
+interface
+-->  interface design standards
+
+interoperability
+-->  interoperability interface requirements
+-->  interoperability interface standards
+-->  interoperability requirements
+
+movement
+-->  movement authorities
+-->  movement of trains
+
+operating
+-->  operating in CBTC
+-->  operating unit
+-->  operating within CBTC
+
+passenger information
+-->  passenger information messages
+-->  passenger information system
+
+regulation
+-->  regulation function
+
+service
+-->  service brake rates
+-->  service strategy
+
+speed
+-->  speed regulation function
+-->  speed restrictions
+
+station
+-->  station departure time
+-->  station in ATO
+
+system
+-->  system hazards
+
+track
+-->  track in CBTC
+-->  track within CBTC
+
+train
+-->  Train fault reporting
+-->  Train location information
+-->  train arrival information
+-->  train at station
+-->  train doors
+-->  train en route
+-->  train health data
+-->  train identification
+-->  train length data
+-->  train location
+-->  train location reports
+-->  train operator
+-->  train regulation
+-->  train regulation functions
+-->  train service
+-->  train service data
+-->  train stop information
+
+train location
+-->  Train location information
+-->  train location reports
+
+train regulation
+-->  train regulation functions
+
+train service
+-->  train service data
+
+user
+-->  user interface
+-->  user interface display
+
+user interface
+-->  user interface display
+
+work
+-->  work trains
+-->  work zones
+

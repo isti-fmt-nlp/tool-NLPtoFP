@@ -1,0 +1,637 @@
+Forma_Prototipica	idDocumento	idFrase	idParolaStart	Lunghezza	Variante	TF*IDF
+ATS	0	14	2	1	ATS	0.0
+ATS	0	75	2	1	ATS	0.0
+ATS	0	59	2	1	ATS	0.0
+ATS	0	10	2	1	ATS	0.0
+ATS	0	8	3	1	ATS	0.0
+ATS	0	70	2	1	ATS	0.0
+ATS	0	13	12	1	ATS	0.0
+ATS	0	42	2	1	ATS	0.0
+ATS	0	94	22	1	ATS	0.0
+ATS	0	32	2	1	ATS	0.0
+ATS	0	39	2	1	ATS	0.0
+ATS	0	13	2	1	ATS	0.0
+ATS	0	18	15	1	ATS	0.0
+ATS	0	29	43	1	ATS	0.0
+ATS	0	11	2	1	ATS	0.0
+ATS	0	25	2	1	ATS	0.0
+ATS	0	47	2	1	ATS	0.0
+ATS	0	8	16	1	ATS	0.0
+ATS	0	33	13	1	ATS	0.0
+ATS	0	67	2	1	ATS	0.0
+ATS	0	31	8	1	ATS	0.0
+ATS	0	26	27	1	ATS	0.0
+ATS	0	84	43	1	ATS	0.0
+ATS	0	38	2	1	ATS	0.0
+ATS	0	29	2	1	ATS	0.0
+ATS	0	45	2	1	ATS	0.0
+ATS	0	9	26	1	ATS	0.0
+ATS	0	80	2	1	ATS	0.0
+ATS	0	52	13	1	ATS	0.0
+ATS	0	15	1	1	ATS	0.0
+ATS	0	19	13	1	ATS	0.0
+ATS	0	63	2	1	ATS	0.0
+ATS	0	39	34	1	ATS	0.0
+ATS	0	72	2	1	ATS	0.0
+ATS	0	25	20	1	ATS	0.0
+ATS	0	17	13	1	ATS	0.0
+ATS	0	88	25	1	ATS	0.0
+ATS	0	78	2	1	ATS	0.0
+ATS	0	3	21	1	ATS	0.0
+ATS	0	1	1	1	ATS	0.0
+ATS	0	55	8	1	ATS	0.0
+ATS	0	16	12	1	ATS	0.0
+ATS	0	51	2	1	ATS	0.0
+ATS functions	0	9	26	2	ATS functions	0.0
+ATS functions	0	14	2	2	ATS functions	0.0
+ATS functions	0	8	3	2	ATS functions	0.0
+ATS functions	0	13	12	2	ATS functions	0.0
+ATS functions	0	8	16	2	ATS functions	0.0
+ATS functions	0	1	1	2	ATS functions	0.0
+ATS system	0	80	2	2	ATS system	0.0
+ATS system	0	59	2	2	ATS system	0.0
+ATS system	0	45	2	2	ATS system	0.0
+ATS system	0	39	2	2	ATS system	0.0
+ATS system	0	78	2	2	ATS system	0.0
+ATS system	0	51	2	2	ATS system	0.0
+ATS system	0	29	2	2	ATS system	0.0
+ATS system	0	67	2	2	ATS system	0.0
+ATS system	0	75	2	2	ATS system	0.0
+ATS system	0	32	2	2	ATS system	0.0
+ATS system	0	72	2	2	ATS system	0.0
+ATS system	0	47	2	2	ATS system	0.0
+ATS system	0	55	8	2	ATS system	0.0
+ATS system	0	63	2	2	ATS system	0.0
+ATS system	0	3	21	2	ATS system	0.0
+ATS system	0	38	2	2	ATS system	0.0
+ATS system	0	25	2	2	ATS system	0.0
+ATS system	0	42	2	2	ATS system	0.0
+ATS system	0	70	2	2	ATS system	0.0
+ATS train stop	0	52	13	3	ATS train stop	0.0
+ATS user	0	10	2	2	ATS user	0.0
+ATS user	0	17	13	2	ATS user	0.0
+ATS user	0	26	27	2	ATS user	0.0
+ATS user	0	84	43	2	ATS user	0.0
+ATS user	0	33	13	2	ATS user	0.0
+ATS user	0	31	8	2	ATS user	0.0
+ATS user	0	39	34	2	ATS users	0.0
+ATS user	0	25	20	2	ATS user	0.0
+ATS user	0	16	12	2	ATS user	0.0
+ATS user	0	18	15	2	ATS user	0.0
+ATS user	0	88	25	2	ATS user	0.0
+ATS user	0	13	2	2	ATS user	0.0
+ATS user	0	11	2	2	ATS user	0.0
+ATS user	0	19	13	2	ATS user	0.0
+ATS user interface	0	10	2	3	ATS user interface	0.0
+ATS user interface	0	33	13	3	ATS user interface	0.0
+ATS user interface	0	84	43	3	ATS user interface	0.0
+ATS user interface	0	88	25	3	ATS user interface	0.0
+ATS user interface	0	25	20	3	ATS user interface	0.0
+ATS user interface	0	26	27	3	ATS user interface	0.0
+ATS user interface	0	11	2	3	ATS user interface	0.0
+ATS user interface	0	31	8	3	ATS user interface	0.0
+ATS user-directed service	0	29	43	3	ATS user-directed service	0.0
+CBTC	0	23	6	1	CBTC	0.0
+CBTC	0	70	17	1	CBTC	0.0
+CBTC	0	33	1	1	CBTC	0.0
+CBTC	0	26	13	1	CBTC	0.0
+CBTC	0	70	28	1	CBTC	0.0
+CBTC	0	57	8	1	CBTC	0.0
+CBTC	0	43	2	1	CBTC	0.0
+CBTC	0	68	2	1	CBTC	0.0
+CBTC	0	80	28	1	CBTC	0.0
+CBTC	0	38	22	1	CBTC	0.0
+CBTC	0	93	22	1	CBTC	0.0
+CBTC	0	29	24	1	CBTC	0.0
+CBTC	0	63	14	1	CBTC	0.0
+CBTC	0	19	9	1	CBTC	0.0
+CBTC	0	32	20	1	CBTC	0.0
+CBTC	0	77	35	1	CBTC	0.0
+CBTC	0	3	10	1	CBTC	0.0
+CBTC	0	39	16	1	CBTC	0.0
+CBTC	0	84	13	1	CBTC	0.0
+CBTC	0	4	16	1	CBTC	0.0
+CBTC	0	25	42	1	CBTC	0.0
+CBTC	0	83	2	1	CBTC	0.0
+CBTC	0	4	38	1	CBTC	0.0
+CBTC	0	45	13	1	CBTC	0.0
+CBTC	0	73	2	1	CBTC	0.0
+CBTC	0	95	8	1	CBTC	0.0
+CBTC	0	60	8	1	CBTC	0.0
+CBTC	0	96	3	1	CBTC	0.0
+CBTC	0	17	4	1	CBTC	0.0
+CBTC	0	95	30	1	CBTC	0.0
+CBTC	0	84	33	1	CBTC	0.0
+CBTC	0	52	8	1	CBTC	0.0
+CBTC	0	29	14	1	CBTC	0.0
+CBTC	0	22	2	1	CBTC	0.0
+CBTC	0	76	2	1	CBTC	0.0
+CBTC	0	38	16	1	CBTC	0.0
+CBTC	0	93	5	1	CBTC	0.0
+CBTC	0	9	2	1	CBTC	0.0
+CBTC	0	51	18	1	CBTC	0.0
+CBTC	0	88	2	1	CBTC	0.0
+CBTC	0	18	4	1	CBTC	0.0
+CBTC	0	41	44	1	CBTC	0.0
+CBTC	0	72	32	1	CBTC	0.0
+CBTC	0	93	17	1	CBTC	0.0
+CBTC equipment	0	88	2	2	CBTC equipment	0.0
+CBTC equipment	0	93	22	2	CBTC equipment	0.0
+CBTC equipment	0	95	8	2	CBTC equipment	0.0
+CBTC equipment	0	95	30	2	CBTC equipment	0.0
+CBTC equipment	0	93	5	2	CBTC equipment	0.0
+CBTC fault reporting	0	83	2	3	CBTC fault reporting	0.0
+CBTC functionality	0	84	33	2	CBTC functionality	0.0
+CBTC movement authority	0	33	1	3	CBTC movement authority	0.0
+CBTC system	0	4	38	2	CBTC system	0.0
+CBTC system	0	43	2	2	CBTC system	0.0
+CBTC system	0	18	4	2	CBTC system	0.0
+CBTC system	0	60	8	2	CBTC system	0.0
+CBTC system	0	17	4	2	CBTC system	0.0
+CBTC system	0	77	35	2	CBTC system	0.0
+CBTC system	0	41	44	2	CBTC system	0.0
+CBTC system	0	19	9	2	CBTC system	0.0
+CBTC system	0	52	8	2	CBTC system	0.0
+CBTC system	0	73	2	2	CBTC system	0.0
+CBTC system	0	84	13	2	CBTC system	0.0
+CBTC system	0	57	8	2	CBTC system	0.0
+CBTC system	0	68	2	2	CBTC system	0.0
+CBTC system	0	76	2	2	CBTC system	0.0
+CBTC territory	0	23	6	2	CBTC territory	0.0
+CBTC territory	0	32	20	2	CBTC territory	0.0
+CBTC territory	0	29	14	2	CBTC territory	0.0
+CBTC territory	0	70	28	2	CBTC territory	0.0
+CBTC territory	0	93	17	2	CBTC territory	0.0
+CBTC territory	0	72	32	2	CBTC territory	0.0
+CBTC territory	0	25	42	2	CBTC territory	0.0
+CBTC territory	0	38	22	2	CBTC territory	0.0
+CBTC train	0	45	13	2	CBTC train	0.0
+CBTC train	0	39	16	2	CBTC train	0.0
+CBTC train	0	22	2	2	CBTC train	0.0
+CBTC train	0	29	24	2	CBTC train	0.0
+CBTC train	0	26	13	2	CBTC train	0.0
+CBTC train	0	80	28	2	CBTC train	0.0
+CBTC train identification	0	22	2	3	CBTC train identification	0.0
+CBTC train location	0	80	28	3	CBTC train location	0.0
+CBTC train location	0	29	24	3	CBTC train location	0.0
+CBTC train location	0	26	13	3	CBTC train location	0.0
+CBTC train location	0	45	13	3	CBTC train location	0.0
+CBTC train location	0	39	16	3	CBTC train location	0.0
+CBTC-equipped	0	23	2	1	CBTC-equipped	0.0
+CBTC-equipped	0	32	16	1	CBTC-equipped	0.0
+CBTC-equipped	0	47	14	1	CBTC-equipped	0.0
+CBTC-equipped	0	59	15	1	CBTC-equipped	0.0
+CBTC-equipped	0	51	12	1	CBTC-equipped	0.0
+CBTC-equipped	0	67	12	1	CBTC-equipped	0.0
+CBTC-equipped	0	42	16	1	CBTC-equipped	0.0
+CBTC-equipped	0	25	37	1	CBTC-equipped	0.0
+CBTC-equipped	0	67	17	1	CBTC-equipped	0.0
+CBTC-equipped	0	53	6	1	CBTC-equipped	0.0
+CBTC-equipped	0	29	10	1	CBTC-equipped	0.0
+CBTC-equipped trains	0	51	12	2	CBTC-equipped train	0.0
+CBTC-equipped trains	0	47	14	2	CBTC-equipped trains	0.0
+CBTC-equipped trains	0	67	17	2	CBTC-equipped trains	0.0
+CBTC-equipped trains	0	29	10	2	CBTC-equipped trains	0.0
+CBTC-equipped trains	0	25	37	2	CBTC-equipped trains	0.0
+CBTC-equipped trains	0	53	6	2	CBTC-equipped train	0.0
+CBTC-equipped trains	0	42	16	2	CBTC-equipped trains	0.0
+CBTC-equipped trains	0	67	12	2	CBTC-equipped train	0.0
+CBTC-equipped trains	0	32	16	2	CBTC-equipped trains	0.0
+CBTC-equipped trains	0	59	15	2	CBTC-equipped trains	0.0
+CBTC-equipped trains	0	23	2	2	CBTC-equipped train	0.0
+CBTC-equipped train operating	0	23	2	3	CBTC-equipped train operating	0.0
+IEEE Std	0	12	13	2	IEEE Std	0.0
+IEEE Std	0	81	11	2	IEEE Std	0.0
+IEEE Std 1474.2-2003.	0	12	13	3	IEEE Std 1474.2-2003.	0.0
+Interoperability interface requirements	0	89	2	3	Interoperability interface requirements	0.0
+Skip station stop	0	58	2	3	Skip station stop	0.0
+accordance with IEEE	0	12	11	3	accordance with IEEE	0.0
+accordance with IEEE	0	81	9	3	accordance with IEEE	0.0
+application	0	68	9	1	application	0.0
+application	0	43	24	1	application	0.0
+application	0	65	2	1	application	0.0
+application	0	14	14	1	application	0.0
+application	0	20	12	1	application	0.0
+ATO	0	61	2	1	ATO	0.0
+ATO	0	57	36	1	ATO	0.0
+ATO	0	53	2	1	ATO	0.0
+ATO	0	77	39	1	ATO	0.0
+ATO	0	41	35	1	ATO	0.0
+ATO mode	0	41	35	2	ATO mode	0.0
+ATO mode	0	53	2	2	ATO mode	0.0
+ATO mode	0	61	2	2	ATO mode	0.0
+ATO mode	0	57	36	2	ATO mode	0.0
+ATO mode	0	77	39	2	ATO mode	0.0
+authority	0	8	29	1	authority	0.0
+authority	0	35	26	1	authority	0.0
+authority	0	11	27	1	authority	0.0
+authority	0	56	18	1	authority	0.0
+authority	0	31	34	1	authority	0.0
+authority	0	91	19	1	authority	0.0
+authority	0	48	16	1	authority	0.0
+authority	0	33	22	1	authority	0.0
+authority	0	21	28	1	authority	0.0
+authority	0	91	8	1	authority	0.0
+authority	0	40	53	1	authority	0.0
+authority	0	3	5	1	authority	0.0
+authority	0	4	12	1	authority	0.0
+authority	0	35	6	1	authority	0.0
+authority	0	9	31	1	authority	0.0
+authority	0	33	3	1	authority	0.0
+authority	0	88	34	1	authority	0.0
+Automatic train regulation	0	36	2	3	Automatic train regulation	0.0
+capability	0	25	7	1	capability	0.0
+capability	0	47	7	1	capability	0.0
+capability	0	29	7	1	capability	0.0
+capability	0	42	7	1	capability	0.0
+capability	0	38	7	1	capability	0.0
+conductor	0	35	17	1	conductor	0.0
+conductor	0	68	20	1	conductor	0.0
+conductor	0	60	21	1	conductor	0.0
+conductor	0	31	21	1	conductor	0.0
+conductor	0	52	22	1	conductor	0.0
+conductor	0	77	28	1	conductor	0.0
+conductor	0	41	26	1	conductor	0.0
+conductor	0	57	21	1	conductor	0.0
+control	0	11	12	1	control	0.0
+control	0	40	26	1	control	0.0
+control	0	63	15	1	control	0.0
+control	0	47	19	1	control	0.0
+control	0	62	3	1	control	0.0
+control	0	21	1	1	Control	0.0
+control actions	0	11	12	2	control actions	0.0
+control actions	0	21	1	2	Control action	0.0
+Control action confirmation	0	21	1	3	Control action confirmation	0.0
+control of run	0	40	26	3	control of run	0.0
+coordination of train	0	47	21	3	coordination of train	0.0
+data communications network	0	9	3	3	data communications network	0.0
+direction of trains	0	78	16	3	direction of trains	0.0
+dispatching function	0	39	8	2	dispatching function	0.0
+Door control inhibit	0	62	2	3	Door control inhibit	0.0
+dwell time variance	0	40	13	3	dwell time variance	0.0
+emergency brake application	0	43	22	3	emergency brake application	0.0
+Energy optimization	0	47	10	2	energy optimization	0.0
+Energy optimization	0	46	2	2	Energy optimization	0.0
+energy optimization algorithms	0	47	10	3	energy optimization algorithms	0.0
+equipment	0	94	23	1	equipment	0.0
+equipment	0	95	9	1	equipment	0.0
+equipment	0	93	23	1	equipment	0.0
+equipment	0	93	6	1	equipment	0.0
+equipment	0	88	3	1	equipment	0.0
+equipment	0	95	31	1	equipment	0.0
+equipment	0	94	3	1	equipment	0.0
+fault reporting	0	82	2	2	Fault reporting	0.0
+fault reporting	0	87	3	2	fault reporting	0.0
+fault reporting	0	83	3	2	fault reporting	0.0
+group	0	67	15	1	group	0.0
+group	0	59	13	1	group	0.0
+group	0	59	23	1	group	0.0
+group	0	51	16	1	group	0.0
+group of CBTC	0	51	16	3	group of CBTC	0.0
+group of CBTC-equipped	0	59	13	3	group of CBTC-equipped	0.0
+group of CBTC-equipped	0	67	15	3	group of CBTC-equipped	0.0
+group of stations	0	59	23	3	group of stations	0.0
+implementation	0	65	17	1	implementation	0.0
+implementation	0	14	37	1	implementation	0.0
+implementation	0	43	6	1	implementation	0.0
+implementation	0	21	16	1	implementation	0.0
+information	0	5	4	1	information	0.0
+information	0	57	15	1	information	0.0
+information	0	52	16	1	information	0.0
+information	0	80	11	1	information	0.0
+information	0	81	3	1	information	0.0
+information	0	79	3	1	information	0.0
+information	0	11	8	1	information	0.0
+information	0	24	13	1	information	0.0
+information	0	12	6	1	information	0.0
+information	0	80	24	1	information	0.0
+information	0	60	15	1	information	0.0
+information	0	80	17	1	information	0.0
+information	0	19	4	1	information	0.0
+information	0	77	7	1	information	0.0
+information system interfaces	0	79	3	3	information system interfaces	0.0
+information system interfaces	0	81	3	3	information system interfaces	0.0
+interface	0	9	17	1	interface	0.0
+interface	0	33	15	1	interface	0.0
+interface	0	31	10	1	interface	0.0
+interface	0	90	10	1	interface	0.0
+interface	0	84	45	1	interface	0.0
+interface	0	26	29	1	interface	0.0
+interface	0	96	8	1	interface	0.0
+interface	0	88	27	1	interface	0.0
+interface	0	25	22	1	interface	0.0
+interface	0	89	3	1	interface	0.0
+interface	0	91	25	1	interface	0.0
+interface	0	8	49	1	interface	0.0
+interface	0	11	4	1	interface	0.0
+interface	0	10	4	1	interface	0.0
+interface design standards	0	90	10	3	interface design standards	0.0
+interoperability	0	96	7	1	interoperability	0.0
+interoperability	0	92	3	1	interoperability	0.0
+interoperability	0	90	14	1	interoperability	0.0
+interoperability	0	91	2	1	interoperability	0.0
+interoperability	0	91	24	1	interoperability	0.0
+interoperability interface requirements	0	96	7	3	interoperability interface requirements	0.0
+interoperability interface standards	0	91	24	3	interoperability interface standards	0.0
+interoperability requirements	0	91	2	2	interoperability requirements	0.0
+interoperability requirements	0	92	3	2	interoperability requirements	0.0
+jurisdiction	0	9	33	1	jurisdiction	0.0
+jurisdiction	0	56	20	1	jurisdiction	0.0
+jurisdiction	0	21	30	1	jurisdiction	0.0
+jurisdiction	0	31	36	1	jurisdiction	0.0
+jurisdiction	0	88	36	1	jurisdiction	0.0
+jurisdiction	0	48	18	1	jurisdiction	0.0
+jurisdiction	0	8	31	1	jurisdiction	0.0
+jurisdiction	0	35	28	1	jurisdiction	0.0
+jurisdiction	0	3	7	1	jurisdiction	0.0
+jurisdiction	0	91	10	1	jurisdiction	0.0
+jurisdiction	0	40	55	1	jurisdiction	0.0
+jurisdiction	0	11	29	1	jurisdiction	0.0
+jurisdiction	0	4	14	1	jurisdiction	0.0
+location	0	29	26	1	location	0.0
+location	0	26	15	1	location	0.0
+location	0	45	15	1	location	0.0
+location	0	39	18	1	location	0.0
+location	0	26	21	1	location	0.0
+location	0	5	3	1	location	0.0
+location	0	80	30	1	location	0.0
+mode of operation	0	77	40	3	mode of operation	0.0
+movement	0	30	29	1	movement	0.0
+movement	0	33	2	1	movement	0.0
+movement	0	73	10	1	movement	0.0
+movement	0	35	5	1	movement	0.0
+movement	0	32	13	1	movement	0.0
+movement authorities	0	35	5	2	movement authority	0.0
+movement authorities	0	73	10	2	movement authorities	0.0
+movement authorities	0	32	13	2	movement authorities	0.0
+movement authorities	0	33	2	2	movement authority	0.0
+movement of trains	0	30	29	3	movement of trains	0.0
+operating	0	23	4	1	operating	0.0
+operating	0	95	18	1	operating	0.0
+operating	0	93	15	1	operating	0.0
+operating	0	95	4	1	operating	0.0
+operating	0	95	25	1	operating	0.0
+operating in CBTC	0	93	15	3	operating in CBTC	0.0
+operating unit	0	95	25	2	operating unit	0.0
+operating unit	0	95	4	2	operating unit	0.0
+operating within CBTC	0	23	4	3	operating within CBTC	0.0
+optimization versus schedule/headway	0	48	6	3	optimization versus schedule/headway	0.0
+passenger information	0	80	10	2	passenger information	0.0
+passenger information	0	79	2	2	Passenger information	0.0
+passenger information	0	81	2	2	passenger information	0.0
+passenger information	0	80	16	2	passenger information	0.0
+passenger information messages	0	80	16	3	passenger information messages	0.0
+passenger information system	0	79	2	3	Passenger information system	0.0
+passenger information system	0	81	2	3	passenger information system	0.0
+passenger information system	0	80	10	3	passenger information systems	0.0
+performance of CBTC	0	38	14	3	performance of CBTC	0.0
+position of trains	0	26	5	3	position of trains	0.0
+profile between stations	0	41	15	3	profile between stations	0.0
+protection of work	0	75	19	3	protection of work	0.0
+regulation	0	40	4	1	regulation	0.0
+regulation	0	37	3	1	regulation	0.0
+regulation	0	48	9	1	regulation	0.0
+regulation	0	45	8	1	regulation	0.0
+regulation	0	36	4	1	regulation	0.0
+regulation	0	41	50	1	regulation	0.0
+regulation function	0	45	8	2	regulation functions	0.0
+regulation function	0	41	50	2	regulation function	0.0
+rerouting of trains	0	30	38	3	rerouting of trains	0.0
+response	0	42	22	1	response	0.0
+response	0	30	42	1	response	0.0
+run times	0	40	28	2	run times	0.0
+section of track	0	72	28	3	section of track	0.0
+section of track	0	70	24	3	section of track	0.0
+service	0	39	29	1	service	0.0
+service	0	40	41	1	service	0.0
+service	0	29	45	1	service	0.0
+service	0	43	11	1	service	0.0
+service	0	42	12	1	service	0.0
+service	0	8	36	1	service	0.0
+service	0	29	34	1	service	0.0
+service	0	30	44	1	service	0.0
+service brake rates	0	40	41	3	service brake rates	0.0
+service strategy	0	29	45	2	service strategy	0.0
+service strategy	0	39	29	2	service strategies	0.0
+skip station information	0	60	13	3	skip station information	0.0
+speed	0	41	14	1	speed	0.0
+speed	0	69	3	1	speed	0.0
+speed	0	41	49	1	speed	0.0
+speed	0	14	19	1	speed	0.0
+speed	0	70	14	1	speed	0.0
+speed regulation function	0	41	49	3	speed regulation function	0.0
+speed restrictions	0	69	3	2	speed restrictions	0.0
+speed restrictions	0	14	19	2	speed restrictions	0.0
+speed restrictions	0	70	14	2	speed restrictions	0.0
+station	0	51	27	1	station	0.0
+station	0	55	25	1	station	0.0
+station	0	57	34	1	station	0.0
+station	0	54	5	1	station	0.0
+station	0	53	14	1	station	0.0
+station	0	49	2	1	Station	0.0
+station	0	59	21	1	station	0.0
+station	0	51	38	1	station	0.0
+station	0	50	6	1	station	0.0
+station	0	41	9	1	station	0.0
+station	0	58	3	1	station	0.0
+station	0	60	14	1	station	0.0
+station departure time	0	41	9	3	station departure time	0.0
+station in ATO	0	57	34	3	station in ATO	0.0
+storage areas	0	30	33	2	storage areas	0.0
+subclause in order	0	4	28	3	subclause in order	0.0
+supplier	0	95	35	1	supplier	0.0
+supplier	0	93	27	1	supplier	0.0
+supplier	0	95	13	1	supplier	0.0
+supplier	0	93	10	1	supplier	0.0
+system	0	80	3	1	system	0.0
+system	0	73	3	1	system	0.0
+system	0	78	3	1	system	0.0
+system	0	79	4	1	system	0.0
+system	0	55	9	1	system	0.0
+system	0	8	41	1	system	0.0
+system	0	81	4	1	system	0.0
+system	0	72	3	1	system	0.0
+system	0	57	9	1	system	0.0
+system	0	76	3	1	system	0.0
+system	0	52	9	1	system	0.0
+system	0	75	3	1	system	0.0
+system	0	67	3	1	system	0.0
+system	0	65	12	1	system	0.0
+system	0	47	3	1	system	0.0
+system	0	70	3	1	system	0.0
+system	0	32	3	1	system	0.0
+system	0	4	39	1	system	0.0
+system	0	60	9	1	system	0.0
+system	0	68	3	1	system	0.0
+system	0	19	10	1	system	0.0
+system	0	43	3	1	system	0.0
+system	0	84	14	1	system	0.0
+system	0	39	3	1	system	0.0
+system	0	29	3	1	system	0.0
+system	0	41	45	1	system	0.0
+system	0	77	36	1	system	0.0
+system	0	25	3	1	system	0.0
+system	0	51	3	1	system	0.0
+system	0	3	22	1	system	0.0
+system	0	18	5	1	system	0.0
+system	0	45	47	1	system	0.0
+system	0	17	5	1	system	0.0
+system	0	45	3	1	system	0.0
+system	0	59	3	1	system	0.0
+system	0	38	3	1	system	0.0
+system	0	84	24	1	system	0.0
+system	0	14	32	1	system	0.0
+system	0	42	3	1	system	0.0
+system	0	63	3	1	system	0.0
+system hazards	0	14	32	2	system hazards	0.0
+system hazards	0	65	12	2	system hazards	0.0
+track	0	73	27	1	track	0.0
+track	0	70	26	1	track	0.0
+track	0	72	30	1	track	0.0
+track	0	5	12	1	track	0.0
+track	0	30	6	1	track	0.0
+track in CBTC	0	70	26	3	track in CBTC	0.0
+track within CBTC	0	72	30	3	track within CBTC	0.0
+train	0	77	25	1	train	0.0
+train	0	88	15	1	train	0.0
+train	0	14	9	1	train	0.0
+train	0	28	2	1	Train	0.0
+train	0	26	14	1	train	0.0
+train	0	22	6	1	train	0.0
+train	0	66	4	1	train	0.0
+train	0	53	7	1	train	0.0
+train	0	27	3	1	train	0.0
+train	0	80	29	1	train	0.0
+train	0	45	14	1	train	0.0
+train	0	57	30	1	train	0.0
+train	0	64	3	1	train	0.0
+train	0	39	13	1	train	0.0
+train	0	87	2	1	Train	0.0
+train	0	59	11	1	train	0.0
+train	0	60	18	1	train	0.0
+train	0	23	12	1	train	0.0
+train	0	25	28	1	train	0.0
+train	0	42	11	1	train	0.0
+train	0	52	19	1	train	0.0
+train	0	68	17	1	train	0.0
+train	0	24	16	1	train	0.0
+train	0	47	30	1	train	0.0
+train	0	50	3	1	train	0.0
+train	0	24	9	1	train	0.0
+train	0	31	1	1	Train	0.0
+train	0	26	20	1	train	0.0
+train	0	57	18	1	train	0.0
+train	0	45	7	1	train	0.0
+train	0	54	3	1	train	0.0
+train	0	80	22	1	train	0.0
+train	0	51	32	1	train	0.0
+train	0	41	23	1	train	0.0
+train	0	5	2	1	Train	0.0
+train	0	67	13	1	train	0.0
+train	0	63	18	1	train	0.0
+train	0	35	14	1	train	0.0
+train	0	52	14	1	train	0.0
+train	0	51	13	1	train	0.0
+train	0	24	2	1	train	0.0
+train	0	45	21	1	train	0.0
+train	0	61	6	1	train	0.0
+train	0	31	18	1	train	0.0
+train	0	29	25	1	train	0.0
+train	0	27	19	1	train	0.0
+train	0	47	23	1	train	0.0
+train	0	47	26	1	train	0.0
+train	0	22	3	1	train	0.0
+train	0	40	18	1	train	0.0
+train	0	36	3	1	train	0.0
+train	0	57	13	1	train	0.0
+train	0	95	21	1	train	0.0
+train	0	29	33	1	train	0.0
+train	0	39	17	1	train	0.0
+train	0	55	22	1	train	0.0
+train	0	23	3	1	train	0.0
+train arrival information	0	80	22	3	train arrival information	0.0
+train at station	0	54	3	3	train at station	0.0
+train doors	0	63	18	2	train doors	0.0
+train en route	0	14	9	3	train en route	0.0
+train en route	0	66	4	3	train en route	0.0
+Train fault reporting	0	87	2	3	Train fault reporting	0.0
+train health data	0	88	15	3	train health data	0.0
+train identification	0	23	12	2	train identification	0.0
+train identification	0	24	2	2	train identification	0.0
+train identification	0	22	3	2	train identification	0.0
+train length data	0	27	19	3	train length data	0.0
+train location	0	29	25	2	train location	0.0
+train location	0	26	14	2	train location	0.0
+train location	0	5	2	2	Train location	0.0
+train location	0	39	17	2	train location	0.0
+train location	0	45	14	2	train location	0.0
+train location	0	80	29	2	train location	0.0
+train location	0	26	20	2	train location	0.0
+Train location information	0	5	2	3	Train location information	0.0
+train location reports	0	39	17	3	train location reports	0.0
+train location reports	0	26	14	3	train location reports	0.0
+train location reports	0	45	14	3	train location reports	0.0
+train location reports	0	29	25	3	train location reports	0.0
+train location reports	0	80	29	3	train location reports	0.0
+train operator	0	35	14	2	train operator	0.0
+train operator	0	77	25	2	train operator	0.0
+train operator	0	52	19	2	train operator	0.0
+train operator	0	41	23	2	train operator	0.0
+train operator	0	31	18	2	train operator	0.0
+train operator	0	68	17	2	train operator	0.0
+train operator	0	60	18	2	train operator	0.0
+train operator	0	57	18	2	train operator	0.0
+train regulation	0	36	3	2	train regulation	0.0
+train regulation	0	45	7	2	train regulation	0.0
+train regulation functions	0	45	7	3	train regulation functions	0.0
+train service	0	42	11	2	train service	0.0
+train service	0	29	33	2	train service	0.0
+train service data	0	29	33	3	train service data	0.0
+train stop information	0	52	14	3	train stop information	0.0
+transit application	0	20	11	2	transit application	0.0
+transit system	0	84	23	2	transit system	0.0
+transit system	0	8	40	2	transit system	0.0
+type of train	0	24	7	3	type of train	0.0
+user	0	12	5	1	user	0.0
+user	0	8	48	1	user	0.0
+user	0	18	16	1	user	0.0
+user	0	21	10	1	user	0.0
+user	0	13	3	1	user	0.0
+user	0	10	3	1	user	0.0
+user	0	25	21	1	user	0.0
+user	0	17	14	1	user	0.0
+user	0	19	14	1	user	0.0
+user	0	88	26	1	user	0.0
+user	0	11	3	1	user	0.0
+user	0	33	14	1	user	0.0
+user	0	84	44	1	user	0.0
+user	0	16	13	1	user	0.0
+user	0	26	28	1	user	0.0
+user	0	31	9	1	user	0.0
+user interface	0	10	3	2	user interface	0.0
+user interface	0	26	28	2	user interface	0.0
+user interface	0	84	44	2	user interface	0.0
+user interface	0	11	3	2	user interface	0.0
+user interface	0	88	26	2	user interface	0.0
+user interface	0	33	14	2	user interface	0.0
+user interface	0	8	48	2	user interface	0.0
+user interface	0	31	9	2	user interface	0.0
+user interface	0	25	21	2	user interface	0.0
+user interface display	0	88	26	3	user interface displays	0.0
+user interface display	0	84	44	3	user interface display	0.0
+wayside for display	0	88	20	3	wayside for display	0.0
+work	0	74	2	1	Work	0.0
+work	0	76	14	1	work	0.0
+work	0	77	45	1	work	0.0
+work	0	75	21	1	work	0.0
+work	0	75	15	1	work	0.0
+work	0	75	24	1	work	0.0
+work	0	77	16	1	work	0.0
+work	0	14	26	1	work	0.0
+work trains	0	75	24	2	work trains	0.0
+work zones	0	75	15	2	work zones	0.0
+work zones	0	77	16	2	work zone	0.0
+work zones	0	74	2	2	Work zones	0.0
+work zones	0	76	14	2	work zones	0.0
+work zones	0	14	26	2	work zones	0.0
+work zones	0	77	45	2	work zone	0.0

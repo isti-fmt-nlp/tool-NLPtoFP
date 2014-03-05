@@ -1,0 +1,146 @@
+# Broader-Narrower Terms:
+
+# Head based:
+
+ATC
+-->  vehicle ATC
+-->  wayside ATC
+
+ATP
+-->  Region ATP
+-->  Vehicle ATP
+
+CITYFLO
+-->  Bombardier CITYFLO
+-->  Stover CITYFLO
+-->  block CITYFLO
+
+Central Control
+-->  Operational Central Control
+
+communication
+-->  Wayside Communications
+
+equipment
+-->  ATC equipment
+-->  TWC equipment
+-->  wayside equipment
+
+installation
+-->  metro installation
+
+line
+-->  End of Line
+-->  Muzha line
+-->  Neihu line
+
+operation
+-->  auto operation
+-->  system operations
+-->  train operation
+
+project
+-->  overlay project
+
+service
+-->  revenue service
+
+system
+-->  ATC system
+-->  ATO system
+-->  ATP system
+-->  CBTC systems
+-->  CITYFLO system
+-->  Central Control System
+-->  Neihu system
+-->  Passenger Information System
+-->  Train Registry System
+-->  UTO systems
+-->  interlocking system
+-->  mass transit systems
+-->  moving-block system
+-->  radio system
+-->  train control system
+
+track
+-->  test track
+
+train control
+-->  Automatic Train Control
+
+vehicle
+-->  Muzha vehicle
+-->  Neihu vehicles
+
+# Modifier based:
+
+ATC
+-->  ATC equipment
+-->  ATC system
+
+ATP
+-->  ATP system
+
+ATS
+-->  ATS functionality
+
+CBTC
+-->  CBTC systems
+
+CITYFLO
+-->  CITYFLO solutions
+-->  CITYFLO system
+
+Central Control
+-->  Central Control Network
+-->  Central Control System
+
+Wayside Network
+-->  Wayside Network backbone
+
+line
+-->  Line of Sight
+-->  line speed limit
+-->  line system INTERFLO
+
+location
+-->  location data
+
+service
+-->  service braking
+-->  service history
+
+system
+-->  System Architecture
+-->  System Overview
+-->  system operations
+-->  system performance
+
+track
+-->  track circuits
+
+train
+-->  Train Registry System
+-->  Train control data
+-->  train control
+-->  train control products
+-->  train control system
+-->  train movement
+-->  train occupancy
+-->  train operation
+
+train control
+-->  Train control data
+-->  train control products
+-->  train control system
+
+vehicle
+-->  Vehicle ATO
+-->  Vehicle ATP
+-->  vehicle ATC
+-->  vehicle tag readers
+
+wayside
+-->  wayside ATC
+-->  wayside equipment
+

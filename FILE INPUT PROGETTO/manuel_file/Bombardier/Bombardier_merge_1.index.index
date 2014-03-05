@@ -1,0 +1,1567 @@
+Forma_Prototipica	idDocumento	idFrase	idParolaStart	Lunghezza	Variante	TF*IDF
+ATP/ATO maintenance data	0	235	39	3	ATP/ATO maintenance data	0.0
+ATP/ATO maintenance data	0	302	27	3	ATP/ATO maintenance data	0.0
+ATS	0	244	53	1	ATS	0.0
+ATS	0	170	19	1	ATS	0.0
+ATS	0	248	2	1	ATS	0.0
+ATS	0	249	2	1	ATS	0.0
+ATS	0	247	6	1	ATS	0.0
+ATS	0	233	34	1	ATS	0.0
+ATS	0	234	2	1	ATS	0.0
+ATS	0	235	158	1	ATS	0.0
+ATS	0	272	12	1	ATS	0.0
+ATS	0	233	62	1	ATS	0.0
+ATS	0	33	31	1	ATS	0.0
+ATS	0	21	7	1	ATS	0.0
+ATS	0	16	9	1	ATS	0.0
+ATS	0	243	2	1	ATS	0.0
+ATS	0	169	14	1	ATS	0.0
+ATS	0	240	7	1	ATS	0.0
+ATS	0	235	2	1	ATS	0.0
+ATS functionality	0	240	7	2	ATS functionality	0.0
+ATS functionality	0	21	7	2	ATS functionality	0.0
+Bombardier CITYFLO	0	14	5	2	Bombardier CITYFLO	0.0
+Bombardier CITYFLO	0	1	22	2	Bombardier CITYFLO	0.0
+Bombardier CITYFLO	0	169	21	2	Bombardier CITYFLO	0.0
+Bombardier CITYFLO	0	165	17	2	Bombardier CITYFLO	0.0
+Bombardier CITYFLO	0	181	17	2	Bombardier CITYFLO	0.0
+Bombardier CITYFLO	0	16	4	2	Bombardier CITYFLO	0.0
+Bombardier Inc	0	158	3	2	Bombardier Inc	0.0
+Bombardier Inc	0	161	3	2	Bombardier Inc	0.0
+Bombardier Inc	0	187	120	2	Bombardier Inc	0.0
+CBTC	0	46	3	1	CBTC	0.0
+CBTC	0	187	84	1	CBTC	0.0
+CBTC	0	134	2	1	CBTC	0.0
+CBTC	0	37	10	1	CBTC	0.0
+CBTC	0	16	99	1	CBTC	0.0
+CBTC	0	131	17	1	CBTC	0.0
+CBTC	0	16	121	1	CBTC	0.0
+CBTC	0	141	6	1	CBTC	0.0
+CBTC	0	169	8	1	CBTC	0.0
+CBTC	0	127	29	1	CBTC	0.0
+CBTC	0	44	23	1	CBTC	0.0
+CBTC	0	44	17	1	CBTC	0.0
+CBTC	0	187	73	1	CBTC	0.0
+CBTC	0	203	3	1	CBTC	0.0
+CBTC	0	135	2	1	CBTC	0.0
+CBTC	0	188	17	1	CBTC	0.0
+CBTC	0	41	27	1	CBTC	0.0
+CBTC	0	133	9	1	CBTC	0.0
+CBTC	0	127	5	1	CBTC	0.0
+CBTC	0	206	10	1	CBTC	0.0
+CBTC	0	34	10	1	CBTC	0.0
+CBTC	0	13	17	1	CBTC	0.0
+CBTC	0	131	37	1	CBTC	0.0
+CBTC	0	136	2	1	CBTC	0.0
+CBTC	0	128	12	1	CBTC	0.0
+CBTC	0	3	16	1	CBTC	0.0
+CBTC	0	131	28	1	CBTC	0.0
+CBTC	0	127	38	1	CBTC	0.0
+CBTC	0	5	21	1	CBTC	0.0
+CBTC	0	187	104	1	CBTC	0.0
+CBTC	0	194	12	1	CBTC	0.0
+CBTC	0	105	17	1	CBTC	0.0
+CBTC	0	149	29	1	CBTC	0.0
+CBTC	0	155	13	1	CBTC	0.0
+CBTC	0	43	33	1	CBTC	0.0
+CBTC	0	134	29	1	CBTC	0.0
+CBTC	0	43	3	1	CBTC	0.0
+CBTC	0	63	11	1	CBTC	0.0
+CBTC	0	132	1	1	CBTC	0.0
+CBTC	0	1	2	1	CBTC	0.0
+CBTC	0	1	30	1	CBTC	0.0
+CBTC	0	187	91	1	CBTC	0.0
+CBTC	0	16	19	1	CBTC	0.0
+CBTC	0	304	14	1	CBTC	0.0
+CBTC	0	45	2	1	CBTC	0.0
+CBTC	0	170	35	1	CBTC	0.0
+CBTC	0	187	114	1	CBTC	0.0
+CBTC	0	80	17	1	CBTC	0.0
+CBTC systems	0	44	23	2	CBTC systems	0.0
+CBTC systems	0	206	10	2	CBTC systems	0.0
+CBTC systems	0	203	3	2	CBTC systems	0.0
+CBTC systems	0	132	1	2	CBTC systems	0.0
+CBTC systems	0	149	29	2	CBTC systems	0.0
+CBTC systems	0	46	3	2	CBTC systems	0.0
+CBTC systems	0	43	33	2	CBTC system	0.0
+CBTC systems	0	134	29	2	CBTC systems	0.0
+CBTC systems	0	43	3	2	CBTC system	0.0
+CBTC systems	0	135	2	2	CBTC systems	0.0
+CBTC systems	0	5	21	2	CBTC system	0.0
+CBTC systems	0	16	121	2	CBTC system	0.0
+CBTC systems	0	34	10	2	CBTC systems	0.0
+CBTC systems	0	37	10	2	CBTC systems	0.0
+CBTC systems	0	304	14	2	CBTC systems	0.0
+CBTC systems	0	155	13	2	CBTC systems	0.0
+CBTC systems	0	45	2	2	CBTC systems	0.0
+CITYFLO	0	170	2	1	CITYFLO	0.0
+CITYFLO	0	325	73	1	CITYFLO	0.0
+CITYFLO	0	47	23	1	CITYFLO	0.0
+CITYFLO	0	221	9	1	CITYFLO	0.0
+CITYFLO	0	221	2	1	CITYFLO	0.0
+CITYFLO	0	188	8	1	CITYFLO	0.0
+CITYFLO	0	187	77	1	CITYFLO	0.0
+CITYFLO	0	163	14	1	CITYFLO	0.0
+CITYFLO	0	220	34	1	CITYFLO	0.0
+CITYFLO	0	16	5	1	CITYFLO	0.0
+CITYFLO	0	281	2	1	CITYFLO	0.0
+CITYFLO	0	181	18	1	CITYFLO	0.0
+CITYFLO	0	87	17	1	CITYFLO	0.0
+CITYFLO	0	268	3	1	CITYFLO	0.0
+CITYFLO	0	194	1	1	CITYFLO	0.0
+CITYFLO	0	196	2	1	CITYFLO	0.0
+CITYFLO	0	223	4	1	CITYFLO	0.0
+CITYFLO	0	187	108	1	CITYFLO	0.0
+CITYFLO	0	319	2	1	CITYFLO	0.0
+CITYFLO	0	207	10	1	CITYFLO	0.0
+CITYFLO	0	323	28	1	CITYFLO	0.0
+CITYFLO	0	111	6	1	CITYFLO	0.0
+CITYFLO	0	191	1	1	CITYFLO	0.0
+CITYFLO	0	107	6	1	CITYFLO	0.0
+CITYFLO	0	198	6	1	CITYFLO	0.0
+CITYFLO	0	326	5	1	CITYFLO	0.0
+CITYFLO	0	47	10	1	CITYFLO	0.0
+CITYFLO	0	15	2	1	CITYFLO	0.0
+CITYFLO	0	2	1	1	CITYFLO	0.0
+CITYFLO	0	169	17	1	CITYFLO	0.0
+CITYFLO	0	90	41	1	CITYFLO	0.0
+CITYFLO	0	166	2	1	CITYFLO	0.0
+CITYFLO	0	14	6	1	CITYFLO	0.0
+CITYFLO	0	1	23	1	CITYFLO	0.0
+CITYFLO	0	325	1	1	CITYFLO	0.0
+CITYFLO	0	16	113	1	CITYFLO	0.0
+CITYFLO	0	276	28	1	CITYFLO	0.0
+CITYFLO	0	16	109	1	CITYFLO	0.0
+CITYFLO	0	117	10	1	CITYFLO	0.0
+CITYFLO	0	227	44	1	CITYFLO	0.0
+CITYFLO	0	217	6	1	CITYFLO	0.0
+CITYFLO	0	46	2	1	CITYFLO	0.0
+CITYFLO	0	19	4	1	CITYFLO	0.0
+CITYFLO	0	187	64	1	CITYFLO	0.0
+CITYFLO	0	6	8	1	CITYFLO	0.0
+CITYFLO	0	214	3	1	CITYFLO	0.0
+CITYFLO	0	17	2	1	CITYFLO	0.0
+CITYFLO	0	227	19	1	CITYFLO	0.0
+CITYFLO	0	3	25	1	CITYFLO	0.0
+CITYFLO	0	183	2	1	CITYFLO	0.0
+CITYFLO	0	120	21	1	CITYFLO	0.0
+CITYFLO	0	230	1	1	CITYFLO	0.0
+CITYFLO	0	316	4	1	CITYFLO	0.0
+CITYFLO	0	233	4	1	CITYFLO	0.0
+CITYFLO	0	197	61	1	CITYFLO	0.0
+CITYFLO	0	323	3	1	CITYFLO	0.0
+CITYFLO	0	63	9	1	CITYFLO	0.0
+CITYFLO	0	324	3	1	CITYFLO	0.0
+CITYFLO	0	169	6	1	CITYFLO	0.0
+CITYFLO	0	169	23	1	CITYFLO	0.0
+CITYFLO	0	256	24	1	CITYFLO	0.0
+CITYFLO	0	325	11	1	CITYFLO	0.0
+CITYFLO	0	231	12	1	CITYFLO	0.0
+CITYFLO	0	227	3	1	CITYFLO	0.0
+CITYFLO	0	227	52	1	CITYFLO	0.0
+CITYFLO	0	103	24	1	CITYFLO	0.0
+CITYFLO	0	197	42	1	CITYFLO	0.0
+CITYFLO	0	193	6	1	CITYFLO	0.0
+CITYFLO	0	187	95	1	CITYFLO	0.0
+CITYFLO	0	350	5	1	CITYFLO	0.0
+CITYFLO	0	225	2	1	CITYFLO	0.0
+CITYFLO	0	226	12	1	CITYFLO	0.0
+CITYFLO	0	87	25	1	CITYFLO	0.0
+CITYFLO	0	123	13	1	CITYFLO	0.0
+CITYFLO	0	187	88	1	CITYFLO	0.0
+CITYFLO	0	38	5	1	CITYFLO	0.0
+CITYFLO	0	233	21	1	CITYFLO	0.0
+CITYFLO	0	347	2	1	CITYFLO	0.0
+CITYFLO	0	244	2	1	CITYFLO	0.0
+CITYFLO	0	216	2	1	CITYFLO	0.0
+CITYFLO	0	193	2	1	CITYFLO	0.0
+CITYFLO	0	188	2	1	CITYFLO	0.0
+CITYFLO	0	90	17	1	CITYFLO	0.0
+CITYFLO	0	85	6	1	CITYFLO	0.0
+CITYFLO	0	169	26	1	CITYFLO	0.0
+CITYFLO	0	169	22	1	CITYFLO	0.0
+CITYFLO	0	109	8	1	CITYFLO	0.0
+CITYFLO	0	17	13	1	CITYFLO	0.0
+CITYFLO	0	187	54	1	CITYFLO	0.0
+CITYFLO	0	165	18	1	CITYFLO	0.0
+CITYFLO solutions	0	226	12	2	CITYFLO solution	0.0
+CITYFLO solutions	0	15	2	2	CITYFLO solutions	0.0
+CITYFLO system	0	325	73	2	CITYFLO system	0.0
+CITYFLO system	0	183	2	2	CITYFLO system	0.0
+CITYFLO system	0	166	2	2	CITYFLO system	0.0
+CITYFLO system	0	17	2	2	CITYFLO System	0.0
+Distribution Amplifiers	0	320	10	2	Distribution Amplifiers	0.0
+Distribution Amplifiers	0	30	12	2	Distribution Amplifiers	0.0
+ERTMS Level	0	187	35	2	ERTMS Level	0.0
+ERTMS Level	0	187	51	2	ERTMS Level	0.0
+Muzha depot	0	79	3	2	Muzha depot	0.0
+Muzha depot	0	107	11	2	Muzha depot	0.0
+Muzha depot	0	75	2	2	Muzha depot	0.0
+Muzha depot	0	114	22	2	Muzha depot	0.0
+Muzha line	0	62	16	2	Muzha line	0.0
+Muzha line	0	90	23	2	Muzha line	0.0
+Muzha line	0	47	14	2	Muzha Line	0.0
+Muzha line	0	63	28	2	Muzha line	0.0
+Muzha line	0	63	16	2	Muzha Line	0.0
+Muzha line	0	81	25	2	Muzha line	0.0
+Muzha line	0	73	7	2	Muzha line	0.0
+Muzha line	0	85	13	2	Muzha line	0.0
+Muzha line	0	75	26	2	Muzha line	0.0
+Muzha line	0	112	15	2	Muzha lines	0.0
+Muzha vehicle	0	117	15	2	Muzha vehicle	0.0
+Muzha vehicle	0	114	12	2	Muzha vehicles	0.0
+Muzha vehicle	0	103	21	2	Muzha vehicles	0.0
+Muzha vehicle	0	119	7	2	Muzha vehicle	0.0
+Muzha vehicle	0	87	10	2	Muzha vehicles	0.0
+Muzha vehicle	0	126	10	2	Muzha vehicle	0.0
+Muzha vehicle	0	119	25	2	Muzha vehicle	0.0
+Muzha vehicle	0	120	33	2	Muzha vehicle	0.0
+Muzha vehicle	0	90	37	2	Muzha vehicles	0.0
+Muzha vehicle	0	126	28	2	Muzha vehicles	0.0
+Muzha vehicle	0	117	2	2	Muzha Vehicle	0.0
+Muzha vehicle	0	105	63	2	Muzha vehicle	0.0
+Muzha vehicle	0	86	10	2	Muzha vehicles	0.0
+Neihu depot	0	98	36	2	Neihu depot	0.0
+Neihu depot	0	69	2	2	Neihu depot	0.0
+Neihu depot	0	79	7	2	Neihu depot	0.0
+Neihu extension	0	81	20	2	Neihu extension	0.0
+Neihu extension	0	66	32	2	Neihu extension	0.0
+Neihu extension	0	62	11	2	Neihu extension	0.0
+Neihu line	0	84	13	2	Neihu lines	0.0
+Neihu line	0	82	7	2	Neihu line	0.0
+Neihu line	0	113	27	2	Neihu line	0.0
+Neihu line	0	63	7	2	Neihu Line	0.0
+Neihu line	0	83	8	2	Neihu lines	0.0
+Neihu system	0	67	2	2	Neihu System	0.0
+Neihu system	0	98	45	2	Neihu system	0.0
+Neihu system	0	123	18	2	Neihu system	0.0
+Neihu system	0	92	14	2	Neihu system	0.0
+Neihu vehicles	0	77	21	2	Neihu vehicles	0.0
+Neihu vehicles	0	124	16	2	Neihu vehicles	0.0
+Neihu vehicles	0	89	16	2	Neihu vehicles	0.0
+Neihu vehicles	0	112	8	2	Neihu vehicles	0.0
+Neihu vehicles	0	112	26	2	Neihu vehicles	0.0
+Neihu vehicles	0	109	13	2	Neihu vehicle	0.0
+Neihu vehicles	0	108	3	2	Neihu vehicles	0.0
+Neihu vehicles	0	93	7	2	Neihu vehicles	0.0
+OCC	0	98	14	1	OCC	0.0
+OCC	0	67	29	1	OCC	0.0
+OCC	0	114	19	1	OCC	0.0
+OCC	0	16	46	1	OCC	0.0
+OCC	0	126	31	1	OCC	0.0
+OCC	0	115	5	1	OCC	0.0
+OCC	0	75	23	1	OCC	0.0
+OCC	0	94	18	1	OCC	0.0
+OCC	0	234	11	1	OCC	0.0
+OCC	0	69	7	1	OCC	0.0
+OCC	0	115	20	1	OCC	0.0
+OCC	0	75	36	1	OCC	0.0
+Operational Central Control	0	67	25	3	Operational Central Control	0.0
+Operational Central Control	0	234	7	3	Operational Central Control	0.0
+Phase	0	92	5	1	Phase	0.0
+Phase	0	75	38	1	Phase	0.0
+Phase	0	109	17	1	Phase	0.0
+Phase	0	70	27	1	Phase	0.0
+Phase	0	70	19	1	Phase	0.0
+Phase	0	111	16	1	Phase	0.0
+Phase	0	126	19	1	Phase	0.0
+Phase	0	79	24	1	Phase	0.0
+Phase	0	103	51	1	Phase	0.0
+Region Number	0	326	23	2	Region Number	0.0
+Region Number	0	327	33	2	Region Number	0.0
+Region ATO	0	289	6	2	Region ATO	0.0
+Region ATO	0	318	10	2	Region ATO	0.0
+Region ATO	0	277	18	2	Region ATO	0.0
+Region ATO	0	281	13	2	Region ATO	0.0
+Region ATO	0	254	25	2	Region ATO	0.0
+Region ATO	0	282	9	2	Region ATO	0.0
+Region ATO	0	173	35	2	Region ATO	0.0
+Region ATO	0	287	11	2	Region ATO	0.0
+Region ATO	0	29	10	2	Region ATO	0.0
+Region ATO	0	256	5	2	Region ATO	0.0
+Region ATO	0	291	21	2	Region ATO	0.0
+Region ATO	0	286	13	2	Region ATO	0.0
+Region ATO	0	233	46	2	Region ATO	0.0
+Region ATO	0	283	2	2	Region ATO	0.0
+Region ATO	0	279	2	2	Region ATO	0.0
+Region ATO	0	295	2	2	Region ATO	0.0
+Region ATO	0	293	2	2	Region ATO	0.0
+Region ATO	0	22	9	2	Region ATO	0.0
+Region ATO	0	285	6	2	Region ATO	0.0
+Region ATO	0	278	10	2	Region ATO	0.0
+Region ATO	0	290	22	2	Region ATO	0.0
+Region ATP	0	254	22	2	Region ATP	0.0
+Region ATP	0	256	10	2	Region ATP	0.0
+Region ATP	0	256	2	2	Region ATP	0.0
+Region ATP	0	317	2	2	Region ATP	0.0
+Region ATP	0	173	38	2	Region ATP	0.0
+Region ATP	0	293	7	2	Region ATP	0.0
+Region ATP	0	310	12	2	Region ATP	0.0
+Region ATP	0	294	14	2	Region ATP	0.0
+Region ATP	0	292	2	2	Region ATP	0.0
+Region ATP	0	266	9	2	Region ATP	0.0
+Region ATP	0	348	2	2	Region ATP	0.0
+Region ATP	0	22	14	2	Region ATP	0.0
+Region ATP	0	268	73	2	Region ATP	0.0
+Region ATP	0	291	30	2	Region ATP	0.0
+Region ATP	0	233	48	2	Region ATP	0.0
+Region ATP	0	284	13	2	Region ATP	0.0
+Region ATP	0	22	6	2	Region ATP	0.0
+Stover CITYFLO	0	188	1	2	Stover CITYFLO	0.0
+Stover CITYFLO	0	244	1	2	Stover CITYFLO	0.0
+Stover CITYFLO	0	225	1	2	Stover CITYFLO	0.0
+Stover CITYFLO	0	347	1	2	Stover CITYFLO	0.0
+Stover CITYFLO	0	281	1	2	Stover CITYFLO	0.0
+Stover CITYFLO	0	170	1	2	Stover CITYFLO	0.0
+Stover CITYFLO	0	319	1	2	Stover CITYFLO	0.0
+TWC equipment	0	254	28	2	TWC Equipment	0.0
+TWC equipment	0	320	2	2	TWC equipment	0.0
+TWC equipment	0	30	2	2	TWC equipment	0.0
+UTO systems	0	150	6	2	UTO systems	0.0
+UTO systems	0	154	5	2	UTO systems	0.0
+Wayside Communications	0	295	39	2	Wayside Communications	0.0
+Wayside Communications	0	173	83	2	Wayside Communications	0.0
+Wayside Communications	0	174	8	2	Wayside Communications	0.0
+Wayside Communications	0	16	81	2	Wayside Communication	0.0
+Wayside Communications	0	26	23	2	Wayside Communication	0.0
+Wayside Network	0	240	14	2	Wayside Network	0.0
+Wayside Network	0	22	2	2	Wayside Network	0.0
+Wayside Network	0	21	15	2	Wayside Network	0.0
+Wayside Network	0	257	8	2	Wayside Network	0.0
+Wayside Network	0	295	12	2	Wayside Network	0.0
+Wayside Network	0	293	12	2	Wayside Network	0.0
+Wayside Network	0	24	8	2	Wayside Network	0.0
+Wayside Network backbone	0	24	8	3	Wayside Network backbone	0.0
+Wayside Network backbone	0	257	8	3	Wayside Network backbone	0.0
+ability	0	140	7	1	ability	0.0
+ability	0	149	22	1	ability	0.0
+ability	0	217	11	1	ability	0.0
+ability	0	41	43	1	ability	0.0
+ability	0	147	3	1	ability	0.0
+ability	0	59	2	1	ability	0.0
+ATC	0	353	3	1	ATC	0.0
+ATC	0	254	2	1	ATC	0.0
+ATC	0	250	7	1	ATC	0.0
+ATC	0	253	5	1	ATC	0.0
+ATC	0	77	38	1	ATC	0.0
+ATC	0	93	16	1	ATC	0.0
+ATC	0	121	30	1	ATC	0.0
+ATC	0	85	8	1	ATC	0.0
+ATC	0	226	20	1	ATC	0.0
+ATC	0	109	10	1	ATC	0.0
+ATC	0	173	97	1	ATC	0.0
+ATC	0	103	46	1	ATC	0.0
+ATC	0	299	10	1	ATC	0.0
+ATC	0	105	48	1	ATC	0.0
+ATC	0	90	44	1	ATC	0.0
+ATC	0	79	15	1	ATC	0.0
+ATC	0	16	140	1	ATC	0.0
+ATC	0	352	3	1	ATC	0.0
+ATC	0	68	25	1	ATC	0.0
+ATC	0	106	30	1	ATC	0.0
+ATC	0	174	6	1	ATC	0.0
+ATC	0	121	12	1	ATC	0.0
+ATC	0	255	16	1	ATC	0.0
+ATC	0	90	19	1	ATC	0.0
+ATC	0	251	2	1	ATC	0.0
+ATC	0	300	27	1	ATC	0.0
+ATC	0	231	14	1	ATC	0.0
+ATC	0	274	16	1	ATC	0.0
+ATC	0	275	16	1	ATC	0.0
+ATC	0	77	3	1	ATC	0.0
+ATC	0	301	8	1	ATC	0.0
+ATC	0	263	2	1	ATC	0.0
+ATC	0	106	11	1	ATC	0.0
+ATC	0	170	15	1	ATC	0.0
+ATC	0	169	16	1	ATC	0.0
+ATC	0	134	19	1	ATC	0.0
+ATC	0	194	19	1	ATC	0.0
+ATC	0	94	5	1	ATC	0.0
+ATC	0	173	42	1	ATC	0.0
+ATC	0	113	16	1	ATC	0.0
+ATC	0	105	60	1	ATC	0.0
+ATC	0	299	3	1	ATC	0.0
+ATC	0	139	13	1	ATC	0.0
+ATC	0	78	12	1	ATC	0.0
+ATC	0	66	47	1	ATC	0.0
+ATC	0	300	9	1	ATC	0.0
+ATC	0	255	3	1	ATC	0.0
+ATC	0	252	3	1	ATC	0.0
+ATC	0	258	12	1	ATC	0.0
+ATC	0	98	18	1	ATC	0.0
+ATC	0	81	31	1	ATC	0.0
+ATC	0	74	14	1	ATC	0.0
+ATC	0	95	21	1	ATC	0.0
+ATC	0	110	9	1	ATC	0.0
+ATC	0	196	4	1	ATC	0.0
+ATC	0	354	3	1	ATC	0.0
+ATC	0	353	22	1	ATC	0.0
+ATC	0	76	4	1	ATC	0.0
+ATC	0	278	3	1	ATC	0.0
+ATC	0	17	15	1	ATC	0.0
+ATC equipment	0	81	31	2	ATC equipment	0.0
+ATC equipment	0	300	27	2	ATC equipment	0.0
+ATC equipment	0	255	16	2	ATC equipment	0.0
+ATC system	0	66	47	2	ATC system	0.0
+ATC system	0	121	12	2	ATC system	0.0
+ATC system	0	139	13	2	ATC systems	0.0
+ATC system	0	194	19	2	ATC systems	0.0
+ATC system	0	251	2	2	ATC system	0.0
+ATC system	0	94	5	2	ATC system	0.0
+ATC system	0	85	8	2	ATC system	0.0
+ATC system	0	106	11	2	ATC system	0.0
+ATO system	0	284	6	2	ATO system	0.0
+ATO system	0	212	2	2	ATO system	0.0
+ATO system	0	277	7	2	ATO system	0.0
+ATP	0	249	15	1	ATP	0.0
+ATP	0	294	15	1	ATP	0.0
+ATP	0	233	49	1	ATP	0.0
+ATP	0	170	27	1	ATP	0.0
+ATP	0	51	14	1	ATP	0.0
+ATP	0	254	23	1	ATP	0.0
+ATP	0	271	5	1	ATP	0.0
+ATP	0	266	20	1	ATP	0.0
+ATP	0	22	7	1	ATP	0.0
+ATP	0	233	45	1	ATP	0.0
+ATP	0	277	4	1	ATP	0.0
+ATP	0	233	40	1	ATP	0.0
+ATP	0	173	39	1	ATP	0.0
+ATP	0	169	12	1	ATP	0.0
+ATP	0	291	31	1	ATP	0.0
+ATP	0	292	3	1	ATP	0.0
+ATP	0	256	11	1	ATP	0.0
+ATP	0	317	3	1	ATP	0.0
+ATP	0	270	2	1	ATP	0.0
+ATP	0	268	74	1	ATP	0.0
+ATP	0	214	10	1	ATP	0.0
+ATP	0	268	8	1	ATP	0.0
+ATP	0	256	3	1	ATP	0.0
+ATP	0	31	12	1	ATP	0.0
+ATP	0	22	15	1	ATP	0.0
+ATP	0	271	13	1	ATP	0.0
+ATP	0	348	3	1	ATP	0.0
+ATP	0	173	91	1	ATP	0.0
+ATP	0	284	14	1	ATP	0.0
+ATP	0	208	11	1	ATP	0.0
+ATP	0	201	5	1	ATP	0.0
+ATP	0	365	32	1	ATP	0.0
+ATP	0	264	9	1	ATP	0.0
+ATP	0	321	12	1	ATP	0.0
+ATP	0	292	8	1	ATP	0.0
+ATP	0	40	11	1	ATP	0.0
+ATP	0	187	40	1	ATP	0.0
+ATP	0	266	10	1	ATP	0.0
+ATP	0	293	8	1	ATP	0.0
+ATP	0	310	13	1	ATP	0.0
+ATP	0	269	5	1	ATP	0.0
+ATP system	0	271	5	2	ATP system	0.0
+ATP system	0	270	2	2	ATP system	0.0
+ATP system	0	268	8	2	ATP systems	0.0
+ATP system	0	269	5	2	ATP system	0.0
+auto operation	0	41	11	2	auto operation	0.0
+auto operation	0	209	11	2	auto operation	0.0
+Automatic Train Control	0	52	30	3	Automatic Train Control	0.0
+Automatic Train Control	0	170	16	3	Automatic Train Control	0.0
+Automatic Train Control	0	16	136	3	Automatic Train Control	0.0
+Automatic Train Control	0	250	3	3	Automatic Train Control	0.0
+Automatic Train Protection	0	208	7	3	Automatic Train Protection	0.0
+Automatic Train Protection	0	40	7	3	Automatic Train Protection	0.0
+Automatic Train Protection	0	264	5	3	Automatic Train Protection	0.0
+Automatic Train Protection	0	16	54	3	Automatic Train Protection	0.0
+Automatic Train Protection	0	51	10	3	Automatic Train Protection	0.0
+Automatic Train Protection	0	170	28	3	Automatic Train Protection	0.0
+Base Data Radio	0	303	10	3	base data radios	0.0
+Base Data Radio	0	25	2	3	Base Data Radio	0.0
+Base Data Radio	0	16	16	3	Base Data Radio	0.0
+Base Data Radio	0	170	32	3	Base Data Radio	0.0
+Base Data Radio	0	269	14	3	base data radio	0.0
+Base Data Radio	0	310	2	3	Base Data Radio	0.0
+block CITYFLO	0	187	94	2	block CITYFLO	0.0
+block CITYFLO	0	187	87	2	block CITYFLO	0.0
+block CITYFLO	0	187	107	2	block CITYFLO	0.0
+block CITYFLO	0	187	76	2	block CITYFLO	0.0
+cab signalling	0	167	3	2	cab signalling	0.0
+cab signalling	0	184	3	2	cab signalling	0.0
+car wash	0	75	18	2	Car Wash	0.0
+car wash	0	69	10	2	car wash	0.0
+Central Control	0	67	26	2	Central Control	0.0
+Central Control	0	88	4	2	Central Control	0.0
+Central Control	0	239	17	2	Central Control	0.0
+Central Control	0	24	15	2	Central Control	0.0
+Central Control	0	21	2	2	Central Control	0.0
+Central Control	0	88	12	2	Central Control	0.0
+Central Control	0	19	16	2	Central Control	0.0
+Central Control	0	88	27	2	Central Control	0.0
+Central Control	0	242	18	2	Central Control	0.0
+Central Control	0	282	17	2	Central Control	0.0
+Central Control	0	81	37	2	Central Control	0.0
+Central Control	0	29	6	2	Central Control	0.0
+Central Control	0	234	8	2	Central Control	0.0
+Central Control	0	295	7	2	Central Control	0.0
+Central Control	0	20	10	2	Central Control	0.0
+Central Control	0	58	9	2	Central Control	0.0
+Central Control	0	318	6	2	Central Control	0.0
+Central Control	0	257	15	2	Central Control	0.0
+Central Control	0	170	50	2	Central Control	0.0
+Central Control	0	233	36	2	Central Control	0.0
+Central Control	0	235	131	2	Central Control	0.0
+Central Control	0	240	2	2	Central Control	0.0
+Central Control	0	19	9	2	Central Control	0.0
+Central Control Network	0	24	15	3	Central Control Network	0.0
+Central Control Network	0	239	17	3	Central Control Network	0.0
+Central Control Network	0	21	2	3	Central Control Network	0.0
+Central Control Network	0	240	2	3	Central Control Network	0.0
+Central Control Network	0	19	16	3	Central Control Network	0.0
+Central Control Network	0	242	18	3	Central Control Network	0.0
+Central Control Network	0	257	15	3	Central Control Network	0.0
+Central Control Network	0	20	10	3	Central Control Network	0.0
+Central Control System	0	295	7	3	Central Control System	0.0
+Central Control System	0	282	17	3	Central Control System	0.0
+coaxial cable	0	314	34	2	coaxial cable	0.0
+coaxial cable	0	30	6	2	coaxial cable	0.0
+coaxial cable	0	309	8	2	coaxial cable	0.0
+coaxial cable	0	307	18	2	coaxial cable	0.0
+coaxial cable	0	297	8	2	coaxial cable	0.0
+communication	0	170	36	1	Communications	0.0
+communication	0	13	12	1	Communication	0.0
+communication	0	173	53	1	Communications	0.0
+communication	0	235	140	1	communication	0.0
+communication	0	196	15	1	communication	0.0
+communication	0	145	13	1	communication	0.0
+communication	0	16	21	1	Communication	0.0
+communication	0	295	24	1	Communication	0.0
+communication	0	187	47	1	communication	0.0
+communication	0	40	19	1	communication	0.0
+communication	0	26	24	1	Communication	0.0
+communication	0	301	15	1	communication	0.0
+communication	0	16	82	1	Communication	0.0
+communication	0	156	34	1	communication	0.0
+communication	0	27	2	1	communication	0.0
+communication	0	170	55	1	Communications	0.0
+communication	0	295	40	1	Communications	0.0
+communication	0	295	22	1	Communications	0.0
+communication	0	174	9	1	Communications	0.0
+communication	0	173	45	1	Communication	0.0
+communication	0	301	4	1	communication	0.0
+communication	0	299	15	1	communication	0.0
+communication	0	173	84	1	Communications	0.0
+communication	0	144	7	1	communication	0.0
+communication	0	1	25	1	Communication	0.0
+communication	0	173	67	1	Communications	0.0
+communication	0	208	19	1	communication	0.0
+cost of fuel	0	8	16	3	cost of fuel	0.0
+cost of fuel	0	174	31	3	cost of fuel	0.0
+customer s need	0	182	12	3	customer s need	0.0
+customer s need	0	183	30	3	customer s need	0.0
+customer s need	0	166	30	3	customer s need	0.0
+distance	0	210	31	1	distance	0.0
+distance	0	357	2	1	distance	0.0
+distance	0	363	4	1	distance	0.0
+distance	0	362	27	1	distance	0.0
+distance	0	358	13	1	distance	0.0
+distance	0	361	23	1	distance	0.0
+distance	0	360	11	1	distance	0.0
+distance	0	363	8	1	distance	0.0
+distance	0	353	13	1	distance	0.0
+distance	0	365	13	1	distance	0.0
+distance	0	360	50	1	distance	0.0
+distance	0	355	9	1	distance	0.0
+distance	0	358	2	1	distance	0.0
+distance	0	365	4	1	distance	0.0
+distance	0	361	17	1	distance	0.0
+End of Line	0	325	48	3	End of Line	0.0
+End of Line	0	349	11	3	End of Line	0.0
+equipment	0	59	10	1	equipment	0.0
+equipment	0	254	11	1	equipment	0.0
+equipment	0	115	15	1	equipment	0.0
+equipment	0	30	3	1	equipment	0.0
+equipment	0	192	23	1	equipment	0.0
+equipment	0	101	3	1	equipment	0.0
+equipment	0	309	19	1	equipment	0.0
+equipment	0	99	9	1	equipment	0.0
+equipment	0	182	34	1	equipment	0.0
+equipment	0	258	16	1	equipment	0.0
+equipment	0	197	77	1	equipment	0.0
+equipment	0	260	5	1	equipment	0.0
+equipment	0	94	21	1	equipment	0.0
+equipment	0	255	17	1	equipment	0.0
+equipment	0	103	40	1	equipment	0.0
+equipment	0	200	4	1	equipment	0.0
+equipment	0	67	33	1	equipment	0.0
+equipment	0	98	12	1	equipment	0.0
+equipment	0	198	11	1	equipment	0.0
+equipment	0	58	11	1	equipment	0.0
+equipment	0	108	17	1	equipment	0.0
+equipment	0	94	42	1	equipment	0.0
+equipment	0	320	3	1	equipment	0.0
+equipment	0	25	8	1	equipment	0.0
+equipment	0	135	7	1	equipment	0.0
+equipment	0	81	32	1	equipment	0.0
+equipment	0	93	19	1	equipment	0.0
+equipment	0	254	29	1	Equipment	0.0
+equipment	0	300	28	1	equipment	0.0
+equipment	0	242	38	1	equipment	0.0
+equipment	0	156	42	1	equipment	0.0
+equipment	0	43	29	1	equipment	0.0
+Figure	0	343	3	1	figure	0.0
+Figure	0	316	1	1	Figure	0.0
+Figure	0	232	3	1	figure	0.0
+Figure	0	18	3	1	figure	0.0
+Figure	0	233	1	1	Figure	0.0
+Figure	0	233	17	1	Figure	0.0
+Figure	0	344	1	1	Figure	0.0
+Figure	0	326	1	1	Figure	0.0
+Figure	0	315	3	1	figure	0.0
+Figure	0	80	21	1	Figure	0.0
+Figure	0	325	62	1	figure	0.0
+Figure	0	244	44	1	Figure	0.0
+Figure	0	19	1	1	Figure	0.0
+Figure	0	16	1	1	Figure	0.0
+Figure	0	127	1	1	Figure	0.0
+frequency bands	0	306	23	2	frequency bands	0.0
+frequency bands	0	142	20	2	frequency bands	0.0
+head footprint	0	357	7	2	head footprint	0.0
+head footprint	0	358	7	2	head footprint	0.0
+information	0	237	2	1	information	0.0
+information	0	257	1	1	Information	0.0
+information	0	24	1	1	Information	0.0
+information	0	29	3	1	information	0.0
+information	0	318	3	1	information	0.0
+information	0	208	2	1	information	0.0
+information	0	187	7	1	information	0.0
+information	0	229	13	1	information	0.0
+information	0	291	27	1	information	0.0
+information	0	236	7	1	information	0.0
+information	0	288	9	1	Information	0.0
+information	0	145	4	1	information	0.0
+information	0	173	20	1	Information	0.0
+information	0	324	37	1	information	0.0
+information	0	337	6	1	information	0.0
+information	0	227	50	1	information	0.0
+information	0	40	2	1	information	0.0
+information	0	105	41	1	information	0.0
+information	0	96	9	1	information	0.0
+initialization process	0	292	12	2	initialization process	0.0
+initialization process	0	203	23	2	initialization process	0.0
+installation	0	18	14	1	installation	0.0
+installation	0	43	35	1	installation	0.0
+installation	0	52	14	1	installation	0.0
+installation	0	44	46	1	installation	0.0
+installation	0	107	3	1	installation	0.0
+installation	0	78	3	1	installation	0.0
+installation	0	131	35	1	installation	0.0
+installation	0	100	6	1	installation	0.0
+installation	0	54	16	1	installation	0.0
+installation	0	98	28	1	installation	0.0
+installation	0	81	28	1	installation	0.0
+installation	0	90	14	1	installation	0.0
+installation	0	85	2	1	installation	0.0
+installation	0	99	1	1	Installation	0.0
+installation	0	114	15	1	installation	0.0
+installation	0	104	16	1	installation	0.0
+installation	0	52	25	1	installation	0.0
+installation	0	105	28	1	installation	0.0
+installation	0	232	14	1	installation	0.0
+installation	0	58	6	1	installation	0.0
+installation	0	115	2	1	installation	0.0
+interlocking system	0	182	23	2	interlocking systems	0.0
+interlocking system	0	129	17	2	interlocking system	0.0
+interlocking system	0	52	18	2	interlocking system	0.0
+Jeffrey S	0	280	2	2	Jeffrey S	0.0
+Jeffrey S	0	169	32	2	Jeffrey S	0.0
+Jeffrey S	0	318	18	2	Jeffrey S	0.0
+Jeffrey S	0	346	4	2	Jeffrey S	0.0
+Jeffrey S	0	163	20	2	Jeffrey S	0.0
+Jeffrey S	0	224	17	2	Jeffrey S	0.0
+Jeffrey S	0	187	125	2	Jeffrey S	0.0
+Jeffrey S	0	243	49	2	Jeffrey S	0.0
+line	0	252	27	1	line	0.0
+line	0	322	3	1	Line	0.0
+line	0	68	3	1	line	0.0
+line	0	140	19	1	line	0.0
+line	0	107	17	1	Line	0.0
+line	0	360	22	1	line	0.0
+line	0	113	28	1	line	0.0
+line	0	325	50	1	Line	0.0
+line	0	90	24	1	line	0.0
+line	0	360	34	1	line	0.0
+line	0	128	13	1	line	0.0
+line	0	81	26	1	line	0.0
+line	0	349	13	1	Line	0.0
+line	0	66	43	1	line	0.0
+line	0	73	8	1	line	0.0
+line	0	25	26	1	Line	0.0
+line	0	46	28	1	line	0.0
+line	0	252	34	1	line	0.0
+line	0	88	21	1	line	0.0
+line	0	187	21	1	line	0.0
+line	0	80	25	1	Line	0.0
+line	0	63	8	1	Line	0.0
+line	0	47	15	1	Line	0.0
+line	0	252	17	1	line	0.0
+line	0	85	14	1	line	0.0
+line	0	6	32	1	line	0.0
+line	0	252	42	1	line	0.0
+line	0	177	22	1	line	0.0
+line	0	55	9	1	Line	0.0
+line	0	75	27	1	line	0.0
+line	0	187	13	1	line	0.0
+line	0	63	29	1	line	0.0
+line	0	16	38	1	Line	0.0
+line	0	210	25	1	line	0.0
+line	0	55	12	1	Line	0.0
+line	0	187	31	1	line	0.0
+line	0	113	11	1	line	0.0
+line	0	62	4	1	Line	0.0
+line	0	147	13	1	line	0.0
+line	0	297	11	1	Line	0.0
+line	0	62	17	1	line	0.0
+line	0	63	17	1	Line	0.0
+line	0	82	8	1	line	0.0
+Line of Sight	0	16	38	3	Line of Sight	0.0
+Line of Sight	0	107	17	3	Line of Sight	0.0
+Line of Sight	0	322	3	3	Line of Sight	0.0
+Line of Sight	0	25	26	3	Line of Sight	0.0
+Line of Sight	0	297	11	3	Line of Sight	0.0
+line speed limit	0	360	22	3	line speed limit	0.0
+line speed limit	0	360	34	3	line speed limit	0.0
+line system INTERFLO	0	187	31	3	line system INTERFLO	0.0
+line system INTERFLO	0	187	13	3	line system INTERFLO	0.0
+location	0	328	24	1	location	0.0
+location	0	330	12	1	location	0.0
+location	0	325	43	1	Location	0.0
+location	0	286	17	1	location	0.0
+location	0	187	5	1	location	0.0
+location	0	337	17	1	location	0.0
+location	0	337	21	1	location	0.0
+location	0	329	15	1	location	0.0
+location	0	333	3	1	location	0.0
+location	0	325	40	1	Location	0.0
+location	0	334	6	1	location	0.0
+location	0	332	7	1	location	0.0
+location	0	352	9	1	location	0.0
+location	0	327	9	1	location	0.0
+location	0	325	54	1	Location	0.0
+location	0	337	5	1	location	0.0
+location	0	347	21	1	location	0.0
+location	0	339	13	1	location	0.0
+location	0	327	29	1	location	0.0
+location	0	259	3	1	location	0.0
+location data	0	329	15	2	location data	0.0
+location data	0	330	12	2	location data	0.0
+LOS antennas	0	307	21	2	LOS antennas	0.0
+LOS antennas	0	309	11	2	LOS antennas	0.0
+mainline solutions	0	182	6	2	mainline solutions	0.0
+mainline solutions	0	181	14	2	mainline solutions	0.0
+mainline solutions	0	165	14	2	mainline solutions	0.0
+mass transit systems	0	187	68	3	mass transit system	0.0
+mass transit systems	0	8	30	3	mass transit systems	0.0
+mass transit systems	0	175	11	3	mass transit systems	0.0
+metro installation	0	232	13	2	metro installation	0.0
+metro installation	0	18	13	2	metro installation	0.0
+Mobile Data Radio	0	30	23	3	Mobile Data Radio	0.0
+Mobile Data Radio	0	173	15	3	Mobile Data Radio	0.0
+Mobile Data Radio	0	320	36	3	Mobile Data Radio	0.0
+Mobile Data Radio	0	16	43	3	Mobile Data Radio	0.0
+movement authority	0	347	16	2	movement authority	0.0
+movement authority	0	201	22	2	movement authority	0.0
+moving-block system	0	350	8	2	moving-block systems	0.0
+moving-block system	0	228	41	2	moving-block system	0.0
+number of regions	0	252	20	3	number of regions	0.0
+number of regions	0	252	8	3	number of regions	0.0
+occupancy generation	0	32	17	2	occupancy generation	0.0
+occupancy generation	0	267	17	2	occupancy generation	0.0
+October	0	16	94	1	October	0.0
+October	0	131	12	1	October	0.0
+October	0	105	12	1	October	0.0
+October	0	80	12	1	October	0.0
+October	0	163	12	1	October	0.0
+October	0	44	12	1	October	0.0
+operation	0	215	16	1	operation	0.0
+operation	0	212	13	1	operation	0.0
+operation	0	72	2	1	operation	0.0
+operation	0	267	8	1	operation	0.0
+operation	0	209	12	1	operation	0.0
+operation	0	276	20	1	operation	0.0
+operation	0	16	71	1	Operation	0.0
+operation	0	154	21	1	operation	0.0
+operation	0	192	8	1	operation	0.0
+operation	0	205	21	1	operation	0.0
+operation	0	87	21	1	operation	0.0
+operation	0	55	5	1	operation	0.0
+operation	0	36	21	1	operation	0.0
+operation	0	184	14	1	operation	0.0
+operation	0	177	32	1	operation	0.0
+operation	0	60	20	1	operation	0.0
+operation	0	214	14	1	operation	0.0
+operation	0	134	20	1	operation	0.0
+operation	0	222	26	1	operation	0.0
+operation	0	279	15	1	operation	0.0
+operation	0	167	14	1	operation	0.0
+operation	0	109	37	1	operation	0.0
+operation	0	88	16	1	operation	0.0
+operation	0	246	18	1	operation	0.0
+operation	0	42	21	1	operation	0.0
+operation	0	281	54	1	operation	0.0
+operation	0	170	65	1	operation	0.0
+operation	0	125	27	1	operation	0.0
+operation	0	345	10	1	operation	0.0
+operation	0	230	22	1	operation	0.0
+operation	0	16	107	1	Operation	0.0
+operation	0	41	12	1	operation	0.0
+operation	0	53	10	1	operation	0.0
+operation	0	113	7	1	operation	0.0
+operation	0	54	28	1	operation	0.0
+operation	0	32	8	1	operation	0.0
+operation	0	167	8	1	operation	0.0
+operation	0	224	12	1	operation	0.0
+operation	0	215	21	1	operation	0.0
+operation	0	248	10	1	operation	0.0
+operation	0	89	5	1	operation	0.0
+operation	0	196	10	1	operation	0.0
+operation	0	184	8	1	operation	0.0
+overlay project	0	60	8	2	overlay project	0.0
+overlay project	0	48	3	2	overlay project	0.0
+Passenger Information System	0	173	19	3	Passenger Information system	0.0
+Passenger Information System	0	96	8	3	passenger information systems	0.0
+Passenger Information System	0	288	8	3	Passenger Information System	0.0
+phase	0	114	1	1	Phase	0.0
+phase	0	103	27	1	Phase	0.0
+phase	0	82	2	1	phase	0.0
+phase	0	87	3	1	phase	0.0
+phase	0	81	13	1	phase	0.0
+phase	0	113	22	1	Phase	0.0
+phase	0	84	3	1	phase	0.0
+phase	0	112	1	1	Phase	0.0
+position error	0	338	18	2	position error	0.0
+position error	0	342	10	2	position error	0.0
+position error	0	344	4	2	Position Error	0.0
+project	0	116	19	1	project	0.0
+project	0	65	3	1	project	0.0
+project	0	80	35	1	project	0.0
+project	0	90	9	1	project	0.0
+project	0	67	10	1	project	0.0
+project	0	48	4	1	project	0.0
+project	0	60	9	1	project	0.0
+project	0	74	5	1	project	0.0
+project	0	114	5	1	project	0.0
+project	0	62	5	1	Project	0.0
+project	0	111	20	1	project	0.0
+project	0	103	31	1	project	0.0
+project	0	117	20	1	project	0.0
+project	0	91	2	1	project	0.0
+project	0	126	23	1	project	0.0
+project	0	92	9	1	project	0.0
+project	0	65	9	1	project	0.0
+radio frequency	0	296	5	2	radio frequency	0.0
+radio frequency	0	46	15	2	radio frequency	0.0
+radio system	0	25	32	2	Radio system	0.0
+radio system	0	44	42	2	radio system	0.0
+rail industry	0	9	7	2	rail industry	0.0
+rail industry	0	175	17	2	rail industry	0.0
+railway industry	0	179	6	2	railway industry	0.0
+railway industry	0	8	35	2	railway industry	0.0
+railway network	0	348	19	2	railway network	0.0
+railway network	0	193	24	2	railway network	0.0
+railway network	0	243	47	2	railway network	0.0
+railway network	0	243	36	2	railway network	0.0
+revenue service	0	41	57	2	revenue service	0.0
+revenue service	0	113	30	2	revenue service	0.0
+revenue service	0	104	9	2	revenue service	0.0
+revenue service	0	82	11	2	revenue service	0.0
+revenue service	0	92	17	2	revenue service	0.0
+revenue service	0	90	28	2	revenue service	0.0
+revenue service	0	126	35	2	revenue service	0.0
+risk	0	126	7	1	risk	0.0
+risk	0	110	6	1	risk	0.0
+risk	0	119	4	1	risk	0.0
+risk	0	115	9	1	risk	0.0
+risk	0	116	13	1	risk	0.0
+risk	0	157	40	1	risk	0.0
+risk	0	113	4	1	risk	0.0
+route	0	339	7	1	route	0.0
+route	0	360	8	1	route	0.0
+route	0	235	84	1	route	0.0
+route	0	341	13	1	route	0.0
+route	0	355	39	1	route	0.0
+route	0	360	19	1	route	0.0
+route	0	243	27	1	route	0.0
+route	0	336	7	1	route	0.0
+route	0	349	22	1	route	0.0
+safety restrictions	0	362	12	2	safety restrictions	0.0
+safety restrictions	0	360	56	2	safety restrictions	0.0
+San Francisco	0	195	17	2	San Francisco	0.0
+San Francisco	0	221	17	2	San Francisco	0.0
+service	0	44	51	1	service	0.0
+service	0	358	16	1	service	0.0
+service	0	125	24	1	service	0.0
+service	0	361	21	1	service	0.0
+service	0	194	4	1	service	0.0
+service	0	362	32	1	service	0.0
+service	0	104	35	1	service	0.0
+service	0	300	31	1	service	0.0
+service	0	194	24	1	service	0.0
+service	0	364	2	1	service	0.0
+service	0	43	45	1	service	0.0
+service	0	85	30	1	service	0.0
+service	0	235	69	1	service	0.0
+service	0	365	2	1	service	0.0
+service	0	113	31	1	service	0.0
+service	0	16	146	1	service	0.0
+service	0	82	12	1	service	0.0
+service	0	92	18	1	service	0.0
+service	0	104	10	1	service	0.0
+service	0	90	29	1	service	0.0
+service	0	362	2	1	service	0.0
+service	0	41	58	1	service	0.0
+service	0	362	25	1	service	0.0
+service	0	126	36	1	service	0.0
+service	0	112	19	1	service	0.0
+service	0	363	2	1	service	0.0
+service	0	358	11	1	service	0.0
+service	0	362	15	1	service	0.0
+service	0	151	20	1	service	0.0
+service	0	221	14	1	service	0.0
+service	0	363	20	1	service	0.0
+service braking	0	358	11	2	service braking	0.0
+service braking	0	358	16	2	service brake	0.0
+service braking	0	362	25	2	service braking	0.0
+service braking	0	362	32	2	service brake	0.0
+service braking	0	364	2	2	service braking	0.0
+service braking	0	363	2	2	service braking	0.0
+service braking	0	361	21	2	service braking	0.0
+service braking	0	363	20	2	service braking	0.0
+service braking	0	365	2	2	service braking	0.0
+service braking	0	362	2	2	service brakes	0.0
+service history	0	194	24	2	service history	0.0
+service history	0	16	146	2	service history	0.0
+South Korea	0	2	37	2	South Korea	0.0
+South Korea	0	223	29	2	South Korea	0.0
+station sign	0	288	13	2	station sign	0.0
+station sign	0	287	23	2	station sign	0.0
+system	0	228	42	1	system	0.0
+system	0	284	7	1	system	0.0
+system	0	163	16	1	System	0.0
+system	0	129	13	1	system	0.0
+system	0	230	6	1	system	0.0
+system	0	43	10	1	system	0.0
+system	0	276	25	1	system	0.0
+system	0	2	28	1	system	0.0
+system	0	227	23	1	system	0.0
+system	0	43	34	1	system	0.0
+system	0	268	5	1	system	0.0
+system	0	265	15	1	system	0.0
+system	0	98	8	1	system	0.0
+system	0	77	10	1	system	0.0
+system	0	64	12	1	system	0.0
+system	0	244	10	1	system	0.0
+system	0	121	13	1	system	0.0
+system	0	187	70	1	system	0.0
+system	0	34	4	1	System	0.0
+system	0	16	122	1	system	0.0
+system	0	269	6	1	system	0.0
+system	0	350	25	1	system	0.0
+system	0	170	56	1	System	0.0
+system	0	85	24	1	system	0.0
+system	0	227	41	1	System	0.0
+system	0	170	60	1	System	0.0
+system	0	187	117	1	system	0.0
+system	0	221	6	1	System	0.0
+system	0	244	21	1	system	0.0
+system	0	40	27	1	system	0.0
+system	0	187	32	1	system	0.0
+system	0	187	26	1	system	0.0
+system	0	227	46	1	system	0.0
+system	0	105	55	1	system	0.0
+system	0	220	36	1	system	0.0
+system	0	210	18	1	system	0.0
+system	0	74	18	1	system	0.0
+system	0	111	11	1	system	0.0
+system	0	217	14	1	system	0.0
+system	0	197	6	1	system	0.0
+system	0	137	29	1	system	0.0
+system	0	323	16	1	system	0.0
+system	0	219	29	1	system	0.0
+system	0	197	44	1	System	0.0
+system	0	107	37	1	system	0.0
+system	0	233	8	1	System	0.0
+system	0	282	19	1	System	0.0
+system	0	85	9	1	system	0.0
+system	0	215	2	1	system	0.0
+system	0	182	3	1	system	0.0
+system	0	185	24	1	system	0.0
+system	0	249	9	1	system	0.0
+system	0	222	2	1	system	0.0
+system	0	342	4	1	System	0.0
+system	0	244	4	1	System	0.0
+system	0	5	22	1	system	0.0
+system	0	213	2	1	system	0.0
+system	0	325	74	1	system	0.0
+system	0	273	22	1	system	0.0
+system	0	60	14	1	system	0.0
+system	0	66	6	1	Systems	0.0
+system	0	41	31	1	SYSTEMS	0.0
+system	0	333	17	1	system	0.0
+system	0	66	28	1	System	0.0
+system	0	187	8	1	system	0.0
+system	0	130	23	1	system	0.0
+system	0	66	48	1	system	0.0
+system	0	281	4	1	System	0.0
+system	0	183	3	1	system	0.0
+system	0	274	21	1	system	0.0
+system	0	270	3	1	system	0.0
+system	0	256	28	1	system	0.0
+system	0	339	18	1	system	0.0
+system	0	106	12	1	system	0.0
+system	0	232	8	1	System	0.0
+system	0	84	20	1	system	0.0
+system	0	271	6	1	system	0.0
+system	0	101	11	1	system	0.0
+system	0	140	17	1	system	0.0
+system	0	23	15	1	system	0.0
+system	0	103	45	1	System	0.0
+system	0	319	4	1	System	0.0
+system	0	251	3	1	system	0.0
+system	0	235	156	1	system	0.0
+system	0	19	6	1	System	0.0
+system	0	187	81	1	system	0.0
+system	0	10	11	1	system	0.0
+system	0	2	35	1	system	0.0
+system	0	123	19	1	system	0.0
+system	0	295	23	1	System	0.0
+system	0	295	9	1	System	0.0
+system	0	235	165	1	system	0.0
+system	0	16	76	1	System	0.0
+system	0	5	29	1	system	0.0
+system	0	109	21	1	system	0.0
+system	0	98	46	1	system	0.0
+system	0	17	3	1	System	0.0
+system	0	236	16	1	system	0.0
+system	0	323	30	1	system	0.0
+system	0	347	4	1	System	0.0
+system	0	217	26	1	system	0.0
+system	0	290	9	1	system	0.0
+system	0	166	3	1	system	0.0
+system	0	54	3	1	system	0.0
+system	0	248	9	1	system	0.0
+system	0	322	24	1	system	0.0
+system	0	282	1	1	System	0.0
+system	0	217	8	1	system	0.0
+system	0	197	16	1	system	0.0
+system	0	187	101	1	system	0.0
+system	0	43	4	1	system	0.0
+system	0	235	21	1	System	0.0
+system	0	248	3	1	system	0.0
+system	0	187	61	1	system	0.0
+system	0	247	18	1	system	0.0
+system	0	193	11	1	system	0.0
+system	0	104	31	1	system	0.0
+system	0	176	11	1	system	0.0
+system	0	207	4	1	System	0.0
+system	0	199	2	1	system	0.0
+system	0	16	115	1	system	0.0
+system	0	187	48	1	system	0.0
+system	0	61	2	1	system	0.0
+system	0	238	13	1	system	0.0
+system	0	52	19	1	system	0.0
+system	0	87	27	1	system	0.0
+system	0	282	26	1	system	0.0
+system	0	173	79	1	System	0.0
+system	0	313	3	1	system	0.0
+system	0	42	14	1	system	0.0
+system	0	173	46	1	System	0.0
+system	0	265	4	1	system	0.0
+system	0	187	14	1	system	0.0
+system	0	235	3	1	system	0.0
+system	0	235	10	1	system	0.0
+system	0	191	12	1	system	0.0
+system	0	212	3	1	system	0.0
+system	0	316	9	1	System	0.0
+system	0	18	8	1	System	0.0
+system	0	327	21	1	System	0.0
+system	0	340	2	1	system	0.0
+system	0	222	35	1	system	0.0
+system	0	225	4	1	System	0.0
+system	0	210	11	1	system	0.0
+system	0	268	82	1	system	0.0
+system	0	189	1	1	system	0.0
+system	0	170	4	1	System	0.0
+system	0	227	54	1	system	0.0
+system	0	67	3	1	System	0.0
+system	0	96	2	1	system	0.0
+system	0	222	21	1	system	0.0
+system	0	173	21	1	system	0.0
+system	0	193	31	1	system	0.0
+system	0	94	6	1	system	0.0
+system	0	73	3	1	System	0.0
+system	0	202	7	1	System	0.0
+system	0	216	4	1	System	0.0
+system	0	208	26	1	system	0.0
+system	0	276	14	1	system	0.0
+system	0	288	10	1	System	0.0
+system	0	285	19	1	system	0.0
+system	0	238	26	1	system	0.0
+system	0	220	10	1	system	0.0
+system	0	188	4	1	System	0.0
+system	0	229	10	1	system	0.0
+system	0	196	27	1	system	0.0
+system	0	94	31	1	system	0.0
+system	0	127	47	1	system	0.0
+system	0	76	9	1	system	0.0
+system	0	25	33	1	system	0.0
+system	0	41	49	1	system	0.0
+system	0	277	8	1	system	0.0
+system	0	92	15	1	system	0.0
+system	0	80	26	1	System	0.0
+system	0	177	33	1	system	0.0
+system	0	156	21	1	system	0.0
+system	0	129	18	1	system	0.0
+system	0	16	111	1	SYSTEM	0.0
+system	0	231	2	1	System	0.0
+system	0	168	24	1	system	0.0
+system	0	197	39	1	System	0.0
+system	0	173	9	1	System	0.0
+system	0	44	43	1	system	0.0
+system	0	237	11	1	system	0.0
+system	0	80	61	1	system	0.0
+system	0	38	12	1	system	0.0
+System Overview	0	244	4	2	System Overview	0.0
+System Overview	0	188	4	2	System Overview	0.0
+System Overview	0	347	4	2	System Overview	0.0
+System Overview	0	163	16	2	System Overview	0.0
+System Overview	0	319	4	2	System Overview	0.0
+System Overview	0	281	4	2	System Overview	0.0
+System Overview	0	170	4	2	System Overview	0.0
+System Overview	0	67	3	2	System Overview	0.0
+System Overview	0	225	4	2	System Overview	0.0
+System Overview	0	73	3	2	System Overview	0.0
+System Architecture	0	197	16	2	system architecture	0.0
+System Architecture	0	316	9	2	System Architecture	0.0
+System Architecture	0	231	2	2	System Architecture	0.0
+System Architecture	0	233	8	2	System Architecture	0.0
+System Architecture	0	19	6	2	System Architecture	0.0
+System Architecture	0	17	3	2	System Architecture	0.0
+System Architecture	0	18	8	2	System Architecture	0.0
+System Architecture	0	232	8	2	System Architecture	0.0
+System Architecture	0	227	46	2	system architecture	0.0
+system operations	0	249	9	2	system operations	0.0
+system operations	0	244	21	2	system operations	0.0
+system operations	0	248	9	2	system operation	0.0
+system operations	0	238	13	2	system operations	0.0
+system performance	0	193	31	2	system performance	0.0
+system performance	0	130	23	2	system performance	0.0
+system performance	0	244	10	2	system performance	0.0
+test track	0	98	38	2	test track	0.0
+test track	0	119	27	2	test track	0.0
+test track	0	125	4	2	test track	0.0
+test track	0	93	28	2	test track	0.0
+test track	0	75	14	2	test track	0.0
+test track	0	69	14	2	test track	0.0
+testing program	0	124	11	2	testing program	0.0
+testing program	0	59	18	2	testing program	0.0
+time	0	106	1	1	Time	0.0
+time	0	83	3	1	time	0.0
+time	0	36	5	1	time	0.0
+time	0	205	5	1	time	0.0
+time	0	109	3	1	time	0.0
+time	0	209	20	1	time	0.0
+time	0	149	11	1	time	0.0
+time	0	246	14	1	time	0.0
+time	0	157	45	1	time	0.0
+time	0	41	20	1	time	0.0
+time	0	246	10	1	time	0.0
+time	0	93	3	1	time	0.0
+time	0	300	23	1	time	0.0
+time	0	103	4	1	time	0.0
+track	0	228	23	1	track	0.0
+track	0	93	29	1	track	0.0
+track	0	196	18	1	track	0.0
+track	0	187	45	1	track	0.0
+track	0	347	24	1	track	0.0
+track	0	98	39	1	track	0.0
+track	0	230	11	1	track	0.0
+track	0	119	28	1	track	0.0
+track	0	69	15	1	track	0.0
+track	0	324	33	1	track	0.0
+track	0	211	18	1	track	0.0
+track	0	189	6	1	track	0.0
+track	0	325	22	1	track	0.0
+track	0	75	15	1	track	0.0
+track	0	261	8	1	track	0.0
+track	0	125	5	1	track	0.0
+track	0	67	19	1	track	0.0
+track	0	68	10	1	track	0.0
+track	0	330	7	1	track	0.0
+track	0	324	11	1	Track	0.0
+track	0	78	7	1	track	0.0
+track	0	129	24	1	track	0.0
+track	0	56	6	1	track	0.0
+track circuits	0	189	6	2	track circuits	0.0
+track circuits	0	129	24	2	track circuits	0.0
+track circuits	0	228	23	2	track circuit	0.0
+track circuits	0	196	18	2	track circuits	0.0
+train	0	228	53	1	train	0.0
+train	0	349	7	1	Train	0.0
+train	0	229	21	1	train	0.0
+train	0	347	29	1	train	0.0
+train	0	208	8	1	Train	0.0
+train	0	350	17	1	train	0.0
+train	0	328	7	1	train	0.0
+train	0	353	6	1	train	0.0
+train	0	338	15	1	train	0.0
+train	0	300	3	1	train	0.0
+train	0	302	13	1	train	0.0
+train	0	286	20	1	train	0.0
+train	0	167	13	1	train	0.0
+train	0	210	21	1	train	0.0
+train	0	26	21	1	Train	0.0
+train	0	331	19	1	train	0.0
+train	0	250	4	1	Train	0.0
+train	0	350	11	1	train	0.0
+train	0	40	8	1	Train	0.0
+train	0	13	14	1	Train	0.0
+train	0	287	3	1	train	0.0
+train	0	276	6	1	Train	0.0
+train	0	197	37	1	Train	0.0
+train	0	173	81	1	Train	0.0
+train	0	11	4	1	train	0.0
+train	0	268	27	1	Train	0.0
+train	0	324	14	1	Train	0.0
+train	0	173	77	1	Train	0.0
+train	0	279	11	1	train	0.0
+train	0	259	2	1	train	0.0
+train	0	360	16	1	train	0.0
+train	0	231	7	1	train	0.0
+train	0	235	90	1	train	0.0
+train	0	170	17	1	Train	0.0
+train	0	264	6	1	Train	0.0
+train	0	228	48	1	train	0.0
+train	0	334	4	1	train	0.0
+train	0	197	75	1	train	0.0
+train	0	233	59	1	Train	0.0
+train	0	362	22	1	train	0.0
+train	0	341	7	1	train	0.0
+train	0	170	21	1	Train	0.0
+train	0	339	3	1	train	0.0
+train	0	287	18	1	train	0.0
+train	0	173	69	1	Train	0.0
+train	0	51	22	1	Train	0.0
+train	0	246	26	1	train	0.0
+train	0	170	25	1	Train	0.0
+train	0	167	7	1	train	0.0
+train	0	281	53	1	Train	0.0
+train	0	34	2	1	Train	0.0
+train	0	357	5	1	train	0.0
+train	0	179	18	1	train	0.0
+train	0	176	9	1	train	0.0
+train	0	16	106	1	Train	0.0
+train	0	277	25	1	train	0.0
+train	0	16	34	1	Train	0.0
+train	0	174	13	1	Train	0.0
+train	0	173	64	1	Train	0.0
+train	0	232	6	1	Train	0.0
+train	0	333	8	1	train	0.0
+train	0	355	37	1	train	0.0
+train	0	350	2	1	Train	0.0
+train	0	187	4	1	train	0.0
+train	0	344	20	1	train	0.0
+train	0	210	6	1	Train	0.0
+train	0	324	26	1	train	0.0
+train	0	184	7	1	train	0.0
+train	0	265	13	1	train	0.0
+train	0	32	11	1	train	0.0
+train	0	195	12	1	train	0.0
+train	0	365	23	1	train	0.0
+train	0	301	18	1	train	0.0
+train	0	235	100	1	train	0.0
+train	0	16	55	1	Train	0.0
+train	0	295	16	1	Train	0.0
+train	0	188	14	1	Train	0.0
+train	0	295	37	1	Train	0.0
+train	0	16	70	1	Train	0.0
+train	0	170	29	1	Train	0.0
+train	0	256	26	1	Train	0.0
+train	0	258	6	1	train	0.0
+train	0	337	2	1	train	0.0
+train	0	215	20	1	train	0.0
+train	0	177	2	1	train	0.0
+train	0	182	30	1	train	0.0
+train	0	32	14	1	train	0.0
+train	0	228	14	1	train	0.0
+train	0	16	74	1	Train	0.0
+train	0	16	61	1	Train	0.0
+train	0	191	10	1	train	0.0
+train	0	267	11	1	train	0.0
+train	0	16	23	1	train	0.0
+train	0	16	12	1	Train	0.0
+train	0	170	38	1	Train	0.0
+train	0	152	22	1	Train	0.0
+train	0	336	3	1	train	0.0
+train	0	328	27	1	train	0.0
+train	0	295	31	1	train	0.0
+train	0	69	30	1	train	0.0
+train	0	229	16	1	train	0.0
+train	0	177	31	1	train	0.0
+train	0	358	5	1	train	0.0
+train	0	244	49	1	Train	0.0
+train	0	10	9	1	train	0.0
+train	0	227	39	1	Train	0.0
+train	0	258	24	1	train	0.0
+train	0	2	17	1	train	0.0
+train	0	152	7	1	train	0.0
+train	0	1	27	1	Train	0.0
+train	0	332	10	1	train	0.0
+train	0	351	13	1	train	0.0
+train	0	16	79	1	Train	0.0
+train	0	228	69	1	train	0.0
+train	0	291	25	1	train	0.0
+train	0	300	17	1	train	0.0
+train	0	207	2	1	Train	0.0
+train	0	144	24	1	train	0.0
+train	0	23	13	1	train	0.0
+train	0	289	22	1	train	0.0
+train	0	134	43	1	train	0.0
+train	0	53	9	1	train	0.0
+train	0	227	21	1	train	0.0
+train	0	233	6	1	Train	0.0
+train	0	352	14	1	train	0.0
+train	0	184	13	1	train	0.0
+train	0	235	72	1	train	0.0
+train	0	52	31	1	Train	0.0
+train	0	51	11	1	Train	0.0
+train	0	275	1	1	Train	0.0
+train	0	16	137	1	Train	0.0
+train	0	235	97	1	Train	0.0
+train	0	229	8	1	Train	0.0
+train	0	145	7	1	train	0.0
+train	0	202	5	1	Train	0.0
+train	0	335	3	1	train	0.0
+train	0	331	3	1	train	0.0
+train	0	229	3	1	Train	0.0
+train	0	333	15	1	train	0.0
+train	0	17	8	1	train	0.0
+train	0	360	6	1	train	0.0
+train	0	235	143	1	train	0.0
+train	0	342	2	1	Train	0.0
+train	0	228	77	1	train	0.0
+train	0	349	26	1	train	0.0
+train	0	26	1	1	Train	0.0
+train	0	201	9	1	train	0.0
+train	0	281	23	1	train	0.0
+train	0	41	47	1	train	0.0
+train	0	18	6	1	Train	0.0
+train	0	276	23	1	train	0.0
+train	0	267	14	1	train	0.0
+train	0	351	2	1	train	0.0
+train	0	178	4	1	train	0.0
+train	0	277	15	1	train	0.0
+Train Registry System	0	197	37	3	Train Registry System	0.0
+Train Registry System	0	202	5	3	Train Registry System	0.0
+Train Registry System	0	34	2	3	Train Registry System	0.0
+Train Registry System	0	16	74	3	Train Registry System	0.0
+Train Registry System	0	173	77	3	Train Registry System	0.0
+Train Registry System	0	207	2	3	Train Registry System	0.0
+train control	0	229	8	2	Train Control	0.0
+train control	0	197	75	2	train control	0.0
+train control	0	18	6	2	Train Control	0.0
+train control	0	134	43	2	train control	0.0
+train control	0	295	31	2	train control	0.0
+train control	0	191	10	2	train control	0.0
+train control	0	333	15	2	train control	0.0
+train control	0	250	4	2	Train Control	0.0
+train control	0	16	23	2	train control	0.0
+train control	0	52	31	2	Train Control	0.0
+train control	0	16	137	2	Train Control	0.0
+train control	0	342	2	2	Train Control	0.0
+train control	0	324	26	2	train control	0.0
+train control	0	173	64	2	Train Control	0.0
+train control	0	256	26	2	Train Control	0.0
+train control	0	265	13	2	train control	0.0
+train control	0	324	14	2	Train Control	0.0
+train control	0	179	18	2	train control	0.0
+train control	0	145	7	2	train control	0.0
+train control	0	1	27	2	Train Control	0.0
+train control	0	233	6	2	Train Control	0.0
+train control	0	11	4	2	train control	0.0
+train control	0	188	14	2	Train Control	0.0
+train control	0	170	38	2	Train Control	0.0
+train control	0	178	4	2	train control	0.0
+train control	0	227	39	2	Train Control	0.0
+train control	0	10	9	2	train control	0.0
+train control	0	176	9	2	train control	0.0
+train control	0	13	14	2	Train Control	0.0
+train control	0	195	12	2	train control	0.0
+train control	0	229	3	2	Train Control	0.0
+train control	0	177	2	2	train control	0.0
+train control	0	152	7	2	train control	0.0
+train control	0	41	47	2	train control	0.0
+train control	0	23	13	2	train control	0.0
+train control	0	2	17	2	train control	0.0
+train control	0	170	17	2	Train Control	0.0
+train control	0	276	23	2	train control	0.0
+train control	0	17	8	2	train control	0.0
+train control	0	26	1	2	Train control	0.0
+train control	0	232	6	2	Train Control	0.0
+train control	0	244	49	2	Train Control	0.0
+train control	0	227	21	2	train control	0.0
+train control	0	231	7	2	train control	0.0
+train control	0	302	13	2	train control	0.0
+train control	0	275	1	2	Train control	0.0
+Train control data	0	26	1	3	Train control data	0.0
+Train control data	0	302	13	3	train control data	0.0
+train control products	0	178	4	3	train control products	0.0
+train control products	0	11	4	3	train control products	0.0
+train control system	0	227	21	3	train control system	0.0
+train control system	0	342	2	3	Train Control System	0.0
+train control system	0	176	9	3	train control system	0.0
+train control system	0	333	15	3	train control system	0.0
+train control system	0	23	13	3	train control system	0.0
+train control system	0	134	43	3	train control systems	0.0
+train control system	0	276	23	3	train control system	0.0
+train control system	0	18	6	3	Train Control System	0.0
+train control system	0	179	18	3	train control systems	0.0
+train control system	0	265	13	3	train control system	0.0
+train control system	0	231	7	3	train control systems	0.0
+train control system	0	152	7	3	train control systems	0.0
+train control system	0	232	6	3	Train Control System	0.0
+train control system	0	227	39	3	Train Control System	0.0
+train control system	0	17	8	3	train control systems	0.0
+train control system	0	10	9	3	train control system	0.0
+train control system	0	191	10	3	train control system	0.0
+train control system	0	177	2	3	train control systems	0.0
+train control system	0	256	26	3	Train Control system	0.0
+train control system	0	229	8	3	Train Control system	0.0
+train control system	0	324	26	3	train control systems	0.0
+train control system	0	41	47	3	train control system	0.0
+train control system	0	233	6	3	Train Control System	0.0
+train movement	0	281	23	2	train movement	0.0
+train movement	0	267	14	2	train movement	0.0
+train movement	0	279	11	2	train movement	0.0
+train movement	0	32	14	2	train movement	0.0
+train occupancy	0	350	11	2	train occupancy	0.0
+train occupancy	0	228	14	2	train occupancy	0.0
+train operation	0	53	9	2	train operation	0.0
+train operation	0	167	13	2	train operation	0.0
+train operation	0	177	31	2	train operation	0.0
+train operation	0	16	70	2	Train Operation	0.0
+train operation	0	184	7	2	train operation	0.0
+train operation	0	184	13	2	train operation	0.0
+train operation	0	215	20	2	train operation	0.0
+train operation	0	281	53	2	Train operation	0.0
+train operation	0	16	106	2	Train Operation	0.0
+train operation	0	167	7	2	train operation	0.0
+transition areas	0	290	3	2	transition areas	0.0
+transition areas	0	291	4	2	transition area	0.0
+vehicle	0	117	3	1	Vehicle	0.0
+vehicle	0	119	8	1	vehicle	0.0
+vehicle	0	123	10	1	vehicle	0.0
+vehicle	0	124	3	1	vehicle	0.0
+vehicle	0	125	11	1	vehicle	0.0
+vehicle	0	289	16	1	vehicle	0.0
+vehicle	0	173	96	1	Vehicle	0.0
+vehicle	0	109	14	1	vehicle	0.0
+vehicle	0	121	20	1	vehicle	0.0
+vehicle	0	31	11	1	Vehicle	0.0
+vehicle	0	103	12	1	vehicle	0.0
+vehicle	0	292	7	1	Vehicle	0.0
+vehicle	0	121	28	1	vehicle	0.0
+vehicle	0	261	12	1	vehicle	0.0
+vehicle	0	291	16	1	vehicle	0.0
+vehicle	0	294	10	1	Vehicle	0.0
+vehicle	0	262	23	1	vehicle	0.0
+vehicle	0	233	44	1	Vehicle	0.0
+vehicle	0	258	11	1	vehicle	0.0
+vehicle	0	192	22	1	vehicle	0.0
+vehicle	0	173	93	1	Vehicle	0.0
+vehicle	0	294	6	1	vehicle	0.0
+vehicle	0	105	64	1	vehicle	0.0
+vehicle	0	33	2	1	Vehicle	0.0
+vehicle	0	121	11	1	vehicle	0.0
+vehicle	0	71	13	1	Vehicle	0.0
+vehicle	0	71	21	1	Vehicle	0.0
+vehicle	0	116	3	1	vehicle	0.0
+vehicle	0	90	43	1	Vehicle	0.0
+vehicle	0	290	26	1	vehicle	0.0
+vehicle	0	119	26	1	vehicle	0.0
+vehicle	0	105	50	1	vehicle	0.0
+vehicle	0	173	90	1	Vehicle	0.0
+vehicle	0	277	27	1	Vehicle	0.0
+vehicle	0	266	19	1	Vehicle	0.0
+vehicle	0	120	4	1	vehicle	0.0
+vehicle	0	244	34	1	vehicle	0.0
+vehicle	0	126	11	1	vehicle	0.0
+vehicle	0	233	42	1	Vehicle	0.0
+vehicle	0	321	11	1	Vehicle	0.0
+vehicle	0	93	15	1	vehicle	0.0
+vehicle	0	120	34	1	vehicle	0.0
+vehicle	0	242	36	1	vehicle	0.0
+vehicle	0	117	16	1	vehicle	0.0
+vehicle	0	262	20	1	vehicle	0.0
+vehicle	0	52	28	1	Vehicle	0.0
+vehicle ATC	0	173	96	2	Vehicle ATC	0.0
+vehicle ATC	0	90	43	2	Vehicle ATC	0.0
+vehicle ATC	0	121	11	2	vehicle ATC	0.0
+vehicle ATC	0	93	15	2	vehicle ATC	0.0
+vehicle ATC	0	258	11	2	vehicle ATC	0.0
+Vehicle ATO	0	294	10	2	Vehicle ATO	0.0
+Vehicle ATO	0	277	27	2	Vehicle ATO	0.0
+Vehicle ATO	0	33	2	2	Vehicle ATO	0.0
+Vehicle ATO	0	173	93	2	Vehicle ATO	0.0
+Vehicle ATO	0	233	42	2	Vehicle ATO	0.0
+Vehicle ATP	0	173	90	2	Vehicle ATP	0.0
+Vehicle ATP	0	233	44	2	Vehicle ATP	0.0
+Vehicle ATP	0	292	7	2	Vehicle ATP	0.0
+Vehicle ATP	0	266	19	2	Vehicle ATP	0.0
+Vehicle ATP	0	321	11	2	Vehicle ATP	0.0
+Vehicle ATP	0	31	11	2	Vehicle ATP	0.0
+vehicle tag readers	0	289	16	3	vehicle tag readers	0.0
+vehicle tag readers	0	290	26	3	vehicle tag readers	0.0
+vehicle tag readers	0	291	16	3	vehicle tag readers	0.0
+wayside	0	299	9	1	wayside	0.0
+wayside	0	95	20	1	wayside	0.0
+wayside	0	192	20	1	wayside	0.0
+wayside	0	103	39	1	wayside	0.0
+wayside	0	242	34	1	wayside	0.0
+wayside	0	295	29	1	wayside	0.0
+wayside	0	77	2	1	wayside	0.0
+wayside	0	98	11	1	wayside	0.0
+wayside	0	108	16	1	wayside	0.0
+wayside	0	26	8	1	wayside	0.0
+wayside	0	101	2	1	wayside	0.0
+wayside	0	251	10	1	wayside	0.0
+wayside	0	182	33	1	wayside	0.0
+wayside	0	302	19	1	wayside	0.0
+wayside	0	50	2	1	wayside	0.0
+wayside	0	281	35	1	wayside	0.0
+wayside	0	229	23	1	wayside	0.0
+wayside	0	297	21	1	wayside	0.0
+wayside	0	266	2	1	wayside	0.0
+wayside	0	198	20	1	wayside	0.0
+wayside	0	49	7	1	wayside	0.0
+wayside	0	301	7	1	wayside	0.0
+wayside	0	144	27	1	wayside	0.0
+wayside	0	353	21	1	wayside	0.0
+wayside	0	300	8	1	wayside	0.0
+wayside	0	105	72	1	wayside	0.0
+wayside	0	350	23	1	wayside	0.0
+wayside	0	98	7	1	wayside	0.0
+wayside	0	263	6	1	wayside	0.0
+wayside	0	273	2	1	wayside	0.0
+wayside ATC	0	301	7	2	wayside ATC	0.0
+wayside ATC	0	353	21	2	wayside ATC	0.0
+wayside ATC	0	299	9	2	wayside ATC	0.0
+wayside ATC	0	77	2	2	wayside ATC	0.0
+wayside ATC	0	95	20	2	wayside ATC	0.0
+wayside ATC	0	300	8	2	wayside ATC	0.0
+wayside equipment	0	98	11	2	wayside equipment	0.0
+wayside equipment	0	182	33	2	wayside equipment	0.0
+wayside equipment	0	108	16	2	wayside equipment	0.0
+wayside equipment	0	103	39	2	wayside equipment	0.0
+wayside equipment	0	101	2	2	wayside equipment	0.0
+work	0	103	6	1	work	0.0
+work	0	124	20	1	work	0.0
+work	0	61	12	1	work	0.0
+work	0	51	2	1	work	0.0
+work	0	57	7	1	work	0.0
+work	0	60	4	1	work	0.0
+work	0	48	7	1	work	0.0

@@ -1,0 +1,131 @@
+Prototypical_Form	Lemma_of_Term	Frequency
+CBTC	CBTC	44
+ATS	ATS	43
+ATS system	ATS system	19
+CBTC system	CBTC system	14
+ATS user	ATS user	14
+CBTC-equipped	CBTC-equipped	11
+user interface	user interface	9
+ATS user interface	ATS user interface	8
+train operator	train operator	8
+CBTC territory	CBTC territory	8
+train location	train location	7
+train	train	57
+interface	interface	14
+work zones	work zone	6
+ATS functions	ATS function	6
+CBTC-equipped trains	CBTC-equipped train	6
+CBTC train	CBTC train	6
+train location reports	train location report	5
+CBTC train location	CBTC train location	5
+CBTC equipment	CBTC equipment	5
+ATO	ato	5
+interoperability	interoperability	5
+conductor	conductor	8
+movement authorities	movement authority	4
+passenger information	passenger information	4
+jurisdiction	jurisdiction	13
+passenger information system	passenger information system	3
+speed restrictions	speed restriction	3
+fault reporting	fault reporting	3
+train identification	train identification	3
+user	user	16
+implementation	implementation	4
+group of CBTC-equipped	group of CBTC-equipped	2
+user interface display	user interface display	2
+accordance with IEEE	accordance with IEEE	2
+information system interfaces	information system interface	2
+section of track	section of track	2
+train en route	train en route	2
+service strategy	service strategy	2
+ATO mode	ato mode	2
+system hazards	system hazard	2
+operating unit	operating unit	2
+interoperability requirements	interoperability requirement	2
+regulation function	regulation function	2
+train regulation	train regulation	2
+IEEE Std	IEEE Std	2
+Energy optimization	energy optimization	2
+control actions	control action	2
+train service	train service	2
+capability	capability	5
+station	station	12
+authority	authority	17
+system	system	40
+location	location	7
+application	application	5
+regulation	regulation	6
+supplier	supplier	4
+transit system	transit system	2
+track	track	5
+speed	speed	5
+information	information	14
+movement	movement	5
+operating	operating	5
+equipment	equipment	7
+work	work	8
+service	service	8
+control	control	6
+response	response	2
+group	group	4
+operating within CBTC	operating within CBTC	1
+movement of trains	movement of train	1
+group of CBTC	group of CBTC	1
+data communications network	data communication network	1
+ATS train stop	ATS train stop	1
+skip station information	skip station information	1
+type of train	type of train	1
+speed regulation function	speed regulation function	1
+passenger information messages	passenger information message	1
+train regulation functions	train regulation function	1
+group of stations	group of station	1
+coordination of train	coordination of train	1
+train stop information	train stop information	1
+energy optimization algorithms	energy optimization algorithms	1
+IEEE Std 1474.2-2003.	IEEE Std 1474.2-2003.	1
+subclause in order	subclause in order	1
+wayside for display	wayside for display	1
+train service data	train service data	1
+control of run	control of run	1
+profile between stations	profile between station	1
+mode of operation	mode of operation	1
+interface design standards	interface design standard	1
+service brake rates	service brake rate	1
+train health data	train health data	1
+station departure time	station departure time	1
+train length data	train lenght data	1
+train arrival information	train arrival information	1
+train at station	train at station	1
+ATS user-directed service	ATS user-directed service	1
+station in ATO	station in ato	1
+interoperability interface standards	interoperability interface standard	1
+optimization versus schedule/headway	optimization versus schedule/headway	1
+position of trains	position of train	1
+CBTC-equipped train operating	CBTC-equipped train operating	1
+Control action confirmation	control action confirmation	1
+Train fault reporting	train fault reporting	1
+direction of trains	direction of train	1
+performance of CBTC	performance of CBTC	1
+emergency brake application	emergency brake application	1
+operating in CBTC	operating in CBTC	1
+CBTC fault reporting	CBTC fault reporting	1
+Skip station stop	Skip station stop	1
+Train location information	train location information	1
+Door control inhibit	door control inhibit	1
+dwell time variance	dwell time variance	1
+track in CBTC	track in CBTC	1
+rerouting of trains	rerouting of train	1
+protection of work	protection of work	1
+Interoperability interface requirements	Interoperability interface requirement	1
+CBTC train identification	CBTC train identification	1
+CBTC movement authority	CBTC movement authority	1
+track within CBTC	track within CBTC	1
+interoperability interface requirements	interoperability interface requirement	1
+Automatic train regulation	automatic train regulation	1
+storage areas	storage area	1
+dispatching function	dispatching function	1
+work trains	work train	1
+run times	run time	1
+train doors	train door	1
+transit application	transit application	1
+CBTC functionality	CBTC functionality	1

@@ -1,0 +1,139 @@
+Lemma_of_Term	Domain_relavance	Frequency
+CBTC	100.0	44
+ATS	99.9999999769	43
+ATS system	99.999998456	19
+CBTC system	99.9999972603	14
+ATS user	99.9999972603	14
+CBTC-equipped	99.9999958494	11
+user interface	99.9999942029	9
+ATS user interface	99.9999929614	8
+train operator	99.9999929614	8
+CBTC territory	99.9999929614	8
+train location	99.999991231	7
+train	99.999991185	57
+interface	99.9999902184	14
+work zone	99.9999886806	6
+ATS function	99.9999886806	6
+CBTC-equipped train	99.9999886806	6
+CBTC train	99.9999886806	6
+train location report	99.9999846156	5
+CBTC train location	99.9999846156	5
+CBTC equipment	99.9999846156	5
+ato	99.9999846156	5
+interoperability	99.9999846156	5
+conductor	99.9999773215	8
+movement authority	99.9999773215	4
+passenger information	99.9999773215	4
+jurisdiction	99.9999734717	13
+passenger information system	99.9999613107	3
+speed restriction	99.9999613107	3
+fault reporting	99.9999613107	3
+train identification	99.9999613107	3
+user	99.9999479968	16
+implementation	99.9999304019	4
+group of CBTC-equipped	99.9999069421	2
+user interface display	99.9999069421	2
+accordance with IEEE	99.9999069421	2
+information system interface	99.9999069421	2
+section of track	99.9999069421	2
+train en route	99.9999069421	2
+service strategy	99.9999069421	2
+ato mode	99.9999069421	2
+system hazard	99.9999069421	2
+operating unit	99.9999069421	2
+interoperability requirement	99.9999069421	2
+regulation function	99.9999069421	2
+train regulation	99.9999069421	2
+IEEE Std	99.9999069421	2
+energy optimization	99.9999069421	2
+control action	99.9999069421	2
+train service	99.999813103	2
+capability	99.9998067926	5
+station	99.9997957378	12
+authority	99.9997766051	17
+system	99.9997019096	40
+location	99.9996856202	7
+application	99.9996774667	5
+regulation	99.9996377619	6
+supplier	99.9995315856	4
+transit system	99.9995315856	2
+track	99.9994349808	5
+speed	99.9993864836	5
+information	99.9993106707	14
+movement	99.9992571578	5
+operating	99.9984812029	5
+equipment	99.998233969	7
+work	99.9979050404	8
+service	99.9978503009	8
+control	99.9970845257	6
+response	99.99136758	2
+group	99.9785585374	4
+operating within CBTC	0.0	1
+movement of train	0.0	1
+group of CBTC	0.0	1
+data communication network	0.0	1
+ATS train stop	0.0	1
+skip station information	0.0	1
+type of train	0.0	1
+speed regulation function	0.0	1
+passenger information message	0.0	1
+train regulation function	0.0	1
+group of station	0.0	1
+coordination of train	0.0	1
+train stop information	0.0	1
+energy optimization algorithms	0.0	1
+IEEE Std 1474.2-2003.	0.0	1
+subclause in order	0.0	1
+wayside for display	0.0	1
+train service data	0.0	1
+control of run	0.0	1
+profile between station	0.0	1
+mode of operation	0.0	1
+interface design standard	0.0	1
+service brake rate	0.0	1
+train health data	0.0	1
+station departure time	0.0	1
+train lenght data	0.0	1
+train arrival information	0.0	1
+train at station	0.0	1
+ATS user-directed service	0.0	1
+station in ato	0.0	1
+interoperability interface standard	0.0	1
+optimization versus schedule/headway	0.0	1
+position of train	0.0	1
+CBTC-equipped train operating	0.0	1
+control action confirmation	0.0	1
+train fault reporting	0.0	1
+direction of train	0.0	1
+performance of CBTC	0.0	1
+emergency brake application	0.0	1
+operating in CBTC	0.0	1
+CBTC fault reporting	0.0	1
+Skip station stop	0.0	1
+train location information	0.0	1
+door control inhibit	0.0	1
+dwell time variance	0.0	1
+track in CBTC	0.0	1
+rerouting of train	0.0	1
+protection of work	0.0	1
+Interoperability interface requirement	0.0	1
+CBTC train identification	0.0	1
+CBTC movement authority	0.0	1
+track within CBTC	0.0	1
+interoperability interface requirement	0.0	1
+automatic train regulation	0.0	1
+storage area	0.0	1
+dispatching function	0.0	1
+work train	0.0	1
+run time	0.0	1
+train door	0.0	1
+transit application	0.0	1
+CBTC functionality	0.0	1
+
+
+Configuration:
+POS_Start	p:NN p:NNP p:NNPS
+POS_Internal	p:JJ p:IN p:NN p:NNP p:NNS p:POS
+POS_End	p:NN p:NNP p:NNS
+Ortografic unit	L
+Max term length	3
