@@ -36,8 +36,10 @@ import java.awt.event.TextEvent;
 import java.awt.event.TextListener;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.QuadCurve2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeListener;
@@ -204,6 +206,14 @@ public class EditorView extends JFrame implements Observer{
 	public static String startOptionalNamePrefix="---START_OPTIONAL---#";
 	/** prefix of any connector ending dot name*/
 	public static String endOptionalNamePrefix="---END_OPTIONAL---#";
+	/** prefix of any connector starting dot name*/
+	public static String startIncludesNamePrefix="---START_INCLUDES---#";
+	/** prefix of any connector ending dot name*/
+	public static String endIncludesNamePrefix="---END_INCLUDES---#";
+	/** prefix of any connector starting dot name*/
+	public static String startExcludesNamePrefix="---START_EXCLUDES---#";
+	/** prefix of any connector ending dot name*/
+	public static String endExcludesNamePrefix="---END_EXCLUDES---#";
 	/** prefix of any group Alternative Gtarting dot name*/
 	public static String altGroupNamePrefix="---ALT_GROUP---#";
 	/** prefix of any Or Group starting dot name*/
@@ -224,6 +234,10 @@ public class EditorView extends JFrame implements Observer{
 	private static URL mandatoryConnectorEndDotIconURL=EditorView.class.getResource("/Mandatory Connector End Dot.png");
 	/** URL of the new optional connector ending dot icon*/
 	private static URL optionalConnectorEndDotIconURL=EditorView.class.getResource("/Optional Connector End Dot.png");
+	/** URL of the new constraint dot icon*/
+	private static URL constraintDotIconURL=EditorView.class.getResource("/Constraint Dot.png");
+	/** URL of the new constraint control point dot icon*/
+	private static URL constraintControlPointDotIconURL=EditorView.class.getResource("/Constraint Control Point Dot.png");
 	/** URL of the connector line-only icon*/
 	private static URL connectorLineLengthIconURL=EditorView.class.getResource("/Connector Line Length.png");
 	/** URL of the group line-only icon*/
@@ -239,12 +253,13 @@ public class EditorView extends JFrame implements Observer{
 		NO_ACTIVE_ITEM, DRAGGING_FEATURE, DRAGGING_EXTERN_ANCHOR, DRAGGING_EXTERN_GROUP,
 		DRAGGING_SELECTION_RECT, DRAGGING_SELECTION_GROUP, 
 		DRAGGING_TOOL_NEWFEATURE, DRAGGING_TOOL_MANDATORY_LINK, DRAGGING_TOOL_OPTIONAL_LINK, 
-		DRAGGING_TOOL_ALT_GROUP, DRAGGING_TOOL_OR_GROUP	
+		DRAGGING_TOOL_ALT_GROUP, DRAGGING_TOOL_OR_GROUP, DRAGGING_TOOL_INCLUDES, DRAGGING_TOOL_EXCLUDES
 	}
 
 	/** enumeration used to specify a item type through the program*/
 	public static enum ItemsType {
-		START_CONNECTOR, END_MANDATORY_CONNECTOR, END_OPTIONAL_CONNECTOR,
+		START_MANDATORY_CONNECTOR, END_MANDATORY_CONNECTOR, START_OPTIONAL_CONNECTOR, END_OPTIONAL_CONNECTOR,
+		START_INCLUDES_DOT, END_INCLUDES_DOT, START_EXCLUDES_DOT, END_EXCLUDES_DOT, CONSTRAINT_CONTROL_POINT,
 		ALT_GROUP_START_CONNECTOR, OR_GROUP_START_CONNECTOR
 	}
 	
@@ -296,8 +311,12 @@ public class EditorView extends JFrame implements Observer{
 	private JMenuItem menuModifyBasicFM=null, menuModifyAdvancedFM=null;
 		
 	
-	/** Current amount of connector lines in the diagram panel*/
+	/** Current amount of connector dots in the diagram panel*/
 	private int connectorsCount=0;
+	/** Current amount of includes constraint dots in the diagram panel*/
+	private int includesCount=0;
+	/** Current amount of excludes constraint dots in the diagram panel*/
+	private int excludesCount=0;
 	/** Current amount of Alternative Groups in the diagram panel*/
 	private int altGroupsCount=0;
 	/** Current amount of Or Groups in the diagram panel*/
@@ -322,10 +341,13 @@ public class EditorView extends JFrame implements Observer{
 	/** List of all connector dots that must be redrawn, with same indexes of the lists above*/
 //	private static ArrayList<Boolean> connectorDotsToRedraw=null;
 	
-	/** List of all connector starting dots,
-	 *  corresponding ending dots can be found in endConnectorDots at the same index
-	 */
+	/** List of all connector starting dots*/
+//	corresponding ending dots can be found in endConnectorDots at the same index*/
 	private ArrayList<JComponent> startConnectorDots=null;
+	/** List of Includes costraints starting dots*/
+	private ArrayList<JComponent> startIncludesDots=null;
+	/** List of Excludes costraints starting dots*/
+	private ArrayList<JComponent> startExcludesDots=null;
 	/** List of Alternative Groups*/
 	private ArrayList<GroupPanel> altGroupPanels=null;	
 	/** List of Or Groups*/
@@ -546,6 +568,8 @@ public class EditorView extends JFrame implements Observer{
 
 		visibleOrderDraggables = new OrderedList();
 		startConnectorDots = new ArrayList<JComponent>();
+		startIncludesDots = new ArrayList<JComponent>();
+		startExcludesDots = new ArrayList<JComponent>();
 //		endConnectorDots = new ArrayList<JComponent>();
 //		prevStartConnectorDotsLocation = new ArrayList<Point>();
 //		prevEndConnectorDotsLocation = new ArrayList<Point>();
@@ -726,6 +750,7 @@ public class EditorView extends JFrame implements Observer{
 		/* ***DEBUG*** */
 		if(debug3) System.out.println("Mi han chiamato, son la paint()");
 		/* ***DEBUG*** */
+		
 		System.out.println("PAINT: isActiveItem="+isActiveItem);
 
 		if(toolDragImage!=null) 
@@ -774,6 +799,18 @@ public class EditorView extends JFrame implements Observer{
 
 		//drawing Or Groups
 		drawGroupList(g2, orGroupPanels, true);
+		
+		//drawing constraints
+		for (int i=0; i< startIncludesDots.size(); ++i){
+		  drawConstraint(g2, getVisibleStartAnchorCenter(startIncludesDots.get(i)),
+			getVisibleStartAnchorCenter(((ConstraintPanel)startIncludesDots.get(i)).getOtherEnd()), 
+			((ConstraintPanel)startIncludesDots.get(i)).getControlPoint().getLocation());
+		}
+		for (int i=0; i< startExcludesDots.size(); ++i){
+		  drawConstraint(g2, getVisibleStartAnchorCenter(startExcludesDots.get(i)),
+			getVisibleStartAnchorCenter(((ConstraintPanel)startExcludesDots.get(i)).getOtherEnd()), 
+			((ConstraintPanel)startExcludesDots.get(i)).getControlPoint().getLocation());
+		}
 	}
 
 	/**
@@ -835,6 +872,161 @@ public class EditorView extends JFrame implements Observer{
 //		  //drawing the group arc
 //		  drawGroupArc(g2, startPanel, leftMost, rightMost, filled);
 		}
+	}
+	
+	/**
+	 * Draws a constraint line.
+	 * 
+	 * @param g2d - the Graphics2D object used to draw
+	 * @param start - start point of constraint
+	 * @param end - end point of constraint
+	 * @param control - control point of constraint
+	 */
+	private void drawConstraint(Graphics2D g2d, Point2D start, Point2D end, Point control) {
+		Point2D intersectionPoint=null;
+		Line2D intersectionSide=null;
+	    // create new QuadCurve2D.Float
+	    QuadCurve2D quadcurve = new QuadCurve2D.Float();
+	    // draw QuadCurve2D.Float with set coordinates
+	    quadcurve.setCurve(start.getX(), start.getY(), control.getX(), control.getY(), end.getX(), end.getY());
+
+	    Rectangle camera=new Rectangle((int)end.getX()-20, (int)end.getY()-20, 40, 40);
+	    Line2D.Double endLine=new Line2D.Double(control, end);
+	    
+	    //getting intersection point
+	    if(control.x>=camera.x && control.x<=camera.x+camera.width){
+	      if(control.y>=camera.y){//control point is directly over the camera
+	    	intersectionSide=
+	    	  new Line2D.Double(camera.x, camera.y, camera.x+camera.width, camera.y);
+	    	intersectionPoint=getIntersectionPoint(endLine, intersectionSide);
+	      }
+	      else if(control.y<=camera.y){//control point is directly below the camera
+	      	intersectionSide=
+	      	  new Line2D.Double(camera.x, camera.y+camera.height, camera.x+camera.width, camera.y+camera.height);
+	      	intersectionPoint=getIntersectionPoint(endLine, intersectionSide);    	  
+	      }
+	    }
+	    else if(control.y>=camera.y && control.y<=camera.y+camera.height){
+	      if(control.x<=camera.x){//control point is directly at left of the camera
+	        intersectionSide=
+	        	new Line2D.Double(camera.x, camera.y, camera.x, camera.y+camera.height);
+	        intersectionPoint=getIntersectionPoint(endLine, intersectionSide);
+	      }
+	      else if(control.x<=camera.x){//control point is directly at right of the camera
+	        intersectionSide=
+	        	new Line2D.Double(camera.x+camera.width, camera.y, camera.x+camera.width, camera.y+camera.height);
+	        intersectionPoint=getIntersectionPoint(endLine, intersectionSide);    	  
+	      }    	
+	    }
+	    else if(control.x<camera.x){
+	      if(control.y<camera.y){//control point is in a top-left position respect to the camera
+	        intersectionSide=//trying the top side
+	        	new Line2D.Double(camera.x, camera.y, camera.x+camera.width, camera.y);
+	        intersectionPoint=getIntersectionPoint(endLine, intersectionSide);   
+	        if(intersectionPoint==null){//trying the left side
+	          intersectionSide=
+	        	new Line2D.Double(camera.x, camera.y, camera.x, camera.y+camera.height);
+	          intersectionPoint=getIntersectionPoint(endLine, intersectionSide);           	
+	        }    	  
+	      }
+	      else if(control.y>camera.y+camera.height){//control point is in a bottom-left position respect to the camera
+	    	intersectionSide=//trying the bottom side
+	    	    new Line2D.Double(camera.x, camera.y+camera.height, camera.x+camera.width, camera.y+camera.height);
+	    	intersectionPoint=getIntersectionPoint(endLine, intersectionSide);   
+	    	if(intersectionPoint==null){//trying the left side
+	    	  intersectionSide=
+	    		new Line2D.Double(camera.x, camera.y, camera.x, camera.y+camera.height);
+	    	  intersectionPoint=getIntersectionPoint(endLine, intersectionSide);           	
+	    	}    	      	  
+	      }
+	    }
+	    else if(control.x>camera.x){
+	      if(control.y<camera.y){//control point is in a top-right position respect to the camera
+	      	intersectionSide=//trying the top side
+	            new Line2D.Double(camera.x, camera.y, camera.x+camera.width, camera.y);
+	      	intersectionPoint=getIntersectionPoint(endLine, intersectionSide);   
+	      	if(intersectionPoint==null){//trying the right side
+	          intersectionSide=
+	        	new Line2D.Double(camera.x+camera.width, camera.y, camera.x+camera.width, camera.y+camera.height);
+	          intersectionPoint=getIntersectionPoint(endLine, intersectionSide);           	
+	      	}    	      	        	  
+	      }
+	      else if(control.y>camera.y+camera.height){//control point is in a bottom-right position respect to the camera
+	      	intersectionSide=//trying the bottom side
+	      		new Line2D.Double(camera.x, camera.y+camera.height, camera.x+camera.width, camera.y+camera.height);
+	      	intersectionPoint=getIntersectionPoint(endLine, intersectionSide);   
+	      	if(intersectionPoint==null){//trying the right side
+	      	  intersectionSide=
+	            new Line2D.Double(camera.x+camera.width, camera.y, camera.x+camera.width, camera.y+camera.height);
+	      	  intersectionPoint=getIntersectionPoint(endLine, intersectionSide);
+	      	}    	      	      	  
+	      }
+	    }
+	    else{//control is inside of camera, getIntersectionPoint is arbitrary
+	   	  intersectionPoint=new Point2D.Double(camera.x, camera.y+camera.height/2);    	
+	    }
+	    
+//	    System.out.println("intersectionPoint: "+intersectionPoint);
+	    
+//	    Point2D[] intersectPoints=getIntersectionPoint(endLine, camera);
+//	    for(Point2D p : intersectPoints) System.out.println("Point: "+p);
+//	    for(Point2D p : intersectPoints) if(p!=null) intersectionPoint=p;
+	    
+	    int radius=(int)Point2D.distance( intersectionPoint.getX(), intersectionPoint.getY(), end.getX(), end.getY());
+
+	    int intersectAngle =getDegreeAngle(end.getX(), end.getY(), intersectionPoint.getX(), intersectionPoint.getY(), radius);
+
+	    int startAngle=intersectAngle-15;
+	    int endAngle=intersectAngle+15;
+	    
+//	    System.out.println("startAngle="+startAngle+"\tendAngle="+endAngle);
+	    
+//	    Point2D trianglePoint1=getPointFromAngle(end, startAngle, radius);
+//	    Point2D trianglePoint2=getPointFromAngle(end, endAngle, radius);
+	    Point2D trianglePoint1=getPointFromAngle(end, -startAngle, radius);
+	    Point2D trianglePoint2=getPointFromAngle(end, -endAngle, radius);
+	    
+	 // draw GeneralPath (polygon)
+	    int x1Points[] = {(int)trianglePoint1.getX(), (int)trianglePoint2.getX(), (int)end.getX(), (int)trianglePoint1.getX()};
+	    int y1Points[] = {(int)trianglePoint1.getY(), (int)trianglePoint2.getY(), (int)end.getY(), (int)trianglePoint1.getY()};
+	    GeneralPath polygon = new GeneralPath(GeneralPath.WIND_EVEN_ODD, x1Points.length);
+	    polygon.moveTo(x1Points[0], y1Points[0]);
+
+	    for (int index = 1; index < x1Points.length; index++) polygon.lineTo(x1Points[index], y1Points[index]);
+	    polygon.closePath();
+	    
+	    g2d.setColor(Color.BLACK);
+	    
+	    g2d.fill(polygon);
+//	    g2d.draw(polygon);
+	    
+	    g2d.setStroke( new BasicStroke(
+			 	1.5f/*Line width*/,
+				BasicStroke.CAP_BUTT/*End-cap style*/,
+				BasicStroke.JOIN_BEVEL/*Vertex join style*/, 
+				1.0f/*miter trim limit(min=1)*/,
+				new float[]{10.0f, 10.0f}/*dash structure*/, 
+				0f/*dash phase*/) ); 
+
+	    g2d.draw(quadcurve);
+//	    g2d.fillArc((int)start.getX()-5, (int)start.getY()-5, 10, 10, 0, 360);
+//	    g2d.fillArc((int)end.getX()-5, (int)end.getY()-5, 10, 10, 0, 360);
+//	    g2d.fillArc((int)control.x-5, (int)control.y-5, 10, 10, 0, 360);
+	}
+	
+	/**
+	 * Returns the point at startAngle degrees, given a circle centered in center with radius radius.
+	 * 
+	 * @param center - Point2D object representing the circle center
+	 * @param startAngle - angle of the requested point, in degrees
+	 * @param radius - centre redius
+	 * @return - a new Point2D object representing the calculated point
+	 */
+	private Point2D getPointFromAngle(Point2D center, int startAngle, int radius) {
+	  double  x = Math.cos(startAngle * Math.PI / 180) * radius + center.getX();
+	  double  y = Math.sin(startAngle * Math.PI / 180) * radius + center.getY();
+		  
+	  return new Point2D.Double(x, y);
 	}
 
 	/**
@@ -932,7 +1124,7 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @return - the corresponding angle, in degree metric
 	 */
-	private int getDegreeAngle(double centreX, double centreY, double pointX, double pointY, double radius) {
+	public static int getDegreeAngle(double centreX, double centreY, double pointX, double pointY, double radius) {
 		double cosin=(pointX-centreX)/radius;
 		double sin=(pointY-centreY)/radius;
 		double acos = Math.acos(cosin);
@@ -1196,17 +1388,6 @@ public class EditorView extends JFrame implements Observer{
      * @return the intersection point of lineA and lineB, if any, null otherwise
      */
     public Point2D getIntersectionPoint(Line2D lineA, Line2D lineB) {
-
-//        int x1 = (int)lineA.getX1();
-//        int y1 = (int)lineA.getY1();
-//        int x2 = (int)lineA.getX2();
-//        int y2 = (int)lineA.getY2();
-//
-//        int x3 = (int)lineB.getX1();
-//        int y3 = (int)lineB.getY1();
-//        int x4 = (int)lineB.getX2();
-//        int y4 = (int)lineB.getY2();
-
         double x1 = lineA.getX1();
         double y1 = lineA.getY1();
         double x2 = lineA.getX2();
@@ -1219,11 +1400,8 @@ public class EditorView extends JFrame implements Observer{
 
         Point2D p = null;
         
-//        int d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
         double d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
         if (d != 0) {//RETTE NON PARALLELE
-//        	int xi = ((x3 - x4) * (x1 * y2 - y1 * x2) - (x1 - x2) * (x3 * y4 - y3 * x4)) / d;
-//            int yi = ((y3 - y4) * (x1 * y2 - y1 * x2) - (y1 - y2) * (x3 * y4 - y3 * x4)) / d;
             double xi = ((x3 - x4) * (x1 * y2 - y1 * x2) - (x1 - x2) * (x3 * y4 - y3 * x4)) / d;
             double yi = ((y3 - y4) * (x1 * y2 - y1 * x2) - (y1 - y2) * (x3 * y4 - y3 * x4)) / d;
 
@@ -1817,6 +1995,26 @@ public class EditorView extends JFrame implements Observer{
 	}
 	
 	/**
+	 * Drags an Includes tool.
+	 * @param e - the MouseEvent passed by the mouseDragged() method of a listener.
+	 *
+	 *@see MouseMotionListener
+	 */
+	public void dragToolIncludes(MouseEvent e) {
+		  dragTool(e);
+	}
+	
+	/**
+	 * Drags an Excludes tool.
+	 * @param e - the MouseEvent passed by the mouseDragged() method of a listener.
+	 *
+	 *@see MouseMotionListener
+	 */
+	public void dragToolExcludes(MouseEvent e) {
+		  dragTool(e);
+	}
+	
+	/**
 	 * Drags a generic tool.
 	 * @param e - the MouseEvent passed by the mouseDragged() method of a listener.
 	 *
@@ -2155,10 +2353,17 @@ public class EditorView extends JFrame implements Observer{
 		  if (underlyingPanel.getClass().equals(FeaturePanel.class) ){
 			featurePanel=(FeaturePanel)underlyingPanel;
 
-			newConnectorStartDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.START_CONNECTOR, 
+
+			if(isActiveItem==activeItems.DRAGGING_TOOL_MANDATORY_LINK)
+				newConnectorStartDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.START_MANDATORY_CONNECTOR, 
 				toolDragPosition.x-(int)featurePanel.getLocationOnScreen().getX(),
 				toolDragPosition.y-(int)featurePanel.getLocationOnScreen().getY()-5);			
 
+			else if(isActiveItem==activeItems.DRAGGING_TOOL_OPTIONAL_LINK)
+				newConnectorStartDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.START_OPTIONAL_CONNECTOR, 
+				toolDragPosition.x-(int)featurePanel.getLocationOnScreen().getX(),
+				toolDragPosition.y-(int)featurePanel.getLocationOnScreen().getY()-5);			
+			
 			moveComponentToTop(featurePanel);
 
 			featurePanel.setLayer(newConnectorStartDot, 0);
@@ -2181,9 +2386,15 @@ public class EditorView extends JFrame implements Observer{
 		  }
 		}
 		
-		if(!startDotInsertedInPanel) 
-		  newConnectorStartDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.START_CONNECTOR,
-			  actualPositionX, actualPositionY-5);			
+		if(!startDotInsertedInPanel){
+		  if(isActiveItem==activeItems.DRAGGING_TOOL_MANDATORY_LINK)
+			newConnectorStartDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.START_MANDATORY_CONNECTOR,
+								  actualPositionX, actualPositionY-5);			
+					
+		  else if(isActiveItem==activeItems.DRAGGING_TOOL_OPTIONAL_LINK)
+			newConnectorStartDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.START_OPTIONAL_CONNECTOR,
+								  actualPositionX, actualPositionY-5);								
+		}
 		
 		ImageIcon lineLengthIcon = new ImageIcon(connectorLineLengthIconURL);
 		ImageIcon startConnectorIcon = new ImageIcon(connectorStartDotIconURL);
@@ -2228,8 +2439,143 @@ public class EditorView extends JFrame implements Observer{
 		newConnectorEndDot.setOtherEnd(newConnectorStartDot);
 
 		addConnectorsToDrawLists(newConnectorStartDot, newConnectorEndDot);
-		cancelToolDrag();
+		cancelToolDrag();		
+	}
+
+	/**
+	 * Adds a new connector to the diagram. If the starting connector dot is dropped over a feature panel, <br>
+	 * it gets attached to it.
+	 * 
+	 * @param e - MouseEvent of the type Mouse Released.
+	 */
+	public void addConstraintToDiagram(MouseEvent e) {
+		int actualPositionX=0;
+		int actualPositionY=0;
+		boolean startDotInsertedInPanel=false;
+		ConstraintPanel newConstraintStartDot=null;			
+		ConstraintPanel newConstraintEndDot=null;
+		JComponent newConstraintControlPointDot=null;
+		FeaturePanel featurePanel = null;
+		JComponent underlyingPanel = null;
 		
+		//the new connector must be dropped on the diagram panel for it to be added
+		if( diagramPanel.getLocationOnScreen().getX()>toolDragPosition.x ||
+			diagramPanel.getLocationOnScreen().getX()+diagramPanel.getWidth()<=toolDragPosition.x ||
+			diagramPanel.getLocationOnScreen().getY()>toolDragPosition.y ||
+			diagramPanel.getLocationOnScreen().getX()+diagramPanel.getHeight()<=toolDragPosition.y ){
+			
+			cancelToolDrag();
+
+			/* ***DEBUG*** */
+			if(debug4) System.out.println("Cannot drop a new connector on tools panel.");
+			/* ***DEBUG*** */
+			return;
+		}
+			
+		actualPositionX=(toolDragPosition.x-(int)diagramPanel.getLocationOnScreen().getX());
+		actualPositionY=(toolDragPosition.y-(int)diagramPanel.getLocationOnScreen().getY());
+
+		//retrieving the underlying feature panel, if any
+		underlyingPanel = getUnderlyingComponent(actualPositionX, actualPositionY);
+
+		/* ***DEBUG*** */
+		if(debug){
+		  System.out.println("Component tmp:"+underlyingPanel);
+		  if(underlyingPanel!=null)
+			System.out.println("Component tmp position on screen:"+underlyingPanel.getLocationOnScreen()
+				+"\nComponent tmp name:"+underlyingPanel.getName());
+		}
+		/* ***DEBUG*** */
+
+		if(underlyingPanel!=null){//if the underlying panel is a feature, the start connection dot is anchored to it
+		  if (underlyingPanel.getClass().equals(FeaturePanel.class) ){
+			featurePanel=(FeaturePanel)underlyingPanel;
+
+			newConstraintStartDot=(ConstraintPanel)getDraggableConnectionDot(
+			  (isActiveItem==activeItems.DRAGGING_TOOL_INCLUDES) ?
+				ItemsType.START_INCLUDES_DOT : ItemsType.START_EXCLUDES_DOT,
+			  toolDragPosition.x-(int)featurePanel.getLocationOnScreen().getX(),
+			  toolDragPosition.y-(int)featurePanel.getLocationOnScreen().getY()-5);			
+
+			moveComponentToTop(featurePanel);
+
+			featurePanel.setLayer(newConstraintStartDot, 0);
+			featurePanel.add(newConstraintStartDot);
+			featurePanel.setComponentZOrder(newConstraintStartDot, 0);
+
+			startDotInsertedInPanel=true;
+			
+			/* ***DEBUG*** */
+			System.out.println("Placing start connector in ("
+					+(toolDragPosition.x-(int)underlyingPanel.getLocationOnScreen().getX())
+					+", "+(toolDragPosition.y-(int)underlyingPanel.getLocationOnScreen().getY())+")");			
+			System.out.println("Start connector Position(feature relative): ("
+					+newConstraintStartDot.getX()+", "+newConstraintStartDot.getY()+")");			
+			System.out.println("Start connector Position(screen relative): ("
+					+newConstraintStartDot.getLocationOnScreen().getX()
+					+", "+newConstraintStartDot.getLocationOnScreen().getY()+")");			
+			/* ***DEBUG*** */
+		  
+		  }
+		}
+		
+		if(!startDotInsertedInPanel) 
+		  newConstraintStartDot=(ConstraintPanel)getDraggableConnectionDot(
+			(isActiveItem==activeItems.DRAGGING_TOOL_INCLUDES) ?
+			  ItemsType.START_INCLUDES_DOT : ItemsType.START_EXCLUDES_DOT,
+			actualPositionX, actualPositionY-5);			
+		
+		ImageIcon lineLengthIcon = new ImageIcon(connectorLineLengthIconURL);
+		ImageIcon startConnectorIcon = new ImageIcon(connectorStartDotIconURL);
+
+		newConstraintEndDot=(ConstraintPanel)getDraggableConnectionDot(
+		    (isActiveItem==activeItems.DRAGGING_TOOL_INCLUDES) ?
+		      ItemsType.END_INCLUDES_DOT : ItemsType.END_EXCLUDES_DOT,
+		    actualPositionX+lineLengthIcon.getIconWidth()+startConnectorIcon.getIconWidth(),
+		    actualPositionY-5+lineLengthIcon.getIconHeight()+startConnectorIcon.getIconHeight());
+
+		/* ***DEBUG*** */
+		if(debug) System.out.println("Mouse released(Drag relative) on: ("+e.getX()+", "+e.getY()+")."
+		  +"\nMouse released(Screen relative) on: ("+e.getXOnScreen()+", "+e.getYOnScreen()+")."
+		  +"\nLocation where the Constraint will be placed: ("+toolDragPosition.x+", "+toolDragPosition.y+")."
+		  +"\nActualPositionX: "+actualPositionX+"\nActualPositionY: "+actualPositionY);
+		/* ***DEBUG*** */
+		
+		visibleOrderDraggables.addToTop(newConstraintStartDot);
+		if(!startDotInsertedInPanel){
+		  diagramPanel.setLayer(newConstraintStartDot, 0);
+		  diagramPanel.add(newConstraintStartDot);
+		  diagramPanel.setComponentZOrder(newConstraintStartDot, 0);
+		}
+
+		visibleOrderDraggables.addToTop(newConstraintEndDot);
+		diagramPanel.setLayer(newConstraintEndDot, 0);
+		diagramPanel.add(newConstraintEndDot);
+		diagramPanel.setComponentZOrder(newConstraintEndDot, 0);
+
+		newConstraintControlPointDot=(JLabel)getDraggableConnectionDot(
+			ItemsType.CONSTRAINT_CONTROL_POINT,
+			(actualPositionX*2+lineLengthIcon.getIconWidth()+startConnectorIcon.getIconWidth())/2,
+			(actualPositionY*2-10+lineLengthIcon.getIconHeight()+startConnectorIcon.getIconHeight())/2);
+
+		/* ***DEBUG*** */
+		if(debug) System.out.println("Actual location of startDot: ("+newConstraintStartDot.getLocationOnScreen()
+		  +"\nActual location of endDot: ("+newConstraintEndDot.getLocationOnScreen()
+		  +"\ndiagramPanel.getLocationOnScreen(): ("+diagramPanel.getLocationOnScreen());
+		/* ***DEBUG*** */
+
+		//setting other ends of constraint dots
+		newConstraintStartDot.setOtherEnd(newConstraintEndDot);
+		newConstraintStartDot.setControlPoint(newConstraintControlPointDot);
+		newConstraintEndDot.setOtherEnd(newConstraintStartDot);
+		newConstraintEndDot.setControlPoint(newConstraintControlPointDot);
+
+		addConstraintToDrawLists(
+			newConstraintStartDot, 
+		  (isActiveItem==activeItems.DRAGGING_TOOL_INCLUDES) ?
+			ItemsType.START_INCLUDES_DOT : ItemsType.START_EXCLUDES_DOT);
+		
+		cancelToolDrag();		
 	}
 
 	public void addOrGroupToDiagram(MouseEvent e) {
@@ -2413,7 +2759,7 @@ public class EditorView extends JFrame implements Observer{
 		JLabel imageLabel = null;
 
 		switch(type){
-		  case START_CONNECTOR:
+		  case START_MANDATORY_CONNECTOR:
 			imagePanel = new AnchorPanel();  
 			if(name!=null) imagePanel.setName(name);
 			else{
@@ -2431,6 +2777,15 @@ public class EditorView extends JFrame implements Observer{
 			}
 			connectorIcon = new ImageIcon(mandatoryConnectorEndDotIconURL);
 			break;
+		  case START_OPTIONAL_CONNECTOR:
+			imagePanel = new AnchorPanel();  
+			if(name!=null) imagePanel.setName(name);
+			else{
+			  imagePanel.setName(startOptionalNamePrefix+connectorsCount);
+			  ++connectorsCount;
+			}
+			connectorIcon = new ImageIcon(connectorStartDotIconURL);
+			break;			
 		  case END_OPTIONAL_CONNECTOR:
 			imagePanel = new AnchorPanel();  
 			if(name!=null) imagePanel.setName(name);
@@ -2439,7 +2794,60 @@ public class EditorView extends JFrame implements Observer{
 			  ++connectorsCount;
 			}
 			connectorIcon = new ImageIcon(optionalConnectorEndDotIconURL);
-			break;				
+			break;		
+		  case START_INCLUDES_DOT:
+			imagePanel = new ConstraintPanel();  
+			if(name!=null) imagePanel.setName(name);
+			else{
+			  imagePanel.setName(startIncludesNamePrefix+includesCount);
+			  ++includesCount;
+			}
+			connectorIcon = new ImageIcon(constraintDotIconURL);
+			break;
+		  case END_INCLUDES_DOT:
+			imagePanel = new ConstraintPanel();  
+			if(name!=null) imagePanel.setName(name);
+			else{
+			  imagePanel.setName(endIncludesNamePrefix+includesCount);
+			  ++includesCount;
+			}
+			connectorIcon = new ImageIcon(constraintDotIconURL);
+			break;		
+		  case START_EXCLUDES_DOT:
+			imagePanel = new ConstraintPanel();  
+			if(name!=null) imagePanel.setName(name);
+			else{
+			  imagePanel.setName(startExcludesNamePrefix+excludesCount);
+			  ++excludesCount;
+			}
+			connectorIcon = new ImageIcon(constraintDotIconURL);
+			break;
+		  case END_EXCLUDES_DOT:
+			imagePanel = new ConstraintPanel();  
+			if(name!=null) imagePanel.setName(name);
+			else{
+			  imagePanel.setName(endExcludesNamePrefix+excludesCount);
+			  ++excludesCount;
+			}
+			connectorIcon = new ImageIcon(constraintDotIconURL);
+			break;
+		  case CONSTRAINT_CONTROL_POINT:
+			//returning the JLabel directly
+			connectorIcon = new ImageIcon(constraintControlPointDotIconURL);
+			imagePanel = new JLabel(connectorIcon);
+			if(name!=null) imagePanel.setName(name);
+			else{
+			  imagePanel.setName(endMandatoryNamePrefix+connectorsCount);
+			}
+			imagePanel.setBounds(x,  y, connectorIcon.getIconWidth(), connectorIcon.getIconHeight()+5);
+			
+//			imageLabel.setBounds(0,  +2, connectorIcon.getIconWidth(), connectorIcon.getIconHeight()+5);
+			imagePanel.setLayout(null);
+//			imagePanel.add(imageLabel);
+			imagePanel.setOpaque(false);
+			imagePanel.setVisible(true);
+			return imagePanel;
+//			break;		
 		  case ALT_GROUP_START_CONNECTOR:
 			imagePanel = new GroupPanel();  
 			if(name!=null) imagePanel.setName(name);
@@ -2675,6 +3083,18 @@ public class EditorView extends JFrame implements Observer{
 	}
 	
 	/**
+	 * Adds the connector ending and starting dots to the lists used to draw connectors.
+	 * 
+	 * @param newConnectorStartDot - the starting connector dot
+	 * @param type - an ItemsType object that representing the type of the constraint
+	 */
+	private void addConstraintToDrawLists(JComponent newConstraintStartDot, ItemsType type) {
+		if(type==ItemsType.START_EXCLUDES_DOT) startExcludesDots.add(newConstraintStartDot);
+		else startIncludesDots.add(newConstraintStartDot);
+	}
+	
+	
+	/**
 	 * Adds the Alternatibe Group to the lists used to draw connectors.
 	 * 
 	 * @param group - the GrouPanel object to be added to the lists
@@ -2739,7 +3159,7 @@ public class EditorView extends JFrame implements Observer{
 		System.out.println("Ungroup is not possible, this group is already minimal.");
 		return;
 	  }
-	  AnchorPanel startConnectorDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.START_CONNECTOR, 0, 0);
+	  AnchorPanel startConnectorDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.START_MANDATORY_CONNECTOR, 0, 0);
 	  startDotlocationX=(int)(anchor.getLocationOnScreen().getX()-diagramPanel.getLocationOnScreen().getX());
 	  startDotlocationY=(int)(anchor.getLocationOnScreen().getY()-diagramPanel.getLocationOnScreen().getY());
 	  group.getMembers().remove(anchor);
@@ -3596,7 +4016,7 @@ public class EditorView extends JFrame implements Observer{
 	  for(String connector : connectors){
 		connectorData=connector.split(" ");
 		
-		System.out.println("Printing connectorFata strings:");
+		System.out.println("Printing connectors strings:");
 		for (String s : connectorData) System.out.println("s: "+s);
 		System.out.println("startConnectorName="+connectorData[0].substring(10));
 		System.out.println("startOwnerName="+connectorData[2].substring(11));
@@ -3623,7 +4043,7 @@ public class EditorView extends JFrame implements Observer{
 		endOwnerName=connectorData[5].substring(9);		
 		
 		//adding start connector
-		startConnector=(AnchorPanel)buildConnectionDot(ItemsType.START_CONNECTOR, startConnectorName, startX, startY);
+		startConnector=(AnchorPanel)buildConnectionDot(ItemsType.START_MANDATORY_CONNECTOR, startConnectorName, startX, startY);
 		if(startOwnerName.length()==0){//adding connector to the diagram panel directly
 		  visibleOrderDraggables.addToTop(startConnector);
 		  diagramPanel.setLayer(startConnector, 0);

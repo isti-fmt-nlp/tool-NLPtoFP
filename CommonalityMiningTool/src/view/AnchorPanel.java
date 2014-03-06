@@ -1,9 +1,6 @@
 package view;
 
-import java.awt.Component;
-
 import javax.swing.JComponent;
-import javax.swing.JPanel;
 
 public class AnchorPanel extends JComponent {
 
