@@ -28,6 +28,7 @@ import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
 
 import view.EditorModel.GroupTypes;
+import view.EditorModel.ConstraintTypes;
 import view.EditorView.activeItems;
 import main.*;
 import main.FeatureNode.FeatureTypes;
@@ -40,6 +41,7 @@ public class EditorController implements
 	private static boolean debug2=false;
 	private static boolean debug3=false;
 	private static boolean debug4=false;
+	private static boolean debug5=false;
 		
 	/** Suffix of the path where general loadable diagram files will be saved*/
 	private static String saveFilesSubPath="saved diagrams"; 
@@ -121,6 +123,7 @@ public class EditorController implements
 	      case DRAGGING_FEATURE: editorView.dragFeature(e); break;
 	      case DRAGGING_EXTERN_ANCHOR: editorView.dragAnchor(e); break;
 	      case DRAGGING_EXTERN_GROUP: editorView.dragAnchor(e); break;
+	      case DRAGGING_EXTERN_CONSTRAINT: editorView.dragAnchor(e); break;
 	      case DRAGGING_SELECTION_RECT:  editorView.dragSelectionRect(e); break;
 	      case DRAGGING_SELECTION_GROUP: 
 			  System.out.println("dragging group!");
@@ -197,6 +200,7 @@ public class EditorController implements
           if(debug3) System.out.println("rigth clicked on: "+comp.getName());
           /* ***DEBUG*** */
 
+          //clicked on the diagram panel, not on an element
           if(comp.getName()==null || comp.getName()==""|| comp.getName().startsWith(EditorView.diagramPanelName)){
         	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemPrintModelDebug());
               editorView.setDiagramElementsMenuPosX(e.getX());
@@ -282,15 +286,13 @@ public class EditorController implements
 	@Override
 	public void mousePressed(MouseEvent e) {
 	  //event originated from the diagram panel
-	  System.out.println("((Component)e.getSource()).getName(): "+((Component)e.getSource()).getName());
-	  System.out.println("e.getSource().getClass(): "+e.getSource().getClass());
-      if( ((Component)e.getSource()).getName().startsWith(EditorView.diagramPanelName) ){
-//      if( ((Component)e.getSource()).getName().startsWith(EditorView.diagramPanelName) 
-//    	  || ((Component)e.getSource()).getName().startsWith(EditorView.textAreaNamePrefix) ){
-//	  if(containsPoint(editorView.getDiagramPanel(), e.getLocationOnScreen())){
-    	  
-    	  
-          
+	  if( ((Component)e.getSource()).getName().startsWith(EditorView.diagramPanelName) ){          
+
+		/* ***DEBUG*** */
+		if(debug) System.out.println("((Component)e.getSource()).getName(): "+((Component)e.getSource()).getName()
+				  					  +"\ne.getSource().getClass(): "+e.getSource().getClass());
+		/* ***DEBUG*** */
+
       	//checking if a feature must be renamed
       	if(oldFeatureName!=null){
       		
@@ -308,27 +310,37 @@ public class EditorController implements
       	  return;
       	}    	  
     	  
-    	  
 		int featurePanelX=0, featurePanelY=0;
 		FeaturePanel featurePanel=null;
 		JComponent otherEnd=null;
 		JComponent otherEndFeaturePanel=null;
 		JComponent anchorPanel=null;
-		String anchorPanelName;
+		String anchorPanelName=null;
 		OrderedListNode tmpNode=editorView.getVisibleOrderDraggables().getFirst();
 		while(tmpNode!=null){
-		  System.out.println("Testing for pressed element: "+((Component)tmpNode.getElement()).getName());
-		  System.out.println("e.getLocation: "+e.getX()+"."+e.getY()+" - elemtn: "+((Component)tmpNode.getElement()).getBounds());			  
+
+		  /* ***DEBUG*** */
+		  if(debug) System.out.println("Testing for pressed element: "+((Component)tmpNode.getElement()).getName()
+				  	+"\ne.getLocation: "+e.getX()+"."+e.getY()+" - elemtn: "+((Component)tmpNode.getElement()).getBounds());			  
+		  /* ***DEBUG*** */
+
 		  if (((Component)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY())){
-			System.out.println("Pressed point got by element: "+((Component)tmpNode.getElement()).getName());
+
+			/* ***DEBUG*** */
+			if(debug) System.out.println("Pressed point got by element: "+((Component)tmpNode.getElement()).getName());
+			/* ***DEBUG*** */
+
 			editorView.setLastPositionX(e.getX());
 			editorView.setLastPositionY(e.getY());
 			
 			//mouse pressed on an element of the group selection
 			if(editorView.getSelectionGroup().contains(tmpNode.getElement())){
-			  System.out.println("Mouse Pressed on a selection group element!");
-			  editorView.setActiveItem(activeItems.DRAGGING_SELECTION_GROUP);
-//			  EditorView.moveSelectionGroupToTop();			
+
+			  /* ***DEBUG*** */
+			  if(debug) System.out.println("Mouse Pressed on a selection group element!");
+			  /* ***DEBUG*** */
+
+			  editorView.setActiveItem(activeItems.DRAGGING_SELECTION_GROUP);	
 			  editorView.moveSelectionGroupToTop();					
 			  return;
 			}
@@ -338,18 +350,20 @@ public class EditorController implements
 			}
 			
 			//mouse pressed on a feature panel in the diagram panel
-			if(/*tmpNode.getElement().getClass().equals(FeaturePanel.class) &&*/
-					((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.featureNamePrefix) ){
+			if( ((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.featureNamePrefix) ){
 
 			  featurePanel=(FeaturePanel)tmpNode.getElement();
 			  featurePanelX=featurePanel.getX();
 			  featurePanelY=featurePanel.getY();
 			  anchorPanel=(JComponent)featurePanel.getComponentAt(e.getX()-featurePanelX, e.getY()-featurePanelY);
 			  anchorPanelName=anchorPanel.getName();
-			  System.out.println("Mouse pressed on "+featurePanel.getName()+", on anchor "+anchorPanelName);
+
+			  /* ***DEBUG*** */
+			  if(debug) System.out.println("Mouse pressed on "+featurePanel.getName()+", on anchor "+anchorPanelName);
+			  /* ***DEBUG*** */
 
 			  //mouse pressed on an anchor inside the feature panel
-			  if(anchorPanelName!=null &&/* anchorPanel.getClass().equals(AnchorPanel.class) &&*/
+			  if(anchorPanelName!=null &&
 				  ( anchorPanelName.startsWith(EditorView.startMandatoryNamePrefix) ||
 					anchorPanelName.startsWith(EditorView.endMandatoryNamePrefix)   || 
 					anchorPanelName.startsWith(EditorView.startOptionalNamePrefix)  ||
@@ -366,52 +380,76 @@ public class EditorController implements
 				if(otherEndFeaturePanel.getName().startsWith(EditorView.featureNamePrefix) ){
 				  if(anchorPanelName.startsWith(EditorView.startMandatoryNamePrefix) 
 					 || anchorPanelName.startsWith(EditorView.startOptionalNamePrefix) )
-//						editorModel.removeLink(featurePanel.getName(), otherEndFeaturePanel.getName());
 					editorModel.removeLink(featurePanel.getID(), ((FeaturePanel)otherEndFeaturePanel).getID());
 				  if(anchorPanelName.startsWith(EditorView.endMandatoryNamePrefix) 
 					 || anchorPanelName.startsWith(EditorView.endOptionalNamePrefix) ){
 					if (otherEnd.getName().startsWith(EditorView.startMandatoryNamePrefix) 
 						|| otherEnd.getName().startsWith(EditorView.startOptionalNamePrefix))
-//						  editorModel.removeLink(otherEndFeaturePanel.getName(), featurePanel.getName());
 					  editorModel.removeLink(((FeaturePanel)otherEndFeaturePanel).getID(), featurePanel.getID());
 					if (otherEnd.getName().startsWith(EditorView.altGroupNamePrefix)
 					    || otherEnd.getName().startsWith(EditorView.orGroupNamePrefix))
-//						  editorModel.removeFeatureFromGroup(otherEndFeaturePanel.getName(), featurePanel.getName(), otherEnd.getName());
 					  editorModel.removeFeatureFromGroup(((FeaturePanel)otherEndFeaturePanel).getID(),
 							  featurePanel.getID(), otherEnd.getName());
 				  }
 				}
-				//the other end is attached to a group not owned by a feature
+				//the other end is a group not owned by a feature
 				else if (otherEnd.getName().startsWith(EditorView.altGroupNamePrefix)
 					|| otherEnd.getName().startsWith(EditorView.orGroupNamePrefix))
-//					  editorModel.removeFeatureFromGroup(null, featurePanel.getName(), otherEnd.getName());
 				  editorModel.removeFeatureFromGroup(null, featurePanel.getID(), otherEnd.getName());
 
 				//the other end is not attached to any feature
-//				else EditorView.detachAnchor(featurePanel, anchorPanel);
 				else editorView.detachAnchor(featurePanel, anchorPanel);
 			  }
 			  //mouse pressed on a group inside the feature panel
-			  else if(anchorPanelName!=null /*&& anchorPanel.getClass().equals(GroupPanel.class)*/ &&
-					   ( anchorPanelName.startsWith(EditorView.altGroupNamePrefix) ||
-						 anchorPanelName.startsWith(EditorView.orGroupNamePrefix)    ) ){
+			  else if(anchorPanelName!=null &&
+					  ( anchorPanelName.startsWith(EditorView.altGroupNamePrefix) ||
+						anchorPanelName.startsWith(EditorView.orGroupNamePrefix) ) ){
 
 				editorView.setActiveItem(activeItems.DRAGGING_EXTERN_GROUP);
 				editorView.setLastAnchorFocused(anchorPanel);
 				editorView.setLastFeatureFocused(featurePanel);
 				
 				//the group has no members
-//				if(((GroupPanel)anchorPanel).getMembers().size()==0)EditorView.detachAnchor(featurePanel, anchorPanel);
 				if(((GroupPanel)anchorPanel).getMembers().size()==0) editorView.detachAnchor(featurePanel, anchorPanel);
 				//the group has members				
-//				else editorModel.removeGroupFromFeature(featurePanel.getName(), anchorPanel.getName());
 				else editorModel.removeGroupFromFeature(featurePanel.getID(), anchorPanel.getName());
 			  }
-			  //mouse directly pressed on a feature panel, not on an inner anchor
+			  //mouse pressed on a constraint inside the feature panel
+			  else if(anchorPanelName!=null &&
+					  (  anchorPanelName.startsWith(EditorView.startIncludesNamePrefix) ||
+						 anchorPanelName.startsWith(EditorView.endIncludesNamePrefix)   ||
+						 anchorPanelName.startsWith(EditorView.startExcludesNamePrefix) ||
+						 anchorPanelName.startsWith(EditorView.endExcludesNamePrefix) ) ){
+				  
+				otherEnd=((ConstraintPanel)anchorPanel).getOtherEnd();
+				otherEndFeaturePanel=(JComponent)otherEnd.getParent();
+				  
+				editorView.setActiveItem(activeItems.DRAGGING_EXTERN_CONSTRAINT);
+				editorView.setLastAnchorFocused(anchorPanel);
+				editorView.setLastFeatureFocused(featurePanel);
+				System.out.println("Trying to remove a constraint");
+				//the other end of the constraint is attached to a feature panel
+				if(otherEndFeaturePanel.getName().startsWith(EditorView.featureNamePrefix) ){
+			      if(anchorPanelName.startsWith(EditorView.startIncludesNamePrefix))
+					editorModel.removeConstraint(featurePanel.getID(),
+						((FeaturePanel)otherEndFeaturePanel).getID(), ConstraintTypes.INCLUDES);
+			      if(anchorPanelName.startsWith(EditorView.endIncludesNamePrefix))
+					editorModel.removeConstraint(((FeaturePanel)otherEndFeaturePanel).getID(),
+							featurePanel.getID(), ConstraintTypes.INCLUDES);
+			      if(anchorPanelName.startsWith(EditorView.startExcludesNamePrefix))
+					editorModel.removeConstraint(featurePanel.getID(),
+						((FeaturePanel)otherEndFeaturePanel).getID(), ConstraintTypes.EXCLUDES);
+			      if(anchorPanelName.startsWith(EditorView.endExcludesNamePrefix))
+					editorModel.removeConstraint(((FeaturePanel)otherEndFeaturePanel).getID(),
+							featurePanel.getID(), ConstraintTypes.EXCLUDES);
+				}
+				else editorView.detachAnchor(featurePanel, anchorPanel);
+					
+			  }
+			  //mouse directly pressed on a feature panel, not on an inner element
 			  else{
 				editorView.setActiveItem(activeItems.DRAGGING_FEATURE);
-				editorView.setLastFeatureFocused((FeaturePanel)tmpNode.getElement());   
-//				EditorView.moveComponentToTop(editorView.getLastFeatureFocused());
+				editorView.setLastFeatureFocused((FeaturePanel)tmpNode.getElement());  
 				editorView.moveComponentToTop(editorView.getLastFeatureFocused());
 			  }
 			}
@@ -423,25 +461,31 @@ public class EditorController implements
 					((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.endOptionalNamePrefix) ) ){
 			  editorView.setActiveItem(activeItems.DRAGGING_EXTERN_ANCHOR);
 			  editorView.setLastAnchorFocused((AnchorPanel)tmpNode.getElement());
-//			  EditorView.moveComponentToTop(editorView.getLastAnchorFocused());
 			  editorView.moveComponentToTop(editorView.getLastAnchorFocused());
 			}
 			//mouse directly pressed on a group panel in the diagram panel
 			else if(/*tmpNode.getElement().getClass().equals(GroupPanel.class) &&*/
-					//lastAnchorFocused?
-					((GroupPanel)tmpNode.getElement()).getName().startsWith(EditorView.altGroupNamePrefix) ||
-					((GroupPanel)tmpNode.getElement()).getName().startsWith(EditorView.orGroupNamePrefix) ){
+					((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.altGroupNamePrefix) ||
+					((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.orGroupNamePrefix) ){
 			  editorView.setActiveItem(activeItems.DRAGGING_EXTERN_GROUP);
 			  editorView.setLastAnchorFocused((GroupPanel)tmpNode.getElement());
-//			  EditorView.moveComponentToTop(editorView.getLastAnchorFocused());
+			  editorView.moveComponentToTop(editorView.getLastAnchorFocused());
+			}
+			//mouse directly pressed on a constraint panel in the diagram panel
+			else if( ((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.startExcludesNamePrefix) ||
+					 ((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.startIncludesNamePrefix)  ||
+					 ((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.endExcludesNamePrefix) ||
+					((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.endIncludesNamePrefix)){
+			  editorView.setActiveItem(activeItems.DRAGGING_EXTERN_CONSTRAINT);
+			  editorView.setLastAnchorFocused((ConstraintPanel)tmpNode.getElement());
 			  editorView.moveComponentToTop(editorView.getLastAnchorFocused());
 			}
 
 			/* ***DEBUG*** */
 			if (debug2){
-				System.out.println("Source dell'evento: "+e.getSource());
+				System.out.println("Event Source: "+e.getSource());
 				OrderedListNode printTmp=editorView.getVisibleOrderDraggables().getFirst();
-				System.out.println("Stampo l'ordine attuale nella lista, partendo da first.");
+				System.out.println("Printing draggables list from first:");
 				while(printTmp!=null){
 					System.out.println("-"+((Component)printTmp.getElement()).getName());							  
 					printTmp=printTmp.getNext();
@@ -456,7 +500,11 @@ public class EditorController implements
 
 		//mouse directly pressed on the diagram panel
 		if (editorView.getSelectionGroup().size()>0) editorView.getSelectionGroup().clear();	
-		System.out.println("editorView.getSelectionGroup().size(): "+editorView.getSelectionGroup().size());
+
+		/* ***DEBUG*** */
+		if(debug) System.out.println("editorView.getSelectionGroup().size(): "+editorView.getSelectionGroup().size());
+		/* ***DEBUG*** */
+
 		editorView.setStartSelectionRect(e.getLocationOnScreen().getLocation());
 //		editorView.setEndSelectionRect(e.getLocationOnScreen().getLocation());
 
@@ -464,7 +512,10 @@ public class EditorController implements
 				e.getLocationOnScreen().getLocation());  	  
 
 		editorView.setActiveItem(activeItems.DRAGGING_SELECTION_RECT);
-		System.out.println("Mouse pressed on: "+((Component)e.getSource()).getName());
+
+		/* ***DEBUG*** */
+		if(debug2) System.out.println("Mouse pressed on: "+((Component)e.getSource()).getName());
+		/* ***DEBUG*** */
 
       }
 	  //event originated from the toolbar
@@ -527,26 +578,26 @@ public class EditorController implements
 	public void mouseReleased(MouseEvent e) {
 	  //event originated from the diagram panel
       if( ((Component)e.getSource()).getName().startsWith(EditorView.diagramPanelName) )
-//	  if(containsPoint(editorView.getDiagramPanel(), e.getLocationOnScreen()))
 		switch(editorView.getActiveItem()){
 		  case DRAGGING_FEATURE:
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
 			  editorView.setLastFeatureFocused(null); break;
 		  case DRAGGING_EXTERN_ANCHOR:
 			  dropAnchor(e);
-//			  EditorView.dropAnchorOnDiagram(e);
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
 			  editorView.setLastAnchorFocused(null); break;
 		  case DRAGGING_EXTERN_GROUP:
 			  dropGroup(e);
-//			  EditorView.dropGroupOnDiagram(e);
+			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+			  editorView.setLastAnchorFocused(null); break;
+		  case DRAGGING_EXTERN_CONSTRAINT:
+			  dropConstraint(e);
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
 			  editorView.setLastAnchorFocused(null); break;
 		  case DRAGGING_SELECTION_RECT:
 			  dropSelectionRectangle(e);
-//			  EditorView.dropGroupOnDiagram(e);
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
-			  /*editorView.setLastAnchorFocused(null);*/ break;
+			  break;
 		  case DRAGGING_SELECTION_GROUP:
 			  System.out.println("released group drag!");
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
@@ -748,7 +799,7 @@ public class EditorController implements
 //    	}
     	
     	/* ***DEBUG*** */
-    	if(debug){
+    	if(debug5){
     	  System.out.println("\n\nPRINTING VISIBLE ORDER DRAGGABLES");
     	  OrderedListNode drag = editorView.getVisibleOrderDraggables().getFirst();
     	  while(drag!=null){
@@ -886,21 +937,24 @@ public class EditorController implements
 	 */
 	private void dropAnchor(MouseEvent e) {
 		GroupTypes type=null;
-//		Component comp=EditorView.dropAnchorOnDiagram(e);
 		Component comp=editorView.dropAnchorOnDiagram(e);
-		if (comp!=null) System.out.println("comp= "+comp.getName());
+		if (comp!=null) System.out.println("comp.getName()= "+comp.getName());
 		JComponent anchor=editorView.getLastAnchorFocused();
 		JComponent otherEnd=((AnchorPanel)anchor).getOtherEnd();
 		//anchor dropped directly on the diagram panel
 		if (comp==null) return;
 		//anchor directly dropped on a feature inside the diagram panel
 		else if (comp.getName().startsWith(EditorView.featureNamePrefix)){
+		  System.out.println("anchor.getName()= "+anchor.getName()
+				  			+"\notherEnd.getParent().getName(): "+otherEnd.getParent().getName());
 			
-		  if(anchor.getName().startsWith(EditorView.endMandatoryNamePrefix)||
-			 anchor.getName().startsWith(EditorView.endOptionalNamePrefix)){
+		  if( anchor.getName().startsWith(EditorView.endMandatoryNamePrefix)||
+			  anchor.getName().startsWith(EditorView.endOptionalNamePrefix) ){
+			System.out.println("otherEnd.getName(): "+otherEnd.getName());
+			System.out.println("otherEnd.getParent().getName(): "+otherEnd.getParent().getName());
 			if( ( otherEnd.getName().startsWith(EditorView.startMandatoryNamePrefix)
-				 || anchor.getName().startsWith(EditorView.startOptionalNamePrefix) ) 
-				&& otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix)){
+				 || otherEnd.getName().startsWith(EditorView.startOptionalNamePrefix) ) 
+				&& otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix) ){
 		      //about to link 2 features by a connector
 			  System.out.println("about to link 2 features by a connector_R");
 //			  editorModel.addMandatoryLink( (otherEnd.getParent().getName(), comp.getName() );
@@ -938,7 +992,7 @@ public class EditorController implements
 			if(anchor.getName().startsWith(EditorView.startMandatoryNamePrefix))				
 				editorModel.addMandatoryLink( ((FeaturePanel)comp).getID(),
 						((FeaturePanel)otherEnd.getParent()).getID() );
-			else if(anchor.getName().startsWith(EditorView.endOptionalNamePrefix))
+			else if(anchor.getName().startsWith(EditorView.startOptionalNamePrefix))
 				editorModel.addOptionalLink( ((FeaturePanel)comp).getID(),
 						((FeaturePanel)otherEnd.getParent()).getID() );
 
@@ -987,33 +1041,85 @@ public class EditorController implements
 	}
 
 	/**
-	 * Drops an anchor on the diagram, attaching it to the underlying component, if any.
+	 * Drops a group on the diagram, attaching it to the underlying component, if any.
 	 * 
 	 * @param e - MouseEvent of the type Mouse Released.
 	 */
 	private void dropGroup(MouseEvent e) {
-//		  Component comp=EditorView.dropGroupOnDiagram(e);
-		  Component comp=editorView.dropGroupOnDiagram(e);
+	  Component comp=editorView.dropGroupOnDiagram(e);
 	  if (comp!=null) System.out.println("comp= "+comp.getName());
 	  GroupPanel group=(GroupPanel)editorView.getLastAnchorFocused();
 	  
-	  //anchor dropped directly on the diagram panel
+	  //group dropped directly on the diagram panel
 	  if (comp==null) return;
-	  //anchor dropped on a feature inside the diagram panel
+	  //group dropped on a feature inside the diagram panel
 	  else if (comp.getName().startsWith(EditorView.featureNamePrefix)){
 		  
 		//the group has no members
 		if (group.getMembers().size()==0 ){
-//			  EditorView.addAnchorToFeature(); return;
 		  editorView.addAnchorToFeature(); return;
 		}
 		else{
 		  //about to add group to the feature comp
 		  System.out.println("about to add a group to a feature");
-//		  editorModel.addGroupToFeature( comp.getName(), group.getName() );
 		  editorModel.addGroupToFeature( ((FeaturePanel)comp).getID(), group.getName() );
 		  return;
 			
+		}
+	  }
+	}
+
+	/**
+	 * Drops a constraint on the diagram, attaching it to the underlying component, if any.
+	 * 
+	 * @param e - MouseEvent of the type Mouse Released.
+	 */
+	private void dropConstraint(MouseEvent e) {
+	  Component comp=editorView.dropConstraintOnDiagram(e);
+	  if (comp!=null) System.out.println("comp= "+comp.getName());
+	  ConstraintPanel constraint=(ConstraintPanel)editorView.getLastAnchorFocused();
+	  
+	  //constraint dropped directly on the diagram panel
+	  if (comp==null) return;
+	  
+	  //constraint dropped on a feature inside the diagram panel
+	  else if (comp.getName().startsWith(EditorView.featureNamePrefix)){
+		  
+		  
+		if (constraint.getOtherEnd().getParent().getName().startsWith(EditorView.featureNamePrefix) ){
+		  //the constraint links two features
+		  System.out.println("about to add a constraint to the model");
+		  if(constraint.getName().startsWith(EditorView.startIncludesNamePrefix)){
+			editorModel.addConstraint(
+				((FeaturePanel)comp).getID(),
+				((FeaturePanel)constraint.getOtherEnd().getParent()).getID(), 
+				EditorModel.ConstraintTypes.INCLUDES);
+			return;
+		  }
+		  if(constraint.getName().startsWith(EditorView.endIncludesNamePrefix)){
+			editorModel.addConstraint(
+				((FeaturePanel)constraint.getOtherEnd().getParent()).getID(), 
+				((FeaturePanel)comp).getID(),
+				EditorModel.ConstraintTypes.INCLUDES);
+			return;
+		  }
+		  if(constraint.getName().startsWith(EditorView.startExcludesNamePrefix)){
+			editorModel.addConstraint(
+				((FeaturePanel)comp).getID(),
+				((FeaturePanel)constraint.getOtherEnd().getParent()).getID(), 
+				EditorModel.ConstraintTypes.EXCLUDES);
+			return;
+		  }
+		  if(constraint.getName().startsWith(EditorView.endExcludesNamePrefix)){
+			editorModel.addConstraint(
+				((FeaturePanel)constraint.getOtherEnd().getParent()).getID(), 
+				((FeaturePanel)comp).getID(),
+				EditorModel.ConstraintTypes.EXCLUDES);
+			return;
+		  }
+		}
+		else{
+		  editorView.addAnchorToFeature(); return;
 		}
 	  }
 	}

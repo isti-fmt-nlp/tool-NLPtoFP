@@ -214,6 +214,8 @@ public class EditorView extends JFrame implements Observer{
 	public static String startExcludesNamePrefix="---START_EXCLUDES---#";
 	/** prefix of any connector ending dot name*/
 	public static String endExcludesNamePrefix="---END_EXCLUDES---#";
+	/** prefix of any constraint control point dot name*/
+	public static String constraintControlPointNamePrefix="---CONSTRAINT_CONTROL_POINT---#";
 	/** prefix of any group Alternative Gtarting dot name*/
 	public static String altGroupNamePrefix="---ALT_GROUP---#";
 	/** prefix of any Or Group starting dot name*/
@@ -251,7 +253,7 @@ public class EditorView extends JFrame implements Observer{
 	/** enumeration of items that can become active, for instance in a drag motion*/
 	public static enum activeItems {
 		NO_ACTIVE_ITEM, DRAGGING_FEATURE, DRAGGING_EXTERN_ANCHOR, DRAGGING_EXTERN_GROUP,
-		DRAGGING_SELECTION_RECT, DRAGGING_SELECTION_GROUP, 
+		DRAGGING_EXTERN_CONSTRAINT, DRAGGING_SELECTION_RECT, DRAGGING_SELECTION_GROUP, 
 		DRAGGING_TOOL_NEWFEATURE, DRAGGING_TOOL_MANDATORY_LINK, DRAGGING_TOOL_OPTIONAL_LINK, 
 		DRAGGING_TOOL_ALT_GROUP, DRAGGING_TOOL_OR_GROUP, DRAGGING_TOOL_INCLUDES, DRAGGING_TOOL_EXCLUDES
 	}
@@ -311,17 +313,19 @@ public class EditorView extends JFrame implements Observer{
 	private JMenuItem menuModifyBasicFM=null, menuModifyAdvancedFM=null;
 		
 	
-	/** Current amount of connector dots in the diagram panel*/
+	/** Number of connector dots created*/
 	private int connectorsCount=0;
-	/** Current amount of includes constraint dots in the diagram panel*/
+	/** Number of includes constraint dots created*/
 	private int includesCount=0;
-	/** Current amount of excludes constraint dots in the diagram panel*/
+	/** Number of excludes constraint dots created*/
 	private int excludesCount=0;
-	/** Current amount of Alternative Groups in the diagram panel*/
+	/** Number of constraint control point dots created*/
+	private int constraintControlsCount=0;
+	/** Number of Alternative Groups created*/
 	private int altGroupsCount=0;
-	/** Current amount of Or Groups in the diagram panel*/
+	/** Number of Or Groups created*/
 	private int orGroupsCount=0;
-	/** Current amount of features in the diagram panel*/
+	/** Number of features created*/
 	private int featuresCount=0;
 	
 	/** List of all connector ending dots,
@@ -801,15 +805,18 @@ public class EditorView extends JFrame implements Observer{
 		drawGroupList(g2, orGroupPanels, true);
 		
 		//drawing constraints
+		g2.setColor(Color.BLACK);
 		for (int i=0; i< startIncludesDots.size(); ++i){
+		  g2.setStroke(new BasicStroke());
 		  drawConstraint(g2, getVisibleStartAnchorCenter(startIncludesDots.get(i)),
 			getVisibleStartAnchorCenter(((ConstraintPanel)startIncludesDots.get(i)).getOtherEnd()), 
-			((ConstraintPanel)startIncludesDots.get(i)).getControlPoint().getLocation());
+			((ConstraintPanel)startIncludesDots.get(i)).getControlPoint().getLocation(), ItemsType.START_INCLUDES_DOT);
 		}
 		for (int i=0; i< startExcludesDots.size(); ++i){
+		  g2.setStroke(new BasicStroke());
 		  drawConstraint(g2, getVisibleStartAnchorCenter(startExcludesDots.get(i)),
 			getVisibleStartAnchorCenter(((ConstraintPanel)startExcludesDots.get(i)).getOtherEnd()), 
-			((ConstraintPanel)startExcludesDots.get(i)).getControlPoint().getLocation());
+			((ConstraintPanel)startExcludesDots.get(i)).getControlPoint().getLocation(), ItemsType.START_EXCLUDES_DOT);
 		}
 	}
 
@@ -882,123 +889,80 @@ public class EditorView extends JFrame implements Observer{
 	 * @param end - end point of constraint
 	 * @param control - control point of constraint
 	 */
-	private void drawConstraint(Graphics2D g2d, Point2D start, Point2D end, Point control) {
-		Point2D intersectionPoint=null;
-		Line2D intersectionSide=null;
+	private void drawConstraint(Graphics2D g2d, Point2D start, Point2D end, Point control, ItemsType type) {
+//		Line2D intersectionSide=null;
+	    int radius=0;
+	    int intersectAngle=0;
+	    int startAngle=0;
+	    int endAngle=0;
+	    Point2D trianglePoint1=null;
+	    Point2D trianglePoint2=null;
+	    int x1Points[]=null;
+	    int y1Points[]=null;
+	    Point2D intersectionPoint=null;
+	    GeneralPath polygon=null;
+	    Line2D.Double endLine=null;
+	    Rectangle camera=null;
+	    
 	    // create new QuadCurve2D.Float
 	    QuadCurve2D quadcurve = new QuadCurve2D.Float();
 	    // draw QuadCurve2D.Float with set coordinates
 	    quadcurve.setCurve(start.getX(), start.getY(), control.getX(), control.getY(), end.getX(), end.getY());
 
-	    Rectangle camera=new Rectangle((int)end.getX()-20, (int)end.getY()-20, 40, 40);
-	    Line2D.Double endLine=new Line2D.Double(control, end);
+	    camera=new Rectangle((int)end.getX()-20, (int)end.getY()-20, 40, 40);
+	    endLine=new Line2D.Double(control, end);
 	    
-	    //getting intersection point
-	    if(control.x>=camera.x && control.x<=camera.x+camera.width){
-	      if(control.y>=camera.y){//control point is directly over the camera
-	    	intersectionSide=
-	    	  new Line2D.Double(camera.x, camera.y, camera.x+camera.width, camera.y);
-	    	intersectionPoint=getIntersectionPoint(endLine, intersectionSide);
-	      }
-	      else if(control.y<=camera.y){//control point is directly below the camera
-	      	intersectionSide=
-	      	  new Line2D.Double(camera.x, camera.y+camera.height, camera.x+camera.width, camera.y+camera.height);
-	      	intersectionPoint=getIntersectionPoint(endLine, intersectionSide);    	  
-	      }
-	    }
-	    else if(control.y>=camera.y && control.y<=camera.y+camera.height){
-	      if(control.x<=camera.x){//control point is directly at left of the camera
-	        intersectionSide=
-	        	new Line2D.Double(camera.x, camera.y, camera.x, camera.y+camera.height);
-	        intersectionPoint=getIntersectionPoint(endLine, intersectionSide);
-	      }
-	      else if(control.x<=camera.x){//control point is directly at right of the camera
-	        intersectionSide=
-	        	new Line2D.Double(camera.x+camera.width, camera.y, camera.x+camera.width, camera.y+camera.height);
-	        intersectionPoint=getIntersectionPoint(endLine, intersectionSide);    	  
-	      }    	
-	    }
-	    else if(control.x<camera.x){
-	      if(control.y<camera.y){//control point is in a top-left position respect to the camera
-	        intersectionSide=//trying the top side
-	        	new Line2D.Double(camera.x, camera.y, camera.x+camera.width, camera.y);
-	        intersectionPoint=getIntersectionPoint(endLine, intersectionSide);   
-	        if(intersectionPoint==null){//trying the left side
-	          intersectionSide=
-	        	new Line2D.Double(camera.x, camera.y, camera.x, camera.y+camera.height);
-	          intersectionPoint=getIntersectionPoint(endLine, intersectionSide);           	
-	        }    	  
-	      }
-	      else if(control.y>camera.y+camera.height){//control point is in a bottom-left position respect to the camera
-	    	intersectionSide=//trying the bottom side
-	    	    new Line2D.Double(camera.x, camera.y+camera.height, camera.x+camera.width, camera.y+camera.height);
-	    	intersectionPoint=getIntersectionPoint(endLine, intersectionSide);   
-	    	if(intersectionPoint==null){//trying the left side
-	    	  intersectionSide=
-	    		new Line2D.Double(camera.x, camera.y, camera.x, camera.y+camera.height);
-	    	  intersectionPoint=getIntersectionPoint(endLine, intersectionSide);           	
-	    	}    	      	  
-	      }
-	    }
-	    else if(control.x>camera.x){
-	      if(control.y<camera.y){//control point is in a top-right position respect to the camera
-	      	intersectionSide=//trying the top side
-	            new Line2D.Double(camera.x, camera.y, camera.x+camera.width, camera.y);
-	      	intersectionPoint=getIntersectionPoint(endLine, intersectionSide);   
-	      	if(intersectionPoint==null){//trying the right side
-	          intersectionSide=
-	        	new Line2D.Double(camera.x+camera.width, camera.y, camera.x+camera.width, camera.y+camera.height);
-	          intersectionPoint=getIntersectionPoint(endLine, intersectionSide);           	
-	      	}    	      	        	  
-	      }
-	      else if(control.y>camera.y+camera.height){//control point is in a bottom-right position respect to the camera
-	      	intersectionSide=//trying the bottom side
-	      		new Line2D.Double(camera.x, camera.y+camera.height, camera.x+camera.width, camera.y+camera.height);
-	      	intersectionPoint=getIntersectionPoint(endLine, intersectionSide);   
-	      	if(intersectionPoint==null){//trying the right side
-	      	  intersectionSide=
-	            new Line2D.Double(camera.x+camera.width, camera.y, camera.x+camera.width, camera.y+camera.height);
-	      	  intersectionPoint=getIntersectionPoint(endLine, intersectionSide);
-	      	}    	      	      	  
-	      }
-	    }
-	    else{//control is inside of camera, getIntersectionPoint is arbitrary
-	   	  intersectionPoint=new Point2D.Double(camera.x, camera.y+camera.height/2);    	
-	    }
+	    //getting intersection point between camera and endLine
+		intersectionPoint = getTriangleTipPoint(control, camera, endLine);
 	    
+	    if(intersectionPoint==null){
+	      System.out.println("drawConstraint(): intersectionPoint is null!");
+	      intersectionPoint=new Point2D.Double(
+					end.getX()-20>0 ? end.getX()-20 : end.getX()+20, 
+		  			end.getY()-20>0 ? end.getY()-20 : end.getY()+20);
+	    }
 //	    System.out.println("intersectionPoint: "+intersectionPoint);
 	    
 //	    Point2D[] intersectPoints=getIntersectionPoint(endLine, camera);
 //	    for(Point2D p : intersectPoints) System.out.println("Point: "+p);
 //	    for(Point2D p : intersectPoints) if(p!=null) intersectionPoint=p;
 	    
-	    int radius=(int)Point2D.distance( intersectionPoint.getX(), intersectionPoint.getY(), end.getX(), end.getY());
+	    radius=(int)Point2D.distance( intersectionPoint.getX(), intersectionPoint.getY(), end.getX(), end.getY());
 
-	    int intersectAngle =getDegreeAngle(end.getX(), end.getY(), intersectionPoint.getX(), intersectionPoint.getY(), radius);
+	    intersectAngle =getDegreeAngle(end.getX(), end.getY(), intersectionPoint.getX(), intersectionPoint.getY(), radius);
 
-	    int startAngle=intersectAngle-15;
-	    int endAngle=intersectAngle+15;
+	    startAngle=intersectAngle-15;
+	    endAngle=intersectAngle+15;
 	    
 //	    System.out.println("startAngle="+startAngle+"\tendAngle="+endAngle);
 	    
-//	    Point2D trianglePoint1=getPointFromAngle(end, startAngle, radius);
-//	    Point2D trianglePoint2=getPointFromAngle(end, endAngle, radius);
-	    Point2D trianglePoint1=getPointFromAngle(end, -startAngle, radius);
-	    Point2D trianglePoint2=getPointFromAngle(end, -endAngle, radius);
+//	    trianglePoint1=getPointFromAngle(end, startAngle, radius);
+//	    trianglePoint2=getPointFromAngle(end, endAngle, radius);
+	    trianglePoint1=getPointFromAngle(end, -startAngle, radius);
+	    trianglePoint2=getPointFromAngle(end, -endAngle, radius);
 	    
-	 // draw GeneralPath (polygon)
-	    int x1Points[] = {(int)trianglePoint1.getX(), (int)trianglePoint2.getX(), (int)end.getX(), (int)trianglePoint1.getX()};
-	    int y1Points[] = {(int)trianglePoint1.getY(), (int)trianglePoint2.getY(), (int)end.getY(), (int)trianglePoint1.getY()};
-	    GeneralPath polygon = new GeneralPath(GeneralPath.WIND_EVEN_ODD, x1Points.length);
+	    // draw GeneralPath (polygon)
+	    x1Points = new int[4];
+	    x1Points[0]=(int)trianglePoint1.getX();
+	    x1Points[1]=(int)trianglePoint2.getX();
+	    x1Points[2]=(int)end.getX();
+	    x1Points[3]=(int)trianglePoint1.getX();
+	    
+	    y1Points = new int[4];	    
+	    y1Points[0]=(int)trianglePoint1.getY();
+	    y1Points[1]=(int)trianglePoint2.getY();
+	    y1Points[2]=(int)end.getY();
+	    y1Points[3]=(int)trianglePoint1.getY();
+	    
+	    polygon = new GeneralPath(GeneralPath.WIND_EVEN_ODD, x1Points.length);
 	    polygon.moveTo(x1Points[0], y1Points[0]);
 
 	    for (int index = 1; index < x1Points.length; index++) polygon.lineTo(x1Points[index], y1Points[index]);
-	    polygon.closePath();
 	    
-	    g2d.setColor(Color.BLACK);
 	    
-	    g2d.fill(polygon);
 //	    g2d.draw(polygon);
+//	    g2d.draw(endLine);
+//	    if(intersectionSide!=null) g2d.draw(intersectionSide);
 	    
 	    g2d.setStroke( new BasicStroke(
 			 	1.5f/*Line width*/,
@@ -1009,10 +973,162 @@ public class EditorView extends JFrame implements Observer{
 				0f/*dash phase*/) ); 
 
 	    g2d.draw(quadcurve);
+	    
+	    if(type==ItemsType.START_INCLUDES_DOT){
+	      g2d.setColor(Color.BLUE);
+	      g2d.fill(polygon);
+		  g2d.setColor(Color.BLACK);
+		  return;
+	    }
+	    else{
+		  g2d.setColor(Color.RED);
+		  g2d.fill(polygon);	    	
+	    }
+
+//	    g2d.draw(camera);
+//	    g2d.fillArc((int)intersectionPoint.getX()-5, (int)intersectionPoint.getY()-5, 10, 10, 0, 360);
+
+	    
+//	    System.out.println("Intersection Point="+intersectionPoint
+//	    				  +"\ncamera="+camera);		
+	    
+//	    g2d.setColor(Color.RED);
 //	    g2d.fillArc((int)start.getX()-5, (int)start.getY()-5, 10, 10, 0, 360);
 //	    g2d.fillArc((int)end.getX()-5, (int)end.getY()-5, 10, 10, 0, 360);
 //	    g2d.fillArc((int)control.x-5, (int)control.y-5, 10, 10, 0, 360);
+	    
+	    //this is an excludes constraint, the starting triangle will be drawn also
+	    camera=new Rectangle((int)start.getX()-20, (int)start.getY()-20, 40, 40);
+	    endLine=new Line2D.Double(control, start);
+
+	    intersectionPoint = getTriangleTipPoint(control, camera, endLine);
+	    
+	    if(intersectionPoint==null){
+	      System.out.println("drawConstraint2(): intersectionPoint is null!");
+	      intersectionPoint=new Point2D.Double(
+	    		  start.getX()-20>0 ? end.getX()-20 : start.getX()+20, 
+	    		  start.getY()-20>0 ? end.getY()-20 : start.getY()+20);
+	    }
+	    
+	    radius=(int)Point2D.distance( intersectionPoint.getX(), intersectionPoint.getY(), start.getX(), start.getY());
+
+	    intersectAngle =getDegreeAngle(start.getX(), start.getY(), intersectionPoint.getX(), intersectionPoint.getY(), radius);
+
+	    startAngle=intersectAngle-15;
+	    endAngle=intersectAngle+15;
+	    
+	    trianglePoint1=getPointFromAngle(start, -startAngle, radius);
+	    trianglePoint2=getPointFromAngle(start, -endAngle, radius);
+	    
+	    // draw GeneralPath (polygon)
+	    x1Points = new int[4];
+	    x1Points[0]=(int)trianglePoint1.getX();
+	    x1Points[1]=(int)trianglePoint2.getX();
+	    x1Points[2]=(int)start.getX();
+	    x1Points[3]=(int)trianglePoint1.getX();
+	    
+	    y1Points = new int[4];	    
+	    y1Points[0]=(int)trianglePoint1.getY();
+	    y1Points[1]=(int)trianglePoint2.getY();
+	    y1Points[2]=(int)start.getY();
+	    y1Points[3]=(int)trianglePoint1.getY();
+	    
+	    polygon = new GeneralPath(GeneralPath.WIND_EVEN_ODD, x1Points.length);
+	    polygon.moveTo(x1Points[0], y1Points[0]);
+
+	    for (int index = 1; index < x1Points.length; index++) polygon.lineTo(x1Points[index], y1Points[index]);
+	    
+	    g2d.fill(polygon);	
+
+	    g2d.setColor(Color.BLACK);
 	}
+
+	/**
+	 * Finds the intersection point between the Rectangle camera and the Line2d.Double endLine,
+	 *  starting at the point control.
+	 * 
+	 * @param control - the starting point of endLine
+	 * @param camera - the Rectangle used to calculate the intersection point
+	 * @param endLine - the Line2d.Double used to calculate the intersection point
+	 * @return
+	 */
+	private Point2D getTriangleTipPoint(Point control, Rectangle camera, Line2D.Double endLine) {
+		Line2D intersectionSide;
+		Point2D intersectionPoint=null;
+	    if(control.x>=camera.x && control.x<=camera.x+camera.width){
+	      if(control.y<=camera.y){//control point is directly over the camera
+	    	intersectionSide=
+	    	  new Line2D.Double(camera.x, camera.y, camera.x+camera.width, camera.y);
+	    	intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);
+	      }
+	      else if(control.y>=camera.y){//control point is directly below the camera
+	      	intersectionSide=
+	      	  new Line2D.Double(camera.x, camera.y+camera.height, camera.x+camera.width, camera.y+camera.height);
+	      	intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);    	  
+	      }
+	    }
+	    else if(control.y>=camera.y && control.y<=camera.y+camera.height){
+	      if(control.x<=camera.x){//control point is directly at left of the camera
+	        intersectionSide=
+	        	new Line2D.Double(camera.x, camera.y, camera.x, camera.y+camera.height);
+	        intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);
+	      }
+	      else if(control.x>=camera.x){//control point is directly at right of the camera
+	        intersectionSide=
+	        	new Line2D.Double(camera.x+camera.width, camera.y, camera.x+camera.width, camera.y+camera.height);
+	    	System.out.println("At right of camera, side="+intersectionSide);
+	        intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);    	  
+	      }    	
+	    }
+	    else if(control.x<camera.x){
+	      if(control.y<camera.y){//control point is in a top-left position respect to the camera
+	        intersectionSide=//trying the top side
+	        	new Line2D.Double(camera.x, camera.y, camera.x+camera.width, camera.y);
+	        intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);   
+	        if(intersectionPoint==null){//trying the left side
+	          intersectionSide=
+	        	new Line2D.Double(camera.x, camera.y, camera.x, camera.y+camera.height);
+	          intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);           	
+	        }    	  
+	      }
+	      else if(control.y>camera.y+camera.height){//control point is in a bottom-left position respect to the camera
+	    	intersectionSide=//trying the bottom side
+	    	    new Line2D.Double(camera.x, camera.y+camera.height, camera.x+camera.width, camera.y+camera.height);
+	    	intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);   
+	    	if(intersectionPoint==null){//trying the left side
+	    	  intersectionSide=
+	    		new Line2D.Double(camera.x, camera.y, camera.x, camera.y+camera.height);
+	    	  intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);           	
+	    	}    	      	  
+	      }
+	    }
+	    else if(control.x>camera.x){
+	      if(control.y<camera.y){//control point is in a top-right position respect to the camera
+	      	intersectionSide=//trying the top side
+	            new Line2D.Double(camera.x, camera.y, camera.x+camera.width, camera.y);
+	      	intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);   
+	      	if(intersectionPoint==null){//trying the right side
+	          intersectionSide=
+	        	new Line2D.Double(camera.x+camera.width, camera.y, camera.x+camera.width, camera.y+camera.height);
+	          intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);           	
+	      	}    	      	        	  
+	      }
+	      else if(control.y>camera.y+camera.height){//control point is in a bottom-right position respect to the camera
+	      	intersectionSide=//trying the bottom side
+	      		new Line2D.Double(camera.x, camera.y+camera.height, camera.x+camera.width, camera.y+camera.height);
+	      	intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);   
+	      	if(intersectionPoint==null){//trying the right side
+	      	  intersectionSide=
+	            new Line2D.Double(camera.x+camera.width, camera.y, camera.x+camera.width, camera.y+camera.height);
+	      	  intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);
+	      	}    	      	      	  
+	      }
+	    }
+	    else{//control is inside of camera, the intersection point is arbitrary
+	   	  intersectionPoint=new Point2D.Double(camera.x, camera.y+camera.height/2);    	
+	    }
+		return intersectionPoint;
+	}	
 	
 	/**
 	 * Returns the point at startAngle degrees, given a circle centered in center with radius radius.
@@ -1387,7 +1503,7 @@ public class EditorView extends JFrame implements Observer{
      * @param lineB - line B
      * @return the intersection point of lineA and lineB, if any, null otherwise
      */
-    public Point2D getIntersectionPoint(Line2D lineA, Line2D lineB) {
+    public Point getIntersectionPoint3(Line2D lineA, Line2D lineB){
         double x1 = lineA.getX1();
         double y1 = lineA.getY1();
         double x2 = lineA.getX2();
@@ -1396,27 +1512,131 @@ public class EditorView extends JFrame implements Observer{
         double x3 = lineB.getX1();
         double y3 = lineB.getY1();
         double x4 = lineB.getX2();
-        double y4 = lineB.getY2();
+        double y4 = lineB.getY2();		  
+    		  
+    	double d = (x1-x2)*(y3-y4) - (y1-y2)*(x3-x4);
+    	if (d == 0.){
+    	  System.out.println("d==0");
+    	  return null;
+    	}
 
-        Point2D p = null;
-        
-        double d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-        if (d != 0) {//RETTE NON PARALLELE
-            double xi = ((x3 - x4) * (x1 * y2 - y1 * x2) - (x1 - x2) * (x3 * y4 - y3 * x4)) / d;
-            double yi = ((y3 - y4) * (x1 * y2 - y1 * x2) - (y1 - y2) * (x3 * y4 - y3 * x4)) / d;
+    	int xi = (int)(((x3-x4)*(x1*y2-y1*x2)-(x1-x2)*(x3*y4-y3*x4))/d);
+    	int yi = (int)(((y3-y4)*(x1*y2-y1*x2)-(y1-y2)*(x3*y4-y3*x4))/d);
 
-            p = new Point2D.Double(xi, yi);
+    	Point p = new Point(xi,yi);
+    	if (xi < Math.min(x1,x2) || xi > Math.max(x1,x2)) return null;
+    	if (xi < Math.min(x3,x4) || xi > Math.max(x3,x4)) return null;
 
-        }
+    	return p;
+      }
+    
+    //if they're parallel to each other and they're not horizontal or vertical.
+    /**
+     * Returns a Point2D representing the intersection point of segments lineA and lineB,
+     * or null if there is no intersection.<br>
+     * If the two segments overlap, the intersection point is considered to be the end point of lineB<br>
+     * owned by both lines. If one of the segment is a sub-segment of the other, one of the two end point of<br>
+     * lineB is returned, without any assumption. 
+     * 
+     * @param lineA - line A
+     * @param lineB - line B
+     * @return the intersection point of lineA and lineB, if any, null otherwise
+     */
+    public Point getIntersectionPoint4(Line2D lineA, Line2D lineB){
+    	double t=0, u=0;
+    	Point p=null;
+    	
+        double x1 = lineA.getX1();
+        double y1 = lineA.getY1();
+        double x2 = lineA.getX2();
+        double y2 = lineA.getY2();
 
-        /* ***DEBUG*** */
-        if (debug2) System.out.println("Line1=(("+x1+"."+y1+"), ("+x2+"."+y2+"))"
-        							+"\nLine2=(("+x3+"."+y3+"), ("+x4+"."+y4+"))"
-        							+"\np="+p);
-        /* ***DEBUG*** */
+        double x3 = lineB.getX1();
+        double y3 = lineB.getY1();
+        double x4 = lineB.getX2();
+        double y4 = lineB.getY2();		  
+    		  
+        //using 2 variables(t and u) to calculate intersection based on line vectors
+        double tmpY4MinusY3=(y4-y3);
+        double tmpX4MinusX3=(x4-x3);
+        double tmpX1MinusX2=(x1-x2);
+        double tmpY2MinusY1=(y2-y1);
+        double tmpY3MinusY1=(y3-y1);
+    	double numerator=tmpY3MinusY1*tmpX4MinusX3+(x1-x3)*tmpY4MinusY3;
+    	double denominator =tmpY2MinusY1*tmpX4MinusX3+tmpX1MinusX2*tmpY4MinusY3; 
+    	
+    	if (denominator == 0.){//the two lines are parallel or overlapping
+    	  System.out.println("d=0");
+    	  //checking if the lines are vertical or horizontal
+    	  if(x1==x2){//lines are vertical
+    		if(y3<=y4){
+    		  if( (y1<y3 && y2<y3) || (y1>y4 && y2>y4)) return null;
+    		  if(y1<y3 || y2<y3) return new Point((int)x3, (int)y3);
+    		  else return new Point((int)x4, (int)y4);
+    		}
+    		else{
+    		  if( (y1<y4 && y2<y4) || (y1>y3 && y2>y3)) return null;
+    		  if(y1<y4 || y2<y4) return new Point((int)x4, (int)y4);
+    		  else  return new Point((int)x3, (int)y3);
+    		}
+    	  }
+    	  if(y1==y2){//lines are horizontal
+      		if(x3<=x4){
+      		  if( (x1<x3 && x2<x3) || (x1>x4 && x2>x4)) return null;
+    		  if(x1<x3 || x2<x3) return new Point((int)x3, (int)y3);
+    		  else return new Point((int)x4, (int)y4);      		  
+      		}
+      		else{
+      		  if( (x1<x4 && x2<x4) || (x1>x3 && x2>x3)) return null;
+    		  if(x1<x4 || x2<x4) return new Point((int)x4, (int)y4);
+    		  else return new Point((int)x3, (int)y3);      			
+      		}    		  
+    	  }
+    	  else{//lines are not horizontal nor vertical, checking the X-axis projections
+        	if(x3<=x4){
+              if( (x1<x3 && x2<x3) || (x1>x4 && x2>x4)) return null;
+              if(x1<x3 || x2<x3) return new Point((int)x3, (int)y3);
+              else return new Point((int)x4, (int)y4);      		  
+        	}
+        	else{
+        	  if( (x1<x4 && x2<x4) || (x1>x3 && x2>x3)) return null;
+        	  if(x1<x4 || x2<x4) return new Point((int)x4, (int)y4);
+        	  else return new Point((int)x3, (int)y3);      			
+        	}     		  
+    	  }
+    	}
 
-        return p;
-    }
+    	t=numerator/denominator;
+    	if(t<0. || t>1.) return null;//no intersection
+    	
+    	if(tmpY4MinusY3==0.){//lineB is horizontal, but lines are not parallel
+    		if( (int)(y1+t*tmpY2MinusY1)==(int)y4){
+              if(x3<=x4){
+            	if((int)(x1+t*(-tmpX1MinusX2))>=(int)x3 || (int)(x1+t*(-tmpX1MinusX2))<= (int)x4)
+            	  return new Point((int)(x1+t*(-tmpX1MinusX2)), (int)(y1+t*tmpY2MinusY1));
+              }
+              else{
+              	if((int)(x1+t*(-tmpX1MinusX2))>=(int)x4 || (int)(x1+t*(-tmpX1MinusX2))<= (int)x3)
+              	  return new Point((int)(x1+t*(-tmpX1MinusX2)), (int)(y1+t*tmpY2MinusY1));            	  
+              }
+    		}
+    		else return null;//no intersection
+    	}
+    	
+    	u=(-tmpY3MinusY1/tmpY4MinusY3)+t*tmpY2MinusY1/tmpY4MinusY3;
+    	
+    	if(u<0. || u>1.) return null;//no intersection
+    			
+    	int xi = (int)(x1+t*(-tmpX1MinusX2));
+    	int yi = (int)(y1+t*tmpY2MinusY1);
+    	
+    	p = new Point(xi,yi);
+    	System.out.println("t="+t+"\tu="+u
+    			+"\n-tmpY3MinusY1="+(-tmpY3MinusY1)+"\ttmpY4MinusY3="+tmpY4MinusY3
+    			+"\ntmpY2MinusY1="+(tmpY2MinusY1)+"\ttmpY4MinusY3="+tmpY4MinusY3
+    			+"\nPoint="+p);
+    	return p;
+      }
 	
 	/**
 	 * Returns a JComponent named name and containing the corresponding icon image, <br>
@@ -2074,13 +2294,16 @@ public class EditorView extends JFrame implements Observer{
 //			break;					  
 //		  }
 			
-		  //anchor dropped over a feature panel
+		  //anchor will be dropped over a feature panel
 		  if (((Component)tmpNode.getElement()).getName().startsWith(featureNamePrefix)){
 
-			//checking if an ending anchor has been dropped over a feature that already owns an ending anchor
-			if(lastAnchorFocused.getName().startsWith(endMandatoryNamePrefix)){
+			//checking if an ending anchor will be dropped over a feature that already owns an ending anchor
+			if(lastAnchorFocused.getName().startsWith(endMandatoryNamePrefix)
+			   || lastAnchorFocused.getName().startsWith(endOptionalNamePrefix)){
 			  for( Component child : ((FeaturePanel)tmpNode.getElement()).getComponents())
-				if (child.getName()!=null && child.getName().startsWith(endMandatoryNamePrefix)) return null;				
+				if (child.getName()!=null 
+				&& ( child.getName().startsWith(endMandatoryNamePrefix)
+					 || child.getName().startsWith(endOptionalNamePrefix) ) ) return null;				
 			}
 			
 //			underlyingPanel=(FeaturePanel)tmpNode.getElement();
@@ -2092,7 +2315,8 @@ public class EditorView extends JFrame implements Observer{
 			relativePosition = new Point((int)(anchorPanelOnScreenX-underlyingComponent.getLocationOnScreen().getX()),
 					(int)(anchorPanelOnScreenY-underlyingComponent.getLocationOnScreen().getY()) );	
 			  
-			if(lastAnchorFocused.getName().startsWith(startMandatoryNamePrefix)){
+			if( lastAnchorFocused.getName().startsWith(startMandatoryNamePrefix)
+			   || lastAnchorFocused.getName().startsWith(startOptionalNamePrefix) ){
 			  comp = underlyingComponent.getComponentAt(relativePosition);
 			  if (comp!=null && comp.getName()!=null && (comp.getName().startsWith(altGroupNamePrefix) 
 				  || comp.getName().startsWith(orGroupNamePrefix) )){
@@ -2110,8 +2334,9 @@ public class EditorView extends JFrame implements Observer{
 //			frameRoot.repaint();
 			return underlyingComponent;					  
 		  }
-		  //anchor dropped directly over the diagram panel
-		  if (lastAnchorFocused.getName().startsWith(startMandatoryNamePrefix) && 
+		  //anchor dropped directly over the diagram panel, checking if anchor must be added to a group
+		  if ( (lastAnchorFocused.getName().startsWith(startMandatoryNamePrefix)
+				|| lastAnchorFocused.getName().startsWith(startOptionalNamePrefix) ) && 
 			   (  ((Component)tmpNode.getElement()).getName().startsWith(altGroupNamePrefix)
 				|| ((Component)tmpNode.getElement()).getName().startsWith(orGroupNamePrefix)) ){
 			underlyingComponent=(JComponent)tmpNode.getElement();
@@ -2130,13 +2355,37 @@ public class EditorView extends JFrame implements Observer{
 	 * Drops a group on the diagram panel, adding it to the underlying feature panel, if any is present.
 	 * 
 	 * @param e - MouseEvent of the type Mouse Released.
+	 * @return - the group's underlying JComponent
 	 */
 	public Component dropGroupOnDiagram(MouseEvent e) {
 	  OrderedListNode tmpNode=visibleOrderDraggables.getFirst();
 	  while(tmpNode!=null){	  
-	    if (tmpNode.getElement().getClass().equals(FeaturePanel.class) 
-	    	&& ((FeaturePanel)tmpNode.getElement()).getName().startsWith(featureNamePrefix)
-	    	&& ((Component)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY()) ){			
+	    if (/*tmpNode.getElement().getClass().equals(FeaturePanel.class) 
+	    	&&*/ ((JComponent)tmpNode.getElement()).getName().startsWith(featureNamePrefix)
+	    	&& ((JComponent)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY()) ){			
+	      underlyingComponent=(JComponent)tmpNode.getElement();
+	      return underlyingComponent;
+//		  addAnchorToFeature(lastAnchorFocused, underlyingPanel);
+//		  frameRoot.repaint();
+//		  break;		
+	    }
+	    tmpNode=tmpNode.getNext();
+	  }				
+	  return null;
+	}
+
+	/**
+	 * Drops a constraint on the diagram panel, adding it to the underlying feature panel, if any is present.
+	 * 
+	 * @param e - MouseEvent of the type Mouse Released.
+	 * @return - the constraint's underlying JComponent
+	 */
+	public Component dropConstraintOnDiagram(MouseEvent e) {
+	  OrderedListNode tmpNode=visibleOrderDraggables.getFirst();
+	  while(tmpNode!=null){	  
+	    if (/*tmpNode.getElement().getClass().equals(FeaturePanel.class) 
+	    	&&*/ ((JComponent)tmpNode.getElement()).getName().startsWith(featureNamePrefix)
+	    	&& ((JComponent)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY()) ){			
 	      underlyingComponent=(JComponent)tmpNode.getElement();
 	      return underlyingComponent;
 //		  addAnchorToFeature(lastAnchorFocused, underlyingPanel);
@@ -2837,7 +3086,8 @@ public class EditorView extends JFrame implements Observer{
 			imagePanel = new JLabel(connectorIcon);
 			if(name!=null) imagePanel.setName(name);
 			else{
-			  imagePanel.setName(endMandatoryNamePrefix+connectorsCount);
+			  imagePanel.setName(constraintControlPointNamePrefix+constraintControlsCount);
+			  ++constraintControlsCount;
 			}
 			imagePanel.setBounds(x,  y, connectorIcon.getIconWidth(), connectorIcon.getIconHeight()+5);
 			
@@ -3124,6 +3374,8 @@ public class EditorView extends JFrame implements Observer{
   		   && ( comp.getName().startsWith(altGroupNamePrefix) || comp.getName().startsWith(orGroupNamePrefix) 
   				|| comp.getName().startsWith(endMandatoryNamePrefix) 
   				|| comp.getName().startsWith(startMandatoryNamePrefix)
+  				|| comp.getName().startsWith(endOptionalNamePrefix) 
+  				|| comp.getName().startsWith(startOptionalNamePrefix)
   			  ) ){
   		  detachAnchor((FeaturePanel)feature, (JComponent)comp);
   		}
@@ -3172,7 +3424,9 @@ public class EditorView extends JFrame implements Observer{
 	  else startDotlocationY=startDotlocationY+(anchor.getHeight()*2);
 	  
 	  startConnectorDot.setLocation(startDotlocationX, startDotlocationY);
-	  startConnectorDot.setName(startMandatoryNamePrefix+anchor.getName().substring(anchor.getName().indexOf("#")+1));
+	  if(anchor.getName().startsWith(startMandatoryNamePrefix))
+	    startConnectorDot.setName(startMandatoryNamePrefix+anchor.getName().substring(anchor.getName().indexOf("#")+1));
+	  else startConnectorDot.setName(startOptionalNamePrefix+anchor.getName().substring(anchor.getName().indexOf("#")+1));
 	  startConnectorDot.setOtherEnd(anchor);
 	  anchor.setOtherEnd(startConnectorDot);
 	  visibleOrderDraggables.addToTop(startConnectorDot);
@@ -3246,7 +3500,7 @@ public class EditorView extends JFrame implements Observer{
       	  visibleOrderDraggables.remove(anchor);
         }
 
-        if (anchor.getName().startsWith(startMandatoryNamePrefix)) startConnectorDots.remove(anchor);
+        /*if (anchor.getName().startsWith(startMandatoryNamePrefix))*/ startConnectorDots.remove(anchor);
         
 	}
 
@@ -3590,14 +3844,13 @@ public class EditorView extends JFrame implements Observer{
 		else if(arg.equals("New Named Feature Correctly Added")) addNamedFeatureToDiagram();		
 		else if(arg.equals("Feature Deleted")) deleteFeature(popUpElement);
 		else if(arg.equals("Group Deleted")) deleteGroup(popUpElement);
-		else if(arg.equals("Feature Not Deleted"))
-			System.out.println("Cannot delete this feature!");
-		else if(arg.equals("Grouped a Feature")
-			     || arg.equals("Two Features Directly Linked")){
-			addAnchorToFeature();
-		}
+		else if(arg.equals("Feature Not Deleted")) System.out.println("Cannot delete this feature!");
+		else if(arg.equals("Two Features Directly Linked")) addAnchorToFeature();
+		else if(arg.equals("Grouped a Feature") ) addAnchorToFeature();
 		else if(arg.equals("Group Added To Feature") ) addAnchorToFeature();	
 		else if(arg.equals("Merged a Connector") ) addStartAnchorToGroup();
+		else if(arg.equals("Constraint Added") ) addAnchorToFeature();
+		else if(arg.equals("Constraint Removed") ) detachAnchor(lastFeatureFocused, lastAnchorFocused);
 		else if(arg.equals("Not Grouped a Feature")
 			     || arg.equals("Two Features Not Linked")
 			     || arg.equals("Group Not Added To Feature")
@@ -3609,10 +3862,13 @@ public class EditorView extends JFrame implements Observer{
 			detachAnchor(lastFeatureFocused, lastAnchorFocused);
 		}
 		else if(arg.equals("Direct Link Not Destroyed")
-				|| arg.equals("Group Not Removed From Feature")){
+				|| arg.equals("Group Not Removed From Feature")
+				|| arg.equals("Constraint Not Added")
+				|| arg.equals("Constraint Not Removed")
+				|| arg.equals("Direct Link Not Destroyed") ){
 			resetActiveItems();
 		}
-		else if(arg.equals("Direct Link Not Destroyed") ) resetActiveItems();
+//		else if(arg.equals("Direct Link Not Destroyed") ) resetActiveItems();
 	}
 	
 	/** 

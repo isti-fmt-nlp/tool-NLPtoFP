@@ -69,6 +69,9 @@ public class EditorModel extends Observable{
 
 	/** enumeration used to specify a group type in the model*/
 	public static enum GroupTypes { ALT_GROUP, OR_GROUP, N_M_GROUP};
+
+	/** enumeration used to specify a group type in the model*/
+	public static enum ConstraintTypes { INCLUDES, EXCLUDES};
 	
 	/** Tells if the model has been modified after last save*/
 	private boolean modified=true;
@@ -76,14 +79,37 @@ public class EditorModel extends Observable{
 	/** root feature of the feature model*/
 	private FeatureNode featureRoot = null;
 	
-	/** feature nodes that are descendant of root */
-	private HashMap<String, FeatureNode> rootLinkedFeatures = new HashMap<String, FeatureNode>();
+//	/** feature nodes that are descendant of root */
+//	private HashMap<String, FeatureNode> rootLinkedFeatures = new HashMap<String, FeatureNode>();
 
 	/** feature nodes that are not descendant of root */
 	private HashMap<String, FeatureNode> unrootedFeatures = new HashMap<String, FeatureNode>();
 
-	/** groups in the diagram */
+	/** groups(with at least a member)*/
 	private HashMap<String, GroupNode> groups= new HashMap<String, GroupNode>();
+
+//	/** include constraints in the model */
+//	private HashMap<String, String> includeConstraints= new HashMap<String, String>();
+//
+//	/** exclude constraints in the model */
+//	private HashMap<String, String> excludeConstraints= new HashMap<String, String>();
+
+	/** constraints in the model, each element has 3 Strings in this order:
+	 *  constraint name, starting feature name, ending feature name */
+	private ArrayList<String[]> constraints= new ArrayList<String[]>();
+
+	/** prefix of any excludes constraint name*/
+	public static String excludesConstraintNamePrefix="---EXCLUDE---#";
+	
+	/** prefix of any includes constraint name*/
+	public static String includesConstraintNamePrefix="---INCLUDE---#";
+	
+	/** Number of includes constraint created*/
+	private int includesCount=0;
+	/** Number of excludes constraint created*/
+	private int excludesCount=0;
+	
+	
 
 	/**
 	 * Creates a new empty editor model.
@@ -340,6 +366,157 @@ public class EditorModel extends Observable{
 	}
 	
 	/**
+	 * Adds a constraint from startingFeature to endingFeature, if it is legal.<br>
+	 * 
+	 * @param startingFeature - the feature from which the constraint starts
+	 * @param endingFeature - the feature on which the constraint ends
+	 * @param type - a ConstraintTypes value representing the type of constraint
+	 */
+	public void addConstraint(String startingFeature, String endingFeature, ConstraintTypes type){
+	  FeatureNode starting= searchFeature(startingFeature);
+	  FeatureNode ending= searchFeature(endingFeature);
+	  String[] newConstraint=null;
+	  
+	  if ( starting==null || ending==null || starting==ending){
+		setChanged();
+		notifyObservers("Constraint Not Added");			
+		return;
+	  }
+
+	  switch(type){
+	    case INCLUDES:
+	      for(String[] strArr: constraints){
+		    if (strArr[1].compareTo(startingFeature)==0
+		    	&& strArr[2].compareTo(endingFeature)==0){//exclude or equivalent include already present
+		  	  setChanged();
+		  	  notifyObservers("Constraint Not Added");			
+		  	  return;	    	  
+		    }
+		    if (strArr[0].startsWith(excludesConstraintNamePrefix)
+		    	&& strArr[1].compareTo(endingFeature)==0
+		    	&& strArr[2].compareTo(startingFeature)==0){//exclude already present
+		      setChanged();
+		      notifyObservers("Constraint Not Added");
+		      return;	    	  
+		    }	    	  
+	      }
+//	      //multiple includes with the same orientation are not possible between two features
+//	      tmpID=includeConstraints.get(startingFeature);
+//	      if(tmpID!=null && tmpID.compareTo(endingFeature)==0){
+//	  		setChanged();
+//			notifyObservers("Constraint Not Added");			
+//			return;	    	  
+//	      }
+//	      //no excludes must be present between two features to add an includes
+//	      tmpID=excludeConstraints.get(startingFeature);
+//	      if(tmpID!=null && tmpID.compareTo(endingFeature)==0){
+//	  		setChanged();
+//			notifyObservers("Constraint Not Added");			
+//			return;	    	  
+//	      }
+	      break;
+	    case EXCLUDES:
+		  for(String[] strArr: constraints){
+			if ( (strArr[1].compareTo(startingFeature)==0
+			      && strArr[2].compareTo(endingFeature)==0) ||
+			     (strArr[1].compareTo(endingFeature)==0
+			      && strArr[2].compareTo(startingFeature)==0) ){//exclude or include already present
+			  setChanged();
+			  notifyObservers("Constraint Not Added");			
+			  return;	    	  
+			} 	  
+		  }	    	
+			
+//	      //multiple excludes are not possible between two features
+//	      tmpID=excludeConstraints.get(startingFeature);
+//	      if(tmpID!=null && tmpID.compareTo(endingFeature)==0){
+//	    	setChanged();
+//	    	notifyObservers("Constraint Not Added");			
+//	    	return;	    	  
+//	      }
+//	      //no includes must be present between two features to add an excludes
+//	      tmpID=includeConstraints.get(startingFeature);
+//	      if(tmpID!=null && tmpID.compareTo(endingFeature)==0){
+//	  		setChanged();
+//			notifyObservers("Constraint Not Added");			
+//			return;	    	  
+//	      }
+//	      tmpID=includeConstraints.get(endingFeature);
+//	      if(tmpID!=null && tmpID.compareTo(startingFeature)==0){
+//	  		setChanged();
+//			notifyObservers("Constraint Not Added");			
+//			return;	    	  
+//	      }
+	      break;
+	  }
+	  
+	  //adding constraint
+	  switch(type){
+	    case INCLUDES:
+	      newConstraint=new String[3];
+	      newConstraint[0]=includesConstraintNamePrefix+includesCount;
+	      newConstraint[1]=startingFeature;
+	      newConstraint[2]=endingFeature;
+	      constraints.add(newConstraint);
+	      ++includesCount;
+	      break;
+	    case EXCLUDES:
+		  newConstraint=new String[3];
+		  newConstraint[0]=excludesConstraintNamePrefix+excludesCount;
+		  newConstraint[1]=startingFeature;
+		  newConstraint[2]=endingFeature;
+		  constraints.add(newConstraint);
+		  ++excludesCount;
+		  break;
+	  }
+	  setChanged();
+	  notifyObservers("Constraint Added");			
+	}
+	
+	/**
+	 * AdRemoves a constraint from startingFeature to endingFeature, if present.<br>
+	 * 
+	 * @param startingFeature - the feature from which the constraint starts
+	 * @param endingFeature - the feature on which the constraint ends
+	 * @param type - a ConstraintTypes value representing the type of constraint
+	 */
+	public void removeConstraint(String startingFeature, String endingFeature, ConstraintTypes type){
+	  boolean found=false;
+	  String[] strArr=null;
+	  switch(type){
+	  case INCLUDES:
+		for(int i=0; i<constraints.size(); ++i){
+		  strArr=constraints.get(i);
+		  if ( strArr[0].startsWith(includesConstraintNamePrefix)
+			   && strArr[1].compareTo(startingFeature)==0
+			   && strArr[2].compareTo(endingFeature)==0 ){ found=true; break;}
+		}
+		if(found) constraints.remove(strArr);
+	    break;
+	  case EXCLUDES:
+		for(int i=0; i<constraints.size(); ++i){
+		  strArr=constraints.get(i);
+		  if ( strArr[0].startsWith(excludesConstraintNamePrefix)
+			   && strArr[1].compareTo(startingFeature)==0
+			   && strArr[2].compareTo(endingFeature)==0 ){ found=true; break;}
+		  else if ( strArr[0].startsWith(excludesConstraintNamePrefix)
+				   && strArr[1].compareTo(endingFeature)==0
+				   && strArr[2].compareTo(startingFeature)==0 ){ found=true; break;}
+		}
+		if(found) constraints.remove(strArr);
+		break;		
+	  }
+	  if(found){
+		setChanged();
+		notifyObservers("Constraint Removed");		  
+	  }
+	  else{
+		setChanged();
+		notifyObservers("Constraint Not Removed");		  
+	  }	  
+	}	
+	
+	/**
 	 * Adds a group to a feature.<br>
 	 * If the feature and the members of the group and are already connected in any way, this method does nothing.
 	 * 
@@ -505,7 +682,7 @@ public class EditorModel extends Observable{
 //	  FeatureNode parentFeature=null;
 //	  GroupNode parentGroup=null;	  
 	  FeatureNode featurefound=unrootedFeatures.get(name);
-	  if (featurefound==null) featurefound=rootLinkedFeatures.get(name);
+//	  if (featurefound==null) featurefound=rootLinkedFeatures.get(name);
 	  if (featurefound==null){
 		setChanged();
 		notifyObservers("Feature Not Deleted");
@@ -518,7 +695,7 @@ public class EditorModel extends Observable{
 //		if(featurefound.getParent().getClass().equals(GroupNode.class)) 
 //		  parentGroup=(GroupNode)featurefound.getParent();
 //	  }
-		//the parent feature is diretly linked
+		//the parent feature is directly linked
 	    if(((FeatureNode)featurefound.getParent()).getSubFeatures().contains(featurefound)){
 		  System.out.println("The feature: "+featurefound+" has a direct parent feature: "+
 				  ((FeatureNode)featurefound.getParent()).getID());
@@ -542,7 +719,7 @@ public class EditorModel extends Observable{
 
 	  //removing the feature from his feature list
 	  if(unrootedFeatures.containsKey(name)) unrootedFeatures.remove(name);
-	  if(rootLinkedFeatures.containsKey(name)) rootLinkedFeatures.remove(name);
+//	  if(rootLinkedFeatures.containsKey(name)) rootLinkedFeatures.remove(name);
 	  setChanged();
 	  notifyObservers("Feature Deleted");
 	}
@@ -585,8 +762,9 @@ public class EditorModel extends Observable{
 	 * @return - a FeatureNode object representing the feature found, or null if it's not present in the model
 	 */
 	private FeatureNode searchFeature(String name){
-	  FeatureNode featurefound=rootLinkedFeatures.get(name);
-	  if(featurefound==null) featurefound=unrootedFeatures.get(name);
+	  FeatureNode featurefound=unrootedFeatures.get(name);
+//	  if(featurefound==null) featurefound=rootLinkedFeatures.get(name);
+//	  if(featurefound==null) featurefound=unrootedFeatures.get(name);
 	  
 	  /* ***DEBUG*** */
 	  if(debug && featurefound!=null) System.out.println("searchFeature("+name+"): "+featurefound.getID());
@@ -1231,6 +1409,8 @@ public class EditorModel extends Observable{
       for(Map.Entry<String,FeatureNode> feature : getUnrootedFeatures().entrySet()){
     	if(feature.getValue().getParent()==null) treePrint(feature.getValue(), "*R*");
       }		
+      System.out.println("\n\nPRINTING CONSTRAINTS");
+      for(String[] strArr : constraints) System.out.println(strArr[0]+": "+strArr[1]+" - "+strArr[2]);      
 	}
 	
 	/**
