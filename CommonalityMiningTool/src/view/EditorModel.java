@@ -717,6 +717,13 @@ public class EditorModel extends Observable{
 	    for(FeatureNode member : group.getMembers()) member.setParent(null);
 	  for(FeatureNode child : featurefound.getSubFeatures()) child.setParent(null);
 
+	  //removing constraints related to this feature
+	  ArrayList<String[]> strArrList=new ArrayList<String[]>();
+	  for(String[] strArr: constraints)
+		if ( strArr[1].compareTo(name)==0 || strArr[2].compareTo(name)==0 ) strArrList.add(strArr);
+
+	  for(String[] strArr: strArrList) constraints.remove(strArr);
+
 	  //removing the feature from his feature list
 	  if(unrootedFeatures.containsKey(name)) unrootedFeatures.remove(name);
 //	  if(rootLinkedFeatures.containsKey(name)) rootLinkedFeatures.remove(name);

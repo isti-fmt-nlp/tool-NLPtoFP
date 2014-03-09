@@ -252,8 +252,8 @@ public class EditorView extends JFrame implements Observer{
 
 	/** enumeration of items that can become active, for instance in a drag motion*/
 	public static enum activeItems {
-		NO_ACTIVE_ITEM, DRAGGING_FEATURE, DRAGGING_EXTERN_ANCHOR, DRAGGING_EXTERN_GROUP,
-		DRAGGING_EXTERN_CONSTRAINT, DRAGGING_SELECTION_RECT, DRAGGING_SELECTION_GROUP, 
+		NO_ACTIVE_ITEM, DRAGGING_FEATURE, DRAGGING_EXTERN_ANCHOR, DRAGGING_EXTERN_GROUP, DRAGGING_EXTERN_CONSTRAINT,
+		DRAGGING_CONSTRAINT_CONTROL_POINT, DRAGGING_SELECTION_RECT, DRAGGING_SELECTION_GROUP, 
 		DRAGGING_TOOL_NEWFEATURE, DRAGGING_TOOL_MANDATORY_LINK, DRAGGING_TOOL_OPTIONAL_LINK, 
 		DRAGGING_TOOL_ALT_GROUP, DRAGGING_TOOL_OR_GROUP, DRAGGING_TOOL_INCLUDES, DRAGGING_TOOL_EXCLUDES
 	}
@@ -283,7 +283,11 @@ public class EditorView extends JFrame implements Observer{
 	private JMenuItem popMenuItemRenameFeature = new JMenuItem("Rename Feature");
 	private JMenuItem popMenuItemDeleteConnector = new JMenuItem("Delete Connector");
 	private JMenuItem popMenuItemDeleteGroup = new JMenuItem("Delete Group");
+	private JMenuItem popMenuItemDeleteConstraint = new JMenuItem("Delete Constraint");
 	private JMenuItem popMenuItemUngroup = new JMenuItem("Ungroup");
+
+	private JMenuItem popMenuItemShowControlPoint = new JMenuItem("Show Control Point");
+	private JMenuItem popMenuItemHideControlPoint = new JMenuItem("Hide Control Point");
 
 	private JMenuItem popMenuItemPrintModelDebug = new JMenuItem("Print Model[DEBUG COMMAND]");
 	
@@ -566,10 +570,17 @@ public class EditorView extends JFrame implements Observer{
 		popMenuItemDeleteGroup.setActionCommand("Delete Element");
 		popMenuItemDeleteGroup.addActionListener(editorController);
 		
-		popMenuItemDelete.addActionListener(editorController);        
+		popMenuItemDeleteConstraint.setText("Delete Constraint");
+		popMenuItemDeleteConstraint.setActionCommand("Delete Element");
+		popMenuItemDeleteConstraint.addActionListener(editorController);
+		
+		popMenuItemDelete.addActionListener(editorController);
         popMenuItemUngroup.addActionListener(editorController);        
         popMenuItemPrintModelDebug.addActionListener(editorController);        
 
+    	popMenuItemShowControlPoint.addActionListener(editorController);
+    	popMenuItemHideControlPoint.addActionListener(editorController);
+    	
 		visibleOrderDraggables = new OrderedList();
 		startConnectorDots = new ArrayList<JComponent>();
 		startIncludesDots = new ArrayList<JComponent>();
@@ -1076,7 +1087,6 @@ public class EditorView extends JFrame implements Observer{
 	      else if(control.x>=camera.x){//control point is directly at right of the camera
 	        intersectionSide=
 	        	new Line2D.Double(camera.x+camera.width, camera.y, camera.x+camera.width, camera.y+camera.height);
-	    	System.out.println("At right of camera, side="+intersectionSide);
 	        intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);    	  
 	      }    	
 	    }
@@ -2818,6 +2828,7 @@ public class EditorView extends JFrame implements Observer{
 		newConstraintStartDot.setControlPoint(newConstraintControlPointDot);
 		newConstraintEndDot.setOtherEnd(newConstraintStartDot);
 		newConstraintEndDot.setControlPoint(newConstraintControlPointDot);
+		newConstraintControlPointDot.setVisible(false);
 
 		addConstraintToDrawLists(
 			newConstraintStartDot, 
@@ -3376,6 +3387,10 @@ public class EditorView extends JFrame implements Observer{
   				|| comp.getName().startsWith(startMandatoryNamePrefix)
   				|| comp.getName().startsWith(endOptionalNamePrefix) 
   				|| comp.getName().startsWith(startOptionalNamePrefix)
+  				|| comp.getName().startsWith(startExcludesNamePrefix) 
+  				|| comp.getName().startsWith(endExcludesNamePrefix)
+  				|| comp.getName().startsWith(startIncludesNamePrefix) 
+  				|| comp.getName().startsWith(endIncludesNamePrefix)
   			  ) ){
   		  detachAnchor((FeaturePanel)feature, (JComponent)comp);
   		}
@@ -3563,6 +3578,21 @@ public class EditorView extends JFrame implements Observer{
 	/** Returns the 'Delete Group' popup menu item */
 	public JMenuItem getPopMenuItemDeleteGroup(){
 		return popMenuItemDeleteGroup;
+	};
+	
+	/** Returns the 'Delete Constraint' popup menu item */
+	public JMenuItem getPopMenuItemDeleteConstraint(){
+		return popMenuItemDeleteConstraint;
+	};
+	
+	/** Returns the 'Show Control Point' popup menu item */
+	public JMenuItem getPopMenuItemShowControlPoint(){
+		return popMenuItemShowControlPoint;
+	};
+	
+	/** Returns the 'Hide Control Point' popup menu item */
+	public JMenuItem getPopMenuItemHideControlPoint(){
+		return popMenuItemHideControlPoint;
 	};
 	
 	/** Returns the 'Ungroup Element' popup menu item */
@@ -4536,6 +4566,34 @@ public class EditorView extends JFrame implements Observer{
 		termsColor.put(featureName, rgbIntValues);
 	  }
 	  
+	}
+
+	/**
+	 * Shows on the diagram panel the control point of constraint.
+	 * 
+	 * @param constraint - one of the two ConstraintPanels owner of the control point
+	 */
+	public void showControlPoint(ConstraintPanel constraint) {
+	  JComponent controlPoint = constraint.getControlPoint();
+	  visibleOrderDraggables.addToTop(controlPoint);
+	  diagramPanel.setLayer(controlPoint, 0);
+	  diagramPanel.add(controlPoint);
+	  diagramPanel.setComponentZOrder(controlPoint, 0);	
+	  controlPoint.setVisible(true);
+	  frameRoot.repaint();
+	}
+
+	/**
+	 * Removes from the diagram panel the control point of constraint.
+	 * 
+	 * @param constraint - one of the two ConstraintPanels owner of the control point
+	 */
+	public void hideControlPoint(ConstraintPanel constraint) {
+	  JComponent controlPoint = constraint.getControlPoint();
+	  diagramPanel.remove(controlPoint);
+	  visibleOrderDraggables.remove(controlPoint);
+	  controlPoint.setVisible(false);
+	  frameRoot.repaint();
 	}
 	
 }

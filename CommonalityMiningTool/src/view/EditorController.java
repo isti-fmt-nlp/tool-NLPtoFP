@@ -124,6 +124,7 @@ public class EditorController implements
 	      case DRAGGING_EXTERN_ANCHOR: editorView.dragAnchor(e); break;
 	      case DRAGGING_EXTERN_GROUP: editorView.dragAnchor(e); break;
 	      case DRAGGING_EXTERN_CONSTRAINT: editorView.dragAnchor(e); break;
+	      case DRAGGING_CONSTRAINT_CONTROL_POINT: editorView.dragAnchor(e); break;	      
 	      case DRAGGING_SELECTION_RECT:  editorView.dragSelectionRect(e); break;
 	      case DRAGGING_SELECTION_GROUP: 
 			  System.out.println("dragging group!");
@@ -244,6 +245,16 @@ public class EditorController implements
           if(popupElement.getName().startsWith(EditorView.altGroupNamePrefix)
         	 || popupElement.getName().startsWith(EditorView.orGroupNamePrefix)){
         	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemDeleteGroup());
+          }
+          //clicked on a constraint
+          if(popupElement.getName().startsWith(EditorView.startIncludesNamePrefix)
+             || popupElement.getName().startsWith(EditorView.endIncludesNamePrefix)
+        	 || popupElement.getName().startsWith(EditorView.startExcludesNamePrefix)
+        	 || popupElement.getName().startsWith(EditorView.endExcludesNamePrefix)){
+        	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemDeleteConstraint());
+        	  if(((ConstraintPanel)popupElement).getControlPoint().isVisible())
+        	    editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemHideControlPoint());
+        	  else editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemShowControlPoint());
           }
 
           editorView.setDiagramElementsMenuPosX(e.getX());
@@ -480,6 +491,12 @@ public class EditorController implements
 			  editorView.setLastAnchorFocused((ConstraintPanel)tmpNode.getElement());
 			  editorView.moveComponentToTop(editorView.getLastAnchorFocused());
 			}
+			//mouse directly pressed on a constraint control point in the diagram panel
+			else if(((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.constraintControlPointNamePrefix)){
+			  editorView.setActiveItem(activeItems.DRAGGING_CONSTRAINT_CONTROL_POINT);
+			  editorView.setLastAnchorFocused((JComponent)tmpNode.getElement());
+			  editorView.moveComponentToTop(editorView.getLastAnchorFocused());
+			}
 
 			/* ***DEBUG*** */
 			if (debug2){
@@ -592,6 +609,9 @@ public class EditorController implements
 			  editorView.setLastAnchorFocused(null); break;
 		  case DRAGGING_EXTERN_CONSTRAINT:
 			  dropConstraint(e);
+			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+			  editorView.setLastAnchorFocused(null); break;
+		  case DRAGGING_CONSTRAINT_CONTROL_POINT:
 			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
 			  editorView.setLastAnchorFocused(null); break;
 		  case DRAGGING_SELECTION_RECT:
@@ -724,25 +744,31 @@ public class EditorController implements
         if (popupElement!=null) elementName=popupElement.getName();
 
         /* ***DEBUG*** */
-        if(debug3) System.out.println("Popup Menu requested delete on "+elementName
-      		  +"\ne = "+e
-      		  /*+"\ncomp.getName()="+comp.getName()*/);
+        if(debug3) System.out.println("Popup Menu requested delete on "+elementName+"\ne = "+e);
         /* ***DEBUG*** */
         
         if(elementName!=null && ( elementName.startsWith(EditorView.startMandatoryNamePrefix)
            || elementName.startsWith(EditorView.startOptionalNamePrefix) )){
-//        	  EditorView.deleteAnchor(popupElement);
-//          	  EditorView.deleteAnchor(((AnchorPanel)popupElement).getOtherEnd());
           editorView.deleteAnchor(popupElement);
           editorView.deleteAnchor(((AnchorPanel)popupElement).getOtherEnd());
       	  editorView.repaintRootFrame();
+        }
+        if(elementName!=null && ( elementName.startsWith(EditorView.startIncludesNamePrefix)
+           || elementName.startsWith(EditorView.endIncludesNamePrefix)
+           || elementName.startsWith(EditorView.startExcludesNamePrefix)
+           || elementName.startsWith(EditorView.endExcludesNamePrefix) )){
+        	
+          if(((ConstraintPanel)popupElement).getControlPoint().isVisible())
+        	editorView.deleteAnchor(((ConstraintPanel)popupElement).getControlPoint());
+
+          editorView.deleteAnchor(popupElement);
+          editorView.deleteAnchor(((ConstraintPanel)popupElement).getOtherEnd());
+          editorView.repaintRootFrame();
         }
         else if(elementName!=null && ( elementName.startsWith(EditorView.endMandatoryNamePrefix)
            || elementName.startsWith(EditorView.endOptionalNamePrefix) )){
       	  if( ((AnchorPanel)popupElement).getOtherEnd().getName().startsWith(EditorView.startMandatoryNamePrefix)
       		 || ((AnchorPanel)popupElement).getOtherEnd().getName().startsWith(EditorView.startOptionalNamePrefix)){
-//        		EditorView.deleteAnchor(popupElement);
-//          		EditorView.deleteAnchor(((AnchorPanel)popupElement).getOtherEnd());            		
       		editorView.deleteAnchor(popupElement);
       		editorView.deleteAnchor(((AnchorPanel)popupElement).getOtherEnd());            		
       	  }
@@ -751,7 +777,6 @@ public class EditorController implements
       	   && ((GroupPanel)((AnchorPanel)popupElement).getOtherEnd()).getMembers().size()>2 ){
 
       		((GroupPanel)((AnchorPanel)popupElement).getOtherEnd()).getMembers().remove(popupElement);
-//      		EditorView.deleteAnchor(popupElement);
       		editorView.deleteAnchor(popupElement);
       	  }	
           editorView.repaintRootFrame();
@@ -762,7 +787,6 @@ public class EditorController implements
           editorView.repaintRootFrame();
         }
         else if(elementName!=null && elementName.startsWith(EditorView.featureNamePrefix)){
-//        	  editorModel.deleteFeature(elementName);
           editorModel.deleteFeature(((FeaturePanel)popupElement).getID());
           editorView.repaintRootFrame();
         }
@@ -786,17 +810,18 @@ public class EditorController implements
       else if(e.getActionCommand().equals("Ungroup")){
         System.out.println("Ungrouping: "+popupElement.getName());
         System.out.println("Other end: "+((AnchorPanel)popupElement).getOtherEnd().getName());
-//    	EditorView.ungroupAnchor((AnchorPanel)popupElement);
     	editorView.ungroupAnchor((AnchorPanel)popupElement);
         editorView.repaintRootFrame();
+      }
+      else if(e.getActionCommand().equals("Show Control Point")){
+    	editorView.showControlPoint((ConstraintPanel)popupElement);
+      }
+      else if(e.getActionCommand().equals("Hide Control Point")){
+      	editorView.hideControlPoint((ConstraintPanel)popupElement);    	  
       }
 	  //popup menu command: Print Model[DEBUG COMMAND]
       else if(e.getActionCommand().equals("Print Model[DEBUG COMMAND]")){
     	editorModel.printModel();
-//    	System.out.println("\n\nPRINTING TREES");
-//    	for(Map.Entry<String,FeatureNode> feature : editorModel.getUnrootedFeatures().entrySet()){
-//    	  if(feature.getValue().getParent()==null) treePrint(feature.getValue(), "*R*");
-//    	}
     	
     	/* ***DEBUG*** */
     	if(debug5){
