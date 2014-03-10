@@ -9,6 +9,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.FileDialog;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
@@ -520,7 +521,7 @@ public class EditorView extends JFrame implements Observer{
 		menuViewColored = new JCheckBoxMenuItem("Colour 'near' Features", false);
 		menuViewColored.addActionListener(editorController);
 		
-		menuViewCommsOrVars = new JMenuItem("View Commonality/Variability");
+		menuViewCommsOrVars = new JCheckBoxMenuItem("View Commonality/Variability");
 		menuViewCommsOrVars.addActionListener(editorController);
 		
 		menuViewExtrOrInsert = new JMenuItem("View Extracted/Inserted");
@@ -915,23 +916,31 @@ public class EditorView extends JFrame implements Observer{
 	    Line2D.Double endLine=null;
 	    Rectangle camera=null;
 	    
-	    // create new QuadCurve2D.Float
+	    //creating the QuadCurve2D.Float
 	    QuadCurve2D quadcurve = new QuadCurve2D.Float();
-	    // draw QuadCurve2D.Float with set coordinates
+	    
+	    //setting coordinates
 	    quadcurve.setCurve(start.getX(), start.getY(), control.getX(), control.getY(), end.getX(), end.getY());
 
 	    camera=new Rectangle((int)end.getX()-20, (int)end.getY()-20, 40, 40);
 	    endLine=new Line2D.Double(control, end);
 	    
 	    //getting intersection point between camera and endLine
-		intersectionPoint = getTriangleTipPoint(control, camera, endLine);
+
+	    int lineLength=
+			(int)Math.sqrt((end.getX()-control.x)*(end.getX()-control.x)+(end.getY()-control.y)*(end.getY()-control.y));		
+		double Xi=end.getX()+(30*(control.x-end.getX())/lineLength);
+		double Yi=end.getY()+(30*(control.y-end.getY())/lineLength);
+		intersectionPoint=new Point2D.Double(Xi, Yi);
+				
+//		intersectionPoint = getTriangleTipPoint(control, camera, endLine);	    
+//	    if(intersectionPoint==null){
+//	      System.out.println("drawConstraint(): intersectionPoint is null!");
+//	      intersectionPoint=new Point2D.Double(
+//					end.getX()-20>0 ? end.getX()-20 : end.getX()+20, 
+//		  			end.getY()-20>0 ? end.getY()-20 : end.getY()+20);
+//	    }
 	    
-	    if(intersectionPoint==null){
-	      System.out.println("drawConstraint(): intersectionPoint is null!");
-	      intersectionPoint=new Point2D.Double(
-					end.getX()-20>0 ? end.getX()-20 : end.getX()+20, 
-		  			end.getY()-20>0 ? end.getY()-20 : end.getY()+20);
-	    }
 //	    System.out.println("intersectionPoint: "+intersectionPoint);
 	    
 //	    Point2D[] intersectPoints=getIntersectionPoint(endLine, camera);
@@ -1012,14 +1021,20 @@ public class EditorView extends JFrame implements Observer{
 	    camera=new Rectangle((int)start.getX()-20, (int)start.getY()-20, 40, 40);
 	    endLine=new Line2D.Double(control, start);
 
-	    intersectionPoint = getTriangleTipPoint(control, camera, endLine);
 	    
-	    if(intersectionPoint==null){
-	      System.out.println("drawConstraint2(): intersectionPoint is null!");
-	      intersectionPoint=new Point2D.Double(
-	    		  start.getX()-20>0 ? end.getX()-20 : start.getX()+20, 
-	    		  start.getY()-20>0 ? end.getY()-20 : start.getY()+20);
-	    }
+	    lineLength=
+			(int)Math.sqrt((start.getX()-control.x)*(start.getX()-control.x)+(start.getY()-control.y)*(start.getY()-control.y));		
+		Xi=start.getX()+(30*(control.x-start.getX())/lineLength);
+		Yi=start.getY()+(30*(control.y-start.getY())/lineLength);
+		intersectionPoint=new Point2D.Double(Xi, Yi);
+
+//	    intersectionPoint = getTriangleTipPoint(control, camera, endLine);	    
+//	    if(intersectionPoint==null){
+//	      System.out.println("drawConstraint2(): intersectionPoint is null!");
+//	      intersectionPoint=new Point2D.Double(
+//	    		  start.getX()-20>0 ? end.getX()-20 : start.getX()+20, 
+//	    		  start.getY()-20>0 ? end.getY()-20 : start.getY()+20);
+//	    }
 	    
 	    radius=(int)Point2D.distance( intersectionPoint.getX(), intersectionPoint.getY(), start.getX(), start.getY());
 
@@ -3170,10 +3185,22 @@ public class EditorView extends JFrame implements Observer{
 	 */
 	private FeaturePanel buildFeaturePanel(String name, String containerName, int x, int y, Color color) {
 		int layer=-1;
-		JTextField textLabel=null;
+//		JTextField textLabel=null;
+		JTextArea textLabel=null;
 		
 		//creating text		
-		textLabel=new JTextField(name){
+//		textLabel=new JTextField(name, 16){
+//
+//			private static final long serialVersionUID = 1L;
+//
+//			@Override
+//			public boolean contains(int x, int y){
+//			  if(!isEditable()) return false;
+//			  else return super.contains(x, y);
+//			}
+//		};
+		
+		textLabel=new JTextArea(name, 6, 16){
 
 			private static final long serialVersionUID = 1L;
 
@@ -3183,6 +3210,7 @@ public class EditorView extends JFrame implements Observer{
 			  else return super.contains(x, y);
 			}
 		};
+
 
 //		textLabel.getInputMap().remove(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ENTER, 0));
 //		
@@ -3212,7 +3240,12 @@ public class EditorView extends JFrame implements Observer{
 //		});
 		   
 		textLabel.setBounds(featureBorderSize/2, featureBorderSize/2, 120, 60);
-		textLabel.setHorizontalAlignment(JTextField.CENTER);
+//		textLabel.setHorizontalAlignment(JTextField.CENTER);
+		
+		textLabel.setFont(new Font("Serif", Font.PLAIN, 12));
+		textLabel.setLineWrap(true);
+		textLabel.setWrapStyleWord(true);		
+		
 		textLabel.setOpaque(true);
 		textLabel.setEditable(false);
 		textLabel.setFocusable(true);
@@ -3284,6 +3317,8 @@ public class EditorView extends JFrame implements Observer{
 		Dimension diagramSize = diagramPanel.getPreferredSize();
 		diagramSize.width=(diagramMaxX-diagramMinX>screenDim.width)? diagramMaxX-diagramMinX : screenDim.width;
 		diagramSize.height=(diagramMaxY-diagramMinY>screenDim.height)? diagramMaxY-diagramMinY : screenDim.height;
+//		diagramSize.width=diagramMaxX-diagramMinX;
+//		diagramSize.height=diagramMaxY-diagramMinY;
 		diagramPanel.setPreferredSize(diagramSize);
 		diagramPanel.revalidate();
 	}
@@ -3515,8 +3550,10 @@ public class EditorView extends JFrame implements Observer{
       	  visibleOrderDraggables.remove(anchor);
         }
 
-        /*if (anchor.getName().startsWith(startMandatoryNamePrefix))*/ startConnectorDots.remove(anchor);
-        
+        if (anchor.getName().startsWith(startMandatoryNamePrefix) ||
+        	anchor.getName().startsWith(startOptionalNamePrefix)) startConnectorDots.remove(anchor);
+        else if(anchor.getName().startsWith(startExcludesNamePrefix)) startExcludesDots.remove(anchor);
+        else if(anchor.getName().startsWith(startIncludesNamePrefix)) startIncludesDots.remove(anchor);        
 	}
 
 	/**
@@ -3623,6 +3660,11 @@ public class EditorView extends JFrame implements Observer{
 	/** Sets the popup menu Y coordinate on the diagram*/
 	public void setDiagramElementsMenuPosY(int yPos){
 		diagramElementsMenuPosY=yPos;
+	};
+	
+	/** Returns the 'View Commonality/Variability' menuView item */
+	public JMenuItem getMenuViewCommsOrVars(){
+		return menuViewCommsOrVars;
 	};
 	
 	/** Returns the last active item type*/
@@ -3865,11 +3907,82 @@ public class EditorView extends JFrame implements Observer{
 	  ((FeaturePanel)popUpElement).getTextArea().setText(oldFeatureName);
 	}
 
+	/**
+	 * Renames a feature, adding the proper suffix if Commonalities/Variabilities distinction is active.
+	 */
+	private void renameFeature(){
+	  String newName=null;
+	  
+	  if(!getMenuViewCommsOrVars().isSelected()) return;
+	  else newName=((FeaturePanel)popUpElement).getLabelName();
+	  
+	  for(String tmp : startingCommonalities) if(tmp.compareTo(newName)==0){
+		((FeaturePanel)popUpElement).getTextArea().setText(newName+"{C}");
+		return;
+	  }
+	  
+	  for(String tmp : startingVariabilities) if(tmp.compareTo(newName)==0){
+		((FeaturePanel)popUpElement).getTextArea().setText(newName+"{V}");
+		return;
+	  }
+	}	
+	
+	/**
+	 * Enables or disables the visualization of Commonalities/Variabilities distinction in the feature names.
+	 * 
+	 * @param activate - if true, visualization will be activated, otherwise it will be deactivated
+	 */
+	public void viewCommVarsDistinction(boolean activate) {
+	  OrderedListNode tmp=null;
+	  FeaturePanel featTmp=null;
+	  boolean found=false;
+	  
+	  if(activate){//activating the visualization
+		tmp = visibleOrderDraggables.getFirst();
+		while(tmp!=null){
+		  if(((JComponent)tmp.getElement()).getName().startsWith(featureNamePrefix)){
+			featTmp = (FeaturePanel)tmp.getElement();
+			found=false;
+			  
+			for(String comm : startingCommonalities) if(featTmp.getLabelName().compareTo(comm)==0){
+		      featTmp.getTextArea().setText(comm+"{C}"); found=true; break;
+			}
+			  
+			if(!found) for(String comm : startingVariabilities) if(featTmp.getLabelName().compareTo(comm)==0){
+			  featTmp.getTextArea().setText(comm+"{V}"); found=true; break;
+			}
+		  }
+		  
+		  tmp=tmp.getNext();
+		}		  
+	  }
+	  else{//deactivating the visualization
+		tmp = visibleOrderDraggables.getFirst();
+		while(tmp!=null){
+		  if(((JComponent)tmp.getElement()).getName().startsWith(featureNamePrefix)){
+			featTmp = (FeaturePanel)tmp.getElement();
+			found=false;
+				  
+			for(String comm : startingCommonalities) if(featTmp.getLabelName().compareTo(comm+"{C}")==0){
+			  featTmp.getTextArea().setText(comm); found=true; break;
+			}
+				  
+			if(!found) for(String comm : startingVariabilities) if(featTmp.getLabelName().compareTo(comm+"{V}")==0){
+			  featTmp.getTextArea().setText(comm); found=true; break;
+			}
+		  }
+			  
+		  tmp=tmp.getNext();
+		}		  	  
+	  }
+
+	}
+	
 	@Override
 	public void update(Observable o, Object arg) {
 		System.out.println("Message received: "+arg);
 		if(arg.equals("New Feature Correctly Added")) addNewFeatureToDiagram();		
-		else if(arg.equals("Feature Renamed"));	
+		else if(arg.equals("Feature Renamed")) renameFeature();	
 		else if(arg.equals("Feature Not Renamed")) undoRenameFeature();	
 		else if(arg.equals("New Named Feature Correctly Added")) addNamedFeatureToDiagram();		
 		else if(arg.equals("Feature Deleted")) deleteFeature(popUpElement);
@@ -4049,11 +4162,15 @@ public class EditorView extends JFrame implements Observer{
 		FeaturePanel featTmp=null;
 		AnchorPanel anchTmp=null;
 		AnchorPanel endTmp=null;
+		ConstraintPanel constrTmp=null;
+		ConstraintPanel endConstrTmp=null;
+		JComponent constControlPoint=null;
 		String startOwner=null;
 		String endOwner=null;
 		Iterator<Entry<String, int[]>> colorIter = null;
 		Entry<String, int[]> colorEntry=null;
 		int[] color=null;
+		Color featColor=null;
 		
 		//saving diagram graphic elements data
 		String savePath = pathProject + "/" + s + "_DiagView.xml"; 
@@ -4066,16 +4183,20 @@ public class EditorView extends JFrame implements Observer{
 		if(debug) System.out.println("***Printing draggables in reverse order before save***\n");
 		/* ***DEBUG*** */
 
+		//saving features
 		tmp = visibleOrderDraggables.getLast();
 		while(tmp!=null){
 		  if(((JComponent)tmp.getElement()).getName().startsWith(featureNamePrefix)){
 			featTmp = (FeaturePanel)tmp.getElement();
-
+			featColor = featTmp.getBackground();
+			
 			/* ***DEBUG*** */
 			if(debug) System.out.println("Adding element: "+featTmp.getID());
 			/* ***DEBUG*** */
 
-			xml+="Name="+featTmp.getLabelName()+" ContName="+featTmp.getID()
+			xml+="Name="+featTmp.getLabelName()
+			   +" ContName="+featTmp.getID()
+			   +" Color="+featColor.getRed()+"-"+featColor.getGreen()+"-"+featColor.getBlue()
 			   +" Loc="+featTmp.getX()+"."+featTmp.getY()
 			   +" Size="+featTmp.getWidth()+"."+featTmp.getHeight()+"\n";
 		  }
@@ -4085,6 +4206,7 @@ public class EditorView extends JFrame implements Observer{
 		xml+=	 "</features>"
 			    +"<connectors>";
 		
+		//saving connectors
 		for(JComponent anchor : startConnectorDots){
 		  anchTmp=(AnchorPanel)anchor;
 		  endTmp=(AnchorPanel)anchTmp.getOtherEnd();
@@ -4102,6 +4224,7 @@ public class EditorView extends JFrame implements Observer{
 		xml+=	 "</connectors>"
 			    +"<groups>";
 
+		//saving groups
 		for(GroupPanel group : altGroupPanels){
 		  if(group.getParent().getName().startsWith(featureNamePrefix)) 
 			startOwner=group.getParent().getName();
@@ -4136,28 +4259,69 @@ public class EditorView extends JFrame implements Observer{
 		  xml+="\n";
 		  
 		}
-		
+
 		xml+=	 "</groups>"
+			    +"<constraints>";
+
+		//saving constraints
+		for(JComponent constraint : startIncludesDots){
+		  constrTmp=(ConstraintPanel)constraint;
+		  endConstrTmp=(ConstraintPanel)constrTmp.getOtherEnd();
+		  constControlPoint=constrTmp.getControlPoint();
+		  if(constrTmp.getParent().getName().startsWith(featureNamePrefix)) 
+			startOwner=constrTmp.getParent().getName();
+		  else startOwner="";
+		  if(endConstrTmp.getParent().getName().startsWith(featureNamePrefix))
+			endOwner=endConstrTmp.getParent().getName();
+		  else endOwner="";
+		  
+		  xml+="StartName="+constrTmp.getName()+" Loc="+constrTmp.getX()+"."+constrTmp.getY()+" StartOwner="+startOwner
+			 +" EndName="+endConstrTmp.getName()+" Loc="+endConstrTmp.getX()+"."+endConstrTmp.getY()+" EndOwner="+endOwner
+			 +" ControlName="+constControlPoint.getName()+" Loc="+constControlPoint.getX()+"."+constControlPoint.getY()+"\n";		  
+		}		
+		
+		for(JComponent constraint : startExcludesDots){
+		  constrTmp=(ConstraintPanel)constraint;
+		  endConstrTmp=(ConstraintPanel)constrTmp.getOtherEnd();
+		  constControlPoint=constrTmp.getControlPoint();
+		  if(constrTmp.getParent().getName().startsWith(featureNamePrefix)) 
+			startOwner=constrTmp.getParent().getName();
+		  else startOwner="";
+		  if(endConstrTmp.getParent().getName().startsWith(featureNamePrefix))
+			endOwner=endConstrTmp.getParent().getName();
+		  else endOwner="";
+			  
+		  xml+="StartName="+constrTmp.getName()+" Loc="+constrTmp.getX()+"."+constrTmp.getY()+" StartOwner="+startOwner
+			 +" EndName="+endConstrTmp.getName()+" Loc="+endConstrTmp.getX()+"."+endConstrTmp.getY()+" EndOwner="+endOwner
+			 +" ControlName="+constControlPoint.getName()+" Loc="+constControlPoint.getX()+"."+constControlPoint.getY()+"\n";		  
+		}		
+		
+		//saving miscellaneous data, mainly counters
+		xml+=	 "</constraints>"
 			    +"<misc>"
-				+"connectorsCount="+connectorsCount+" altGroupsCount="+altGroupsCount
+				+"connectorsCount="+connectorsCount+" includesCount="+includesCount+" excludesCount="+excludesCount
+				+" constraintControlsCount="+constraintControlsCount+" altGroupsCount="+altGroupsCount
 				+" orGroupsCount="+orGroupsCount+" featuresCount="+featuresCount
 			    +"</misc>"
 			    +"<startingCommonalities>";
 		
+		//saving starting commonalities
 		for(String name : startingCommonalities){
-		  xml+=name+" ";
+		  xml+=name+"\t";
 		}
 
 		xml+=	 "</startingCommonalities>"
 			    +"<startingVariabilities>";
 		
+		//saving starting variabilities
 		for(String name : startingVariabilities){
-		  xml+=name+" ";
+		  xml+=name+"\t";
 		}		
 
 		xml+=	 "</startingVariabilities>"
 				+"<featureColors>";
 
+		//saving color associations
 		colorIter = termsColor.entrySet().iterator();
 		while(colorIter.hasNext()){
 		  colorEntry=colorIter.next();
@@ -4208,6 +4372,7 @@ public class EditorView extends JFrame implements Observer{
 				+"Features:\n"+xmlHandler.featuresList
 				+"\nConnectors:\n"+xmlHandler.connectorsList
 				+"\nGroups:\n"+xmlHandler.groupsList
+				+"\nConstraintsList:\n"+xmlHandler.constraintsList
 				+"\nMisc:\n"+xmlHandler.misc
 				+"\nStarting Commonalities:\n"+xmlHandler.startingComm
 				+"\nStarting Variabilities:\n"+xmlHandler.startingVars
@@ -4218,12 +4383,14 @@ public class EditorView extends JFrame implements Observer{
 		if(xmlHandler.featuresList!=null) loadFeatures(xmlHandler.featuresList);
 		if(xmlHandler.connectorsList!=null) loadConnectors(xmlHandler.connectorsList);
 		if(xmlHandler.groupsList!=null) loadGroups(xmlHandler.groupsList);
+		if(xmlHandler.constraintsList!=null) loadConstraints(xmlHandler.constraintsList);
 		if(xmlHandler.misc!=null) loadMiscellaneous(xmlHandler.misc);
 		if(xmlHandler.startingComm!=null) loadStartingCommonalities(xmlHandler.startingComm);
 		if(xmlHandler.startingVars!=null) loadStartingVariabilities(xmlHandler.startingVars);
 
 		//resizing diagram to fit all components
-		fitDiagram();		  		
+		fitDiagram();		
+		frameRoot.repaint();
 	  } catch (Exception e) {
 		System.out.println("Error while loading saved diagram");
 		e.printStackTrace(); 
@@ -4243,6 +4410,8 @@ public class EditorView extends JFrame implements Observer{
 	  String containerName=null;
 	  int x=0, y=0, width=0, height=0, i=0;
 	  String[] features=featuresList.split("\n");
+	  String[] rgbValues=null;
+	  int[] rgbIntValues=null;
 	  Color featureColor=null;
 	  
 	  for(String feature : features){
@@ -4251,10 +4420,22 @@ public class EditorView extends JFrame implements Observer{
 
 		//getting feature name
 		featureName=featureData[0].substring(5);
-		for(int k=1; k<featureData.length-3; ++k) featureName+=" "+featureData[k];
+		for(int k=1; k<featureData.length-4; ++k) featureName+=" "+featureData[k];
 
 		//getting feature ID
-		containerName=featureData[featureData.length-3].substring(9);
+		containerName=featureData[featureData.length-4].substring(9);
+		
+		//getting RGB color as a String
+		rgbValues=featureData[featureData.length-3].split("-");		
+		rgbIntValues=new int[3];
+		System.out.println("rgbValues: ");
+		for(String k: rgbValues) System.out.println("-"+k);
+		rgbIntValues[0]=new Integer(rgbValues[0].substring(6));
+		rgbIntValues[1]=new Integer(rgbValues[1]);
+		rgbIntValues[2]=new Integer(rgbValues[2]);		
+		featureColor=getNewColor(rgbIntValues);
+		
+//		featureColor = getNewColor(termsColor.get(featureName));
 
 		//getting feature location in the diagram
 		for (i=4; i<featureData[featureData.length-2].length(); ++i)
@@ -4269,9 +4450,7 @@ public class EditorView extends JFrame implements Observer{
 		width=Integer.valueOf(featureData[featureData.length-1].substring(5, i));
 		height=Integer.valueOf(featureData[featureData.length-1].substring(i+1));
 		
-		featureColor = getNewColor(termsColor.get(featureName));
-		
-		
+		//building feature panel
 		FeaturePanel newFeature=buildFeaturePanel(featureName, containerName, x, y, featureColor);
 		newFeature.setSize(width, height);
 		
@@ -4308,7 +4487,6 @@ public class EditorView extends JFrame implements Observer{
 		System.out.println("startOwnerName="+connectorData[2].substring(11));
 		System.out.println("endConnectorName="+connectorData[3].substring(8));
 		System.out.println("endOwnerName="+connectorData[5].substring(9));
-
 
 		//getting data of start anchor of this connector
 		startConnectorName=connectorData[0].substring(10);
@@ -4381,13 +4559,15 @@ public class EditorView extends JFrame implements Observer{
 		  owner.add(endConnector);
 		  owner.setComponentZOrder(endConnector, 0);
 		}		
+		
 		//adding mutual references
 		startConnector.setOtherEnd(endConnector);
 		endConnector.setOtherEnd(startConnector);
+
 		//adding connector to draw list
 		startConnectorDots.add(startConnector);
 	  }
-
+	  
 	}
 
 	/**
@@ -4452,7 +4632,6 @@ public class EditorView extends JFrame implements Observer{
 		  owner.setComponentZOrder(group, 0);
 		}
 
-
 		//adding members
 		for(int k=4; k<groupData.length; k+=3){
 		  //getting member's data
@@ -4488,6 +4667,7 @@ public class EditorView extends JFrame implements Observer{
 			owner.add(member);
 			owner.setComponentZOrder(member, 0);
 		  }	
+
 		  //adding mutual references
 		  member.setOtherEnd(group);
 		  group.getMembers().add(member);
@@ -4496,8 +4676,160 @@ public class EditorView extends JFrame implements Observer{
 		//adding group to draw list
 		if(groupType==ItemsType.ALT_GROUP_START_CONNECTOR) altGroupPanels.add(group);
 		else orGroupPanels.add(group);
-	  }
+	  }	  
+
+	}
+	
+	/**
+	 * Adds to the diagram panel all the saved constraints described in the list.
+	 * 
+	 * @param constraintsList - String describing the constraints to load, one per line
+	 */
+	private void loadConstraints(String constraintsList) {
+	  String[] constraintData=null;
+	  String startConstraintName=null;
+	  String startOwnerName=null;
+	  int startX=0, startY=0;	  
+	  String endConstraintName=null;
+	  String endOwnerName=null;
+	  int endX=0, endY=0;
+	  String controlName=null;
+	  int controlX=0, controlY=0;
+	  int i=0;
+	  String[] connectors=constraintsList.split("\n");
+	  ConstraintPanel startConstraint=null, endConstraint=null;
+	  JComponent constControlPoint=null;
+	  FeaturePanel owner=null;
 	  
+	  for(String connector : connectors){
+		constraintData=connector.split(" ");
+
+		System.out.println("Printing constraint strings:");
+		for (String s : constraintData) System.out.println("s: "+s);
+		System.out.println("startConstraintName="+constraintData[0].substring(10));
+		System.out.println("startOwnerName="+constraintData[2].substring(11));
+		System.out.println("endConstraintName="+constraintData[3].substring(8));
+		System.out.println("endOwnerName="+constraintData[5].substring(9));
+		System.out.println("controlName="+constraintData[6].substring(12));
+
+		//getting data of start anchor of this constraint
+		startConstraintName=constraintData[0].substring(10);
+
+		for (i=4; i<constraintData[1].length(); ++i) if (constraintData[1].charAt(i)=='.') break;
+		startX=Integer.valueOf(constraintData[1].substring(4, i));
+		startY=Integer.valueOf(constraintData[1].substring(i+1));
+
+		startOwnerName=constraintData[2].substring(11);
+
+		//getting data of end anchor of this constraint
+		endConstraintName=constraintData[3].substring(8);
+
+		for (i=4; i<constraintData[4].length(); ++i) if (constraintData[4].charAt(i)=='.') break;
+		endX=Integer.valueOf(constraintData[4].substring(4, i));
+		endY=Integer.valueOf(constraintData[4].substring(i+1));
+
+		endOwnerName=constraintData[5].substring(9);		
+
+		System.out.println("startX="+startX+", startY="+startY+", endX="+endX+", endY="+endY);
+		
+		//getting data of control point of this constraint
+		controlName=constraintData[6].substring(12);
+
+		for (i=4; i<constraintData[7].length(); ++i) if (constraintData[7].charAt(i)=='.') break;
+		
+		System.out.println("constraintData[7].substring(4, "+i+")="+constraintData[7].substring(4, i)
+						  +"\tconstraintData[7].substring("+i+"+1)="+constraintData[7].substring(i+1));
+
+		controlX=Integer.valueOf(constraintData[7].substring(4, i));
+		controlY=Integer.valueOf(constraintData[7].substring(i+1));		
+		
+		//adding constraint start anchor
+		startConstraint=(ConstraintPanel)buildConnectionDot(
+				startConstraintName.startsWith(startExcludesNamePrefix) ? 
+				ItemsType.START_EXCLUDES_DOT : ItemsType.START_INCLUDES_DOT,
+				startConstraintName, startX, startY);
+		
+		if(startOwnerName.length()==0){//adding anchor to the diagram panel directly
+		  visibleOrderDraggables.addToTop(startConstraint);
+		  diagramPanel.setLayer(startConstraint, 0);
+		  diagramPanel.add(startConstraint);
+		  diagramPanel.setComponentZOrder(startConstraint, 0);			
+		}
+		else{//adding anchor to its owner feature panel
+		  OrderedListNode tmp=visibleOrderDraggables.getFirst();
+		  while(tmp!=null){
+			if(((JComponent)tmp.getElement()).getName().compareTo(startOwnerName)==0){
+			  owner=(FeaturePanel)tmp.getElement(); break;
+			}
+			tmp=tmp.getNext();
+		  }
+		  if(owner==null)
+			throw new RuntimeException("Couldn't find feature '"+startOwnerName+"' as owner of '"+startConstraintName+"'");
+
+		  visibleOrderDraggables.addToTop(startConstraint);
+		  owner.setLayer(startConstraint, 0);
+		  owner.add(startConstraint);
+		  owner.setComponentZOrder(startConstraint, 0);
+		}
+
+		//adding constraint end anchor
+		endConstraint=(ConstraintPanel)buildConnectionDot(
+				endConstraintName.startsWith(endExcludesNamePrefix) ? 
+				ItemsType.END_EXCLUDES_DOT : ItemsType.END_INCLUDES_DOT,
+				endConstraintName, endX, endY);
+		
+		if(endOwnerName.length()==0){//adding anchor to the diagram panel directly
+		  visibleOrderDraggables.addToTop(endConstraint);
+		  diagramPanel.setLayer(endConstraint, 0);
+		  diagramPanel.add(endConstraint);
+		  diagramPanel.setComponentZOrder(endConstraint, 0);			
+		}
+		else{//adding anchor to its owner feature panel
+		  OrderedListNode tmp=visibleOrderDraggables.getFirst();
+		  while(tmp!=null){
+			if(((JComponent)tmp.getElement()).getName().compareTo(endOwnerName)==0){
+			  owner=(FeaturePanel)tmp.getElement(); break;
+			}
+			tmp=tmp.getNext();
+		  }
+		  if(owner==null)
+			throw new RuntimeException("Couldn't find feature '"+endOwnerName+"' as owner of '"+endConstraintName);
+
+		  visibleOrderDraggables.addToTop(endConstraint);
+		  owner.setLayer(endConstraint, 0);
+		  owner.add(endConstraint);
+		  owner.setComponentZOrder(endConstraint, 0);
+		}	
+		
+		//adding constraint control point
+		constControlPoint=buildConnectionDot(ItemsType.CONSTRAINT_CONTROL_POINT, controlName, controlX, controlY);
+		
+//		//adding anchor to the diagram panel directly
+//		visibleOrderDraggables.addToTop(constControlPoint);
+//		diagramPanel.setLayer(constControlPoint, 0);
+//		diagramPanel.add(constControlPoint);
+//		diagramPanel.setComponentZOrder(constControlPoint, 0);			
+		
+	    //setting other ends of constraint dots
+	    startConstraint.setOtherEnd(endConstraint);
+	    startConstraint.setControlPoint(constControlPoint);
+	    endConstraint.setOtherEnd(startConstraint);
+	    endConstraint.setControlPoint(constControlPoint);
+	    constControlPoint.setVisible(false);
+
+		//adding constraint to draw list
+		addConstraintToDrawLists(startConstraint, (startConstraintName.startsWith(startIncludesNamePrefix)) ?
+			ItemsType.START_INCLUDES_DOT : ItemsType.START_EXCLUDES_DOT);	  
+	  
+	  
+//	  	startConstraint.setOtherEnd(endConstraint);
+//		endConstraint.setOtherEnd(startConstraint);
+//		
+//		//adding connector to draw list
+//		startConnectorDots.add(startConnector);
+	  }
+
+
 	}
 
 	/**
@@ -4508,9 +4840,12 @@ public class EditorView extends JFrame implements Observer{
 	private void loadMiscellaneous(String misc) {
 	  String[] values=misc.split(" ");
 	  connectorsCount=Integer.valueOf(values[0].substring(16));
-	  altGroupsCount=Integer.valueOf(values[1].substring(15));
-	  orGroupsCount=Integer.valueOf(values[2].substring(14));
-	  featuresCount=Integer.valueOf(values[3].substring(14));
+	  includesCount=Integer.valueOf(values[1].substring(14));
+	  excludesCount=Integer.valueOf(values[2].substring(14));
+	  constraintControlsCount=Integer.valueOf(values[3].substring(24));
+	  altGroupsCount=Integer.valueOf(values[4].substring(15));
+	  orGroupsCount=Integer.valueOf(values[5].substring(14));
+	  featuresCount=Integer.valueOf(values[6].substring(14));
 	}
 
 	/**
@@ -4519,7 +4854,7 @@ public class EditorView extends JFrame implements Observer{
 	 * @param startingComm - String containing the names of starting commonalities, separated by a singol blank
 	 */
 	private void loadStartingCommonalities(String startingComm) {
-	  String[] commonalityNames=startingComm.split(" ");
+	  String[] commonalityNames=startingComm.split("\t");
 	  for(String name : commonalityNames) startingCommonalities.add(name);
 	}
 
@@ -4529,7 +4864,7 @@ public class EditorView extends JFrame implements Observer{
 	 * @param startingVars - String containing the names of starting variabilities, separated by a singol blank
 	 */
 	private void loadStartingVariabilities(String startingVars) {
-	  String[] variabilityNames=startingVars.split(" ");
+	  String[] variabilityNames=startingVars.split("\t");
 	  for(String name : variabilityNames) startingVariabilities.add(name);
 	}
 
@@ -4586,13 +4921,20 @@ public class EditorView extends JFrame implements Observer{
 	/**
 	 * Removes from the diagram panel the control point of constraint.
 	 * 
-	 * @param constraint - one of the two ConstraintPanels owner of the control point
+	 * @param constraint - the control point or one of its two ConstraintPanels
 	 */
-	public void hideControlPoint(ConstraintPanel constraint) {
-	  JComponent controlPoint = constraint.getControlPoint();
-	  diagramPanel.remove(controlPoint);
-	  visibleOrderDraggables.remove(controlPoint);
-	  controlPoint.setVisible(false);
+	public void hideControlPoint(JComponent constraint) {
+	  if(constraint.getName().startsWith(constraintControlPointNamePrefix)){
+		diagramPanel.remove(constraint);
+		visibleOrderDraggables.remove(constraint);
+		constraint.setVisible(false);		  
+	  }
+	  else{
+		JComponent controlPoint = ((ConstraintPanel)constraint).getControlPoint();
+		diagramPanel.remove(controlPoint);
+		visibleOrderDraggables.remove(controlPoint);
+		controlPoint.setVisible(false);
+	  }
 	  frameRoot.repaint();
 	}
 	

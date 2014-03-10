@@ -371,8 +371,9 @@ public class EditorModel extends Observable{
 	 * @param startingFeature - the feature from which the constraint starts
 	 * @param endingFeature - the feature on which the constraint ends
 	 * @param type - a ConstraintTypes value representing the type of constraint
+	 * @param IDnum - a String representing the unique sequential number of this constraint
 	 */
-	public void addConstraint(String startingFeature, String endingFeature, ConstraintTypes type){
+	public void addConstraint(String startingFeature, String endingFeature, ConstraintTypes type, String IDnum){
 	  FeatureNode starting= searchFeature(startingFeature);
 	  FeatureNode ending= searchFeature(endingFeature);
 	  String[] newConstraint=null;
@@ -454,19 +455,21 @@ public class EditorModel extends Observable{
 	  switch(type){
 	    case INCLUDES:
 	      newConstraint=new String[3];
-	      newConstraint[0]=includesConstraintNamePrefix+includesCount;
+	      newConstraint[0]=includesConstraintNamePrefix+IDnum;
+//	      newConstraint[0]=includesConstraintNamePrefix+includesCount;
 	      newConstraint[1]=startingFeature;
 	      newConstraint[2]=endingFeature;
 	      constraints.add(newConstraint);
-	      ++includesCount;
+//	      ++includesCount;
 	      break;
 	    case EXCLUDES:
 		  newConstraint=new String[3];
-		  newConstraint[0]=excludesConstraintNamePrefix+excludesCount;
+		  newConstraint[0]=excludesConstraintNamePrefix+IDnum;
+//		  newConstraint[0]=excludesConstraintNamePrefix+excludesCount;
 		  newConstraint[1]=startingFeature;
 		  newConstraint[2]=endingFeature;
 		  constraints.add(newConstraint);
-		  ++excludesCount;
+//		  ++excludesCount;
 		  break;
 	  }
 	  setChanged();
@@ -879,14 +882,15 @@ public class EditorModel extends Observable{
 				+feature.getValue().getMinCardinality()+"."+feature.getValue().getMaxCardinality()+"]"
 				+recursiveXMLTreeBuilder(feature.getValue(), 1);
 
-		xml+=	   "</feature_tree>"
+		xml+=	 "</feature_tree>"
 				+"<constraints>";
 
-		/*
-		 * CONSTRAINT PART IS STILL TO BE ADDED...
-		 */
+		for(String[] strArr: constraints){
+		  if(strArr[0].startsWith(includesConstraintNamePrefix)) xml+=strArr[0]+": ~"+strArr[1]+" or "+strArr[2]+"\n";
+		  else xml+=strArr[0]+": ~"+strArr[1]+" or ~"+strArr[2]+"\n";
+		}
 
-		xml+=	   "</constraints>"
+		xml+=	 "</constraints>"
 				+"</feature_model>";
 
 		//saving xml string on file
@@ -942,14 +946,15 @@ public class EditorModel extends Observable{
 		xml+=":r "+feature.getValue().getName()+" ("+feature.getValue().getID()+")"
 				+recursiveSXFMTreeBuilder(feature.getValue(), 1);
 
-		xml+=	   "</feature_tree>"
+		xml+=	 "</feature_tree>"
 				+"<constraints>";
 
-		/*
-		 * CONSTRAINT PART IS STILL TO BE ADDED...
-		 */
+		for(String[] strArr: constraints){
+		  if(strArr[0].startsWith(includesConstraintNamePrefix)) xml+=strArr[0]+": ~"+strArr[1]+" or "+strArr[2]+"\n";
+		  else xml+=strArr[0]+": ~"+strArr[1]+" or ~"+strArr[2]+"\n";
+		}
 
-		xml+=	   "</constraints>"
+		xml+=	 "</constraints>"
 				+"</feature_model>";
 
 		//saving xml string on file
@@ -1091,27 +1096,32 @@ public class EditorModel extends Observable{
 	  SAXParserFactory saxFactory = SAXParserFactory.newInstance();
 	  ModelXMLHandler xmlHandler = new ModelXMLHandler();
 	  StringWrapper featureTree=null;
+	  String[] strArr=null, tmpArr=null, newConstraint=null;
 
 	  EditorModel newModel=new EditorModel();
 	  
 	  System.out.println("EditorModel: ***PARSING ALL XML MODEL FILES***");
-	  
+	  //building feature trees
 	  for(int i=0; i< featureModelDataPaths.size(); ++i){
 	    try{
 	      xml="";
 		  BufferedReader br1 = new BufferedReader(new FileReader(featureModelDataPaths.get(i)));
-		  while( (s = br1.readLine()) != null ) xml+=s;
+		  System.out.println("**PARSING: "+featureModelDataPaths.get(i));
+		  while( (s = br1.readLine()) != null ){			  
+			System.out.println("s= "+s);
+			xml+=s+"\n";
+		  }
 		  br1.close();
 		  stream = new ByteArrayInputStream(xml.getBytes());
 		  
 		  System.out.println("**PARSING: "+featureModelDataPaths.get(i));
 		  saxParser = saxFactory.newSAXParser();
 		  saxParser.parse(stream, xmlHandler);
-		  System.out.println("\nResulting XML from parsing:\n"+xmlHandler.xml);
+		  System.out.println("\nResulting Feature Tree from parsing:\n"+xmlHandler.featureTree);
 
-		  featureTree=new StringWrapper(xmlHandler.xml);
+		  featureTree=new StringWrapper(xmlHandler.featureTree);
 		  newModel.recursiveFeatureTreeBuilder(null, 0, featureTree);
-		  xmlHandler.xml="";
+		  xmlHandler.featureTree="";
 		  
 	    }catch (Exception e) {
 	      System.out.println("Error while loading saved model");
@@ -1119,6 +1129,23 @@ public class EditorModel extends Observable{
 	      throw new RuntimeException("Error while load saved model");
 	    }
 	  }
+
+	  //loading constraints
+	  if(xmlHandler.constraints!=null){
+		strArr=xmlHandler.constraints.split("\n");
+	  
+		for(String constr: strArr){
+		  tmpArr=constr.split(" ");		
+		  newConstraint=new String[3];
+		  newConstraint[0]=tmpArr[0].substring(0, tmpArr[0].length()-1);
+		  if(tmpArr[1].charAt(0)=='~') newConstraint[1]=tmpArr[1].substring(1);
+		  else newConstraint[1]=tmpArr[1];
+		  if(tmpArr[3].charAt(0)=='~') newConstraint[2]=tmpArr[3].substring(1);
+		  else newConstraint[2]=tmpArr[3];
+		  newModel.constraints.add(newConstraint);
+		}
+	  }
+	  
 	  newModel.printModel();
 	  return newModel;
 	}
@@ -1428,10 +1455,15 @@ public class EditorModel extends Observable{
 	 */
 	private void treePrint(FeatureNode feature, String indent) {
 		System.out.println(indent+feature.getName()+"("+feature.getID()+")");
-		for(FeatureNode child : feature.getSubFeatures()) treePrint(child, indent+">");
+		for(FeatureNode child : feature.getSubFeatures()){
+		  if(child.getCardinality().x>0) treePrint(child, indent+"MAN>");
+		  else treePrint(child, indent+"OPT>");
+		}
 		for(GroupNode group : feature.getSubGroups()) 
-		  for(FeatureNode member : group.getMembers()) 
-		  treePrint(member, indent+"|"); 
+		  for(FeatureNode member : group.getMembers()){
+			if(group.getCardinality().x>0) treePrint(member, indent+"OR|"); 
+			else treePrint(member, indent+"ALT|"); 
+		  }
 	}	
 	
 	

@@ -135,7 +135,7 @@ public class ModelProject extends Observable implements Runnable{
 	private boolean [] stateProject = {false, false};
 	
 	/** Minimum intersection size required to join two sets of terms into one, used to assign color to terms */
-	private static int minimumIntersectionSize=2;
+	private static int minimumIntersectionSize=3;
 	
 	/** 
 	 * Waits for threads workerProject to end their work, and computes commonalities candidates
@@ -1246,6 +1246,7 @@ public class ModelProject extends Observable implements Runnable{
 	 * @return al ArrayList contenenti i nomi dei file del progetto
 	 */
 	public ArrayList<String> loadProject(String s){
+		ModelFile modelFileTmp=null;
 		if(s == null) return null;
 
 		parserXML = new ParserXML();
@@ -1277,10 +1278,11 @@ public class ModelProject extends Observable implements Runnable{
 			
 			filesProject = new ArrayList <ModelFile> ();
 			
-			for(int i = 0; i < parserXML.readPathInput().size(); i++){		
-				filesProject.add(
-						new ModelFile(
-								parserXML.readPathInput().get(i), pathProject));
+			for(int i = 0; i < parserXML.readPathInput().size(); i++){	
+				modelFileTmp=new ModelFile(parserXML.readPathInput().get(i), pathProject);
+				filesProject.add(modelFileTmp);
+				modelFileTmp.filterFile();
+				
 				workerProject.add(
 						new Thread(
 								filesProject.get(i)));

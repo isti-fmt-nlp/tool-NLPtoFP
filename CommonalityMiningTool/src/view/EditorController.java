@@ -1,5 +1,6 @@
 package view;
 
+import java.awt.CheckboxMenuItem;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
@@ -256,6 +258,10 @@ public class EditorController implements
         	    editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemHideControlPoint());
         	  else editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemShowControlPoint());
           }
+          //clicked on a constraint control point
+          if(popupElement.getName().startsWith(EditorView.constraintControlPointNamePrefix)){
+        	editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemHideControlPoint());
+          }
 
           editorView.setDiagramElementsMenuPosX(e.getX());
           editorView.setDiagramElementsMenuPosY(e.getY());
@@ -313,7 +319,10 @@ public class EditorController implements
       	  ((FeaturePanel)popupElement).getTextArea().setEditable(false);
       	  ((FeaturePanel)popupElement).getTextArea().getCaret().setVisible(false);	  
 
-      	  String newFeatureName=((FeaturePanel)popupElement).getLabelName();
+      	  String newFeatureName=
+      		((FeaturePanel)popupElement).getLabelName().replaceAll("\n", " ").replaceAll("\\s{2,}+", " ").trim();
+      	  
+      	  ((FeaturePanel)popupElement).getTextArea().setText(newFeatureName);
       	  
       	  editorModel.changeFeatureName(((FeaturePanel)popupElement).getID(), newFeatureName);
       	  
@@ -438,7 +447,9 @@ public class EditorController implements
 				editorView.setActiveItem(activeItems.DRAGGING_EXTERN_CONSTRAINT);
 				editorView.setLastAnchorFocused(anchorPanel);
 				editorView.setLastFeatureFocused(featurePanel);
-				System.out.println("Trying to remove a constraint");
+				System.out.println("Trying to remove a constraint:"
+					+"\nanchorPanelName: "+anchorPanelName+"featurePanel.getID(): "+featurePanel.getID()
+					+"((FeaturePanel)otherEndFeaturePanel).getID(): "+((FeaturePanel)otherEndFeaturePanel).getID());
 				//the other end of the constraint is attached to a feature panel
 				if(otherEndFeaturePanel.getName().startsWith(EditorView.featureNamePrefix) ){
 			      if(anchorPanelName.startsWith(EditorView.startIncludesNamePrefix))
@@ -795,9 +806,12 @@ public class EditorController implements
 	  //popup menu command: Rename Feature
       else if(e.getActionCommand().equals("Rename Feature")){
     	oldFeatureName=((FeaturePanel)popupElement).getLabelName();
+    	if(editorView.getMenuViewCommsOrVars().isSelected())
+    	  ((FeaturePanel)popupElement).getTextArea().setText(oldFeatureName.substring(0, oldFeatureName.length()-3));
     	
         System.out.println("Renaming: "+popupElement.getName()); 
         ((FeaturePanel)popupElement).getTextArea().setEditable(true);
+        ((FeaturePanel)popupElement).getTextArea().getCaret().setVisible(true);
         
       }
 	  //popup menu command: Change Color
@@ -817,7 +831,7 @@ public class EditorController implements
     	editorView.showControlPoint((ConstraintPanel)popupElement);
       }
       else if(e.getActionCommand().equals("Hide Control Point")){
-      	editorView.hideControlPoint((ConstraintPanel)popupElement);    	  
+      	editorView.hideControlPoint(popupElement);    	  
       }
 	  //popup menu command: Print Model[DEBUG COMMAND]
       else if(e.getActionCommand().equals("Print Model[DEBUG COMMAND]")){
@@ -847,6 +861,7 @@ public class EditorController implements
     	
       }
 	  //commands from editor menu bar
+	  //menuFiles command: Save Diagram
       else if(e.getActionCommand().equals("Save Diagram")){
   		String s = null;			
   		if((s = editorView.assignNameDiagramDialog()) != null){
@@ -873,6 +888,7 @@ public class EditorController implements
   		  }
   		}    	  
       }
+	  //menuFiles command: Open Diagram
       else if(e.getActionCommand().equals("Open Diagram")){
   		String s = null;
   		if((s = editorView.loadXMLDialog(diagramPath)) != null)
@@ -880,6 +896,7 @@ public class EditorController implements
 //  				s.substring(0, s.length() - 4)
     	  
       }
+	  //menuFiles command: Export as SXFM
       else if(e.getActionCommand().equals("Export as SXFM")){
     	String s = null;			
     	if((s = editorView.assignNameSXFMDialog()) != null){
@@ -899,21 +916,32 @@ public class EditorController implements
     		System.out.println("Exception exportAsSXFM: " + ex.getMessage());
     		ex.printStackTrace();
     	  }
-    	}    	  
-    	  
+    	}    	      	  
       }
+	  //menuFiles command: Export as PNG
       else if(e.getActionCommand().equals("Export as PNG")){
     	editorView.exportAsImageFile(imagesPath, "PNG");
       }
+	  //menuFiles command: Export as GIF
       else if(e.getActionCommand().equals("Export as GIF")){
     	editorView.exportAsImageFile(imagesPath, "GIF");
       }
+	  //menuFiles command: Delete Diagram
       else if(e.getActionCommand().equals("Delete Diagram")){
     	  
       }
+	  //menuFiles command: Exit
       else if(e.getActionCommand().equals("Exit")){
     	  
       }
+      //menuView command: View Commonality/Variability
+      else if(e.getActionCommand().equals("View Commonality/Variability")){
+    	if( ((JCheckBoxMenuItem)editorView.getMenuViewCommsOrVars()).isSelected() )
+    	  editorView.viewCommVarsDistinction(true);
+    	else editorView.viewCommVarsDistinction(false);
+
+      }
+
 
 	}
 
@@ -1114,32 +1142,36 @@ public class EditorController implements
 		if (constraint.getOtherEnd().getParent().getName().startsWith(EditorView.featureNamePrefix) ){
 		  //the constraint links two features
 		  System.out.println("about to add a constraint to the model");
-		  if(constraint.getName().startsWith(EditorView.startIncludesNamePrefix)){
+		  if(constraint.getName()	.startsWith(EditorView.startIncludesNamePrefix)){
 			editorModel.addConstraint(
 				((FeaturePanel)comp).getID(),
 				((FeaturePanel)constraint.getOtherEnd().getParent()).getID(), 
-				EditorModel.ConstraintTypes.INCLUDES);
+				EditorModel.ConstraintTypes.INCLUDES,
+				constraint.getName().substring(EditorView.startIncludesNamePrefix.length()));
 			return;
 		  }
 		  if(constraint.getName().startsWith(EditorView.endIncludesNamePrefix)){
 			editorModel.addConstraint(
 				((FeaturePanel)constraint.getOtherEnd().getParent()).getID(), 
 				((FeaturePanel)comp).getID(),
-				EditorModel.ConstraintTypes.INCLUDES);
+				EditorModel.ConstraintTypes.INCLUDES,
+				constraint.getName().substring(EditorView.endIncludesNamePrefix.length()));
 			return;
 		  }
 		  if(constraint.getName().startsWith(EditorView.startExcludesNamePrefix)){
 			editorModel.addConstraint(
 				((FeaturePanel)comp).getID(),
 				((FeaturePanel)constraint.getOtherEnd().getParent()).getID(), 
-				EditorModel.ConstraintTypes.EXCLUDES);
+				EditorModel.ConstraintTypes.EXCLUDES,
+				constraint.getName().substring(EditorView.startExcludesNamePrefix.length()));
 			return;
 		  }
 		  if(constraint.getName().startsWith(EditorView.endExcludesNamePrefix)){
 			editorModel.addConstraint(
 				((FeaturePanel)constraint.getOtherEnd().getParent()).getID(), 
 				((FeaturePanel)comp).getID(),
-				EditorModel.ConstraintTypes.EXCLUDES);
+				EditorModel.ConstraintTypes.EXCLUDES,
+				constraint.getName().substring(EditorView.endExcludesNamePrefix.length()));
 			return;
 		  }
 		}

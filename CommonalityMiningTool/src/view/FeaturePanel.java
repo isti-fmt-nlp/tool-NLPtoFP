@@ -42,7 +42,8 @@ public class FeaturePanel extends JLayeredPane {
 	
 	private String labelName=null;
 
-	private JTextField jta=null;
+//	private JTextField jta=null;
+	private JTextArea jta=null;
 
 	/**
 	 * Creates a new default FeaturePanel. <br>
@@ -52,10 +53,18 @@ public class FeaturePanel extends JLayeredPane {
 //		this.parent=parent;
 	}
 	
+//	/**
+//	 * Creates a new default FeaturePanel. <br>
+//	 */
+//	public FeaturePanel(JTextField jta){
+//		super();
+//		this.jta=jta;
+//	}
+	
 	/**
 	 * Creates a new default FeaturePanel. <br>
 	 */
-	public FeaturePanel(JTextField jta){
+	public FeaturePanel(JTextArea jta){
 		super();
 		this.jta=jta;
 	}
@@ -87,12 +96,21 @@ public class FeaturePanel extends JLayeredPane {
 		return jta.getText();
 	}
 
+//	/**
+//	 * Returns the JTextArea of this feature panel.
+//	 * 
+//	 * @return - a String containing the name.
+//	 */
+//	public JTextField getTextArea(){
+//		return jta;
+//	}
+
 	/**
 	 * Returns the JTextArea of this feature panel.
 	 * 
 	 * @return - a String containing the name.
 	 */
-	public JTextField getTextArea(){
+	public JTextArea getTextArea(){
 		return jta;
 	}
 

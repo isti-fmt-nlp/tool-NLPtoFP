@@ -8,14 +8,16 @@ public class ViewXMLHandler extends DefaultHandler {
 	boolean inFeaturesList=false;
 	boolean inConnectorsList=false;
 	boolean inGroupsList=false;
+	boolean inConstraintsList=false;	
 	boolean inMisc=false;
 	boolean inStartingComm=false;
 	boolean inStartingVars=false;
-	boolean inFeatureColors=false;	
+	boolean inFeatureColors=false;		
 
 	public String featuresList=null;
 	public String connectorsList=null;
 	public String groupsList=null;
+	public String constraintsList=null;
 	public String misc=null;
 	public String startingComm=null;
 	public String startingVars=null;
@@ -25,6 +27,7 @@ public class ViewXMLHandler extends DefaultHandler {
 	  if (qName.equals("features")) inFeaturesList=true;
 	  else if (qName.equals("connectors")) inConnectorsList=true;
 	  else if (qName.equals("groups")) inGroupsList=true;
+	  else if (qName.equals("constraints")) inConstraintsList=true;	  
 	  else if (qName.equals("misc")) inMisc=true;
 	  else if (qName.equals("startingCommonalities")) inStartingComm=true;
 	  else if (qName.equals("startingVariabilities")) inStartingVars=true;
@@ -40,6 +43,7 @@ public class ViewXMLHandler extends DefaultHandler {
 	  if (qName.equals("features")) inFeaturesList=false;
 	  else if (qName.equals("connectors")) inConnectorsList=false;
 	  else if (qName.equals("groups")) inGroupsList=false;
+	  else if (qName.equals("constraints")) inConstraintsList=false;
 	  else if (qName.equals("misc")) inMisc=false;
 	  else if (qName.equals("startingCommonalities")) inStartingComm=false;
 	  else if (qName.equals("startingVariabilities")) inStartingVars=false;
@@ -63,6 +67,10 @@ public class ViewXMLHandler extends DefaultHandler {
 	  else if (inGroupsList){
 		if (groupsList==null) groupsList=tmp;
 		else groupsList+=tmp;		  
+	  }
+	  else if (inConstraintsList){
+		if (constraintsList==null) constraintsList=tmp;
+		else constraintsList+=tmp;		  
 	  }
 	  else if (inMisc){
 		if (misc==null) misc=tmp;

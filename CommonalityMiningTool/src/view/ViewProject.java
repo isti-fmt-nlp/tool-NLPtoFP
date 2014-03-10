@@ -229,7 +229,7 @@ public class ViewProject implements Observer, Runnable{
 		menuFilesLoadFolder.addActionListener(controllerProject);
 		menuFilesLoadFolder.setEnabled(false);
 				
-		menuFiles.add(menuFilesLoad);		
+//		menuFiles.add(menuFilesLoad);		
 		menuFiles.add(menuFilesDelete);
 		menuFiles.add(menuFilesLoadFolder);
 		
