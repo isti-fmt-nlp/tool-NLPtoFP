@@ -218,32 +218,6 @@ public class ViewPanelCentral{
 		panelAnalysis.add(tabFeatures[0]);
 		panelAnalysis.add(tabFeatures[1]);
 
-//		for(int i = 0; i < 2; i++)
-//		{
-//			switch(i)
-//			{
-//				case 0:
-//				{
-//					tabFeatures[1].add("Commonality Candidates", getTabFeaturesCandidates(alFeaturesCand, alFeaturesSel));
-//					break;
-//				}
-//				case 1:
-//				{
-//					if( selectFilePath == null)
-//						break;
-//					
-//					tabFeatures[1].add("Selected Commonality", getTabHTMLFile(selectFilePath));		
-//					break;
-//				}
-//				default: break;
-//			}
-//		}
-//
-// INVECE DI
-//
-//		tabFeatures[1].add("Commonality Candidates", getTabFeaturesCandidates(alFeaturesCand, alFeaturesSel));
-//		if( selectFilePath != null) tabFeatures[1].add("Selected Commonality", getTabHTMLFile(selectFilePath));		
-
 	}
 	
 	/** Creates or updates the tab showing selected features

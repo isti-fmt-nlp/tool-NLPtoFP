@@ -747,6 +747,8 @@ public class EditorController implements
 	public void actionPerformed(ActionEvent e) {
 	  String diagDataPath=null;
 	  ArrayList<String> modelDataPaths=null;
+	  boolean done=false;
+	  
 	  //commands from diagram popup menu
 	  JComponent popupElement=editorView.getPopUpElement();
 	  //popup menu command: Delete Element
@@ -806,8 +808,17 @@ public class EditorController implements
 	  //popup menu command: Rename Feature
       else if(e.getActionCommand().equals("Rename Feature")){
     	oldFeatureName=((FeaturePanel)popupElement).getLabelName();
-    	if(editorView.getMenuViewCommsOrVars().isSelected())
-    	  ((FeaturePanel)popupElement).getTextArea().setText(oldFeatureName.substring(0, oldFeatureName.length()-3));
+    	if(editorView.getMenuViewCommsOrVars().isSelected()){
+    		  
+    	  done=false;
+    	  for(String tmp : editorView.getStartingCommonalities()) if(oldFeatureName.compareTo(tmp+"{C}")==0){
+      		((FeaturePanel)popupElement).getTextArea().setText(oldFeatureName.substring(0, oldFeatureName.length()-3));
+      		done=true;
+    	  }
+    	  
+    	  if(!done) for(String tmp : editorView.getStartingVariabilities()) if(oldFeatureName.compareTo(tmp+"{V}")==0)
+      		((FeaturePanel)popupElement).getTextArea().setText(oldFeatureName.substring(0, oldFeatureName.length()-3));
+    	}    	  
     	
         System.out.println("Renaming: "+popupElement.getName()); 
         ((FeaturePanel)popupElement).getTextArea().setEditable(true);

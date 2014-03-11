@@ -604,7 +604,8 @@ public class EditorView extends JFrame implements Observer{
 		//creating tools panel
 		toolsPanel = new JPanel();		
 		toolsPanel.setLayout(new GridLayout(0, 2, 2, 2));		
-		toolsPanel.setPreferredSize(new Dimension(140, Toolkit.getDefaultToolkit().getScreenSize().height));
+//		toolsPanel.setPreferredSize(new Dimension(140, Toolkit.getDefaultToolkit().getScreenSize().height));
+		toolsPanel.setPreferredSize(new Dimension(140, Toolkit.getDefaultToolkit().getScreenSize().height/2));
 		toolsPanel.setBackground(Color.white);
 //		toolsPanel.setBorder(BorderFactory.createCompoundBorder(
 //				BorderFactory.createEtchedBorder(EtchedBorder.RAISED), 
@@ -623,7 +624,7 @@ public class EditorView extends JFrame implements Observer{
 		
 		
 		JComponent iconTmpPanel=null;
-//		for(int i=0; i<4; ++i){
+
 		iconTmpPanel=getToolIcon("Mandatory Link", true);
 		iconTmpPanel.addMouseListener(editorController);
 		iconTmpPanel.addMouseMotionListener(editorController);
@@ -658,31 +659,10 @@ public class EditorView extends JFrame implements Observer{
 		iconTmpPanel.addMouseListener(editorController);
 		iconTmpPanel.addMouseMotionListener(editorController);
 		toolsPanel.add(iconTmpPanel);
-//		}
 
 		//creating diagram panel, that will be inserted in the scroller
-//		diagramPanel = new JLayeredPane(){
-//
-//		  private static final long serialVersionUID = 1L;
-//			
-//		  @Override
-//		  public void paint(Graphics g){
-//			Graphics2D g2 = (Graphics2D)g.create();		
-//			paintComponent(g);
-//			paintBorder(g);
-//			drawAllConnectors(g2);
-//			paintChildren(g);//panels in the diagram panel are drawn over lines			  
-//		  }
-//		};
-		
 		diagramPanel = new ScrollLayeredPane();
 		diagramPanel.setName(diagramPanelName);
-//		diagramPanel = new OrderedListPaintJPanel();
-//		diagramPanel = new OrderedListPaintJPanel(visibleOrderDraggables);
-//		diagramPanel.setPaintList(visibleOrderDraggables);
-//		diagramPanel = new JPanel();
-//		diagramPanel.setBackground(Color.getHSBColor(myColorHBS[0], myColorHBS[1], myColorHBS[2]));
-//		diagramPanel.setOpaque(true);
 		diagramPanel.setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width-160,
 		Toolkit.getDefaultToolkit().getScreenSize().height));
 		diagramPanel.setLayout(null);		
@@ -700,8 +680,10 @@ public class EditorView extends JFrame implements Observer{
 		diagramScroller.setMinimumSize(new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width-160)/6,
 				Toolkit.getDefaultToolkit().getScreenSize().height));
 
+//		toolsPanel.setMinimumSize(new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width-160)/12,
+//				Toolkit.getDefaultToolkit().getScreenSize().height));		
 		toolsPanel.setMinimumSize(new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width-160)/12,
-				Toolkit.getDefaultToolkit().getScreenSize().height));
+				Toolkit.getDefaultToolkit().getScreenSize().height/2));
 		
 		splitterPanel = new EditorSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		splitterPanel.setContinuousLayout(true);
@@ -714,7 +696,26 @@ public class EditorView extends JFrame implements Observer{
 //		splitterPanel.setLocation(0,0);
 //		splitterPanel.setResizeWeight(0.5);
 		
-		splitterPanel.add(toolsPanel);
+		JPanel controllerPanel=new JPanel();
+		controllerPanel.setLayout(new BorderLayout());
+
+		
+		JPanel treePanel=new JPanel();		
+		treePanel.setPreferredSize(new Dimension(140, Toolkit.getDefaultToolkit().getScreenSize().height));
+		treePanel.setMinimumSize(new Dimension(140, Toolkit.getDefaultToolkit().getScreenSize().height));
+		treePanel.setSize(new Dimension(140, Toolkit.getDefaultToolkit().getScreenSize().height));
+		treePanel.setBackground(Color.RED);
+		treePanel.add(new JLabel("Caio!"));
+
+//		controllerPanel.add(toolsPanel, BorderLayout.SOUTH);		
+//		controllerPanel.add(treePanel, BorderLayout.NORTH);		
+		controllerPanel.add(toolsPanel, BorderLayout.NORTH);		
+		controllerPanel.add(treePanel, BorderLayout.SOUTH);
+//		controllerPanel.add(toolsPanel);		
+//		controllerPanel.add(treePanel);
+		
+//		splitterPanel.add(toolsPanel);
+		splitterPanel.add(controllerPanel);
 		splitterPanel.add(diagramScroller);
 		
 				
@@ -730,7 +731,7 @@ public class EditorView extends JFrame implements Observer{
 		setVisible(true);
 		setLocation(0, 0);
 		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
-
+		validate();
 /*		
 		//adding starting commonalities and variabilities
 		int i=10, j=10;
