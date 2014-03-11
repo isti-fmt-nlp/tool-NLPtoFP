@@ -3321,6 +3321,7 @@ public class EditorView extends JFrame implements Observer{
 //		diagramSize.height=diagramMaxY-diagramMinY;
 		diagramPanel.setPreferredSize(diagramSize);
 		diagramPanel.revalidate();
+		frameRoot.repaint();
 	}
 	
 	/**
@@ -4084,7 +4085,7 @@ public class EditorView extends JFrame implements Observer{
     	
     	//checking if the diagrams save directory must be created
     	File dir=new File(pathProject);		
-    	if(!dir.isDirectory() && !dir.mkdir()){
+    	if(!dir.isDirectory() && !dir.mkdirs()){
     		errorDialog("Save Directory can't be created.");
     		return null;
     	}
@@ -4118,7 +4119,7 @@ public class EditorView extends JFrame implements Observer{
 	  try{
 		//checking if the diagrams save directory must be created
 		File dir=new File(imagesPath);		
-		if(!dir.isDirectory() && !dir.mkdir() ) throw new IOException("Save Directory can't be created.");
+		if(!dir.isDirectory() && !dir.mkdirs() ) throw new IOException("Save Directory can't be created.");
 	  }catch(IOException e){
 		System.out.println("Can't create PNG save directory");
 		e.printStackTrace();
@@ -4336,7 +4337,7 @@ public class EditorView extends JFrame implements Observer{
 		try{
 		  //checking if the diagrams save directory must be created
 		  File dir=new File(pathProject);		
-		  if(!dir.isDirectory() && !dir.mkdir() ) throw new IOException("Save Directory can't be created.");
+		  if(!dir.isDirectory() && !dir.mkdirs() ) throw new IOException("Save Directory can't be created.");
 			
 		  PrintWriter pw1 = new PrintWriter(new BufferedWriter(new FileWriter(savePath)));
 		  pw1.print(xml);
@@ -4390,7 +4391,16 @@ public class EditorView extends JFrame implements Observer{
 
 		//resizing diagram to fit all components
 		fitDiagram();		
+		//hiding control points after fitting
+		for(JComponent constr : startIncludesDots) hideControlPoint(constr);
+		for(JComponent constr : startExcludesDots) hideControlPoint(constr);
 		frameRoot.repaint();
+		
+		
+//		diagramPanel.remove(constControlPoint);
+//		visibleOrderDraggables.remove(constControlPoint);
+//		constControlPoint.setVisible(false);		  
+		
 	  } catch (Exception e) {
 		System.out.println("Error while loading saved diagram");
 		e.printStackTrace(); 
@@ -4804,18 +4814,22 @@ public class EditorView extends JFrame implements Observer{
 		//adding constraint control point
 		constControlPoint=buildConnectionDot(ItemsType.CONSTRAINT_CONTROL_POINT, controlName, controlX, controlY);
 		
-//		//adding anchor to the diagram panel directly
-//		visibleOrderDraggables.addToTop(constControlPoint);
-//		diagramPanel.setLayer(constControlPoint, 0);
-//		diagramPanel.add(constControlPoint);
-//		diagramPanel.setComponentZOrder(constControlPoint, 0);			
+		//adding anchor to the diagram panel directly
+		constControlPoint.setLocation(controlX, controlY);
+		visibleOrderDraggables.addToTop(constControlPoint);
+		diagramPanel.setLayer(constControlPoint, 0);
+		diagramPanel.add(constControlPoint);
+		diagramPanel.setComponentZOrder(constControlPoint, 0);
+	    constControlPoint.setVisible(true);
 		
 	    //setting other ends of constraint dots
 	    startConstraint.setOtherEnd(endConstraint);
 	    startConstraint.setControlPoint(constControlPoint);
 	    endConstraint.setOtherEnd(startConstraint);
 	    endConstraint.setControlPoint(constControlPoint);
-	    constControlPoint.setVisible(false);
+//	    constControlPoint.setVisible(false);
+	    
+	    System.out.println("constControlPoint.getLocation(): "+constControlPoint.getLocation());
 
 		//adding constraint to draw list
 		addConstraintToDrawLists(startConstraint, (startConstraintName.startsWith(startIncludesNamePrefix)) ?

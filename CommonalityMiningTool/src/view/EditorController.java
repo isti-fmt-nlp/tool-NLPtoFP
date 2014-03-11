@@ -56,9 +56,6 @@ public class EditorController implements
 
 	/** Path where diagram files will be saved*/
 	private String diagramPath = null;		
-	
-	/** Old name of the feature about to be renamed*/
-	private String oldFeatureName=null;
 
 	/** Path where SXFM exported files will be saved*/
 	private String sxfmPath = null;		
@@ -69,6 +66,9 @@ public class EditorController implements
 	private EditorView editorView = null;
 		
 	private EditorModel editorModel = null;
+	
+	/** Old name of the feature about to be renamed*/
+	private String oldFeatureName=null;
 	
 	/** Costruttore
 	 * 
@@ -872,7 +872,7 @@ public class EditorController implements
   		  else try{
   			//checking if the diagrams save directory must be created
   			File dir=new File(diagramPath+"/"+saveFilesSubPath);		
-  			if(!dir.isDirectory() && !dir.mkdir() ) 
+  			if(!dir.isDirectory() && !dir.mkdirs() ) 
   			  throw new IOException("Save Directory can't be created.");
   				
   			PrintWriter pw1 = new PrintWriter(new BufferedWriter(
@@ -905,7 +905,7 @@ public class EditorController implements
     	  else try{
     		//checking if the SXFM files save directory must be created
     		File dir=new File(sxfmPath+"/"+saveFilesSubPath);		
-    		if(!dir.isDirectory() && !dir.mkdir() ) 
+    		if(!dir.isDirectory() && !dir.mkdirs() ) 
     		  throw new IOException("Save Directory can't be created.");
 
     		PrintWriter pw1 = new PrintWriter(new BufferedWriter(
@@ -1223,6 +1223,7 @@ public class EditorController implements
 	 * @param pathProject - the path used for saving the project
 	 */
 	public void setSavePath(String pathProject) {
+		System.out.println("setSavePath(): pathProject="+pathProject);
 		this.diagramPath=pathProject;		
 		this.sxfmPath=pathProject+sxfmSubPath;
 		this.imagesPath=pathProject+imagesSubPath;

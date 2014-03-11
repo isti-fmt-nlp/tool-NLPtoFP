@@ -46,7 +46,8 @@ public class ViewProject implements Observer, Runnable{
 
 	private static boolean verbose=false;//variable used to activate prints in the code
 	
-	private static final String savedProjectsDir = "Usage Tries";
+//	private static final String savedProjectsDir = "Usage Tries";
+	private static final String savedProjectsDir = "Usage Tries/ANALISYS";
 	
 	private ModelProject modelProject = null;
 	
@@ -593,7 +594,7 @@ public class ViewProject implements Observer, Runnable{
     	
     	//checking if the diagrams save directory must be created
     	File dir=new File(pathProject);		
-    	if(!dir.isDirectory() && !dir.mkdir()){
+    	if(!dir.isDirectory() && !dir.mkdirs()){
     		errorDialog("Save Directory can't be created.");
     		return null;
     	}
@@ -605,7 +606,8 @@ public class ViewProject implements Observer, Runnable{
 	    
 	    if(d.getFile() == null) return null;
 
-	    return d.getFile().toString();
+	    System.out.println("DIR IS: "+d.getDirectory()+"\nFILE IS: "+d.getFile());
+	    return d.getDirectory()+d.getFile().toString();
 	}
 	
 	/** Salva il progetto

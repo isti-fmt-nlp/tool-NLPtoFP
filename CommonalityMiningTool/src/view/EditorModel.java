@@ -897,7 +897,7 @@ public class EditorModel extends Observable{
 		try{
 		  //checking if the diagrams save directory must be created
 		  File dir=new File(pathProject);		
-		  if(!dir.isDirectory() && !dir.mkdir()) throw new IOException("Save Directory can't be created.");
+		  if(!dir.isDirectory() && !dir.mkdirs()) throw new IOException("Save Directory can't be created.");
 
 		  PrintWriter pw1 = new PrintWriter(new BufferedWriter(
 				  new FileWriter(savePathPrefix+feature.getValue().getID()+savePathSuffix) ));
@@ -961,7 +961,7 @@ public class EditorModel extends Observable{
 		try{
 		  //checking if the SXFM files save directory must be created
 		  File dir=new File(savePath);		
-		  if(!dir.isDirectory() && !dir.mkdir()) throw new IOException("Save Directory can't be created.");
+		  if(!dir.isDirectory() && !dir.mkdirs()) throw new IOException("Save Directory can't be created.");
 
 		  PrintWriter pw1 = new PrintWriter(new BufferedWriter(
 				  new FileWriter(savePathPrefix+feature.getValue().getID()+savePathSuffix) ));

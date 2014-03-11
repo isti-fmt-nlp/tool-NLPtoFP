@@ -56,7 +56,8 @@ public class ModelProject extends Observable implements Runnable{
 	private static boolean debugColors=true;//variable used to activate debug prints in the code
 	
 	
-	private static final String savedProjectsDir = "Usage Tries";
+//	private static final String savedProjectsDir = "Usage Tries";
+	private static final String savedProjectsDir = "Usage Tries/ANALISYS";
 	
 	/** String containing the project name*/
 	private String nameProject = null;
@@ -627,7 +628,9 @@ public class ModelProject extends Observable implements Runnable{
 		stateProject[0] = true;
 		stateProject[1] = true;
 		
-		if(new File(pathProject).mkdir() == false)
+		System.out.println("pathProject: "+pathProject);
+		
+		if(new File(pathProject).mkdirs() == false)
 			return false;		
 		
 		else{

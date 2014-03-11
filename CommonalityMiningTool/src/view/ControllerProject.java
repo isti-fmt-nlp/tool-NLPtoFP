@@ -24,7 +24,8 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 	private static boolean verbose=false;//variabile usata per attivare stampe nel codice
 	
 	/** path used to save diagrams and feature models xml files*/
-	private static String diagramPath="/DIAGRAMS";
+	private static String diagramPath="../Usage Tries/DIAGRAMS";
+	private static String diagramRelativePath="../DIAGRAMS";
 	
 	/** Path where general loadable diagram files will be saved*/
 	private static String saveFilesSubPath="saved diagrams"; 
@@ -142,7 +143,16 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 
 		//creating controller
 		EditorController editorController =new EditorController(editorView, editorModel);
-		editorController.setSavePath(modelProject.getPathProject()+diagramPath);
+		
+		//setting diagrams save path
+		String[] strArr=modelProject.getPathProject().split("/");
+		String projectname=strArr[strArr.length-1];
+		String diagramsSavePath=modelProject.getPathProject();
+		diagramsSavePath=diagramsSavePath.substring(0, diagramsSavePath.length()-projectname.length())
+		  +diagramRelativePath+"/"+projectname;
+		
+//		editorController.setSavePath(modelProject.getPathProject()+diagramPath);
+		editorController.setSavePath(diagramsSavePath);
 		
 		//adding the view as observer to the model
 		editorModel.addObserver(editorView);
@@ -163,11 +173,25 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		String s1=null;		
 		String diagramDataPath=null;
 		ArrayList<String> featureModelDataPaths=new ArrayList<String>();
-		String loadDirectory=modelProject.getPathProject()+diagramPath+"/"+saveFilesSubPath;  
+		
+		//detting diagrams save path
+
+//		String[] strArr=modelProject.getPathProject().split("/");
+//		String projectname=strArr[strArr.length-1];
+//		String diagramsSavePath=modelProject.getPathProject();
+//		diagramsSavePath=diagramsSavePath.substring(0, diagramsSavePath.length()-projectname.length())
+//				+diagramRelativePath+"/"+projectname;
+
+		//loading general diagram save file
+//		String loadDirectory=modelProject.getPathProject()+diagramPath+"/"+saveFilesSubPath;  
+
+//		String loadDirectory=diagramsSavePath+"/"+saveFilesSubPath;  
+		String loadDirectory=diagramPath;  
 		
 		String s = null;
 		if((s = viewProject.loadDiagramDialog(loadDirectory)) != null) try{
-		  BufferedReader br1 = new BufferedReader(new FileReader(loadDirectory+"/"+s));
+//		  BufferedReader br1 = new BufferedReader(new FileReader(loadDirectory+"/"+s));
+		  BufferedReader br1 = new BufferedReader(new FileReader(s));
 		  diagramDataPath=br1.readLine();
 		  while( (s1 = br1.readLine()) != null ) featureModelDataPaths.add(s1);
 		  br1.close();
@@ -191,7 +215,15 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 
 		  //creating controller
 		  EditorController editorController =new EditorController(editorView, editorModel);
-		  editorController.setSavePath(modelProject.getPathProject()+diagramPath);
+		  
+		  
+		  //setting diagrams save path
+//		  editorController.setSavePath(modelProject.getPathProject()+diagramPath);		  
+
+//		  editorController.setSavePath(diagramsSavePath);
+		  String[] strArr=s.split("/");
+		  s=s.substring(0, s.length()-strArr[strArr.length-2].length()-1-strArr[strArr.length-1].length()-1);
+		  editorController.setSavePath(s);
 
 		  //adding the view as observer to the model
 		  editorModel.addObserver(editorView);

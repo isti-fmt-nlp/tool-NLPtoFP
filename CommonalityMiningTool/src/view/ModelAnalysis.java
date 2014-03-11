@@ -1264,7 +1264,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 	private void saveRelevantTerms() throws IOException {
 	  if(termRelevant==null){//just creating an empty file
 		File emptyFile=new File(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + ".log");
-		emptyFile.getParentFile().mkdir(); emptyFile.createNewFile();
+		emptyFile.getParentFile().mkdirs(); emptyFile.createNewFile();
 		return;
 	  }
 	  
@@ -1287,7 +1287,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 	  PrintWriter writer=null;
 	  if(termsInSentencesSet==null){//just creating an empty file
 		File emptyFile=new File(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + "SETS.log");
-		emptyFile.getParentFile().mkdir(); emptyFile.createNewFile();
+		emptyFile.getParentFile().mkdirs(); emptyFile.createNewFile();
 		return;
 	  }
 			  
