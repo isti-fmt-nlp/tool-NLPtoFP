@@ -981,7 +981,8 @@ public class ViewPanelCentral{
 				if (compArrTmp[k].getName()==tabTitle) occursTabbedPane.setSelectedComponent(compArrTmp[k]);
 		  }
 
-		  selectCurrentOccurrence(currentSelectedCheckBox, ((JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
+		  selectCurrentOccurrence(currentSelectedCheckBox,
+			  ((JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
 
 		  occursTabbedPane.addMouseListener(
 			new MouseAdapter(){
@@ -989,7 +990,8 @@ public class ViewPanelCentral{
 			  public void mouseClicked(MouseEvent me){						
 			    selectCurrentOccurrence(currentSelectedCheckBox,
 					((JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
-			    currentFiles.put(currentSelectedCheckBox, ((JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
+			    currentFiles.put(currentSelectedCheckBox,
+			    	((JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
 			  }
 			}
 		  );

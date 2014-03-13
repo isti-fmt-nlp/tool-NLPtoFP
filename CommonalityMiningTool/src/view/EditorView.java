@@ -134,6 +134,7 @@ public class EditorView extends JFrame implements Observer{
 	private static boolean debug2=false;
 	private static boolean debug3=false;
 	private static boolean debug4=false;
+	private static boolean debug5=false;
 //	private static Robot eventsRobot = null;
 	
 	private static final long serialVersionUID = 1L;
@@ -446,8 +447,8 @@ public class EditorView extends JFrame implements Observer{
 	/** The panel searchFrame used to search for feature occurrences*/
 	private JPanel searchPanel = null;
 
-	/** List of selected features names*/
-	private ArrayList<JLabel> labelFeatures = new ArrayList<JLabel> ();
+//	/** List of selected features names*/
+//	private ArrayList<JLabel> labelFeatures = new ArrayList<JLabel> ();
 	
 	/**buttons for navigating through commonalitie occurences in tab texts, the X...wardButtons move of x occurences, 
 	 where x is defined by occurrJumpSpan constant*/
@@ -5112,40 +5113,70 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @return - the JScrollPane created
 	 */
-	protected JScrollPane getTabFeaturesCandidates(/*ArrayList<String> featuresTyped, 
-				ArrayList<String> commonalitiesExtracted, ArrayList<String> variabilitiesExtracted*/){
+	protected JScrollPane getTabFeaturesCandidates(){
       	
 		ImageIcon iconSearch = new ImageIcon(getClass().getResource("/Search/magnifier glasses-min3.png"));
 		ImageIcon iconNoSearch = new ImageIcon(getClass().getResource("/Search/magnifier glasses_NO_SEARCH.png"));
 		JLabel iconLabel = null;
 		int[] colorRGB=new int[3];
 		Color backColor=null;
+    	ArrayList<String> commonalitiesExtracted = new ArrayList<String>();//starting extracted commonalities		
+    	ArrayList<String> variabilitiesExtracted = new ArrayList<String>();//starting extracted variabilities		
+    	ArrayList<String> featuresTyped = new ArrayList<String>();//ArrayList containing not extracted features
+    	String featureName=null;
 
-		//buliding features lists
-		/** ArrayList containing starting extracted commonalities*/
-    	ArrayList<String> commonalitiesExtracted = new ArrayList<String>();
-		/** ArrayList containing starting extracted variabilities*/
-    	ArrayList<String> variabilitiesExtracted = new ArrayList<String>();
-		/** ArrayList containing not extracted features*/
-    	ArrayList<String> featuresTyped = new ArrayList<String>();
+		//building features lists
+    	if(selectionGroupFocused.size()>0){
+    	  for(JComponent groupMember : selectionGroupFocused){
+    		if(!groupMember.getName().startsWith(featureNamePrefix)) continue;//element is not a feature
+    		
+    		//getting feature name
+    		featureName=((FeaturePanel)groupMember).getLabelName();
+    		if (menuViewCommsOrVars.isSelected()) featureName=featureName.substring(0, featureName.length()-3);
 
-    	for(String tmp : startingCommonalities)
-    		  if(relevantTerms.get(tmp)==null) featuresTyped.add(tmp);
-    		  else commonalitiesExtracted.add(tmp);
-      	
-    	for(String tmp : startingVariabilities)
-    		  if(relevantTerms.get(tmp)==null) featuresTyped.add(tmp);
-    		  else variabilitiesExtracted.add(tmp);
+    		//getting the type of the feature: extracted commonality, extracted variability or added by the user
+    		if(relevantTerms.get(featureName)==null) featuresTyped.add(featureName);//a non-extracted feature
+    		else{
+    	      for(String tmp : startingCommonalities) if(tmp.compareTo(featureName)==0){
+    	    	commonalitiesExtracted.add(featureName);
+    	    	featureName=null; break;
+    	      }
+    	      if(featureName!=null)//feature still not found
+    	    	for(String tmp : startingVariabilities) if(tmp.compareTo(featureName)==0){
+    	    	  variabilitiesExtracted.add(featureName); break;
+      	      	}
+    		}
+    	  }
+    	  getSelectionGroup().clear();//clearing selection group
+    	}
+    	else{//search asked on a single feature
+    	  featureName=((FeaturePanel)getPopUpElement()).getLabelName();
+    	  
+    	  //getting the type of the feature: extracted commonality, extracted variability or added by the user
+    	  if(relevantTerms.get(featureName)==null) featuresTyped.add(featureName);//a non-extracted feature
+    	  else{
+    		for(String tmp : startingCommonalities) if(tmp.compareTo(featureName)==0){
+  	    	  commonalitiesExtracted.add(featureName);
+  	    	  featureName=null; break;
+    		}
+    		if(featureName!=null)//feature still not found
+  	    	  for(String tmp : startingVariabilities) if(tmp.compareTo(featureName)==0){
+  	    	    variabilitiesExtracted.add(featureName); break;
+  	    	  }
+    	  }
+    	}
     	
     	/* ***DEBUG*** */
-    	System.out.println("commonalitiesExtracted: ");
-    	for(String tmp : commonalitiesExtracted) System.out.println(tmp);
+    	if(debug5){
+    	  System.out.println("commonalitiesExtracted: ");
+    	  for(String tmp : commonalitiesExtracted) System.out.println(tmp);
 
-    	System.out.println("variabilitiesExtracted: ");
-    	for(String tmp : variabilitiesExtracted) System.out.println(tmp);
+    	  System.out.println("variabilitiesExtracted: ");
+    	  for(String tmp : variabilitiesExtracted) System.out.println(tmp);
 
-    	System.out.println("featuresTyped: ");
-    	for(String tmp : featuresTyped) System.out.println(tmp);
+    	  System.out.println("featuresTyped: ");
+    	  for(String tmp : featuresTyped) System.out.println(tmp);    		
+    	}
     	/* ***DEBUG*** */
 
 
@@ -5157,23 +5188,22 @@ public class EditorView extends JFrame implements Observer{
 		searchPanel = new JPanel();
 		searchPanel.setBackground(Color.WHITE);
 //		searchPanel.setOpaque(true);
-		searchPanel.setBounds(0, 0, 550, 652);
+		searchPanel.setBounds(0, 0, 800, 700);
 		searchPanel.setLayout(null);
 		
 		panelFeatures = new JPanel();
 		panelFeatures.setBackground(Color.WHITE);
 //		panelFeatures.setOpaque(true);
-		panelFeatures.setBounds(30,10,510,260);
+		panelFeatures.setBounds(5,5,770,200);
 		panelFeatures.setLayout(new GridLayout(0, 1));
 		panelFeatures.setBorder(BorderFactory.createCompoundBorder(
 				BorderFactory.createEtchedBorder(EtchedBorder.RAISED), 
 						BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)));
 		
-		//each entry is a JLabel with the feature's name and a search icon
-		labelFeatures = new ArrayList<JLabel>();
+//		//each entry is a JLabel with the feature's name and a search icon
+//		labelFeatures = new ArrayList<JLabel>();
 		
 		//creating panelfeatures
-
 		colorRGB[0]=160; colorRGB[1]=160; colorRGB[2]=0;
 		//getting color for extracted commonalities
 		backColor=getNewColor(colorRGB);
@@ -5183,11 +5213,11 @@ public class EditorView extends JFrame implements Observer{
 		  iconLabel.setBackground(backColor);
 
 		  iconLabel.addMouseListener(getTermSearchIconListener("Extracted", commonalitiesExtracted.get(i), alFeaturesToHighlight));
-		  labelFeatures.add(iconLabel); panelFeatures.add(iconLabel);
+		  /*labelFeatures.add(iconLabel);*/ panelFeatures.add(iconLabel);
 		}
 		
 		colorRGB[0]=0; colorRGB[1]=160; colorRGB[2]=160;
-		//getting color for not extracted variabilities
+		//getting color for extracted variabilities
 		backColor=getNewColor(colorRGB);
 		for(int i = 0; i < variabilitiesExtracted.size(); i++){
 		  iconLabel = new JLabel(variabilitiesExtracted.get(i), iconSearch, JLabel.LEFT);
@@ -5195,7 +5225,7 @@ public class EditorView extends JFrame implements Observer{
 		  iconLabel.setBackground(backColor);
 
 		  iconLabel.addMouseListener(getTermSearchIconListener("Extracted", variabilitiesExtracted.get(i), alFeaturesToHighlight));
-		  labelFeatures.add(iconLabel); panelFeatures.add(iconLabel);
+		  /*labelFeatures.add(iconLabel);*/ panelFeatures.add(iconLabel);
 		}
 
 		colorRGB[0]=160; colorRGB[1]=0; colorRGB[2]=0;
@@ -5206,46 +5236,44 @@ public class EditorView extends JFrame implements Observer{
 		  iconLabel.setOpaque(true);
 		  iconLabel.setBackground(backColor);
 		  
-		  iconLabel.addMouseListener(getTermSearchIconListener("Extracted", featuresTyped.get(i), alFeaturesToHighlight));
-		  labelFeatures.add(iconLabel); panelFeatures.add(iconLabel);
+//		  iconLabel.addMouseListener(getTermSearchIconListener("Extracted", featuresTyped.get(i), alFeaturesToHighlight));
+		  /*labelFeatures.add(iconLabel);*/ panelFeatures.add(iconLabel);
 		}
 		
-		JScrollPane scrollingFeaturesPanel = new JScrollPane(panelFeatures, 
-				   ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-				   ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		scrollingFeaturesPanel.setBounds(15, 10, 490, 260);
+		//adding panelfeatures
+		JScrollPane scrollingFeaturesPanel = new JScrollPane(panelFeatures);
+		scrollingFeaturesPanel.setBounds(10, 10, 780, 210);
 
-		
 		
 		//adding control buttons and a label for term occurences navigation
 		XBackwardOccurrButton = new JButton("<<("+occurrJumpSpan+")");
 //		XBackwardOccurrButton.setBounds(20, 370, 76, 22);
-		XBackwardOccurrButton.setBounds(20, 340, 76, 22);
+		XBackwardOccurrButton.setBounds(30, 230, 100, 22);
 		XBackwardOccurrButton.addActionListener(getOccurrNavButtonListener(-occurrJumpSpan));
 
 		prevOccurrButton = new JButton("<");
-		prevOccurrButton.setBounds(100, 340, 76, 22);
+		prevOccurrButton.setBounds(170, 230, 100, 22);
 		prevOccurrButton.addActionListener(getOccurrNavButtonListener(-1));
 		
 		occurrsLabel = new JLabel("<html><div style=\"text-align: center;\">" + "x/y" + "</html>");
 
 		occurrsLabelPanel = new JPanel();
 		occurrsLabelPanel.add(occurrsLabel);
-		occurrsLabelPanel.setBounds(186, 340, 146, 22);
+		occurrsLabelPanel.setBounds(285, 230, 230, 22);
 		occurrsLabelPanel.setBackground(Color.LIGHT_GRAY);
 
 		nextOccurrButton = new JButton(">");
-		nextOccurrButton.setBounds(342, 340, 76, 22);
+		nextOccurrButton.setBounds(530, 230, 100, 22);
 		nextOccurrButton.addActionListener(getOccurrNavButtonListener(1));
 
 		XForwardOccurrButton = new JButton(">>("+occurrJumpSpan+")");
-		XForwardOccurrButton.setBounds(422, 340, 76, 22);
+		XForwardOccurrButton.setBounds(670, 230, 100, 22);
 		XForwardOccurrButton.addActionListener(getOccurrNavButtonListener(occurrJumpSpan));
 		
 
 		//adding text area for term occurences visualization		
 		occursTabbedPane = new JTabbedPane();
-		occursTabbedPane.setBounds(15, 365, 490, 274);//+50?
+		occursTabbedPane.setBounds(10, 270, 780, 390);
 		
 		//initializing utility maps
 		textTabs = new HashMap<String, JTextArea>();
@@ -5342,7 +5370,7 @@ public class EditorView extends JFrame implements Observer{
 
 		  //restoring previous occurences panel state, if any.
 		  if (!currentFiles.containsKey(term)) currentFiles.put(term, 
-				  ( (JScrollPane)occursTabbedPane.getSelectedComponent() ).getName());
+				  ((JScrollPane)occursTabbedPane.getSelectedComponent() ).getName());
 
 		  else {
 			tabTitle = currentFiles.get(term);
@@ -5351,7 +5379,8 @@ public class EditorView extends JFrame implements Observer{
 			  if (compArrTmp[k].getName()==tabTitle) occursTabbedPane.setSelectedComponent(compArrTmp[k]);
 		  }
 
-		  selectCurrentOccurrence(currentSelectedFeatureName, term);
+		  selectCurrentOccurrence(currentSelectedFeatureName,
+			  ((JScrollPane)occursTabbedPane.getSelectedComponent() ).getName());
 
 		  occursTabbedPane.addMouseListener(
 			new MouseAdapter(){
@@ -5359,7 +5388,8 @@ public class EditorView extends JFrame implements Observer{
 			  public void mouseClicked(MouseEvent me){						
 				selectCurrentOccurrence(currentSelectedFeatureName,
 					((JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
-				currentFiles.put(currentSelectedFeatureName, ((JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
+				currentFiles.put(currentSelectedFeatureName, 
+					((JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
 			  }
 			}
 		  );
@@ -5368,9 +5398,6 @@ public class EditorView extends JFrame implements Observer{
 
 	  };	
 	  else return null;
-
-
-	  //	return null;
 	}	
 
 	/**
@@ -5658,6 +5685,7 @@ public class EditorView extends JFrame implements Observer{
 		  ArrayList<Highlight> commTagsToRemove=null;//commonality tags to highlight
 			
 		  JTextArea jta= textTabs.get(file);
+		  System.out.println("currentSelectedFeatureName: "+currentSelectedFeatureName+"\tfile: "+file);
 		  int currentIndex= textIndexes.get(currentSelectedFeatureName).get(file);
 
 		  //calculating current occurrence index for selection

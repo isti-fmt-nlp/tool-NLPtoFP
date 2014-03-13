@@ -179,23 +179,11 @@ public class EditorController implements
 		editorView.getDiagramElementsMenu().removeAll();
 
 		
-		switch(e.getButton()){
-		  case MouseEvent.BUTTON1: System.out.println("BUTTON1!"); break;
-		  case MouseEvent.BUTTON2: System.out.println("BUTTON2!"); break;
-		  case MouseEvent.BUTTON3: System.out.println("BUTTON3!"); break;		  
-		}
-
-//		/* TEST */
-//		if (e.getButton() == MouseEvent.BUTTON2) {
-//		  System.out.println("Ma ci sono o no?");
-//		  editorView.getDiagramPanel().setPreferredSize(new Dimension(10000, 10000));
-//		  editorView.getDiagramPanel().setSize(new Dimension(10000, 10000));
-////		  editorView.getDiagramPanel().invalidate();
-////		  editorView.repaintRootFrame();
-////		  editorView.getDiagramPanel().validate();
-////		  editorView.getDiagramPanel().repaint();
+//		switch(e.getButton()){
+//		  case MouseEvent.BUTTON1: System.out.println("BUTTON1!"); break;
+//		  case MouseEvent.BUTTON2: System.out.println("BUTTON2!"); break;
+//		  case MouseEvent.BUTTON3: System.out.println("BUTTON3!"); break;		  
 //		}
-//		/* TEST */
 
 		if (e.getButton() == MouseEvent.BUTTON3) {//user asked for the popup menu
           Component comp=editorView.getDiagramPanel().getComponentAt(e.getX(), e.getY());
@@ -357,6 +345,20 @@ public class EditorController implements
 			
 			//mouse pressed on an element of the group selection
 			if(editorView.getSelectionGroup().contains(tmpNode.getElement())){
+
+			  if (e.getButton() == MouseEvent.BUTTON3//user asked for the group popup menu
+				  && ((Component)tmpNode.getElement()).getName().startsWith(EditorView.featureNamePrefix)){
+
+//				editorView.setPopUpElement((JComponent)tmpNode.getElement());
+		  		editorView.getDiagramElementsMenu().removeAll();
+		  		editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemSearchFeature());
+		        editorView.setDiagramElementsMenuPosX(e.getX());
+		        editorView.setDiagramElementsMenuPosY(e.getY());
+		        editorView.showDiagramElementsMenu();
+		        editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+//		        System.out.println("clicked! popupElement: "+((JComponent)tmpNode.getElement()).getName());
+		        return;
+			  }
 
 			  /* ***DEBUG*** */
 			  if(debug) System.out.println("Mouse Pressed on a selection group element!");
@@ -837,16 +839,21 @@ public class EditorController implements
       else if(e.getActionCommand().equals("Search Feature")){    	 
     	JFrame searchFrame=editorView.getSearchFrame();
     	
-    	if(searchFrame==null){
+//    	if(searchFrame==null){
     	  searchFrame=new JFrame("Search Feature in Input Files");
-    	  searchFrame.setSize(800, 400);
+    	  searchFrame.setSize(800, 700);
     	  searchFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+    	  editorView.setSearchFrame(searchFrame);
     	  
     	  searchFrame.add(editorView.getTabFeaturesCandidates());
-    	  editorView.setSearchFrame(searchFrame);
     	  searchFrame.setVisible(true);
-    	}
-    	  
+//    	}
+//    	else{
+//    	  searchFrame.removeAll();
+//    	  searchFrame.add(editorView.getTabFeaturesCandidates());
+//    	  searchFrame.setVisible(true);
+//    	}
+//    	  
       }     
 	  //popup menu command: Ungroup Element
       else if(e.getActionCommand().equals("Ungroup")){
