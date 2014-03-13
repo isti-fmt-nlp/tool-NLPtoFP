@@ -488,6 +488,20 @@ public class EditorView extends JFrame implements Observer{
 			  new DefaultHighlighter.DefaultHighlightPainter(Color.CYAN)
 	};
 	
+	private static int[] PCcol={160, 160, 0};
+	private static int[] PVcol={0, 160, 160};
+	private static int[] ACcol={255, 255, 0};
+	private static int[] AVcol={0, 255, 255};
+
+	private static Highlighter.HighlightPainter passiveCommHighlightPainter =
+			new DefaultHighlighter.DefaultHighlightPainter(getNewColor(PCcol));
+	private static Highlighter.HighlightPainter passiveVarsHighlightPainter= 
+			new DefaultHighlighter.DefaultHighlightPainter(getNewColor(PVcol));
+	private static Highlighter.HighlightPainter activeCommHighlightPainter = 
+			new DefaultHighlighter.DefaultHighlightPainter(getNewColor(ACcol));
+	private static Highlighter.HighlightPainter activeVarsHighlightPainter = 
+			new DefaultHighlighter.DefaultHighlightPainter(getNewColor(AVcol));
+	
 	/** The splitter panel containing diagramPanel and toolsPanel*/
 	private EditorSplitPane splitterPanel=null;
 	
@@ -608,7 +622,7 @@ public class EditorView extends JFrame implements Observer{
 	public boolean prepareUI(EditorController editorController){
 		if(editorController==null) return false;
 //		this.editorController=editorController;
-
+		
 		/* initializing JMenuBar */		
 		menuFiles = new JMenu("Files");
 		menuFiles.setMnemonic(KeyEvent.VK_F);
@@ -3700,7 +3714,7 @@ public class EditorView extends JFrame implements Observer{
 	 * @param RGBValues - an int[] containing color RGB values in order: red in position 0, green in pos. 1, blue in pos. 2.
 	 * @return - the new Color object required
 	 */
-	private Color getNewColor(int[] RGBValues) {
+	private static Color getNewColor(int[] RGBValues) {
 		if(RGBValues==null) return Color.BLACK;
 		float[] colorHBS=null;
 		Color featureColor=null;
@@ -5120,7 +5134,10 @@ public class EditorView extends JFrame implements Observer{
 		JLabel iconLabel = null;
 		int[] colorRGB=new int[3];
 		Color backColor=null;
-    	ArrayList<String> commonalitiesExtracted = new ArrayList<String>();//starting extracted commonalities		
+		ArrayList<String> commonalitiesToHighlight = new ArrayList<String>();//commonalities to highlight in the texts
+		ArrayList<String> variabilitiesToHighlight = new ArrayList<String>();//variabilities to highlight in the texts
+
+		ArrayList<String> commonalitiesExtracted = new ArrayList<String>();//starting extracted commonalities		
     	ArrayList<String> variabilitiesExtracted = new ArrayList<String>();//starting extracted variabilities		
     	ArrayList<String> featuresTyped = new ArrayList<String>();//ArrayList containing not extracted features
     	String featureName=null;
@@ -5181,9 +5198,8 @@ public class EditorView extends JFrame implements Observer{
 
 
 		//creating list of features to highlight in the text
-		ArrayList<String> alFeaturesToHighlight = new ArrayList<String>();
-		for(String tmp: commonalitiesExtracted) alFeaturesToHighlight.add(tmp);
-		for(String tmp: variabilitiesExtracted) alFeaturesToHighlight.add(tmp);
+		for(String tmp: commonalitiesExtracted) commonalitiesToHighlight.add(tmp);
+		for(String tmp: variabilitiesExtracted) variabilitiesToHighlight.add(tmp);
 		
 		searchPanel = new JPanel();
 		searchPanel.setBackground(Color.WHITE);
@@ -5203,7 +5219,7 @@ public class EditorView extends JFrame implements Observer{
 //		//each entry is a JLabel with the feature's name and a search icon
 //		labelFeatures = new ArrayList<JLabel>();
 		
-		//creating panelfeatures
+		//creating panelFeatures
 		colorRGB[0]=160; colorRGB[1]=160; colorRGB[2]=0;
 		//getting color for extracted commonalities
 		backColor=getNewColor(colorRGB);
@@ -5212,7 +5228,8 @@ public class EditorView extends JFrame implements Observer{
 		  iconLabel.setOpaque(true);
 		  iconLabel.setBackground(backColor);
 
-		  iconLabel.addMouseListener(getTermSearchIconListener("Extracted", commonalitiesExtracted.get(i), alFeaturesToHighlight));
+		  iconLabel.addMouseListener(getTermSearchIconListener("Extracted", commonalitiesExtracted.get(i), 
+				  					 commonalitiesToHighlight, variabilitiesToHighlight));
 		  /*labelFeatures.add(iconLabel);*/ panelFeatures.add(iconLabel);
 		}
 		
@@ -5224,7 +5241,8 @@ public class EditorView extends JFrame implements Observer{
 		  iconLabel.setOpaque(true);
 		  iconLabel.setBackground(backColor);
 
-		  iconLabel.addMouseListener(getTermSearchIconListener("Extracted", variabilitiesExtracted.get(i), alFeaturesToHighlight));
+		  iconLabel.addMouseListener(getTermSearchIconListener("Extracted", variabilitiesExtracted.get(i), 
+				  					 commonalitiesToHighlight, variabilitiesToHighlight));
 		  /*labelFeatures.add(iconLabel);*/ panelFeatures.add(iconLabel);
 		}
 
@@ -5294,10 +5312,12 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @param type - String representing the required behaviour type
 	 * @param term - String representing the name of the feature candidate
-	 * @param alFeaturesToHighlight - if not null, the terms in alFeaturesToHighlight will be highlighted 
+	 * @param commonalitiesToHighlight - if not null, these terms will be highlighted with the commonalities color
+	 * @param variabilitiesToHighlight - if not null, these terms will be highlighted with the variabilities color
 	 * @return the new ActionListener
 	 */
-	private MouseListener getTermSearchIconListener(String type, final String term, final ArrayList<String> alFeaturesToHighlight) {
+	private MouseListener getTermSearchIconListener(String type, final String term,
+			final ArrayList<String> commonalitiesToHighlight, final ArrayList<String> variabilitiesToHighlight) {
 
 	  if (type=="Extracted") return new MouseAdapter(){			
 
@@ -5341,7 +5361,7 @@ public class EditorView extends JFrame implements Observer{
 			occurrencesList = (Map.Entry)filesIterator.next();
 
 			JScrollPane scrollingFilePanel = getRegisteredTabTextFile(term, 
-					(String)occurrencesList.getKey(), alFeaturesToHighlight);
+					(String)occurrencesList.getKey(), commonalitiesToHighlight, variabilitiesToHighlight);
 
 			occursTabbedPane.addTab((String)occurrencesList.getKey(), scrollingFilePanel);
 
@@ -5481,13 +5501,19 @@ public class EditorView extends JFrame implements Observer{
 
 		  if(highlightTag!=null) hilite.removeHighlight(highlightTag);
 
+		  //getting correct highlighter for this feature name
+		  Highlighter.HighlightPainter occurrPainter=null;
+//		  currentSelectedFeatureName
+		  for(String tmp: startingCommonalities)
+			if(currentSelectedFeatureName.compareTo(tmp)==0){ occurrPainter=activeCommHighlightPainter; break;}
+		  if(occurrPainter==null) occurrPainter=activeVarsHighlightPainter;
 
 		  //highlighting current occurrence and saving it in lastHighlightedTag
 		  try {
 			lastHighlightedTag.get(currentSelectedFeatureName).put(fileName, hilite.addHighlight(
 					occurrenceIndex, 
 					occurrenceIndex+relevantTermsVersions.get(currentSelectedFeatureName).get(fileName).length(),
-					highlightPainter[1]));
+					occurrPainter));
 
 		  } catch (BadLocationException e) {
 			System.out.println("BadLocationException\nTerm: "+currentSelectedFeatureName+" - occurrence: "+occurrenceIndex);
@@ -5532,10 +5558,12 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @param term - relevant term by which occurences indexes will be added to the list of indexes
 	 * @param file - path of the file 
-	 * @param al - if not null, the terms in al will be highlighted 
+	 * @param commonalitiesToHighlight - if not null, these terms will be highlighted with the commonalities color
+	 * @param variabilitiesToHighlight - if not null, these terms will be highlighted with the variabilities color
 	 * @return JScrollPane - the scrollable panel containing the text of the file
 	 */
-	private JScrollPane getRegisteredTabTextFile(String term, String file, ArrayList <String> al){
+	private JScrollPane getRegisteredTabTextFile(String term, String file, 
+			ArrayList <String> commonalitiesToHighlight, ArrayList<String> variabilitiesToHighlight){
 		try{
 			String s = getFileContent(file);
 		    
@@ -5552,7 +5580,7 @@ public class EditorView extends JFrame implements Observer{
             }
     		/* ***VERBOSE****/
 		    
-		    return getRegisteredTabTextString(term, file, s, al);
+		    return getRegisteredTabTextString(term, file, s, commonalitiesToHighlight, variabilitiesToHighlight);
 
 		}catch(FileNotFoundException e){
 			System.out.println("Exception tabTextFile: " + e.getMessage());
@@ -5593,18 +5621,22 @@ public class EditorView extends JFrame implements Observer{
 	}
 	
 	/**
-	 * Returns a JScrollPane containing the String s as a JTextArea with the words in al highlighted if highlight is true,
-	 *  the JTextArea is added to the list of text Tabs, and a list of selected occurences indexes is built..
+	 * Returns a JScrollPane containing the String fileContent as a JTextArea with highlights on the words 
+	 * commonalitiesToHighlight and variabilitiesToHighlight, if they're not null.
+	 * The JTextArea is added to the list of text tabs, and a list of selected occurences indexes is built.<br>
+	 *  NOTE: The String fileContent should contain the content of the file
 	 * 
 	 * @param term - relevant term by which occurences indexes will be added to the list of indexes
-	 * @param s - the string to use
-	 * @param al - if not null, the terms in al will be highlighted 
-	 * @param name - the name of this Component
+	 * @param fileContent - the string to use, containing the content of file
+	 * @param file - path of the file 
+	 * @param commonalitiesToHighlight - if not null, these terms will be highlighted with the commonalities color
+	 * @param variabilitiesToHighlight - if not null, these terms will be highlighted with the variabilities color
 	 * @return - a new JScrollPane with the highlighted text
 	 */
-	private JScrollPane getRegisteredTabTextString(String term, String name, String s, ArrayList<String> al) {
-		JTextArea jta = getTextAreaString(name, s);
-		textTabs.put(name, jta);
+	private JScrollPane getRegisteredTabTextString(String term, String file, String fileContent,
+			ArrayList<String> commonalitiesToHighlight, ArrayList<String> variabilitiesToHighlight) {
+		JTextArea jta = getTextAreaString(file, fileContent);
+		textTabs.put(file, jta);
 		if (!textIndexes.containsKey(term)){
 			
     		/* ***DEBUG****/			
@@ -5614,11 +5646,13 @@ public class EditorView extends JFrame implements Observer{
 
 			textIndexes.put(term, new HashMap<String, Integer>());
 		}
-		if (!textIndexes.get(term).containsKey(name)) textIndexes.get(term).put(name, 0);		
+		if (!textIndexes.get(term).containsKey(file)) textIndexes.get(term).put(file, 0);		
 
-		if (al!=null) jta=(JTextArea)setHighlightText(jta, al);
+		if (commonalitiesToHighlight!=null || variabilitiesToHighlight!=null)
+			jta=(JTextArea)setHighlightText(jta, commonalitiesToHighlight, variabilitiesToHighlight, file);
+		
 		JScrollPane jscr = new JScrollPane(jta);
-		jscr.setName(name);
+		jscr.setName(file);
 		return jscr;
 	}	
 
@@ -5640,11 +5674,16 @@ public class EditorView extends JFrame implements Observer{
 	 * Highlights a JTextComponent with the specified terms.
 	 * 
 	 * @param jtc - JTextComponent to be highlighted
-	 * @param al - ArrayList containing terms to highlight
+	 * @param commonalitiesToHighlight - if not null, these terms will be highlighted with the commonalities color
+	 * @param variabilitiesToHighlight - if not null, these terms will be highlighted with the variabilities color
+	 * @param file - the path of the file displayed by jtc
 	 * 
 	 * @return - the modified JTextComponent
 	 */
-	private JTextComponent setHighlightText(JTextComponent jtc, ArrayList <String> al){
+	private JTextComponent setHighlightText(JTextComponent jtc,
+			ArrayList <String> commonalitiesToHighlight, ArrayList<String> variabilitiesToHighlight, String file){
+		String originalVersionFeaturename=null;
+		if(commonalitiesToHighlight==null && variabilitiesToHighlight==null) return jtc;
 		try{   
 			Highlighter hilite = jtc.getHighlighter();
 		    
@@ -5653,16 +5692,29 @@ public class EditorView extends JFrame implements Observer{
 			String text = doc.getText(0, doc.getLength());
 		    
 			int pos = 0;
-			
-			for(int i = 0; i < al.size(); i++){
-				while((pos = text.toUpperCase().indexOf(al.get(i).toUpperCase(), pos)) >= 0){	
-					if(ModelProject.isValidOccurrence(al.get(i), text, pos) )
-//					if(text.charAt(pos + al.get(i).length()) == ' ' && text.charAt(pos - 1) == ' ')
-						hilite.addHighlight(pos, pos + al.get(i).length(), highlightPainter[0]);
+			//adding highlights to commonalities occurrences
+			if(commonalitiesToHighlight!=null) for(int i = 0; i < commonalitiesToHighlight.size(); i++){
+				originalVersionFeaturename=relevantTermsVersions.get(commonalitiesToHighlight.get(i)).get(file);
+
+				while((pos = text.toUpperCase().indexOf(originalVersionFeaturename.toUpperCase(), pos)) >= 0){	
+					if(ModelProject.isValidOccurrence( originalVersionFeaturename, text, pos) )
+						hilite.addHighlight(pos, pos+originalVersionFeaturename.length(), passiveCommHighlightPainter);
 					
-					pos += al.get(i).length();
+					pos += originalVersionFeaturename.length();
 				}    
 			}		
+			//adding highlights to variabilities occurrences
+			if(variabilitiesToHighlight!=null) for(int i = 0; i < variabilitiesToHighlight.size(); i++){
+				originalVersionFeaturename=relevantTermsVersions.get(variabilitiesToHighlight.get(i)).get(file);
+
+				while((pos = text.toUpperCase().indexOf(originalVersionFeaturename.toUpperCase(), pos)) >= 0){	
+					if(ModelProject.isValidOccurrence(originalVersionFeaturename, text, pos) )
+						hilite.addHighlight(pos, pos+originalVersionFeaturename.length(), passiveVarsHighlightPainter);
+					
+					pos += originalVersionFeaturename.length();
+				}    
+			}		
+			
 		}catch(BadLocationException e){
 		  System.out.println("Exception tabTextFile: " + e.getMessage());
 		  return null;
@@ -5696,7 +5748,7 @@ public class EditorView extends JFrame implements Observer{
 
 		  Highlighter hilite = jta.getHighlighter();
 		  
-		  //initializing of lastRemovedCommHighlights, if necessary
+		  //initializing of lastRemovedHighlights, if necessary
 		  if(lastRemovedHighlights.get(currentSelectedFeatureName)==null) 
 			  lastRemovedHighlights.put(currentSelectedFeatureName, new HashMap<String, ArrayList<Highlight>>());
 		  
@@ -5741,12 +5793,19 @@ public class EditorView extends JFrame implements Observer{
 		  
 //		  if(lastHighlightedTag!=null) hilite.removeHighlight(lastHighlightedTag);
 		  
+		  //getting correct highlighter for this feature name
+		  Highlighter.HighlightPainter occurrPainter=null;
+//		  currentSelectedFeatureName
+		  for(String tmp: startingCommonalities)
+			if(currentSelectedFeatureName.compareTo(tmp)==0){ occurrPainter=activeCommHighlightPainter; break;}
+		  if(occurrPainter==null) occurrPainter=activeVarsHighlightPainter;
+		  
 		  //highlighting current occurrence and saving it in lastHighlightedTag		  		  
 		  try {
 			lastHighlightedTag.get(currentSelectedFeatureName).put(
 			  ((JScrollPane)occursTabbedPane.getSelectedComponent()).getName(),
 			  hilite.addHighlight(occurrenceIndex, 
-			  occurrenceIndex+relevantTermsVersions.get(currentSelectedFeatureName).get(file).length(), highlightPainter[1]));
+			  occurrenceIndex+relevantTermsVersions.get(currentSelectedFeatureName).get(file).length(), occurrPainter));
 			  
 		  } catch (BadLocationException e) {
 			  System.out.println("BadLocationException\nTerm: "+currentSelectedFeatureName+" - occurrence: "+occurrenceIndex);
