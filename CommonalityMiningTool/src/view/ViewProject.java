@@ -589,6 +589,7 @@ public class ViewProject implements Observer, Runnable{
 	 */
 	public String loadDiagramDialog(String pathProject){
 		FileDialog d = new FileDialog(new JFrame("Load File"));
+	    d.setResizable(true);
     	d.setMode(FileDialog.LOAD);
 //    	d.setFilenameFilter(new FilterFileProject());
     	

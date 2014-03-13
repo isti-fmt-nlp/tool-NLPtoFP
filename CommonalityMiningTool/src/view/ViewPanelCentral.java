@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -52,17 +53,18 @@ public class ViewPanelCentral{
 	private static boolean verbose=false;
 
 	/**variable used to activate debug prints in the code*/
-	private static boolean debug=false;
+	private static boolean debug=true;
 
 	private JPanel panelAnalysis = null;
 	
 	private JTabbedPane tabFile = null;
 	
-	/**the root central panel used for commonalities*/
-	private JPanel jpG = null;
+	/**the root central panel used for feature selection*/
+	private JPanel panelSelection = null;
 	
 	private JTabbedPane [] tabFeatures = null;
 	
+	/**the panel containing the candidate feature's checkboxes */
 	private JPanel panelFeatures = null;
 
 	/**buttons for adding commonalities and extracting selected commonalities*/
@@ -88,7 +90,7 @@ public class ViewPanelCentral{
 	private HashMap<String, HashMap<String, ArrayList<Integer>>> relevantTerms=null;
 	
 	/** Contains all project's relevant terms, in both original version and term-extraction version*/
-	private HashMap<String, String> originalTermsVersions=null; 
+	private HashMap<String, HashMap<String, String>> originalTermsVersions=null; 
 
 	/**current selected checkbox*/
 	private String currentSelectedCheckBox=null;
@@ -101,7 +103,7 @@ public class ViewPanelCentral{
 
 	
 	
-	/**relevant terms occurrencese panel*/
+	/**relevant terms occurrences panel*/
 	private JTabbedPane occursTabbedPane = null;
 	
 	/**the JTextAreas of search panel*/
@@ -182,18 +184,19 @@ public class ViewPanelCentral{
 	 */
 	public void createTabFeatures(ArrayList<String> alF, ArrayList<String> alFeaturesCand, ArrayList<String> alFeaturesSel,
 			String selectFilePath, HashMap<String, HashMap<String, ArrayList<Integer>>> relevantTerms,
-			ArrayList<String[]> relevantTermsBothVersions, FeatureType fType,
+			HashMap<String, HashMap<String, String>> relevantTermsFilesVersions, FeatureType fType,
 			ArrayList<String> alFeaturesToHighlight, JButton buttonSelectionEnd){
 		
 		String displayText = fType==FeatureType.COMMONALITIES? "Commonality":"Variability";
 		if(alF == null || alFeaturesCand == null) return;
 		
-//		JTabbedPane tmpTab= new JTabbedPane();
-//		tmpTab.setLayout();
-		
 		this.relevantTerms=relevantTerms;
-		this.originalTermsVersions=new HashMap<String, String>();
-		for(String[] str : relevantTermsBothVersions) originalTermsVersions.put(str[0], str[1]);
+		this.originalTermsVersions=new HashMap<String, HashMap<String,String>>();
+		this.originalTermsVersions=relevantTermsFilesVersions;
+//		if(relevantTermsVersions.get(name)!=null) 
+//			this.relevantTermsVersions.put(name, relevantTermsVersions.get(name));
+//
+//		for(String[] str : relevantTermsBothVersions) originalTermsVersions.put(str[0], str[1]);
 		
 		tabFeatures = new JTabbedPane[2];
 		
@@ -203,7 +206,6 @@ public class ViewPanelCentral{
 		
 		for(int i = 0; i < alF.size(); i++)
 			tabFeatures[0].add(new File(alF.get(i)).getName().substring(0,
-//				/*new File(*/alF.get(i)/*).getName()*/.length() - 6), getTabHTMLFile(alF.get(i)));
 	    		new File(alF.get(i)).getName().length() - 6), getTabHTMLFile(alF.get(i)));
 					
 		tabFeatures[1] = new JTabbedPane(); 
@@ -312,10 +314,8 @@ public class ViewPanelCentral{
 	 * @param al - if not null, the terms in al will be highlighted 
 	 * @return JScrollPane - the scrollable panel containing the text of the file
 	 */
-	private JScrollPane getRegisteredTabTextFile(String term, String file, ArrayList <String> al)
-	{
-		try
-		{
+	private JScrollPane getRegisteredTabTextFile(String term, String file, ArrayList <String> al){
+		try{
 			String s = getFileContent(file);
 		    
     		/* ***VERBOSE****/
@@ -333,14 +333,10 @@ public class ViewPanelCentral{
 		    
 		    return getRegisteredTabTextString(term, file, s, al);
 
-		}
-		catch(FileNotFoundException e)
-		{
+		}catch(FileNotFoundException e){
 			System.out.println("Exception tabTextFile: " + e.getMessage());
 			return null;
-		} 
-		catch (IOException e) 
-		{
+		}catch (IOException e) {
 			System.out.println("Exception tabTextFile: " + e.getMessage());
 			return null;
 		}
@@ -540,11 +536,11 @@ public class ViewPanelCentral{
 
 //		JButton fileSearchButton = null;
 
-		jpG = new JPanel();
-		jpG.setBackground(Color.WHITE);
+		panelSelection = new JPanel();
+		panelSelection.setBackground(Color.WHITE);
 //		jpG.setOpaque(true);
-		jpG.setBounds(0, 0, 550, 652);
-		jpG.setLayout(null);
+		panelSelection.setBounds(0, 0, 550, 652);
+		panelSelection.setLayout(null);
 		
 		panelFeatures = new JPanel();
 		panelFeatures.setBackground(Color.WHITE);
@@ -560,7 +556,7 @@ public class ViewPanelCentral{
 
 		if(alFeaturesSel == null){//there are no Features Selected
 		  for(int i = 0; i < alFeaturesCand.size(); i++){
-			//each entry has a panel with a JCheckBox and an icon button inside
+			//each entry has a panel with a JCheckBox and an icon inside
 			checkBoxTmp=new JCheckBox(alFeaturesCand.get(i));
 			checkBoxTmp.setSelected(false);
 
@@ -690,15 +686,15 @@ public class ViewPanelCentral{
 		lastRemovedCommHighlights = new HashMap<String, HashMap<String, ArrayList<Highlight>>>();
 
 		//adding components to panel		
-		jpG.add(jsp);
-		jpG.add(jtf);
-		jpG.add(jl);
-		jpG.add(buttonFeaturesAdd);
-		jpG.add(occursTabbedPane);
-		jpG.add(buttonSelectionEnd);
+		panelSelection.add(jsp);
+		panelSelection.add(jtf);
+		panelSelection.add(jl);
+		panelSelection.add(buttonFeaturesAdd);
+		panelSelection.add(occursTabbedPane);
+		panelSelection.add(buttonSelectionEnd);
 
 //		return jpG;
-		return new JScrollPane(jpG);
+		return new JScrollPane(panelSelection);
 
 //		return new JScrollPane(jpG, 
 //				   ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
@@ -843,18 +839,18 @@ public class ViewPanelCentral{
 				  }
 
 				  //adding occurences navigation controls
-				  jpG.add(nextOccurrButton);
+				  panelSelection.add(nextOccurrButton);
 				  nextOccurrButton.setVisible(true);
-				  jpG.add(prevOccurrButton);
+				  panelSelection.add(prevOccurrButton);
 				  prevOccurrButton.setVisible(true);
-				  jpG.add(XForwardOccurrButton);
+				  panelSelection.add(XForwardOccurrButton);
 				  XForwardOccurrButton.setVisible(true);
-				  jpG.add(XBackwardOccurrButton);
+				  panelSelection.add(XBackwardOccurrButton);
 				  XBackwardOccurrButton.setVisible(true);
-				  jpG.add(occurrsLabelPanel);
+				  panelSelection.add(occurrsLabelPanel);
 				  occurrsLabelPanel.setVisible(true);
 //				  jpG.validate();
-				  jpG.repaint();
+				  panelSelection.repaint();
 				  
 				  //restoring previous occurences panel state, if any.
 				  if (!currentFiles.containsKey(term)) currentFiles.put(term, 
@@ -910,7 +906,6 @@ public class ViewPanelCentral{
 		
 	  if (type=="Extracted") return new MouseAdapter(){			
 			
-		@SuppressWarnings({ "rawtypes" })
 		@Override
 		public void mouseClicked(MouseEvent me){				
 			
@@ -919,8 +914,8 @@ public class ViewPanelCentral{
 		  textTabs.clear();
 		  HashMap<String, ArrayList<Integer>> filesListTmp = null;//files list for a term
 
-		  Iterator filesIterator = null;
-		  Map.Entry occurrencesList = null;
+		  Iterator<Entry<String, ArrayList<Integer>>> filesIterator = null;
+		  Entry<String, ArrayList<Integer>> occurrencesList = null;
 
 		  //variables used to remember last selected tab for each relevant term
 		  Component[] compArrTmp = null;
@@ -943,11 +938,8 @@ public class ViewPanelCentral{
 		  /* ***DEBUG*** */
 
 		  filesIterator = filesListTmp.entrySet().iterator();
-
-
 		  while (filesIterator.hasNext()) {//for each file a JScrollPane is added
-
-			occurrencesList = (Map.Entry)filesIterator.next();
+			occurrencesList = filesIterator.next();
 
 			JScrollPane jScrP = getRegisteredTabTextFile(term, 
 					(String)occurrencesList.getKey(), alFeaturesToHighlight/*termArrListTmp*/);
@@ -965,22 +957,22 @@ public class ViewPanelCentral{
 		  }
 
 		  //adding occurences navigation controls
-		  jpG.add(nextOccurrButton);
+		  panelSelection.add(nextOccurrButton);
 		  nextOccurrButton.setVisible(true);
-		  jpG.add(prevOccurrButton);
+		  panelSelection.add(prevOccurrButton);
 		  prevOccurrButton.setVisible(true);
-		  jpG.add(XForwardOccurrButton);
+		  panelSelection.add(XForwardOccurrButton);
 		  XForwardOccurrButton.setVisible(true);
-		  jpG.add(XBackwardOccurrButton);
+		  panelSelection.add(XBackwardOccurrButton);
 		  XBackwardOccurrButton.setVisible(true);
-		  jpG.add(occurrsLabelPanel);
+		  panelSelection.add(occurrsLabelPanel);
 		  occurrsLabelPanel.setVisible(true);
 		  //				  jpG.validate();
-		  jpG.repaint();
+		  panelSelection.repaint();
 
 		  //restoring previous occurences panel state, if any.
 		  if (!currentFiles.containsKey(term)) currentFiles.put(term, 
-				  ( (JScrollPane)occursTabbedPane.getSelectedComponent() ).getName());
+				  ((JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
 
 		  else {
 			tabTitle = currentFiles.get(term);
@@ -989,7 +981,7 @@ public class ViewPanelCentral{
 				if (compArrTmp[k].getName()==tabTitle) occursTabbedPane.setSelectedComponent(compArrTmp[k]);
 		  }
 
-		  selectCurrentOccurrence(currentSelectedCheckBox, term);
+		  selectCurrentOccurrence(currentSelectedCheckBox, ((JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
 
 		  occursTabbedPane.addMouseListener(
 			new MouseAdapter(){
@@ -1030,18 +1022,17 @@ public class ViewPanelCentral{
 			  Object highlightTag=null;//highlight tag that will be added to the text
 			  ArrayList<Highlight> lastRemovedTags=null;//last removed highlighted commonality tags 
 			  ArrayList<Highlight> commTagsToRemove=null;//commonality tags to highlight
-			  
+			  String fileName=((JScrollPane)occursTabbedPane.getSelectedComponent()).getName();
 			  
 			  JTextArea jta= textTabs.get(( (JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
-			  currentIndex= textIndexes.get(currentSelectedCheckBox).get((
-						(JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
+			  currentIndex= textIndexes.get(currentSelectedCheckBox).get(fileName);
 //			  int currentIndex= textIndexes.get(checkBoxCommonalities.get(currentSelectedCheckBox).getText()).get((
 //						(JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
 
 			  //calculate next occurrence index to use, depending on the jump parameter
 			  occurrFilesList = relevantTerms.get(currentSelectedCheckBox);
 //			  occurrFilesList = relevantTerms.get(checkBoxCommonalities.get(currentSelectedCheckBox).getText());
-			  occurrIndexesList=occurrFilesList.get(( (JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
+			  occurrIndexesList=occurrFilesList.get(fileName);
 			  
 //			  previousIndex=currentIndex;
 //			  previousOccurrenceIndex = occurrIndexesList.get(previousIndex);
@@ -1064,8 +1055,7 @@ public class ViewPanelCentral{
 				  lastRemovedCommHighlights.put(currentSelectedCheckBox, new HashMap<String, ArrayList<Highlight>>());
 			  
 			  //re-putting last removed highlighted commonality tags for this term and file
-			  lastRemovedTags=lastRemovedCommHighlights.get(currentSelectedCheckBox).get((
-			      (JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
+			  lastRemovedTags=lastRemovedCommHighlights.get(currentSelectedCheckBox).get(fileName);
 			  
 			  if(lastRemovedTags!=null) try{
 			    for(int h=0; h<lastRemovedTags.size(); ++h)
@@ -1082,15 +1072,15 @@ public class ViewPanelCentral{
 //				if (tmp.getStartOffset()>=occurrenceIndex && tmp.getEndOffset()<=occurrenceIndex+currentSelectedCheckBox.length())
 //				  commTagsToRemove.add(tmp);
 				if (tmp.getStartOffset()>=occurrenceIndex 
-					&& tmp.getEndOffset()<=occurrenceIndex+originalTermsVersions.get(currentSelectedCheckBox).length())
+					&& tmp.getEndOffset()<=
+					occurrenceIndex+originalTermsVersions.get(currentSelectedCheckBox).get(fileName).length())
 					  commTagsToRemove.add(tmp);
 
 			  //removing highlighted tags that already are in next occurrence text interval
 			  for (Highlight tmp: commTagsToRemove) hilite.removeHighlight(tmp);
 			  
 			  //saving last removed Commonality tags in lastRemovedCommHighlights
-			  lastRemovedCommHighlights.get(currentSelectedCheckBox).put((
-			    (JScrollPane)occursTabbedPane.getSelectedComponent()).getName(), commTagsToRemove);
+			  lastRemovedCommHighlights.get(currentSelectedCheckBox).put(fileName, commTagsToRemove);
 			  
 			  
 			  //initializing of lastHighlightedTag, if necessary
@@ -1098,8 +1088,7 @@ public class ViewPanelCentral{
 			    lastHighlightedTag.put(currentSelectedCheckBox, new HashMap<String, Object>());
 			  
 			  //removing last highlighted tag for this term and file
-			  highlightTag=lastHighlightedTag.get(currentSelectedCheckBox).get((
-			      (JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
+			  highlightTag=lastHighlightedTag.get(currentSelectedCheckBox).get(fileName);
 				  
 			  if(highlightTag!=null) hilite.removeHighlight(highlightTag);
 
@@ -1110,9 +1099,9 @@ public class ViewPanelCentral{
 //				    ((JScrollPane)occursTabbedPane.getSelectedComponent()).getName(),
 //				    hilite.addHighlight(occurrenceIndex, occurrenceIndex+currentSelectedCheckBox.length(), highlightPainter[1]));
 				  lastHighlightedTag.get(currentSelectedCheckBox).put(
-					((JScrollPane)occursTabbedPane.getSelectedComponent()).getName(),
-					hilite.addHighlight(occurrenceIndex, 
-					occurrenceIndex+originalTermsVersions.get(currentSelectedCheckBox).length(), highlightPainter[1]));
+					fileName, hilite.addHighlight(occurrenceIndex,
+					 occurrenceIndex+originalTermsVersions.get(currentSelectedCheckBox).get(fileName).length(),
+					highlightPainter[1]) );
 				  				
 			  } catch (BadLocationException e) {
 				System.out.println("BadLocationException\nTerm: "+currentSelectedCheckBox+" - occurrence: "+occurrenceIndex);
@@ -1129,8 +1118,7 @@ public class ViewPanelCentral{
 //			  jta.setSelectionColor(Color.CYAN);
 
 			  //updating current occurrence index for this file
-			  textIndexes.get(currentSelectedCheckBox).put(
-				  		((JScrollPane)occursTabbedPane.getSelectedComponent()).getName(), currentIndex);
+			  textIndexes.get(currentSelectedCheckBox).put(fileName, currentIndex);
 //			  textIndexes.get(checkBoxCommonalities.get(currentSelectedCheckBox).getText()).put(
 //				  		((JScrollPane)occursTabbedPane.getSelectedComponent()).getName(), currentIndex);
 
@@ -1140,8 +1128,8 @@ public class ViewPanelCentral{
 
 
 			  /* ***VERBOSE****/					
-			  if (verbose) System.out.println("\n*****\nSELECTED TAB: "
-				+( (JScrollPane)occursTabbedPane.getSelectedComponent()).getName()
+			  if (verbose) System.out.println(
+				 "\n*****\nSELECTED TAB: "+fileName
 				+"\noccurrenceIndex: "+occurrenceIndex
 				+"\ncurrentSelectedCheckBox(il testo): "+currentSelectedCheckBox
 				+"\ncurrentSelectedCheckBox(lunghezza): "+currentSelectedCheckBox.length()
@@ -1161,7 +1149,6 @@ public class ViewPanelCentral{
 	 * @param currentSelectedCheckBox - index of current selected checkbox in checkBoxCommonalities
 	 * @param file - file name of the file contained in the tab
 	 */
-//	private void selectCurrentOccurrence(int currentSelectedCheckBox, String file) {
 	private void selectCurrentOccurrence(String currentSelectedCheckBox, String file) {
 		  HashMap<String, ArrayList<Integer>> occurrFilesList=null;		
 		  ArrayList<Integer> occurrIndexesList=null;
@@ -1170,16 +1157,15 @@ public class ViewPanelCentral{
 		  ArrayList<Highlight> lastRemovedTags=null;//last removed highlighted commonality tags 
 		  ArrayList<Highlight> commTagsToRemove=null;//commonality tags to highlight
 			
-		  JTextArea jta= textTabs.get(( (JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
-		  int currentIndex= textIndexes.get(currentSelectedCheckBox).get(
-					( (JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
+		  JTextArea jta= textTabs.get(file);
+		  int currentIndex= textIndexes.get(currentSelectedCheckBox).get(file);
 //		  int currentIndex= textIndexes.get(checkBoxCommonalities.get(currentSelectedCheckBox).getText()).get(
 //					( (JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
 
 		  //calculating current occurrence index for selection
 		  occurrFilesList = relevantTerms.get(currentSelectedCheckBox);
 //		  occurrFilesList = relevantTerms.get(checkBoxCommonalities.get(currentSelectedCheckBox).getText());
-		  occurrIndexesList=occurrFilesList.get(( (JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
+		  occurrIndexesList=occurrFilesList.get(file);
 		  occurrenceIndex = occurrIndexesList.get(currentIndex);
 
 		  Highlighter hilite = jta.getHighlighter();
@@ -1189,8 +1175,7 @@ public class ViewPanelCentral{
 			  lastRemovedCommHighlights.put(currentSelectedCheckBox, new HashMap<String, ArrayList<Highlight>>());
 		  
 		  //re-putting last removed highlighted commonality tags for this term and file
-		  lastRemovedTags=lastRemovedCommHighlights.get(currentSelectedCheckBox).get((
-		      (JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
+		  lastRemovedTags=lastRemovedCommHighlights.get(currentSelectedCheckBox).get(file);
 		  
 		  if(lastRemovedTags!=null) try{
 		    for(int h=0; h<lastRemovedTags.size(); ++h)
@@ -1204,17 +1189,15 @@ public class ViewPanelCentral{
 		  //checking what highlighted tags already are in next occurrence text interval
 		  commTagsToRemove = new ArrayList<Highlight>();
 		  for (Highlight tmp: hilite.getHighlights())
-			if (tmp.getStartOffset()>=occurrenceIndex 
-				&& tmp.getEndOffset()<=occurrenceIndex+originalTermsVersions.get(currentSelectedCheckBox).length())
+			if (tmp.getStartOffset()>=occurrenceIndex && tmp.getEndOffset()<=
+			    occurrenceIndex+originalTermsVersions.get(currentSelectedCheckBox).get(file).length())
 			  commTagsToRemove.add(tmp);
 
 		  //removing highlighted tags that already are in next occurrence text interval
 		  for (Highlight tmp: commTagsToRemove) hilite.removeHighlight(tmp);
 		  
 		  //saving last removed Commonality tags in lastRemovedCommHighlights
-		  lastRemovedCommHighlights.get(currentSelectedCheckBox).put((
-		    (JScrollPane)occursTabbedPane.getSelectedComponent()).getName(), 
-		    commTagsToRemove);
+		  lastRemovedCommHighlights.get(currentSelectedCheckBox).put(file, commTagsToRemove);
 		  
 
 		  //initializing of lastHighlightedTag, if necessary
@@ -1222,8 +1205,7 @@ public class ViewPanelCentral{
 			  lastHighlightedTag.put(currentSelectedCheckBox, new HashMap<String, Object>());
 
 		  //removing last highlighted tag for this term and file
-		  highlightTag=lastHighlightedTag.get(currentSelectedCheckBox).get((
-				  (JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
+		  highlightTag=lastHighlightedTag.get(currentSelectedCheckBox).get(file);
 
 		  if(highlightTag!=null) hilite.removeHighlight(highlightTag);
 
@@ -1235,7 +1217,7 @@ public class ViewPanelCentral{
 			lastHighlightedTag.get(currentSelectedCheckBox).put(
 			  ((JScrollPane)occursTabbedPane.getSelectedComponent()).getName(),
 			  hilite.addHighlight(occurrenceIndex, 
-				occurrenceIndex+originalTermsVersions.get(currentSelectedCheckBox).length(), highlightPainter[1]));
+				occurrenceIndex+originalTermsVersions.get(currentSelectedCheckBox).get(file).length(), highlightPainter[1]));
 			  
 //			lastHighlightedTag=hilite.addHighlight(occurrenceIndex, occurrenceIndex+currentSelectedCheckBox.length(),
 //				highlightPainter[1]);
@@ -1254,7 +1236,8 @@ public class ViewPanelCentral{
 //		  jta.setSelectionColor(Color.CYAN);
 		  
 		  //updating occurrences label
-		  occurrsLabel.setText( (currentIndex+1)+""+"/"+occurrIndexesList.size()+"[Line: "+occurrIndexesList.get(currentIndex)+"]");
+		  occurrsLabel.setText( (currentIndex+1)+""+"/"+occurrIndexesList.size()
+				  			    +"[Line: "+occurrIndexesList.get(currentIndex)+"]");
 		
 	}	
 

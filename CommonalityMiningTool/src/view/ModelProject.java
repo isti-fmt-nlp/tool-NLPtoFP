@@ -47,13 +47,17 @@ public class ModelProject extends Observable implements Runnable{
 	
 	private static boolean verbose2=false;//variable used to activate prints in the code
 
-	private static boolean verbose3=true;//variable used to activate prints in the code
+	private static boolean verbose3=false;//variable used to activate prints in the code
+
+	private static boolean verbose4=true;//variable used to activate prints in the code
+	
+	private static boolean verbose5=true;//variable used to activate prints in the code
 	
 	private static boolean debug=false;//variable used to activate debug prints in the code
 
 	private static boolean debug2=false;//variable used to activate debug prints in the code
 	
-	private static boolean debugColors=true;//variable used to activate debug prints in the code
+	private static boolean debugColors=false;//variable used to activate debug prints in the code
 	
 	
 //	private static final String savedProjectsDir = "Usage Tries";
@@ -98,8 +102,8 @@ public class ModelProject extends Observable implements Runnable{
 	/** String containing the variabilities selected HTML page path*/
 	private String pathVariabilitiesSelectedHTML = null;
 	
-	/** Contains all project's relevant terms, in both original version and term-extraction version*/
-	private ArrayList<String[]> relevantTermsVersions=null; 
+	/** Contains all project's relevant terms, in both original file versions and term-extraction version*/
+	private HashMap<String, HashMap<String, String>> relevantTermsVersions=null; 
 
 	/** Relevant terms set. For each, there is a corresponding input file names list, and for each file
 	 * there is a corresponding list of integers, the indexes of term occurrence in that file*/
@@ -147,7 +151,11 @@ public class ModelProject extends Observable implements Runnable{
 	  String line=null;							//line read from an input file 	  
 	  int charcount=0;							//starting position of a line in the file
 	  int index=0;								//index of a possible relevant term occurence in line
-
+	  String fileName=null;
+	  BufferedReader reader = null;
+	  Iterator<Entry<String, HashMap<String, String>>> iterTerms=null;
+	  Entry<String, HashMap<String, String>> entryTerms=null;
+	  
 	  commonalitiesCandidates = new ArrayList <String> ();
 
 	  for(int i = 0; i < workerProject.size(); i++){
@@ -177,7 +185,7 @@ public class ModelProject extends Observable implements Runnable{
 	  }
 	  
 	  //collecting relevant terms from all models, in both original version and term-extraction version
-	  relevantTermsVersions=new ArrayList<String[]>();
+	  relevantTermsVersions=new HashMap<String, HashMap<String, String>>();
 	  for(int k=0; k<filesProject.size(); k++){
 		  
 		/* ****VERBOSE */
@@ -189,48 +197,66 @@ public class ModelProject extends Observable implements Runnable{
 		}
 		/* ****VERBOSE */
 
-		joinRelevantTerms(relevantTermsVersions, filesProject.get(k).readTermRelevant());
+		joinRelevantTerms(filesProject.get(k).readPathFileUTF8(), filesProject.get(k).readTermRelevant());
 		  
 	  }
 
 	  /* ****VERBOSE */
-	  if(verbose){
-		System.out.println("Listing allFilesRelevantTerms:");
-		for(String[] str: relevantTermsVersions) System.out.println("Computed: "+str[0]+"\nOriginal:"+str[1]);
-	  }
+	  if(verbose) printRelevantTermsVersions();
 	  /* ****VERBOSE */
 
 	  //saving the positions in input files of relevant terms occurences 
 	  relevantTerms=new HashMap<String, HashMap<String, ArrayList<Integer>>>();
-	  for(int k=0; k<filesProject.size(); k++){//for each file
-		BufferedReader reader = null;
+	  //for each file
+	  for(int k=0; k<filesProject.size(); k++){
+		reader = null;
+		fileName = filesProject.get(k).readPathFileUTF8();
 		try {
-//		  reader = new BufferedReader(new FileReader(filesProject.get(k).readPathFileUTF8()));
 		  reader = new BufferedReader(new StringReader(filesProject.get(k).readTextUTF8()));
 		  charcount=0;
-		  while((line = reader.readLine()) != null){//for each line
-//			for(int h=0; h<filesProject.get(k).readTermRelevant().size(); h++){//for each relevant term
-			for(int h=0; h<relevantTermsVersions.size(); h++){//for each relevant term
+		  //for each line
+		  while((line = reader.readLine()) != null){
+			iterTerms=relevantTermsVersions.entrySet().iterator();
+			entryTerms=null;			  
+			//for each relevant term
+			while(iterTerms.hasNext()){
+//			for(int h=0; h<relevantTermsVersions.size(); h++){
+			  entryTerms=iterTerms.next();
 			  index=0;
 			  while(index<line.length()){//for each occurrence
 				//get next occurrence
 //				index = line.toUpperCase().indexOf(filesProject.get(k).readTermRelevant().get(h).toUpperCase(), index);
-				index = line.toUpperCase().indexOf(relevantTermsVersions.get(h)[1].toUpperCase(), index);
+
+				if(verbose){
+					System.out.println("entryTerms.getKey(): "+entryTerms.getKey()
+									  +"\nfileName: "+fileName
+									  +"\nentryTerms.getValue().get(fileName): "+entryTerms.getValue().get(fileName));
+				}
+				  
+				if(entryTerms.getValue().get(fileName)!=null)
+				  index = line.toUpperCase().indexOf(entryTerms.getValue().get(fileName).toUpperCase(), index);
+				else break;
+//				index = line.toUpperCase().indexOf(relevantTermsVersions.get(h)[1].toUpperCase(), index);
 
 				if (index == -1) break;//start checking next relevant term occurrences in this line
 
 				//add occurrence to relevantTerms, if it is valid
+				if (isValidOccurrence(entryTerms.getValue().get(fileName), line, index))
+				      addCharIndexToOccursList(entryTerms.getKey(), fileName, charcount+index);
+
+				//previous version of code snippet
+//				if (isValidOccurrence(relevantTermsVersions.get(h)[1], line, index))
+//					  addCharIndexToOccursList(relevantTermsVersions.get(h)[0],
+//							  filesProject.get(k).readPathFileUTF8(), charcount+index);
+
 //				if (isValidOccurrence(filesProject.get(k).readTermRelevant().get(h), line, index))
 //					  addCharIndexToOccursList(filesProject.get(k).readTermRelevant().get(h),
 //							  filesProject.get(k).readPathFileUTF8(), charcount+index);
 
-				if (isValidOccurrence(relevantTermsVersions.get(h)[1], line, index))
-					  addCharIndexToOccursList(relevantTermsVersions.get(h)[0],
-							  filesProject.get(k).readPathFileUTF8(), charcount+index);
-
 				//incrementing index to search for next occurrence
+				index+=entryTerms.getValue().get(fileName).length();
+//				index+=relevantTermsVersions.get(h)[1].length();
 //				index+=filesProject.get(k).readTermRelevant().get(h).length();
-				index+=relevantTermsVersions.get(h)[1].length();
 			  }
 			}
 			charcount+=line.length()+1;
@@ -244,26 +270,9 @@ public class ModelProject extends Observable implements Runnable{
 		}		
 	  }
 	  
-	  
-	  if(verbose){
-		Iterator<Entry<String, HashMap<String, ArrayList<Integer>>>> termIter = relevantTerms.entrySet().iterator();
-		Entry<String, HashMap<String, ArrayList<Integer>>> termEntry=null;
-
-		Iterator<Entry<String, ArrayList<Integer>>> fileIter = null;
-		Entry<String, ArrayList<Integer>> fileEntry=null;
-
-		String termName=null;
-		while(termIter.hasNext()){
-		  termEntry=termIter.next();
-		  termName=termEntry.getKey();
-		  System.out.println("\n***Term: "+termName);
-		  fileIter=termEntry.getValue().entrySet().iterator();
-		  while(fileIter.hasNext()){
-			fileEntry=fileIter.next();
-			System.out.println("******File: "+fileEntry.getKey());
-		  }
-		}	  
-	  }
+	  /* ***VERBOSE*** */
+	  if(verbose) printRelevantTermsOccurrences();	  
+	  /* ***VERBOSE*** */
 	  
 	  //calculating relevant terms colors
 	  /* ***DEBUG*** */
@@ -329,18 +338,68 @@ public class ModelProject extends Observable implements Runnable{
 	}
 
 	/**
+	 * Prints the occurrences of all relevant terms in all input files.
+	 */
+	private void printRelevantTermsOccurrences() {
+		Iterator<Entry<String, HashMap<String, ArrayList<Integer>>>> termIter = relevantTerms.entrySet().iterator();
+		Entry<String, HashMap<String, ArrayList<Integer>>> termEntry=null;
+
+		Iterator<Entry<String, ArrayList<Integer>>> fileIter = null;
+		Entry<String, ArrayList<Integer>> fileEntry=null;
+
+		String termName=null;
+		while(termIter.hasNext()){
+		  termEntry=termIter.next();
+		  termName=termEntry.getKey();
+		  System.out.println("\n***Term: "+termName);
+		  fileIter=termEntry.getValue().entrySet().iterator();
+		  while(fileIter.hasNext()){
+			fileEntry=fileIter.next();
+			System.out.println("******File: "+fileEntry.getKey());
+		  }
+		}
+	}
+
+	/**
+	 * Prints the versions of all relevant terms in all input files.
+	 */
+	private void printRelevantTermsVersions() {
+		Iterator<Entry<String, HashMap<String, String>>> iterTerms;
+		Entry<String, HashMap<String, String>> entryTerms;
+		System.out.println("Listing relevantTermsVersions: Size="+relevantTermsVersions.size());
+		iterTerms=relevantTermsVersions.entrySet().iterator();
+		entryTerms=null;
+		Iterator<Entry<String, String>> iterFiles=null;
+		Entry<String, String> entryFiles=null;
+		while(iterTerms.hasNext()){
+		  entryTerms=iterTerms.next();
+		  iterFiles=entryTerms.getValue().entrySet().iterator();
+		  System.out.println("\n-> Extracted:"+entryTerms.getKey());
+		  while(iterFiles.hasNext()){
+			entryFiles=iterFiles.next();
+			System.out.println("->> File:"+entryFiles.getKey()+"\nOriginal:"+entryFiles.getValue());
+		  }
+		}
+	}
+
+	/**
 	 * Adds all elements from list to globalList, except for those already present in it.
 	 * 
-	 * @param globalList - the list in which to add elements from list
+	 * @param relevantTermsVersions - the list in which to add elements from list
 	 * @param list - the list from which to get elements to be added
 	 */
-	private void joinRelevantTerms(ArrayList<String[]> globalList, ArrayList<String[]> list) {
-	  int i=0;
+	private void joinRelevantTerms(String fileName, 
+			/*HashMap<String,ArrayList<String[]>> relevantTermsVersions, */ArrayList<String[]> list) {
+//	  int i=0;
 	  for(String[] elementToAdd : list){
-		for(i=0; i<globalList.size(); ++i)
-		  if(globalList.get(i)[0].compareTo(elementToAdd[0])==0) break;
+		if(relevantTermsVersions.get(elementToAdd[0])==null)
+		  relevantTermsVersions.put(elementToAdd[0], new HashMap<String, String>());
+		  
+		  relevantTermsVersions.get(elementToAdd[0]).put(fileName, elementToAdd[1]);
+//		for(i=0; i<relevantTermsVersions.size(); ++i)
+//		  if(relevantTermsVersions.get(i)[0].compareTo(elementToAdd[0])==0) break;
 
-		if(i==globalList.size()) globalList.add(elementToAdd);
+//		if(i==relevantTermsVersions.size()) relevantTermsVersions.add(elementToAdd);
 	  }
 	}
 
@@ -1044,9 +1103,9 @@ public class ModelProject extends Observable implements Runnable{
 	 * @return - true if s intersect the relevant terms sets of all files, false otherwise
 	 */	
 	private boolean intersectTermRelevant(String s){
+	  int j = 0;
 	  for(int i = 1; i < filesProject.size(); i++){
-		int j = 0;
-			
+		j=0;	
 		while(j < filesProject.get(i).readTermRelevant().size()){
 		  if(filesProject.get(i).readTermRelevant().get(j)[0].compareTo(s)==0) break;				
 		  j++;
@@ -1072,7 +1131,7 @@ public class ModelProject extends Observable implements Runnable{
 	 * 
 	 * @return - allFilesRelevantTerms, the list of all relevant terms in both versions
 	 */
-	public ArrayList<String[]> getRelevantTermsVersions() {		
+	public HashMap<String, HashMap<String, String>> getRelevantTermsVersions() {		
 		return relevantTermsVersions;
 	}
 
@@ -1186,8 +1245,26 @@ public class ModelProject extends Observable implements Runnable{
 	 * @throws IOException
 	 */
 	private void saveRelevantTermsVersions() throws IOException {
-		PrintWriter pw2 = new PrintWriter(new BufferedWriter(new FileWriter(pathTermsVersions)));		
-		if(relevantTermsVersions != null) for(String[] str: relevantTermsVersions) pw2.println(str[0]+"\t"+str[1]);
+		Iterator<Entry<String, HashMap<String, String>>> termIter = relevantTermsVersions.entrySet().iterator();
+		Entry<String, HashMap<String, String>> termEntry=null;
+		Entry<String, String> fileEntry=null;
+		Iterator<Entry<String, String>> fileIter = null;
+		String termFilesVersions=null;
+
+		PrintWriter pw2 = new PrintWriter(new BufferedWriter(new FileWriter(pathTermsVersions)));
+		
+		while(termIter.hasNext()){
+		  termEntry=termIter.next();
+		  termFilesVersions=termEntry.getKey();
+		  fileIter=termEntry.getValue().entrySet().iterator();
+		  while(fileIter.hasNext()){
+			fileEntry=fileIter.next();
+			termFilesVersions+="\t"+fileEntry.getKey()+"\t"+fileEntry.getValue();
+		  }
+		  pw2.println(termFilesVersions);
+		}	  
+	
+//		if(relevantTermsVersions != null) for(String[] str: relevantTermsVersions) pw2.println(str[0]+"\t"+str[1]);
 		pw2.close();
 		return;		
 	}	
@@ -1311,18 +1388,13 @@ public class ModelProject extends Observable implements Runnable{
             
 			return parserXML.readNameFile();
 		} 
-		catch (ParserConfigurationException e) 
-		{
+		catch (ParserConfigurationException e){
 			System.out.println("Exception loadProject: " + e.getMessage());
 			return null;
-		}
-		catch (SAXException e) 
-		{
+		}catch (SAXException e){
 			System.out.println("Exception loadProject: " + e.getMessage());
 			return null;
-		}
-		catch (IOException e) 
-		{
+		}catch (IOException e){
 			System.out.println("Exception loadProject: " + e.getMessage());
 			return null;
 		} 
@@ -1363,22 +1435,32 @@ public class ModelProject extends Observable implements Runnable{
 	private boolean loadProjectTermsVersions() throws IOException {
 		BufferedReader br1 =null;
 		String s1=null;				
-		relevantTermsVersions=new ArrayList<String[]>();
+		String[] strArr=null;
+		relevantTermsVersions=new HashMap<String, HashMap<String,String>>();
+		HashMap<String,String> filesVersionsMap=null;
 		
 		try{
 		  br1 = new BufferedReader(new FileReader(pathTermsVersions));			
 		}catch(FileNotFoundException e){ return true;}
 		
-		relevantTermsVersions=new ArrayList<String[]>();
+//		relevantTermsVersions=new ArrayList<String[]>();
 		
-		while( (s1 = br1.readLine()) != null ) relevantTermsVersions.add(s1.split("\t"));
+//		while( (s1 = br1.readLine()) != null ){
+//			relevantTermsVersions.add(s1.split("\t"));
+//		}
 
-		/* ***VERBOSE*** */
-		if(verbose3){
-		  System.out.println("Printing relevant terms versions!");
-		  for(String str[] :relevantTermsVersions) System.out.println("Original: "+str[0]+"\nExtracted: "+str[1]);
+		while( (s1 = br1.readLine()) != null ){
+		  strArr=s1.split("\t");
+		  if(relevantTermsVersions.get(strArr[0])==null) 
+			 relevantTermsVersions.put(strArr[0], new HashMap<String, String>());
+		  
+		  filesVersionsMap=relevantTermsVersions.get(strArr[0]);
+		  for(int k=1; k<strArr.length; k+=2) filesVersionsMap.put(strArr[k], strArr[k+1]);
 		}
-		/* ***VERBOSE*** */
+
+		/* ****VERBOSE */
+		if(verbose5) printRelevantTermsVersions();
+		/* ****VERBOSE */
 
 		br1.close();
 		return true;
@@ -1410,18 +1492,19 @@ public class ModelProject extends Observable implements Runnable{
 		  tokens=s1.split("\t");
 
 		  if(tokens.length!=2){
-			if(verbose3) System.out.println("Uncorrect format for relevant terms file");
+			if(verbose4) System.out.println("Uncorrect format for relevant terms file");
 			br1.close();
 			return false;			  
 		  }
 
 		  termName=tokens[0];
 		  tokens=tokens[1].split(" ");
+		  
 		  /* ***VERBOSE*** */
-		  if(verbose3){
-			System.out.println("Stampo i tokens!");
+		  if(verbose4){
+			System.out.println("Found Term: "+termName);
+			System.out.println("Printing tokens!");
 			for(String str:tokens) System.out.println(str);
-			System.out.println("Trovato termine: "+termName);
 		  }
 		  /* ***VERBOSE*** */
 
@@ -1435,28 +1518,28 @@ public class ModelProject extends Observable implements Runnable{
 				fileName+=" "+tokens[i]; ++i;
 			  }
 			  
-			  if(verbose3) System.out.println("\tTrovato file: "+fileName);
+			  if(verbose4) System.out.println("\tTrovato file: "+fileName);
 			  
-			  if(tokens[i].compareTo("i:")!=0){
-				  
-				if(verbose3) System.out.println("Uncorrect format for relevant terms file");
-
+			  if(tokens[i].compareTo("i:")!=0){				  
+				if(verbose4) System.out.println("Uncorrect format for relevant terms file");
 				br1.close();
 				return false;
 			  }
 			  else ++i;
+			  
 			  //loading occurrence indexes of this file
 			  for(; i<tokens.length; ++i){
-				if(verbose3) System.out.println("***Token: "+tokens[i]);
+				if(verbose4) System.out.println("***Token: "+tokens[i]);
 				if(tokens[i].compareTo("f:")==0){
-				  fileMap.put(fileName, occurrences);
+				  --i;
 				  break;
 				}
 				occurrences.add(Integer.valueOf(tokens[i]));
-				if(verbose3) System.out.println("\t\tTrovata occorrenza: "+tokens[i]);
+				if(verbose4) System.out.println("\t\tTrovata occorrenza: "+tokens[i]);
 			  }
+			  fileMap.put(fileName, occurrences);			  
 			}
-			fileMap.put(fileName, occurrences);
+			
 		  }
 		  relevantTerms.put(termName, fileMap);
 		}

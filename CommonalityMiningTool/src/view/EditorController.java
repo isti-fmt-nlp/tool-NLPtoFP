@@ -27,6 +27,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
 
 import view.EditorModel.GroupTypes;
@@ -242,6 +243,7 @@ public class EditorController implements
         	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemDeleteFeature());
         	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemRenameFeature());
         	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemChangeColor());
+        	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemSearchFeature());
           }
           //clicked on a group
           if(popupElement.getName().startsWith(EditorView.altGroupNamePrefix)
@@ -831,6 +833,21 @@ public class EditorController implements
         if (color==null) return;
         else ((FeaturePanel)popupElement).setBackground(color);        
       }
+	  //popup menu command: Search Feature
+      else if(e.getActionCommand().equals("Search Feature")){    	 
+    	JFrame searchFrame=editorView.getSearchFrame();
+    	
+    	if(searchFrame==null){
+    	  searchFrame=new JFrame("Search Feature in Input Files");
+    	  searchFrame.setSize(800, 400);
+    	  searchFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+    	  
+    	  searchFrame.add(editorView.getTabFeaturesCandidates());
+    	  editorView.setSearchFrame(searchFrame);
+    	  searchFrame.setVisible(true);
+    	}
+    	  
+      }     
 	  //popup menu command: Ungroup Element
       else if(e.getActionCommand().equals("Ungroup")){
         System.out.println("Ungrouping: "+popupElement.getName());

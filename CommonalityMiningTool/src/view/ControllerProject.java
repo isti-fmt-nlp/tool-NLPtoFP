@@ -139,7 +139,9 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		EditorView editorView= new EditorView(
 						modelProject.readCommonalitiesSelected(), 
 						modelProject.readVariabilitiesSelected(), 
-						modelProject.getTermsColor());
+						modelProject.getTermsColor(), 
+						modelProject.getRelevantTerms(),
+						modelProject.getRelevantTermsVersions());
 
 		//creating controller
 		EditorController editorController =new EditorController(editorView, editorModel);
@@ -200,6 +202,7 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		  e.printStackTrace();
 		  return;
 		}
+		else return;
 		  
 		//creating model
 		try{
