@@ -452,7 +452,7 @@ public class ViewPanelCentral{
 			String text = doc.getText(0, doc.getLength());
 		    
 			
-			//adding highlights to variabilities occurrences
+			//adding highlights to terms occurrences
 			for(int i = 0; i < al.size(); i++){
 			  occurrences = relevantTerms.get(al.get(i)).get(fileName);
 			  for(int[] occurr: occurrences) hilite.addHighlight(occurr[0], occurr[1], highlightPainter[0]);
@@ -1132,8 +1132,7 @@ public class ViewPanelCentral{
 //				  		((JScrollPane)occursTabbedPane.getSelectedComponent()).getName(), currentIndex);
 
 			  //updating occurrences label
-			  occurrsLabel.setText( (currentIndex+1)+""+"/"+occurrIndexesList.size()
-					  +"[Line: "+occurrIndexesList.get(currentIndex)+"]");
+			  occurrsLabel.setText( (currentIndex+1)+"/"+occurrIndexesList.size()+"[Index: "+occurrence[0]+"]");
 
 
 			  /* ***VERBOSE****/					
@@ -1248,8 +1247,7 @@ public class ViewPanelCentral{
 //		  jta.setSelectionColor(Color.CYAN);
 		  
 		  //updating occurrences label
-		  occurrsLabel.setText( (currentIndex+1)+""+"/"+occurrIndexesList.size()
-				  			    +"[Line: "+occurrIndexesList.get(currentIndex)+"]");
+		  occurrsLabel.setText( (currentIndex+1)+"/"+occurrIndexesList.size()+"[Index: "+occurrence[0]+"]");
 		
 	}	
 

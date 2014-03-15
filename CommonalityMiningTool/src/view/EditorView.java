@@ -441,8 +441,8 @@ public class EditorView extends JFrame implements Observer{
 	/** The JFrame used to display search panels*/
 	private JFrame searchFrame=null;
 
-	/**the panel containing the candidate feature's checkboxes */
-	private JPanel panelFeatures = null;
+//	/**the panel containing the candidate feature's checkboxes */
+//	private JPanel panelFeatures = null;
 	
 	/** The panel searchFrame used to search for feature occurrences*/
 	private JPanel searchPanel = null;
@@ -492,6 +492,7 @@ public class EditorView extends JFrame implements Observer{
 	private static int[] PVcol={0, 160, 160};
 	private static int[] ACcol={255, 255, 0};
 	private static int[] AVcol={0, 255, 255};
+	private static int[] NEcol={160, 0, 0};
 
 	private static Highlighter.HighlightPainter passiveCommHighlightPainter =
 			new DefaultHighlighter.DefaultHighlightPainter(getNewColor(PCcol));
@@ -5129,12 +5130,20 @@ public class EditorView extends JFrame implements Observer{
 	 * @return - the JScrollPane created
 	 */
 	protected JScrollPane getTabFeaturesCandidates(){
+		JPanel featuresPanel = null, legendPanel=null;
+		JLabel passiveCommColorLabel=null, passiveVarsColorLabel=null, nonExtractedColorLabel=null;
+		JLabel activeCommColorLabel=null, activeVarsColorLabel=null;
+
+		JLabel passiveCommTextLabel=null, passiveVarsTextLabel=null, nonExtractedTextLabel=null;
+		JLabel activeCommTextLabel=null, activeVarsTextLabel=null;
+
+		
       	
 		ImageIcon iconSearch = new ImageIcon(getClass().getResource("/Search/magnifier glasses-min3.png"));
 		ImageIcon iconNoSearch = new ImageIcon(getClass().getResource("/Search/magnifier glasses_NO_SEARCH.png"));
 		JLabel iconLabel = null;
-		int[] colorRGB=new int[3];
-		Color backColor=null;
+//		int[] colorRGB=new int[3];
+		Color commBackColor=null, varsBackColor=null, nonExtrBackColor=null;
 		ArrayList<String> commonalitiesToHighlight = new ArrayList<String>();//commonalities to highlight in the texts
 		ArrayList<String> variabilitiesToHighlight = new ArrayList<String>();//variabilities to highlight in the texts
 
@@ -5207,59 +5216,125 @@ public class EditorView extends JFrame implements Observer{
 		searchPanel = new JPanel();
 		searchPanel.setBackground(Color.WHITE);
 //		searchPanel.setOpaque(true);
-		searchPanel.setBounds(0, 0, 800, 700);
+		searchPanel.setBounds(0, 0, 900, 700);
 		searchPanel.setLayout(null);
 		
-		panelFeatures = new JPanel();
-		panelFeatures.setBackground(Color.WHITE);
+		featuresPanel = new JPanel();
+		featuresPanel.setBackground(Color.WHITE);
 //		panelFeatures.setOpaque(true);
-		panelFeatures.setBounds(5,5,770,200);
-		panelFeatures.setLayout(new GridLayout(0, 1));
-		panelFeatures.setBorder(BorderFactory.createCompoundBorder(
+		featuresPanel.setBounds(5,5,770,200);
+		featuresPanel.setLayout(new GridLayout(0, 1));
+		featuresPanel.setBorder(BorderFactory.createCompoundBorder(
 				BorderFactory.createEtchedBorder(EtchedBorder.RAISED), 
 						BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)));
 		
 		//creating panelFeatures
-		colorRGB[0]=160; colorRGB[1]=160; colorRGB[2]=0;
+//		colorRGB[0]=160; colorRGB[1]=160; colorRGB[2]=0;
 		//getting color for extracted commonalities
-		backColor=getNewColor(colorRGB);
+		commBackColor=getNewColor(PCcol);
 		for(int i = 0; i < commonalitiesExtracted.size(); i++){
 		  iconLabel = new JLabel(commonalitiesExtracted.get(i), iconSearch, JLabel.LEFT);
 		  iconLabel.setOpaque(true);
-		  iconLabel.setBackground(backColor);
+		  iconLabel.setBackground(commBackColor);
 
 		  iconLabel.addMouseListener(getTermSearchIconListener("Extracted", commonalitiesExtracted.get(i), 
 				  					 commonalitiesToHighlight, variabilitiesToHighlight));
-		  panelFeatures.add(iconLabel);
+		  featuresPanel.add(iconLabel);
 		}
 		
-		colorRGB[0]=0; colorRGB[1]=160; colorRGB[2]=160;
+//		colorRGB[0]=0; colorRGB[1]=160; colorRGB[2]=160;
 		//getting color for extracted variabilities
-		backColor=getNewColor(colorRGB);
+		varsBackColor=getNewColor(PVcol);
 		for(int i = 0; i < variabilitiesExtracted.size(); i++){
 		  iconLabel = new JLabel(variabilitiesExtracted.get(i), iconSearch, JLabel.LEFT);
 		  iconLabel.setOpaque(true);
-		  iconLabel.setBackground(backColor);
+		  iconLabel.setBackground(varsBackColor);
 
 		  iconLabel.addMouseListener(getTermSearchIconListener("Extracted", variabilitiesExtracted.get(i), 
 				  					 commonalitiesToHighlight, variabilitiesToHighlight));
-		  panelFeatures.add(iconLabel);
+		  featuresPanel.add(iconLabel);
 		}
 
-		colorRGB[0]=160; colorRGB[1]=0; colorRGB[2]=0;
+//		colorRGB[0]=160; colorRGB[1]=0; colorRGB[2]=0;
 		//getting color for not extracted features
-		backColor=getNewColor(colorRGB);
+		nonExtrBackColor=getNewColor(NEcol);
 		for(int i = 0; i < featuresTyped.size(); i++){
 		  iconLabel = new JLabel(featuresTyped.get(i), iconNoSearch, JLabel.LEFT);
 		  iconLabel.setOpaque(true);
-		  iconLabel.setBackground(backColor);
+		  iconLabel.setBackground(nonExtrBackColor);
 		  
-		  panelFeatures.add(iconLabel);
+		  featuresPanel.add(iconLabel);
 		}
 		
-		//adding panelfeatures
-		JScrollPane scrollingFeaturesPanel = new JScrollPane(panelFeatures);
-		scrollingFeaturesPanel.setBounds(10, 10, 780, 210);
+		//creating scrollingFeaturesPanel from panelFeatures
+		JScrollPane scrollingFeaturesPanel = new JScrollPane(featuresPanel);
+		scrollingFeaturesPanel.setBounds(270, 10, 620, 210);
+		
+		//creating legend panel
+		legendPanel = new JPanel();
+		legendPanel.setBounds(5, 10, 260, 210);
+		legendPanel.setLayout(null);
+		
+		passiveCommColorLabel=new JLabel();
+		passiveCommColorLabel.setBackground(commBackColor);
+		passiveCommColorLabel.setBounds(15, 10, 30, 15);
+		passiveCommColorLabel.setOpaque(true);
+		passiveCommTextLabel=new JLabel(": commonalities"); 
+		passiveCommTextLabel.setLocation(48, 10);
+		passiveCommTextLabel.setSize(new Dimension(220, 15));
+		passiveCommTextLabel.setFont(new Font("Dialog", Font.ITALIC|Font.BOLD, 12));
+
+		
+		passiveVarsColorLabel=new JLabel();
+		passiveVarsColorLabel.setBackground(varsBackColor);
+		passiveVarsColorLabel.setBounds(15, 40, 30, 15);
+		passiveVarsColorLabel.setOpaque(true);
+		passiveVarsTextLabel=new JLabel(": variabilities"); 
+		passiveVarsTextLabel.setLocation(48, 40);
+		passiveVarsTextLabel.setSize(new Dimension(220, 15));
+		passiveVarsTextLabel.setFont(new Font("Dialog", Font.ITALIC|Font.BOLD, 12));
+		
+		nonExtractedColorLabel=new JLabel();
+		nonExtractedColorLabel.setBackground(nonExtrBackColor);
+		nonExtractedColorLabel.setBounds(15, 70, 30, 15);
+		nonExtractedColorLabel.setOpaque(true);
+		nonExtractedTextLabel=new JLabel(": non extracted features"); 
+		nonExtractedTextLabel.setLocation(48, 70);
+		nonExtractedTextLabel.setSize(new Dimension(220, 15));
+		nonExtractedTextLabel.setFont(new Font("Dialog", Font.ITALIC|Font.BOLD, 12));
+
+		activeCommColorLabel=new JLabel();
+		activeCommColorLabel.setBackground(getNewColor(ACcol));
+		activeCommColorLabel.setBounds(15, 100, 30, 15);
+		activeCommColorLabel.setOpaque(true);
+		activeCommTextLabel=new JLabel(": current commonality occurrence"); 
+		activeCommTextLabel.setLocation(48, 100);
+		activeCommTextLabel.setSize(new Dimension(220, 15));
+		activeCommTextLabel.setFont(new Font("Dialog", Font.ITALIC|Font.BOLD, 12));
+		
+		activeVarsColorLabel=new JLabel();
+		activeVarsColorLabel.setBackground(getNewColor(AVcol));
+		activeVarsColorLabel.setBounds(15, 130, 30, 15);
+		activeVarsColorLabel.setOpaque(true);
+		activeVarsTextLabel=new JLabel(": current variability occurrence"); 
+		activeVarsTextLabel.setLocation(48, 130);
+		activeVarsTextLabel.setSize(new Dimension(220, 15));
+		activeVarsTextLabel.setFont(new Font("Dialog", Font.ITALIC|Font.BOLD, 12));
+		
+		legendPanel.add(passiveCommColorLabel);
+		legendPanel.add(passiveVarsColorLabel);
+		legendPanel.add(nonExtractedColorLabel);
+		legendPanel.add(activeCommColorLabel);
+		legendPanel.add(activeVarsColorLabel);
+		
+		legendPanel.add(passiveCommTextLabel);
+		legendPanel.add(passiveVarsTextLabel);
+		legendPanel.add(nonExtractedTextLabel);
+		legendPanel.add(activeCommTextLabel);
+		legendPanel.add(activeVarsTextLabel);
+		
+		legendPanel.setBackground(Color.LIGHT_GRAY);
+		legendPanel.setOpaque(true);
 		
 		//adding control buttons and a label for term occurences navigation
 		XBackwardOccurrButton = new JButton("<<("+occurrJumpSpan+")");
@@ -5267,28 +5342,28 @@ public class EditorView extends JFrame implements Observer{
 		XBackwardOccurrButton.addActionListener(getOccurrNavButtonListener(-occurrJumpSpan));
 
 		prevOccurrButton = new JButton("<");
-		prevOccurrButton.setBounds(170, 230, 100, 22);
+		prevOccurrButton.setBounds(185, 230, 100, 22);
 		prevOccurrButton.addActionListener(getOccurrNavButtonListener(-1));
 		
 		occurrsLabel = new JLabel("<html><div style=\"text-align: center;\">" + "x/y" + "</html>");
 
 		occurrsLabelPanel = new JPanel();
 		occurrsLabelPanel.add(occurrsLabel);
-		occurrsLabelPanel.setBounds(285, 230, 230, 22);
+		occurrsLabelPanel.setBounds(315, 230, 270, 22);
 		occurrsLabelPanel.setBackground(Color.LIGHT_GRAY);
 
 		nextOccurrButton = new JButton(">");
-		nextOccurrButton.setBounds(530, 230, 100, 22);
+		nextOccurrButton.setBounds(615, 230, 100, 22);
 		nextOccurrButton.addActionListener(getOccurrNavButtonListener(1));
 
 		XForwardOccurrButton = new JButton(">>("+occurrJumpSpan+")");
-		XForwardOccurrButton.setBounds(670, 230, 100, 22);
+		XForwardOccurrButton.setBounds(770, 230, 100, 22);
 		XForwardOccurrButton.addActionListener(getOccurrNavButtonListener(occurrJumpSpan));
 		
 
 		//adding text area for term occurences visualization		
 		occursTabbedPane = new JTabbedPane();
-		occursTabbedPane.setBounds(10, 270, 780, 390);
+		occursTabbedPane.setBounds(10, 270, 880, 390);
 		
 		//initializing utility maps
 		textTabs = new HashMap<String, JTextArea>();
@@ -5298,6 +5373,7 @@ public class EditorView extends JFrame implements Observer{
 		lastRemovedHighlights = new HashMap<String, HashMap<String, ArrayList<Highlight>>>();
 
 		//adding components to panel		
+		searchPanel.add(legendPanel);
 		searchPanel.add(scrollingFeaturesPanel);
 		searchPanel.add(occursTabbedPane);
 
@@ -5534,8 +5610,7 @@ public class EditorView extends JFrame implements Observer{
 		  //			  		((JScrollPane)occursTabbedPane.getSelectedComponent()).getName(), currentIndex);
 
 		  //updating occurrences label
-		  occurrsLabel.setText( (currentIndex+1)+""+"/"+occurrIndexesList.size()
-			  +"[Line: "+occurrIndexesList.get(currentIndex)+"]");
+		  occurrsLabel.setText( (currentIndex+1)+"/"+occurrIndexesList.size()+"[Index: "+occurrence[0]+"]");
 
 
 		  /* ***VERBOSE****/					
@@ -5713,7 +5788,8 @@ public class EditorView extends JFrame implements Observer{
 			//adding highlights to variabilities occurrences
 			for(int i = 0; i < variabilitiesToHighlight.size(); i++){
 			  occurrences = relevantTerms.get(variabilitiesToHighlight.get(i)).get(file);
-			  for(int[] occurr: occurrences) hilite.addHighlight(occurr[0], occurr[1], passiveVarsHighlightPainter);
+			  if(occurrences!=null) for(int[] occurr: occurrences) 
+				hilite.addHighlight(occurr[0], occurr[1], passiveVarsHighlightPainter);
 			}
 			
 //			if(variabilitiesToHighlight!=null) for(int i = 0; i < variabilitiesToHighlight.size(); i++){
@@ -5847,8 +5923,7 @@ public class EditorView extends JFrame implements Observer{
 //		  jta.setSelectionColor(Color.CYAN);
 		  
 		  //updating occurrences label
-		  occurrsLabel.setText( (currentIndex+1)+""+"/"+occurrIndexesList.size()
-				  				+"[Index: "+occurrIndexesList.get(currentIndex)+"]");
+		  occurrsLabel.setText( (currentIndex+1)+"/"+occurrIndexesList.size()+"[Index: "+occurrence[0]+"]");
 		
 	}		
 	

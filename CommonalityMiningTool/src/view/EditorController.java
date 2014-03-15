@@ -842,7 +842,7 @@ public class EditorController implements
     	
 //    	if(searchFrame==null){
     	  searchFrame=new JFrame("Search Feature in Input Files");
-    	  searchFrame.setSize(800, 700);
+    	  searchFrame.setSize(900, 700);
     	  searchFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
     	  editorView.setSearchFrame(searchFrame);
     	  
