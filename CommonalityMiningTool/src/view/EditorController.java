@@ -1,5 +1,6 @@
 package view;
 
+import java.awt.BorderLayout;
 import java.awt.CheckboxMenuItem;
 import java.awt.Color;
 import java.awt.Component;

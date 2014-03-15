@@ -391,12 +391,12 @@ public class EditorView extends JFrame implements Observer{
 	private HashMap<String, int[]> termsColor=null;
 	
 	/** Occurences of features in all input files*/
-	private HashMap<String, HashMap<String, ArrayList<Integer>>> relevantTerms=null;
+	private HashMap<String, HashMap<String, ArrayList<int[]>>> relevantTerms=null;
 	
 	/** Contains both versions of feature names,
 	 * with the computed version at index 0 and the extracted one at index 1
 	 */
-	private HashMap<String, HashMap<String, String>> relevantTermsVersions=null;
+	private HashMap<String, HashMap<String, ArrayList<String>>> relevantTermsVersions=null;
 	
 	/** OrderedList containing the panels children of the diagram panel*/
 	private OrderedList visibleOrderDraggables = null;
@@ -546,27 +546,28 @@ public class EditorView extends JFrame implements Observer{
 	public EditorView(ArrayList<String> commonalitiesSelected,
 			   		  ArrayList<String> variabilitiesSelected,
 			   		  HashMap<String, int[]> colorsMap,
-			   		  HashMap<String, HashMap<String, ArrayList<Integer>>> relevantTerms,
-			   		  HashMap<String, HashMap<String, String>> relevantTermsVersions) {
+			   		  HashMap<String, HashMap<String, ArrayList<int[]>>> relevantTerms,
+			   		  HashMap<String, HashMap<String, ArrayList<String>>> relevantTermsVersions) {
 		
 	  this.termsColor = new HashMap<String, int[]>();
-	  this.relevantTerms = new HashMap<String, HashMap<String, ArrayList<Integer>>>();
-	  this.relevantTermsVersions = new HashMap<String, HashMap<String, String>>();
+	  this.relevantTerms = new HashMap<String, HashMap<String, ArrayList<int[]>>>();
+	  this.relevantTermsVersions = new HashMap<String, HashMap<String, ArrayList<String>>>();
 		  
 //	  System.out.println("relevantTermsVersions: ");
 //	  for(String[] strArr : relevantTermsVersions) System.out.println(strArr[0]+" - "+strArr[1]);
-	  Iterator<Entry<String, HashMap<String, ArrayList<Integer>>>> termVersionsIter = relevantTerms.entrySet().iterator();
-	  Entry<String, HashMap<String, ArrayList<Integer>>> termVersionsEntry=null;
-	  Iterator<Entry<String, ArrayList<Integer>>> fileVersionsIter = null;
-	  Entry<String, ArrayList<Integer>> fileVersionsEntry=null;
+
+//	  Iterator<Entry<String, HashMap<String, ArrayList<int[]>>>> termVersionsIter = relevantTerms.entrySet().iterator();
+//	  Entry<String, HashMap<String, ArrayList<int[]>>> termVersionsEntry=null;
+//	  Iterator<Entry<String, ArrayList<int[]>>> fileVersionsIter = null;
+//	  Entry<String, ArrayList<int[]>> fileVersionsEntry=null;
 
 	  /* ***VERBOSE*** */
 	  //printing all relevantTerms occurrences
-	  Iterator<Entry<String, HashMap<String, ArrayList<Integer>>>> termIterVERB = relevantTerms.entrySet().iterator();
-	  Entry<String, HashMap<String, ArrayList<Integer>>> termEntryVERB=null;
+	  Iterator<Entry<String, HashMap<String, ArrayList<int[]>>>> termIterVERB = relevantTerms.entrySet().iterator();
+	  Entry<String, HashMap<String, ArrayList<int[]>>> termEntryVERB=null;
 
-	  Iterator<Entry<String, ArrayList<Integer>>> fileIterVERB = null;
-	  Entry<String, ArrayList<Integer>> fileEntryVERB=null;
+	  Iterator<Entry<String, ArrayList<int[]>>> fileIterVERB = null;
+	  Entry<String, ArrayList<int[]>> fileEntryVERB=null;
 	  
 	  String termName=null;
 	  while(termIterVERB.hasNext()){
@@ -5168,7 +5169,8 @@ public class EditorView extends JFrame implements Observer{
     	}
     	else{//search asked on a single feature
     	  featureName=((FeaturePanel)getPopUpElement()).getLabelName();
-    	  
+    	  if (menuViewCommsOrVars.isSelected()) featureName=featureName.substring(0, featureName.length()-3);
+
     	  //getting the type of the feature: extracted commonality, extracted variability or added by the user
     	  if(relevantTerms.get(featureName)==null) featuresTyped.add(featureName);//a non-extracted feature
     	  else{
@@ -5201,6 +5203,7 @@ public class EditorView extends JFrame implements Observer{
 		for(String tmp: commonalitiesExtracted) commonalitiesToHighlight.add(tmp);
 		for(String tmp: variabilitiesExtracted) variabilitiesToHighlight.add(tmp);
 		
+		//creating panel elements
 		searchPanel = new JPanel();
 		searchPanel.setBackground(Color.WHITE);
 //		searchPanel.setOpaque(true);
@@ -5216,9 +5219,6 @@ public class EditorView extends JFrame implements Observer{
 				BorderFactory.createEtchedBorder(EtchedBorder.RAISED), 
 						BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)));
 		
-//		//each entry is a JLabel with the feature's name and a search icon
-//		labelFeatures = new ArrayList<JLabel>();
-		
 		//creating panelFeatures
 		colorRGB[0]=160; colorRGB[1]=160; colorRGB[2]=0;
 		//getting color for extracted commonalities
@@ -5230,7 +5230,7 @@ public class EditorView extends JFrame implements Observer{
 
 		  iconLabel.addMouseListener(getTermSearchIconListener("Extracted", commonalitiesExtracted.get(i), 
 				  					 commonalitiesToHighlight, variabilitiesToHighlight));
-		  /*labelFeatures.add(iconLabel);*/ panelFeatures.add(iconLabel);
+		  panelFeatures.add(iconLabel);
 		}
 		
 		colorRGB[0]=0; colorRGB[1]=160; colorRGB[2]=160;
@@ -5243,7 +5243,7 @@ public class EditorView extends JFrame implements Observer{
 
 		  iconLabel.addMouseListener(getTermSearchIconListener("Extracted", variabilitiesExtracted.get(i), 
 				  					 commonalitiesToHighlight, variabilitiesToHighlight));
-		  /*labelFeatures.add(iconLabel);*/ panelFeatures.add(iconLabel);
+		  panelFeatures.add(iconLabel);
 		}
 
 		colorRGB[0]=160; colorRGB[1]=0; colorRGB[2]=0;
@@ -5254,18 +5254,15 @@ public class EditorView extends JFrame implements Observer{
 		  iconLabel.setOpaque(true);
 		  iconLabel.setBackground(backColor);
 		  
-//		  iconLabel.addMouseListener(getTermSearchIconListener("Extracted", featuresTyped.get(i), alFeaturesToHighlight));
-		  /*labelFeatures.add(iconLabel);*/ panelFeatures.add(iconLabel);
+		  panelFeatures.add(iconLabel);
 		}
 		
 		//adding panelfeatures
 		JScrollPane scrollingFeaturesPanel = new JScrollPane(panelFeatures);
 		scrollingFeaturesPanel.setBounds(10, 10, 780, 210);
-
 		
 		//adding control buttons and a label for term occurences navigation
 		XBackwardOccurrButton = new JButton("<<("+occurrJumpSpan+")");
-//		XBackwardOccurrButton.setBounds(20, 370, 76, 22);
 		XBackwardOccurrButton.setBounds(30, 230, 100, 22);
 		XBackwardOccurrButton.addActionListener(getOccurrNavButtonListener(-occurrJumpSpan));
 
@@ -5308,30 +5305,30 @@ public class EditorView extends JFrame implements Observer{
 	}
 
 	/**
-	 * (Manuel M.) Returns a new ActionListener for features view buttons. The behaviour changes based on the parameter.
+	 * Returns a new ActionListener for features view buttons. The behaviour changes based on the parameter.
 	 * 
 	 * @param type - String representing the required behaviour type
 	 * @param term - String representing the name of the feature candidate
 	 * @param commonalitiesToHighlight - if not null, these terms will be highlighted with the commonalities color
 	 * @param variabilitiesToHighlight - if not null, these terms will be highlighted with the variabilities color
-	 * @return the new ActionListener
+	 * 
+	 * @return - the new ActionListener
 	 */
 	private MouseListener getTermSearchIconListener(String type, final String term,
 			final ArrayList<String> commonalitiesToHighlight, final ArrayList<String> variabilitiesToHighlight) {
 
 	  if (type=="Extracted") return new MouseAdapter(){			
 
-		@SuppressWarnings({ "rawtypes" })
 		@Override
 		public void mouseClicked(MouseEvent me){				
 
 		  //creation of occurrences navigation panel
 		  occursTabbedPane.removeAll();
 		  textTabs.clear();
-		  HashMap<String, ArrayList<Integer>> filesListTmp = null;//files list for a term
+		  HashMap<String, ArrayList<int[]>> filesListTmp = null;//files list for a term
 
-		  Iterator filesIterator = null;
-		  Map.Entry occurrencesList = null;
+		  Iterator<Entry<String, ArrayList<int[]>>> filesIterator = null;
+		  Entry<String, ArrayList<int[]>> occurrencesList = null;
 
 		  //variables used to remember last selected tab for each relevant term
 		  Component[] compArrTmp = null;
@@ -5356,9 +5353,9 @@ public class EditorView extends JFrame implements Observer{
 		  filesIterator = filesListTmp.entrySet().iterator();
 
 
-		  while (filesIterator.hasNext()) {//for each file a JScrollPane is added
+		  while (filesIterator.hasNext()) {//for each file a JScrollPane is added as tab
 
-			occurrencesList = (Map.Entry)filesIterator.next();
+			occurrencesList = filesIterator.next();
 
 			JScrollPane scrollingFilePanel = getRegisteredTabTextFile(term, 
 					(String)occurrencesList.getKey(), commonalitiesToHighlight, variabilitiesToHighlight);
@@ -5366,11 +5363,13 @@ public class EditorView extends JFrame implements Observer{
 			occursTabbedPane.addTab((String)occurrencesList.getKey(), scrollingFilePanel);
 
 			/* ***VERBOSE****/
-			if (debug4) System.out.println("\n***\nNumero di componenti di jScrP: "+scrollingFilePanel.getComponentCount());
-			for (int h=0; h<scrollingFilePanel.getComponentCount(); h++){
-			  System.out.println("Classe del componente "+h+": "+scrollingFilePanel.getComponent(h).getClass());
-			}
-			System.out.println("Classe del ViewPort: "+scrollingFilePanel.getViewport().getClass());
+			if (debug4){
+			  System.out.println("\n***\nNumero di componenti di jScrP: "+scrollingFilePanel.getComponentCount());
+			  for (int h=0; h<scrollingFilePanel.getComponentCount(); h++){
+				System.out.println("Classe del componente "+h+": "+scrollingFilePanel.getComponent(h).getClass());
+			  }
+			  System.out.println("Classe del ViewPort: "+scrollingFilePanel.getViewport().getClass());
+			}			  
 			/* ***VERBOSE****/
 
 		  }
@@ -5396,7 +5395,7 @@ public class EditorView extends JFrame implements Observer{
 			tabTitle = currentFiles.get(term);
 			compArrTmp = occursTabbedPane.getComponents();
 			for (int k=0; k< compArrTmp.length; ++k)
-			  if (compArrTmp[k].getName()==tabTitle) occursTabbedPane.setSelectedComponent(compArrTmp[k]);
+			  if (compArrTmp[k].getName()==tabTitle){ occursTabbedPane.setSelectedComponent(compArrTmp[k]); break;}
 		  }
 
 		  selectCurrentOccurrence(currentSelectedFeatureName,
@@ -5432,10 +5431,10 @@ public class EditorView extends JFrame implements Observer{
 
 		@Override
 		public void actionPerformed(ActionEvent ae){							
-//		  HashMap<String, ArrayList<Integer>> occurrFilesList=null;		
-		  ArrayList<Integer> occurrIndexesList=null;
+		  ArrayList<int[]> occurrIndexesList=null;
 		  int currentIndex=0;//current index in occurrIndexesList of occurrence to highlite
-		  int occurrenceIndex =0;//current index in the text of occurrence to highlite
+//		  int occurrenceIndex =0;//current index in the text of occurrence to highlite
+		  int[] occurrence=null;//current index in the text of occurrence to highlite
 		  Object highlightTag=null;//highlight tag that will be added to the text
 		  ArrayList<Highlight> lastRemovedTags=null;//last removed highlight tags
 		  ArrayList<Highlight> tagsToRemove=null;//highlight tags to remove
@@ -5446,8 +5445,6 @@ public class EditorView extends JFrame implements Observer{
 		  currentIndex= textIndexes.get(currentSelectedFeatureName).get(fileName);
 
 		  //calculate next occurrence index to use, depending on the jump parameter
-//		  occurrFilesList = relevantTerms.get(currentSelectedFeatureName);
-//		  occurrIndexesList=occurrFilesList.get(fileName);
 		  occurrIndexesList=relevantTerms.get(currentSelectedFeatureName).get(fileName);
 		  
 		  if (jump>0){
@@ -5459,11 +5456,21 @@ public class EditorView extends JFrame implements Observer{
 			else currentIndex=0;
 		  }
 
-		  occurrenceIndex = occurrIndexesList.get(currentIndex);
+		  occurrence = occurrIndexesList.get(currentIndex);
 
 		  Highlighter hilite = jta.getHighlighter();
 
-		  //initializing of lastRemovedCommHighlights, if necessary
+		  //initializing of lastHighlightedTag, if necessary
+		  if(lastHighlightedTag.get(currentSelectedFeatureName)==null) 
+		    lastHighlightedTag.put(currentSelectedFeatureName, new HashMap<String, Object>());
+
+		  //removing last highlighted tag for this term and file
+		  highlightTag=lastHighlightedTag.get(currentSelectedFeatureName).get(fileName);
+
+		  if(highlightTag!=null) hilite.removeHighlight(highlightTag);
+
+		  
+		  //initializing of lastRemovedHighlights, if necessary
 		  if(lastRemovedHighlights.get(currentSelectedFeatureName)==null) 
 			  lastRemovedHighlights.put(currentSelectedFeatureName, new HashMap<String, ArrayList<Highlight>>());
 
@@ -5475,16 +5482,17 @@ public class EditorView extends JFrame implements Observer{
 			  hilite.addHighlight(lastRemovedTags.get(h).getStartOffset(), lastRemovedTags.get(h).getEndOffset(),
 				  lastRemovedTags.get(h).getPainter());
 		  } catch (BadLocationException e) {
-			System.out.println("BadLocationException\nTerm: "+currentSelectedFeatureName+" - occurrence: "+occurrenceIndex);
+			System.out.println("BadLocationException\nTerm: "+currentSelectedFeatureName+" - occurrence: "+occurrence);
 			e.printStackTrace();
 		  }
 
 		  //checking what highlighted tags already are in next occurrence text interval
 		  tagsToRemove = new ArrayList<Highlight>();
 		  for (Highlight tmp: hilite.getHighlights())
-			if (tmp.getStartOffset()>=occurrenceIndex && tmp.getEndOffset()<=
-			    occurrenceIndex+relevantTermsVersions.get(currentSelectedFeatureName).get(fileName).length())
-			  tagsToRemove.add(tmp);
+//			if (tmp.getStartOffset()>=occurrence && tmp.getEndOffset()<=
+//			    occurrence+relevantTermsVersions.get(currentSelectedFeatureName).get(fileName).length())
+//			  tagsToRemove.add(tmp);
+			if (tmp.getStartOffset()>=occurrence[0] && tmp.getEndOffset()<=occurrence[1]) tagsToRemove.add(tmp);
 
 		  //removing highlight tags that already are in next occurrence text interval
 		  for (Highlight tmp: tagsToRemove) hilite.removeHighlight(tmp);
@@ -5492,18 +5500,8 @@ public class EditorView extends JFrame implements Observer{
 		  //saving last removed highlight tags in lastRemovedHighlights
 		  lastRemovedHighlights.get(currentSelectedFeatureName).put(fileName, tagsToRemove);
 
-		  //initializing of lastHighlightedTag, if necessary
-		  if(lastHighlightedTag.get(currentSelectedFeatureName)==null) 
-		    lastHighlightedTag.put(currentSelectedFeatureName, new HashMap<String, Object>());
-
-		  //removing last highlighted tag for this term and file
-		  highlightTag=lastHighlightedTag.get(currentSelectedFeatureName).get(fileName);
-
-		  if(highlightTag!=null) hilite.removeHighlight(highlightTag);
-
 		  //getting correct highlighter for this feature name
 		  Highlighter.HighlightPainter occurrPainter=null;
-//		  currentSelectedFeatureName
 		  for(String tmp: startingCommonalities)
 			if(currentSelectedFeatureName.compareTo(tmp)==0){ occurrPainter=activeCommHighlightPainter; break;}
 		  if(occurrPainter==null) occurrPainter=activeVarsHighlightPainter;
@@ -5511,19 +5509,20 @@ public class EditorView extends JFrame implements Observer{
 		  //highlighting current occurrence and saving it in lastHighlightedTag
 		  try {
 			lastHighlightedTag.get(currentSelectedFeatureName).put(fileName, hilite.addHighlight(
-					occurrenceIndex, 
-					occurrenceIndex+relevantTermsVersions.get(currentSelectedFeatureName).get(fileName).length(),
-					occurrPainter));
+					occurrence[0], occurrence[1], occurrPainter));
+//			occurrence, 
+//			occurrence+relevantTermsVersions.get(currentSelectedFeatureName).get(fileName).length(),
+//			occurrPainter));
 
 		  } catch (BadLocationException e) {
-			System.out.println("BadLocationException\nTerm: "+currentSelectedFeatureName+" - occurrence: "+occurrenceIndex);
+			System.out.println("BadLocationException\nTerm: "+currentSelectedFeatureName+" - occurrence: "+occurrence);
 			e.printStackTrace();
 		  }
 
 		  //set Caret position and text selection
 		  jta.requestFocusInWindow();
 		  jta.getCaret().setVisible(true);
-		  jta.setCaretPosition(occurrenceIndex);
+		  jta.setCaretPosition(occurrence[0]);
 		  //		  jta.setSelectionStart(occurrenceIndex);
 		  //		  jta.setSelectionEnd(occurrenceIndex+checkBoxCommonalities.get(currentSelectedCheckBox).getText().length());
 		  //		  jta.setSelectionEnd(occurrenceIndex+currentSelectedCheckBox.length());
@@ -5542,7 +5541,7 @@ public class EditorView extends JFrame implements Observer{
 		  /* ***VERBOSE****/					
 		  if (debug4) System.out.println(
 			 "\n*****\nSELECTED TAB: "+fileName
-			+"\noccurrenceIndex: "+occurrenceIndex
+			+"\noccurrenceIndex: "+occurrence
 			+"\ncurrentSelectedFeatureName: "+currentSelectedFeatureName
 			+"\ncurrentSelectedFeatureName.length(): "+currentSelectedFeatureName.length()
 			+"\ncurrentIndex: "+currentIndex
@@ -5681,8 +5680,10 @@ public class EditorView extends JFrame implements Observer{
 	 * @return - the modified JTextComponent
 	 */
 	private JTextComponent setHighlightText(JTextComponent jtc,
-			ArrayList <String> commonalitiesToHighlight, ArrayList<String> variabilitiesToHighlight, String file){
+			ArrayList<String> commonalitiesToHighlight, ArrayList<String> variabilitiesToHighlight, String file){
 		String originalVersionFeaturename=null;
+		ArrayList<int[]> occurrences = null;
+		
 		if(commonalitiesToHighlight==null && variabilitiesToHighlight==null) return jtc;
 		try{   
 			Highlighter hilite = jtc.getHighlighter();
@@ -5691,29 +5692,41 @@ public class EditorView extends JFrame implements Observer{
 		    
 			String text = doc.getText(0, doc.getLength());
 		    
-			int pos = 0;
 			//adding highlights to commonalities occurrences
-			if(commonalitiesToHighlight!=null) for(int i = 0; i < commonalitiesToHighlight.size(); i++){
-				originalVersionFeaturename=relevantTermsVersions.get(commonalitiesToHighlight.get(i)).get(file);
+			for(int i = 0; i < commonalitiesToHighlight.size(); i++){
+			  occurrences = relevantTerms.get(commonalitiesToHighlight.get(i)).get(file);
+			  for(int[] occurr: occurrences) hilite.addHighlight(occurr[0], occurr[1], passiveCommHighlightPainter);
+			}
+				
+//			int pos = 0;
+//			if(commonalitiesToHighlight!=null) for(int i = 0; i < commonalitiesToHighlight.size(); i++){
+//				originalVersionFeaturename=relevantTermsVersions.get(commonalitiesToHighlight.get(i)).get(file);
+//
+//				while((pos = text.toUpperCase().indexOf(originalVersionFeaturename.toUpperCase(), pos)) >= 0){	
+//					if(ModelProject.isValidOccurrence( originalVersionFeaturename, text, pos) )
+//						hilite.addHighlight(pos, pos+originalVersionFeaturename.length(), passiveCommHighlightPainter);
+//					
+//					pos += originalVersionFeaturename.length();
+//				}    
+//			}		
 
-				while((pos = text.toUpperCase().indexOf(originalVersionFeaturename.toUpperCase(), pos)) >= 0){	
-					if(ModelProject.isValidOccurrence( originalVersionFeaturename, text, pos) )
-						hilite.addHighlight(pos, pos+originalVersionFeaturename.length(), passiveCommHighlightPainter);
-					
-					pos += originalVersionFeaturename.length();
-				}    
-			}		
 			//adding highlights to variabilities occurrences
-			if(variabilitiesToHighlight!=null) for(int i = 0; i < variabilitiesToHighlight.size(); i++){
-				originalVersionFeaturename=relevantTermsVersions.get(variabilitiesToHighlight.get(i)).get(file);
-
-				while((pos = text.toUpperCase().indexOf(originalVersionFeaturename.toUpperCase(), pos)) >= 0){	
-					if(ModelProject.isValidOccurrence(originalVersionFeaturename, text, pos) )
-						hilite.addHighlight(pos, pos+originalVersionFeaturename.length(), passiveVarsHighlightPainter);
-					
-					pos += originalVersionFeaturename.length();
-				}    
-			}		
+			for(int i = 0; i < variabilitiesToHighlight.size(); i++){
+			  occurrences = relevantTerms.get(variabilitiesToHighlight.get(i)).get(file);
+			  for(int[] occurr: occurrences) hilite.addHighlight(occurr[0], occurr[1], passiveVarsHighlightPainter);
+			}
+			
+//			if(variabilitiesToHighlight!=null) for(int i = 0; i < variabilitiesToHighlight.size(); i++){
+//				originalVersionFeaturename=relevantTermsVersions.get(variabilitiesToHighlight.get(i)).get(file);
+//
+//				if(originalVersionFeaturename!=null)
+//				  while((pos = text.toUpperCase().indexOf(originalVersionFeaturename.toUpperCase(), pos)) >= 0){	
+//					if(ModelProject.isValidOccurrence(originalVersionFeaturename, text, pos) )
+//						hilite.addHighlight(pos, pos+originalVersionFeaturename.length(), passiveVarsHighlightPainter);
+//					
+//					pos += originalVersionFeaturename.length();
+//				  }    
+//			}		
 			
 		}catch(BadLocationException e){
 		  System.out.println("Exception tabTextFile: " + e.getMessage());
@@ -5729,30 +5742,59 @@ public class EditorView extends JFrame implements Observer{
 	 * @param file - file name of the file contained in the tab
 	 */
 	private void selectCurrentOccurrence(String currentSelectedFeatureName, String file) {
-		  HashMap<String, ArrayList<Integer>> occurrFilesList=null;		
-		  ArrayList<Integer> occurrIndexesList=null;
-		  int occurrenceIndex =0;
+		  HashMap<String, ArrayList<int[]>> occurrFilesList=null;		
+		  ArrayList<int[]> occurrIndexesList=null;
+		  int[] occurrence=null;
 		  Object highlightTag=null;//highlight tag that will be added to the text
 		  ArrayList<Highlight> lastRemovedTags=null;//last removed highlighted commonality tags 
 		  ArrayList<Highlight> commTagsToRemove=null;//commonality tags to highlight
 			
 		  JTextArea jta= textTabs.get(file);
-		  System.out.println("currentSelectedFeatureName: "+currentSelectedFeatureName+"\tfile: "+file);
+		  
+		  System.out.println("\n***selectCurrentOccurrence***\n");
+		  System.out.println(
+			 "currentSelectedFeatureName: "+currentSelectedFeatureName+"\tfile: "+file
+			+"\nlastHighlightedTag.get("+currentSelectedFeatureName+"): "+lastHighlightedTag.get(currentSelectedFeatureName)
+			);
+		  if(lastHighlightedTag.get(currentSelectedFeatureName)!=null)
+			System.out.println(
+	"lastHighlightedTag.get("+currentSelectedFeatureName+").get("+((JScrollPane)occursTabbedPane.getSelectedComponent()).getName()+"):\n"
+	+lastHighlightedTag.get(currentSelectedFeatureName).get(((JScrollPane)occursTabbedPane.getSelectedComponent()).getName()));
+			  
+		  System.out.println("lastRemovedHighlights.get("+currentSelectedFeatureName+"): "
+		  +lastRemovedHighlights.get(currentSelectedFeatureName));
+		  if(lastRemovedHighlights.get(currentSelectedFeatureName)!=null){
+			System.out.println("lastRemovedHighlights.get("+currentSelectedFeatureName+").get(file): ");
+			for(Highlight tmp : lastRemovedHighlights.get(currentSelectedFeatureName).get(file))
+			  System.out.println("*) "+tmp.toString());
+			  
+		  }
+					  
 		  int currentIndex= textIndexes.get(currentSelectedFeatureName).get(file);
 
 		  //calculating current occurrence index for selection
 		  occurrFilesList = relevantTerms.get(currentSelectedFeatureName);
 //		  occurrFilesList = relevantTerms.get(checkBoxCommonalities.get(currentSelectedCheckBox).getText());
 		  occurrIndexesList=occurrFilesList.get(file);
-		  occurrenceIndex = occurrIndexesList.get(currentIndex);
+		  occurrence = occurrIndexesList.get(currentIndex);
 
 		  Highlighter hilite = jta.getHighlighter();
+		  
+		  //initializing of lastHighlightedTag, if necessary
+		  if(lastHighlightedTag.get(currentSelectedFeatureName)==null) 
+			  lastHighlightedTag.put(currentSelectedFeatureName, new HashMap<String, Object>());
+
+		  //removing last highlighted tag for this term and file, if any
+		  highlightTag=lastHighlightedTag.get(currentSelectedFeatureName).get(file);
+		  
+		  if(highlightTag!=null) hilite.removeHighlight(highlightTag);
+
 		  
 		  //initializing of lastRemovedHighlights, if necessary
 		  if(lastRemovedHighlights.get(currentSelectedFeatureName)==null) 
 			  lastRemovedHighlights.put(currentSelectedFeatureName, new HashMap<String, ArrayList<Highlight>>());
 		  
-		  //re-putting last removed highlighted commonality tags for this term and file
+		  //re-putting last removed highlighted commonality tags for this term and file, if any
 		  lastRemovedTags=lastRemovedHighlights.get(currentSelectedFeatureName).get(file);
 		  
 		  if(lastRemovedTags!=null) try{
@@ -5760,17 +5802,14 @@ public class EditorView extends JFrame implements Observer{
 			  hilite.addHighlight(lastRemovedTags.get(h).getStartOffset(), lastRemovedTags.get(h).getEndOffset(),
 			  lastRemovedTags.get(h).getPainter());
 		  } catch (BadLocationException e) {
-			System.out.println("BadLocationException\nTerm: "+currentSelectedFeatureName+" - occurrence: "+occurrenceIndex);
+			System.out.println("BadLocationException\nTerm: "+currentSelectedFeatureName+" - occurrence: "+occurrence);
 			e.printStackTrace();
 		  }
 		  
 		  //checking what highlighted tags already are in next occurrence text interval
 		  commTagsToRemove = new ArrayList<Highlight>();
 		  for (Highlight tmp: hilite.getHighlights())
-			if (tmp.getStartOffset()>=occurrenceIndex
-				&& tmp.getEndOffset()<=
-				occurrenceIndex+relevantTermsVersions.get(currentSelectedFeatureName).get(file).length() )
-			  commTagsToRemove.add(tmp);
+			if (tmp.getStartOffset()>=occurrence[0] && tmp.getEndOffset()<=occurrence[1]) commTagsToRemove.add(tmp);
 
 		  //removing highlighted tags that already are in next occurrence text interval
 		  for (Highlight tmp: commTagsToRemove) hilite.removeHighlight(tmp);
@@ -5780,22 +5819,9 @@ public class EditorView extends JFrame implements Observer{
 		    (JScrollPane)occursTabbedPane.getSelectedComponent()).getName(), 
 		    commTagsToRemove);		  
 
-		  //initializing of lastHighlightedTag, if necessary
-		  if(lastHighlightedTag.get(currentSelectedFeatureName)==null) 
-			  lastHighlightedTag.put(currentSelectedFeatureName, new HashMap<String, Object>());
-
-		  //removing last highlighted tag for this term and file
-		  highlightTag=lastHighlightedTag.get(currentSelectedFeatureName).get((
-				  (JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
-
-		  if(highlightTag!=null) hilite.removeHighlight(highlightTag);
-
-		  
-//		  if(lastHighlightedTag!=null) hilite.removeHighlight(lastHighlightedTag);
 		  
 		  //getting correct highlighter for this feature name
 		  Highlighter.HighlightPainter occurrPainter=null;
-//		  currentSelectedFeatureName
 		  for(String tmp: startingCommonalities)
 			if(currentSelectedFeatureName.compareTo(tmp)==0){ occurrPainter=activeCommHighlightPainter; break;}
 		  if(occurrPainter==null) occurrPainter=activeVarsHighlightPainter;
@@ -5804,25 +5830,25 @@ public class EditorView extends JFrame implements Observer{
 		  try {
 			lastHighlightedTag.get(currentSelectedFeatureName).put(
 			  ((JScrollPane)occursTabbedPane.getSelectedComponent()).getName(),
-			  hilite.addHighlight(occurrenceIndex, 
-			  occurrenceIndex+relevantTermsVersions.get(currentSelectedFeatureName).get(file).length(), occurrPainter));
+			  hilite.addHighlight(occurrence[0], occurrence[1], occurrPainter));
 			  
 		  } catch (BadLocationException e) {
-			  System.out.println("BadLocationException\nTerm: "+currentSelectedFeatureName+" - occurrence: "+occurrenceIndex);
+			  System.out.println("BadLocationException\nTerm: "+currentSelectedFeatureName+" - occurrence: "+occurrence);
 			  e.printStackTrace();
 		  }
 		  
 		  //setting Caret position and text selection
 		  jta.requestFocusInWindow();
 		  jta.getCaret().setVisible(true);
-		  jta.setCaretPosition(occurrenceIndex);
+		  jta.setCaretPosition(occurrence[0]);
 //		  jta.setSelectionStart(occurrenceIndex);
 //		  jta.setSelectionEnd(occurrenceIndex+currentSelectedCheckBox.length());
 //		  jta.setSelectionEnd(occurrenceIndex+checkBoxCommonalities.get(currentSelectedCheckBox).getText().length());
 //		  jta.setSelectionColor(Color.CYAN);
 		  
 		  //updating occurrences label
-		  occurrsLabel.setText( (currentIndex+1)+""+"/"+occurrIndexesList.size()+"[Line: "+occurrIndexesList.get(currentIndex)+"]");
+		  occurrsLabel.setText( (currentIndex+1)+""+"/"+occurrIndexesList.size()
+				  				+"[Index: "+occurrIndexesList.get(currentIndex)+"]");
 		
 	}		
 	
