@@ -171,7 +171,7 @@ public class CombinatoryUtils {
    * (this means that more 'pure' color comes first than less 'pure' ones).
    * 
    * @param values - the int[] containing all possible values
-   * @return - a String[] containing all possible combinations in the form of "x.y.z"
+   * @return res - a int[][] containing all possible combinations with res[][0]=x, res[][1]=y, res[][2]=z
    */
   public static int[][] threePositionsCombinationsAsIntegers(int[] values){
 	

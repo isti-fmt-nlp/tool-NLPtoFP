@@ -300,7 +300,6 @@ public class ModelProject extends Observable implements Runnable{
 	  if(verbose) printRelevantTermsOccurrences();	  
 	  /* ***VERBOSE*** */
 	  
-	  //calculating relevant terms colors
 	  /* ***DEBUG*** */
 	  if(debugColors) for(int k=0; k<filesProject.size(); k++){//for each file
 	    termsInSentencesSet=filesProject.get(k).getTermsInSentencesSet();
@@ -312,10 +311,6 @@ public class ModelProject extends Observable implements Runnable{
 	  }
       /* ***DEBUG*** */  
 
-
-	  //creating global structures needed to assign colors
-	  buildColorStructures();
-
 	  //extracting communalities candidates from first input File
 	  iterTermsVersion = filesProject.get(0).readTermRelevant().entrySet().iterator();
 	  entryTermsVersion = null;
@@ -324,11 +319,6 @@ public class ModelProject extends Observable implements Runnable{
      	if(intersectTermRelevant(entryTermsVersion.getKey()))
            	  commonalitiesCandidates.add(entryTermsVersion.getKey());
 	  }
-//	  for(int j = 0; j < filesProject.get(0).readTermRelevant().size(); j = j + 1)
-//       	if(intersectTermRelevant(filesProject.get(0).readTermRelevant().get(j)[0]))
-//       	  commonalitiesCandidates.add(filesProject.get(0).readTermRelevant().get(j)[0]);
-//     	if(intersectTermRelevant(filesProject.get(0).readTermRelevant())
-//         	  commonalitiesCandidates.add(filesProject.get(0).readTermRelevant().get(j)[0]);
 		
 	  //removing duplicates among communalities candidates
 	  for(int i = 0; i < commonalitiesCandidates.size(); i++)
@@ -353,6 +343,11 @@ public class ModelProject extends Observable implements Runnable{
 	  }
 	  /* ***VERBOSE****/
 	  
+	  //calculating relevant terms colors
+
+	  //creating global structures needed to assign colors
+	  buildColorStructures();
+
 	  
 //	  Iterator<Entry<String, HashMap<String, ArrayList<Integer>>>> iter = relevantTerms.entrySet().iterator();
 //	  Entry<String, HashMap<String, ArrayList<Integer>>> entry=null;
@@ -495,6 +490,7 @@ public class ModelProject extends Observable implements Runnable{
 	  int maxArity=0;
 	  int[] baseColor=null;
 	  int[] termColor=null;
+	  HashMap<Integer, ArrayList<Integer>> toBeJoined=null;
 	  Iterator<Entry<String, int[]>> colorIter = null;
 	  Entry<String, int[]> colorEntry = null;
 	  
@@ -505,16 +501,8 @@ public class ModelProject extends Observable implements Runnable{
 	  //creating a color map for all relevant terms
 	  termsColor= new HashMap<String, int[]>();
 
-	  for(ModelFile model: filesProject ){
-		for(ArrayList<String> set : model.getTermsInSentencesSet()) termsInSentencesSet.add(set);
-		arityIterator=model.getTermsAriety().entrySet().iterator();
-		while(arityIterator.hasNext()){
-		  arityEntry=arityIterator.next();
-		  if(termsArity.get(arityEntry.getKey())==null)
-			termsArity.put(arityEntry.getKey(), arityEntry.getValue());
-		  else termsArity.put(arityEntry.getKey(), termsArity.get(arityEntry.getKey())+arityEntry.getValue());
-		}
-	  }
+	  //computing terms sentences and arities
+	  computeSetsAndArities();
 	  
 	  //analisys phase is still to be done
 	  if(termsInSentencesSet.size()==0) return;
@@ -531,96 +519,201 @@ public class ModelProject extends Observable implements Runnable{
 	  }
 	  /* ***DEBUG*** */
 
-	  //joining all intersected sets until only disjointed sets remains
-	  for(int k=0; k<termsInSentencesSet.size(); ++k){
-		for(int l=k+1; l<termsInSentencesSet.size(); ++l){  
-		  intersectionSize=0;
-		  for(String term : termsInSentencesSet.get(k)) if(termsInSentencesSet.get(l).contains(term)){
-			++intersectionSize;
-			if(minimumIntersectionSize==intersectionSize) break;
-		  }		  
-		  if(minimumIntersectionSize==intersectionSize){
-			//joining two sets into the first
-			joinSets(termsInSentencesSet.get(k), termsInSentencesSet.get(l));
-			termsInSentencesSet.remove(l);
-			//restarting cycle after join
-			k=-1; break;
-		  }
-		}
-	  }
-
-	  //calculating all possible RGB combinations to get base colors for the sets
-	  if(termsInSentencesSet.size()==1){
-		colors=new int[1][]; int[] oneColor=new int[3]; 
-		oneColor[0]=255; oneColor[1]=0; oneColor[2]=0;
-		colors[0]=oneColor;
-		colorOffset=255;
-	  }
-	  else{
-		card=Math.pow(termsInSentencesSet.size(), 1.0/3);
-		cardUpper=((int)card<card)? (int)card+1: (int)card;
-		values=new int[cardUpper];
-		colorOffset=255/(cardUpper-1);
-		values[0]=0;
-		for(int i=1; i<values.length-1; ++i){
-		  values[i]=colorOffset*i;
-		}
-		values[values.length-1]=255;
-		colors=CombinatoryUtils.threePositionsCombinationsAsIntegers(values);
-	  }
+	  //assigning colors to relevant terms, based on sentences separation and arities
+	  assignColorsBySets();
 		  
-	  /* ***DEBUG*** */
-	  if(debugColors){
-	    System.out.println("\n\nNumero totale di insiemi: "+termsInSentencesSet.size());
-	    System.out.println("Radice cubica: "+card);
-	    System.out.println("Radice cubica[UPPER]: "+cardUpper);
-	    System.out.println("Elenco elementi per ogni insieme: ");
-	    for(int k=0; k<termsInSentencesSet.size(); ++k){
-		  System.out.println("**Set#"+k);
-		  for(String term : termsInSentencesSet.get(k)) System.out.println(term);
-	    }
-	    for(int k=0; k<colors.length; ++k){
-		  System.out.println("**Color#"+k+": "+colors[k][0]+"."+colors[k][1]+"."+colors[k][2]);
-	    }
-	  }
-	  /* ***DEBUG*** */
-		  
-	  //assigning colors to terms
-	  maxColorReduction=((double)colorOffset/2.0)/255.0;
-	  colorReductionUnit=0;
-	  maxArity=0;
-	  baseColor=null;
-	  termColor=null;
-
-	  for(int k=0; k<termsInSentencesSet.size(); ++k){
-		//getting the term with max arity in the set
-		for(String term : termsInSentencesSet.get(k)){
-		  if(termsArity.get(term)>maxArity){
-		    maxArity=termsArity.get(term);
-		  }
-		}
-		colorReductionUnit=maxColorReduction/(maxArity-1);
-
-		//assigning colors
-		baseColor=colors[k];
-		for(String term : termsInSentencesSet.get(k)){
-		  termColor=new int[3];
-		  termColor[0]=(int)((double)baseColor[0]*(1.0-colorReductionUnit*(maxArity-termsArity.get(term))));			
-		  termColor[1]=(int)((double)baseColor[1]*(1.0-colorReductionUnit*(maxArity-termsArity.get(term))));			
-		  termColor[2]=(int)((double)baseColor[2]*(1.0-colorReductionUnit*(maxArity-termsArity.get(term))));			
-		  termsColor.put(term, termColor);
-		  
-		  /* ***DEBUG*** */
-		  if(debugColors)
-		    System.out.println("Base Color for term '"+term+"' is: ("+baseColor[0]+"."+baseColor[1]+"."+baseColor[2]+")"
-			+"\nmaxArity: "+maxArity+"\ttermsArity.get(term): "+termsArity.get(term)+"\tcolorReductionUnit: "+colorReductionUnit
-		    +"\nExact Color for term '"+term+"' is: ("+termColor[0]+"."+termColor[1]+"."+termColor[2]+")");
-		  /* ***DEBUG*** */
-		}
-	  }
+	  //assigning colors to relevant terms, based on a clustering algorithm similar to K Nearest Neighbours
+	  assignColorsByClusters();
 		  
 	}
+
+	/**
+	 * Assigns a color to each relevant term, based on a clustering algorithm similar to K Nearest Neighbours.
+	 */
+	private void assignColorsByClusters() {		
+	  Iterator<Entry<String, Integer>> arityIterator =null;
+	  Entry<String, Integer> arityEntry = null;
+	  int[][] colors = null;
+	  
+	  ArrayList<Entry<String, Integer>> entryList = new ArrayList<Entry<String,Integer>>();	
 	
+	  arityIterator = termsArity.entrySet().iterator();
+	  while(arityIterator.hasNext()){
+		arityEntry=arityIterator.next();
+		entryList.add(arityEntry);
+	  }
+	  
+	  //ordering the list from highest to lowest arities
+	  SortUtils.recQuickSortArities(entryList, 0, entryList.size()-1);
+	  
+	  for(int i=0; i<entryList.size(); ++i)
+		System.out.println(i+") "+entryList.get(i).getKey()+" - "+entryList.get(i).getValue());
+
+	  //getting 14 statically chosen colors
+	  colors=getStaticChosenColors();
+
+	  for(int i=0, k=1; i<entryList.size(); ++i){
+		for(String comm : commonalitiesCandidates)
+		  if(comm.compareTo(entryList.get(i).getKey())==0)
+ 		    System.out.println((k++)+") "+entryList.get(i).getKey()+" - "+entryList.get(i).getValue());
+		if(k==14) break;		  
+	  }
+
+	  
+		
+	}
+
+	/**
+	 * Assigns a color to each relevant term, based on sentences separation and arities.
+	 */
+	private void assignColorsBySets() {
+		double card=0;
+		int cardUpper=0;
+		int intersectionSize;
+		int[] values;
+		int colorOffset;
+		int[][] colors;
+		double maxColorReduction;
+		double colorReductionUnit;
+		int maxArity;
+		int[] baseColor;
+		int[] termColor;
+		
+		//joining all intersected sets until only disjointed sets remains
+		for(int k=0; k<termsInSentencesSet.size(); ++k){
+		  for(int l=k+1; l<termsInSentencesSet.size(); ++l){  
+			intersectionSize=0;
+			for(String term : termsInSentencesSet.get(k)) if(termsInSentencesSet.get(l).contains(term)){
+			  ++intersectionSize;
+			  if(minimumIntersectionSize==intersectionSize) break;
+			}		  
+			if(minimumIntersectionSize==intersectionSize){
+			  //joining two sets into the first
+			  joinSets(termsInSentencesSet.get(k), termsInSentencesSet.get(l));
+			  termsInSentencesSet.remove(l);
+			  //restarting cycle after join
+			  k=-1; break;
+			}
+		  }
+		}
+		
+//		  toBeJoined=new HashMap<Integer, ArrayList<Integer>>();
+//
+//			  for(int k=0; k<termsInSentencesSet.size(); ++k){
+//				for(int l=k+1; l<termsInSentencesSet.size(); ++l){  
+//				  intersectionSize=0;
+//				  for(String term : termsInSentencesSet.get(k)) if(termsInSentencesSet.get(l).contains(term)){
+//					++intersectionSize;
+//					if(minimumIntersectionSize==intersectionSize) break;
+//				  }		  
+//				  if(minimumIntersectionSize==intersectionSize) toBeJoined.get(k).add(l);			  
+//				}
+//			  }
+//			  
+//			  recursiveSetJoin(toBeJoined);
+
+
+		//calculating all possible RGB combinations to get base colors for the sets
+		if(termsInSentencesSet.size()==1){
+		  colors=new int[1][]; int[] oneColor=new int[3]; 
+		  oneColor[0]=255; oneColor[1]=0; oneColor[2]=0;
+		  colors[0]=oneColor;
+		  colorOffset=255;
+		}
+		else{
+		  card=Math.pow(termsInSentencesSet.size(), 1.0/3);
+		  cardUpper=((int)card<card)? (int)card+1: (int)card;
+		  values=new int[cardUpper];
+		  colorOffset=255/(cardUpper-1);
+		  values[0]=0;
+		  for(int i=1; i<values.length-1; ++i){
+			values[i]=colorOffset*i;
+		  }
+		  values[values.length-1]=255;
+		  colors=CombinatoryUtils.threePositionsCombinationsAsIntegers(values);
+		}
+			  
+		/* ***DEBUG*** */
+		if(debugColors){
+		  System.out.println("\n\nNumero totale di insiemi: "+termsInSentencesSet.size());
+		  System.out.println("Radice cubica: "+card);
+		  System.out.println("Radice cubica[UPPER]: "+cardUpper);
+		  System.out.println("Elenco elementi per ogni insieme: ");
+		  for(int k=0; k<termsInSentencesSet.size(); ++k){
+			System.out.println("**Set#"+k);
+			for(String term : termsInSentencesSet.get(k)) System.out.println(term);
+		  }
+		  for(int k=0; k<colors.length; ++k){
+			System.out.println("**Color#"+k+": "+colors[k][0]+"."+colors[k][1]+"."+colors[k][2]);
+		  }
+		}
+		/* ***DEBUG*** */
+			  
+		//assigning colors to terms
+		maxColorReduction=((double)colorOffset/2.0)/255.0;
+		colorReductionUnit=0;
+		maxArity=0;
+		baseColor=null;
+		termColor=null;
+
+		for(int k=0; k<termsInSentencesSet.size(); ++k){
+		  //getting the term with max arity in the set
+		  for(String term : termsInSentencesSet.get(k)){
+			if(termsArity.get(term)>maxArity){
+			  maxArity=termsArity.get(term);
+			}
+		  }
+		  colorReductionUnit=maxColorReduction/(maxArity-1);
+
+		  //assigning colors
+		  baseColor=colors[k];
+		  for(String term : termsInSentencesSet.get(k)){
+			termColor=new int[3];
+			termColor[0]=(int)((double)baseColor[0]*(1.0-colorReductionUnit*(maxArity-termsArity.get(term))));			
+			termColor[1]=(int)((double)baseColor[1]*(1.0-colorReductionUnit*(maxArity-termsArity.get(term))));			
+			termColor[2]=(int)((double)baseColor[2]*(1.0-colorReductionUnit*(maxArity-termsArity.get(term))));			
+			termsColor.put(term, termColor);
+			  
+			/* ***DEBUG*** */
+			if(debugColors)
+			  System.out.println("Base Color for term '"+term+"' is: ("+baseColor[0]+"."+baseColor[1]+"."+baseColor[2]+")"
+			  +"\nmaxArity: "+maxArity+"\ttermsArity.get(term): "+termsArity.get(term)+"\tcolorReductionUnit: "+colorReductionUnit
+			  +"\nExact Color for term '"+term+"' is: ("+termColor[0]+"."+termColor[1]+"."+termColor[2]+")");
+			/* ***DEBUG*** */
+		  }
+		}
+	}
+
+	/**
+	 * Computes terms sentences and arities, filling the related global structures, termsInSentencesSet and termsArity.
+	 */
+	private void computeSetsAndArities() {
+		Iterator<Entry<String, Integer>> arityIterator;
+		Entry<String, Integer> arityEntry;
+		for(ModelFile model: filesProject ){
+			for(ArrayList<String> set : model.getTermsInSentencesSet()) termsInSentencesSet.add(set);
+			arityIterator=model.getTermsAriety().entrySet().iterator();
+			while(arityIterator.hasNext()){
+			  arityEntry=arityIterator.next();
+			  if(termsArity.get(arityEntry.getKey())==null)
+				termsArity.put(arityEntry.getKey(), arityEntry.getValue());
+			  else termsArity.put(arityEntry.getKey(), termsArity.get(arityEntry.getKey())+arityEntry.getValue());
+			}
+		  }
+	}
+	
+	private void recursiveSetJoin(HashMap<Integer, ArrayList<Integer>> toBeJoined) {
+
+	  for(int k=0; k<termsInSentencesSet.size(); ++k){
+		for(int l=k+1; l<termsInSentencesSet.size(); ++l){  
+			
+		}
+	  }
+
+
+		
+	}
+
 	/**
 	 * Join two sets into the first. After a call to this method,<br>
 	 * array1 will be the union of the two arrays, array2 will remain unchanged
@@ -630,6 +723,39 @@ public class ModelProject extends Observable implements Runnable{
 	 */
 	private void joinSets(ArrayList<String> array1, ArrayList<String> array2) {
 	  for(String tmp : array2) if(!array1.contains(tmp)) array1.add(tmp);
+	}
+	
+	/**
+	 * Returns a int[][] containing RGB values to create 14 statically chosen colors 
+	 * to be assigned to group-leading commonalities.
+	 * 
+	 * @return - a int[][] with 14 different colors, each element has the Red value at index 0,
+	 * the Green value at index 1 and the Blue value at index 2 
+	 */
+	private static int[][] getStaticChosenColors() {
+		int[][] colors=null;
+
+		//14 colori diversi
+		colors=new int[14][3];
+		colors[0][0]=230; colors[0][1]=0; colors[0][2]=0;//			230.0.0
+		colors[1][0]=0; colors[1][1]=230; colors[1][2]=0;//			0.230.0
+		colors[2][0]=0; colors[2][1]=0; colors[2][2]=230;//			0.0.230
+		colors[3][0]=255; colors[3][1]=230; colors[3][2]=0;//		255.230.0
+		colors[4][0]=230; colors[4][1]=0; colors[4][2]=230;//		230.0.230
+		colors[5][0]=0; colors[5][1]=255; colors[5][2]=255;//		0.255.255
+		
+		colors[6][0]=255; colors[6][1]=128; colors[6][2]=0;//		255.128.0
+		colors[7][0]=136; colors[7][1]=255; colors[7][2]=0;//		136.255.0
+		colors[8][0]=0; colors[8][1]=128; colors[8][2]=255;//		0.128.255
+		
+		colors[9][0]=150; colors[9][1]=40; colors[9][2]=0;//		150.40.0
+		colors[10][0]=255; colors[10][1]=0; colors[10][2]=85;//		255.0.85
+		colors[11][0]=0; colors[11][1]=170; colors[11][2]=90;//		0.170.90
+		colors[12][0]=180; colors[12][1]=180; colors[12][2]=90;//	180.180.90
+		colors[13][0]=100; colors[13][1]=60; colors[13][2]=160;//	100.60.160
+				
+		return colors;
+		
 	}
 
 	/**

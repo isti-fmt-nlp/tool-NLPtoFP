@@ -1,5 +1,6 @@
 package main;
 import java.util.ArrayList;
+import java.util.Map.Entry;
 import java.util.Random;
 /**
 * Fornisce metodi statici di ordinamento per array di interi.
@@ -158,28 +159,67 @@ public class SortUtils {
 	public static void recQuickSortStartIndex(ArrayList<int[]> a, int sx, int dx){
 		if(sx<dx){
 			int pivot=sx+((gen.nextInt(1000000)& 0x7FFFFFFF)%(1+(dx-sx)));
-			int perno=distributeString(a, sx, pivot, dx);
+			int perno=distributeStartIndex(a, sx, pivot, dx);
 			recQuickSortStartIndex(a, sx, perno-1);
 			recQuickSortStartIndex(a, perno+1, dx);
 		}		
 	}
 
-	private static int distributeString(ArrayList<int[]> a, int sx, int pivot, int dx){
-		if(pivot!=dx) exchangeString(a, pivot, dx);
+	private static int distributeStartIndex(ArrayList<int[]> a, int sx, int pivot, int dx){
+		if(pivot!=dx) exchangeStartIndex(a, pivot, dx);
 		int i=sx, j=dx-1;
 		while(i<j){
 			while(i<j && a.get(i)[0]<=a.get(dx)[0]) ++i;
 			while(i<j && a.get(j)[0]>=a.get(dx)[0]) --j;
-			if(i<j) exchangeString(a, i, j);
+			if(i<j) exchangeStartIndex(a, i, j);
 		}
-		if(i!=dx-1){ exchangeString(a, i, dx); return i;}
+		if(i!=dx-1){ exchangeStartIndex(a, i, dx); return i;}
 		else if(a.get(i)[0]<=a.get(dx)[0]) return dx;
-		else{ exchangeString(a, i, dx); return i;}
+		else{ exchangeStartIndex(a, i, dx); return i;}
 	}
 	
-	private static void exchangeString(ArrayList<int[]> a, int i, int j){
+	private static void exchangeStartIndex(ArrayList<int[]> a, int i, int j){
 		int[] tmp=a.get(i);
 		a.set(i, a.get(j));
 		a.set(j, tmp);
 	}
+	
+	
+	/**
+	 * Sort the ArrayList<Entry<String, Integer>> array a from sx index to dx index included,
+	 * using a quick-sort algorithm. After the call the ArrayList will be ordered by the integer values of entries, 
+	 * from highest to lowest values.
+	 * 
+	 * @param a - the array to be sorted
+	 * @param sx - minimum index for sorting
+	 * @param dx - maximum index for sorting
+	 */
+	public static void recQuickSortArities(ArrayList<Entry<String, Integer>> a, int sx, int dx){
+		if(sx<dx){
+			int pivot=sx+((gen.nextInt(1000000)& 0x7FFFFFFF)%(1+(dx-sx)));
+			int perno=distributeArities(a, sx, pivot, dx);
+			recQuickSortArities(a, sx, perno-1);
+			recQuickSortArities(a, perno+1, dx);
+		}		
+	}
+
+	private static int distributeArities(ArrayList<Entry<String, Integer>> a, int sx, int pivot, int dx){
+		if(pivot!=dx) exchangeArities(a, pivot, dx);
+		int i=sx, j=dx-1;
+		while(i<j){
+			while(i<j && a.get(i).getValue()>=a.get(dx).getValue()) ++i;
+			while(i<j && a.get(j).getValue()<=a.get(dx).getValue()) --j;
+			if(i<j) exchangeArities(a, i, j);
+		}
+		if(i!=dx-1){ exchangeArities(a, i, dx); return i;}
+		else if(a.get(i).getValue()>=a.get(dx).getValue()) return dx;
+		else{ exchangeArities(a, i, dx); return i;}
+	}
+	
+	private static void exchangeArities(ArrayList<Entry<String, Integer>> a, int i, int j){
+		Entry<String, Integer> tmp=a.get(i);
+		a.set(i, a.get(j));
+		a.set(j, tmp);
+	}
+	
 }

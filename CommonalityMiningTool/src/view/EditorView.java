@@ -5283,7 +5283,6 @@ public class EditorView extends JFrame implements Observer{
 		passiveCommTextLabel.setLocation(48, 10);
 		passiveCommTextLabel.setSize(new Dimension(220, 15));
 		passiveCommTextLabel.setFont(new Font("Dialog", Font.ITALIC|Font.BOLD, 12));
-
 		
 		passiveVarsColorLabel=new JLabel();
 		passiveVarsColorLabel.setBackground(varsBackColor);
