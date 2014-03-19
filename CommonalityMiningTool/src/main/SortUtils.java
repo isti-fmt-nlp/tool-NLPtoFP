@@ -194,32 +194,112 @@ public class SortUtils {
 	 * @param sx - minimum index for sorting
 	 * @param dx - maximum index for sorting
 	 */
-	public static void recQuickSortArities(ArrayList<Entry<String, Integer>> a, int sx, int dx){
+	public static void recQuickSortEntryListByIntVal(ArrayList<Entry<String, Integer>> a, int sx, int dx){
 		if(sx<dx){
 			int pivot=sx+((gen.nextInt(1000000)& 0x7FFFFFFF)%(1+(dx-sx)));
-			int perno=distributeArities(a, sx, pivot, dx);
-			recQuickSortArities(a, sx, perno-1);
-			recQuickSortArities(a, perno+1, dx);
+			int perno=distributeEntryListByIntVal(a, sx, pivot, dx);
+			recQuickSortEntryListByIntVal(a, sx, perno-1);
+			recQuickSortEntryListByIntVal(a, perno+1, dx);
 		}		
 	}
 
-	private static int distributeArities(ArrayList<Entry<String, Integer>> a, int sx, int pivot, int dx){
-		if(pivot!=dx) exchangeArities(a, pivot, dx);
+	private static int distributeEntryListByIntVal(ArrayList<Entry<String, Integer>> a, int sx, int pivot, int dx){
+		if(pivot!=dx) exchangeEntryListByIntVal(a, pivot, dx);
 		int i=sx, j=dx-1;
 		while(i<j){
 			while(i<j && a.get(i).getValue()>=a.get(dx).getValue()) ++i;
 			while(i<j && a.get(j).getValue()<=a.get(dx).getValue()) --j;
-			if(i<j) exchangeArities(a, i, j);
+			if(i<j) exchangeEntryListByIntVal(a, i, j);
 		}
-		if(i!=dx-1){ exchangeArities(a, i, dx); return i;}
+		if(i!=dx-1){ exchangeEntryListByIntVal(a, i, dx); return i;}
 		else if(a.get(i).getValue()>=a.get(dx).getValue()) return dx;
-		else{ exchangeArities(a, i, dx); return i;}
+		else{ exchangeEntryListByIntVal(a, i, dx); return i;}
 	}
 	
-	private static void exchangeArities(ArrayList<Entry<String, Integer>> a, int i, int j){
+	private static void exchangeEntryListByIntVal(ArrayList<Entry<String, Integer>> a, int i, int j){
 		Entry<String, Integer> tmp=a.get(i);
 		a.set(i, a.get(j));
 		a.set(j, tmp);
 	}
+	
+	
+	/**
+	 * Sort the ArrayList<Entry<String, Integer>> array a from sx index to dx index included,
+	 * using a quick-sort algorithm. After the call the ArrayList will be ordered by the integer values of entries, 
+	 * from highest to lowest values.
+	 * 
+	 * @param a - the array to be sorted
+	 * @param sx - minimum index for sorting
+	 * @param dx - maximum index for sorting
+	 */
+	public static void recQuickSortEntryListByDoubleVal(ArrayList<Entry<String, Double>> a, int sx, int dx){
+		if(sx<dx){
+			int pivot=sx+((gen.nextInt(1000000)& 0x7FFFFFFF)%(1+(dx-sx)));
+			int perno=distributeEntryListByDoubleVal(a, sx, pivot, dx);
+			recQuickSortEntryListByDoubleVal(a, sx, perno-1);
+			recQuickSortEntryListByDoubleVal(a, perno+1, dx);
+		}		
+	}
+
+	private static int distributeEntryListByDoubleVal(ArrayList<Entry<String, Double>> a, int sx, int pivot, int dx){
+		if(pivot!=dx) exchangeEntryListByDoubleVal(a, pivot, dx);
+		int i=sx, j=dx-1;
+		while(i<j){
+			while(i<j && a.get(i).getValue()>=a.get(dx).getValue()) ++i;
+			while(i<j && a.get(j).getValue()<=a.get(dx).getValue()) --j;
+			if(i<j) exchangeEntryListByDoubleVal(a, i, j);
+		}
+		if(i!=dx-1){ exchangeEntryListByDoubleVal(a, i, dx); return i;}
+		else if(a.get(i).getValue()>=a.get(dx).getValue()) return dx;
+		else{ exchangeEntryListByDoubleVal(a, i, dx); return i;}
+	}
+	
+	private static void exchangeEntryListByDoubleVal(ArrayList<Entry<String, Double>> a, int i, int j){
+		Entry<String, Double> tmp=a.get(i);
+		a.set(i, a.get(j));
+		a.set(j, tmp);
+	}
+	
+	
+	/**
+	 * Sort the ArrayList<Entry<String, int[]>> array a from sx index to dx index included,
+	 * using a quick-sort algorithm. After the call the ArrayList will be 
+	 * ordered by the integer values of entries at index 0, from lowest to highest indexes.
+	 * 
+	 * @param a - the array to be sorted
+	 * @param sx - minimum index for sorting
+	 * @param dx - maximum index for sorting
+	 */
+	public static void recQuickSortOccurrences(ArrayList<Entry<String, int[]>> a, int sx, int dx){
+		if(sx<dx){
+			int pivot=sx+((gen.nextInt(1000000)& 0x7FFFFFFF)%(1+(dx-sx)));
+			int perno=distributeOccurrences(a, sx, pivot, dx);
+			recQuickSortOccurrences(a, sx, perno-1);
+			recQuickSortOccurrences(a, perno+1, dx);
+		}		
+	}
+
+	private static int distributeOccurrences(ArrayList<Entry<String, int[]>> a, int sx, int pivot, int dx){
+		if(pivot!=dx) exchangeOccurrences(a, pivot, dx);
+		int i=sx, j=dx-1;
+		while(i<j){
+			while(i<j && a.get(i).getValue()[0]<=a.get(dx).getValue()[0]) ++i;
+			while(i<j && a.get(j).getValue()[0]>=a.get(dx).getValue()[0]) --j;
+			if(i<j) exchangeOccurrences(a, i, j);
+		}
+		if(i!=dx-1){ exchangeOccurrences(a, i, dx); return i;}
+		else if(a.get(i).getValue()[0]<=a.get(dx).getValue()[0]) return dx;
+		else{ exchangeOccurrences(a, i, dx); return i;}
+	}
+	
+	private static void exchangeOccurrences(ArrayList<Entry<String, int[]>> a, int i, int j){
+		Entry<String, int[]> tmp=a.get(i);
+		a.set(i, a.get(j));
+		a.set(j, tmp);
+	}
+	
+	
+	
+	
 	
 }

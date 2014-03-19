@@ -99,6 +99,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.Scrollable;
@@ -107,12 +108,25 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.BoxView;
+import javax.swing.text.ComponentView;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Document;
+import javax.swing.text.Element;
 import javax.swing.text.Highlighter;
+import javax.swing.text.IconView;
 import javax.swing.text.JTextComponent;
+import javax.swing.text.LabelView;
 import javax.swing.text.LayeredHighlighter;
+import javax.swing.text.ParagraphView;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
+import javax.swing.text.StyledEditorKit;
+import javax.swing.text.View;
+import javax.swing.text.ViewFactory;
 import javax.swing.text.Highlighter.Highlight;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -135,11 +149,68 @@ public class EditorView extends JFrame implements Observer{
 	private static boolean debug3=false;
 	private static boolean debug4=false;
 	private static boolean debug5=false;
-//	private static Robot eventsRobot = null;
 	
 	private static final long serialVersionUID = 1L;
 
-	/** Class used to implement the draw area of the editor . */
+	/** Class used to implement the text area of the features */
+	class CenteredTextPane extends JTextPane{
+		
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public boolean contains(int x, int y){
+		  if(!isEditable()) return false;
+		  else return super.contains(x, y);
+		}
+	}
+	
+	/** StyledEditorKit to be set on CenteredTextPane objects */
+	class CenteredEditorKit extends StyledEditorKit {
+				
+		private static final long serialVersionUID = 1L;
+
+		public ViewFactory getViewFactory() {
+	        return new StyledViewFactory();
+	    }	    
+	}
+	
+	/** ViewFactory used by CenteredEditorKit */
+    class StyledViewFactory implements ViewFactory {
+        public View create(Element elem) {
+            String kind = elem.getName();
+            if (kind != null) {
+                if (kind.equals(AbstractDocument.ContentElementName)) return new LabelView(elem);
+                else if (kind.equals(AbstractDocument.ParagraphElementName)) return new ParagraphView(elem);
+                else if (kind.equals(AbstractDocument.SectionElementName)) return new CenteredBoxView(elem, View.Y_AXIS);
+                else if (kind.equals(StyleConstants.ComponentElementName)) return new ComponentView(elem);
+                else if (kind.equals(StyleConstants.IconElementName)) return new IconView(elem);
+            }	 
+
+            return new LabelView(elem);
+        }
+    }
+    
+	/** BoxView used by StyledViewFactory */
+	class CenteredBoxView extends BoxView {
+		
+	    public CenteredBoxView(Element elem, int axis) {
+	        super(elem,axis);
+	    }
+	    
+	    protected void layoutMajorAxis(int targetSpan, int axis, int[] offsets, int[] spans) {
+	        super.layoutMajorAxis(targetSpan,axis,offsets,spans);
+	        
+	        int textBlockHeight = 0;
+	        int offset = 0;
+	 
+	        for (int i = 0; i < spans.length; i++) textBlockHeight += spans[i];
+
+	        offset = (targetSpan - textBlockHeight) / 2;
+	        for (int i = 0; i < offsets.length; i++) offsets[i] += offset;
+	    }
+	}    
+	
+	/** Class used to implement the draw area of the editor. */
 	class ScrollLayeredPane extends JLayeredPane implements Scrollable{
 
 		private static final long serialVersionUID = 1L;
@@ -3337,12 +3408,12 @@ public class EditorView extends JFrame implements Observer{
 	 * @return A new JPanel representing the feature
 	 */
 	private FeaturePanel buildFeaturePanel(String name, String containerName, int x, int y, Color color) {
+		StyledDocument doc = null;
+		SimpleAttributeSet attrs = null;
 		int layer=-1;
-//		JTextField textLabel=null;
-		JTextArea textLabel=null;
 		
-		//creating text		
-//		textLabel=new JTextField(name, 16){
+//		JTextArea textLabel=null;		
+//		textLabel=new JTextArea(name, 5, 10){
 //
 //			private static final long serialVersionUID = 1L;
 //
@@ -3352,67 +3423,38 @@ public class EditorView extends JFrame implements Observer{
 //			  else return super.contains(x, y);
 //			}
 //		};
+//
+//		textLabel.setLineWrap(true);
+//		textLabel.setWrapStyleWord(true);		
 		
-		textLabel=new JTextArea(name, 6, 16){
+		CenteredTextPane textLabel=new CenteredTextPane();
 
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public boolean contains(int x, int y){
-			  if(!isEditable()) return false;
-			  else return super.contains(x, y);
-			}
-		};
-
-
-//		textLabel.getInputMap().remove(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ENTER, 0));
-//		
-//		textLabel.getInputMap().put(KeyStroke.getKeyStroke(
-//				java.awt.event.KeyEvent.VK_ENTER, 0), "Change Feature Name");
-//		
-//		textLabel.getActionMap().put("Change Feature Name", new Action() {
-//			
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//			  System.out.println("You pressed Enter");
-//			  ((Component)e.getSource()).setEnabled(false);
-//			}
-//			
-//			@Override
-//			public Object getValue(String key) {return null;}
-//			@Override
-//			public void putValue(String key, Object value) { }
-//			@Override
-//			public void setEnabled(boolean b) {}
-//			@Override
-//			public boolean isEnabled() {return false;}
-//			@Override
-//			public void addPropertyChangeListener(PropertyChangeListener listener) {}
-//			@Override
-//			public void removePropertyChangeListener(PropertyChangeListener listener) {}
-//		});
-		   
+		
+    	textLabel.setEditorKit(new CenteredEditorKit());
+        attrs=new SimpleAttributeSet();
+        StyleConstants.setAlignment(attrs, StyleConstants.ALIGN_CENTER);
+        doc=(StyledDocument)textLabel.getDocument();
+        doc.setParagraphAttributes(0,doc.getLength()-1,attrs,false);
+        		
 		textLabel.setBounds(featureBorderSize/2, featureBorderSize/2, 120, 60);
 //		textLabel.setHorizontalAlignment(JTextField.CENTER);
 		
-		textLabel.setFont(new Font("Serif", Font.PLAIN, 12));
-		textLabel.setLineWrap(true);
-		textLabel.setWrapStyleWord(true);		
+//		textLabel.setFont(new Font("Serif", Font.PLAIN, 12));
+		textLabel.setFont(new Font("Arial", Font.BOLD, 12));
 		
-		textLabel.setOpaque(true);
+//		textLabel.setOpaque(true);
 		textLabel.setEditable(false);
-		textLabel.setFocusable(true);
-		textLabel.setName(textAreaNamePrefix);		
+//		textLabel.setFocusable(true);
+		textLabel.setName(textAreaNamePrefix);	
+		textLabel.setText(name);
 		
 		//creating text
 		FeaturePanel container = new FeaturePanel(textLabel);
 		if(containerName==null) container.setName(featureNamePrefix+featuresCount);
 		else container.setName(containerName);
 		container.setLayout(null);
-		container.setBounds(x,  y,  120+featureBorderSize,
-				60+featureBorderSize);
+		container.setBounds(x, y, 120+featureBorderSize, 60+featureBorderSize);
 		container.setOpaque(true);
-		System.out.println("Color of the new feature is: "+color.toString());
 		container.setBackground(color);
 		
 		//adding the text
@@ -3421,9 +3463,8 @@ public class EditorView extends JFrame implements Observer{
 		container.add(textLabel);
 		container.setComponentZOrder(textLabel, layer);
 		
-
 		/* ***DEBUG*** */
-		if(debug) System.out.println("container.getBounds(): "+container.getBounds());
+		/*if(debug)*/ System.out.println("container.getBounds(): "+container.getBounds());
 		/* ***DEBUG*** */
 
 		return container;

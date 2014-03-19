@@ -22,12 +22,14 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Observable;
+import java.util.Random;
 import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -50,7 +52,7 @@ public class ModelProject extends Observable implements Runnable{
 
 	private static boolean verbose3=false;//variable used to activate prints in the code
 
-	private static boolean verbose4=true;//variable used to activate prints in the code
+	private static boolean verbose4=false;//variable used to activate prints in the code
 	
 	private static boolean verbose5=true;//variable used to activate prints in the code
 	
@@ -58,7 +60,7 @@ public class ModelProject extends Observable implements Runnable{
 
 	private static boolean debug2=false;//variable used to activate debug prints in the code
 	
-	private static boolean debugColors=false;//variable used to activate debug prints in the code
+	private static boolean debugColors=true;//variable used to activate debug prints in the code
 	
 	
 //	private static final String savedProjectsDir = "Usage Tries";
@@ -141,8 +143,13 @@ public class ModelProject extends Observable implements Runnable{
 	/* boolean contenente lo stato del progetto */
 	private boolean [] stateProject = {false, false};
 	
-	/** Minimum intersection size required to join two sets of terms into one, used to assign color to terms */
+	/** Minimum intersection size required to join two sets of terms into one, used to assign colors to terms */
 	private static int minimumIntersectionSize=3;
+	
+	/** Maximum number of clusters to form to assign colors to terms, values hogher than the number of colors(14) are ignored */
+	private static int maxClusterLimit=10;
+	
+	
 	
 	/** 
 	 * Waits for threads workerProject to end their work, and computes commonalities candidates
@@ -520,23 +527,49 @@ public class ModelProject extends Observable implements Runnable{
 	  /* ***DEBUG*** */
 
 	  //assigning colors to relevant terms, based on sentences separation and arities
-	  assignColorsBySets();
+//	  assignColorsBySets();
 		  
 	  //assigning colors to relevant terms, based on a clustering algorithm similar to K Nearest Neighbours
-	  assignColorsByClusters();
+	  computeColorsByClusters();
 		  
 	}
 
 	/**
 	 * Assigns a color to each relevant term, based on a clustering algorithm similar to K Nearest Neighbours.
 	 */
-	private void assignColorsByClusters() {		
+	@SuppressWarnings("unchecked")
+	private void computeColorsByClusters() {		
 	  Iterator<Entry<String, Integer>> arityIterator =null;
 	  Entry<String, Integer> arityEntry = null;
+	  Iterator<Entry<String, HashMap<String, ArrayList<int[]>>>> termsIterator = null;
+	  Entry<String, HashMap<String, ArrayList<int[]>>> termsEntry = null;
+	  ArrayList<int[]> leaderOccurrences=null, termOccurrences=null;
 	  int[][] colors = null;
+	  int[][] leadersBoundaries=null;
+	  int[] tmpArr = null, leaderStartOffset=null, currentMinDistances=null;
+	  int[] tiers=null;
+	  ArrayList<String> groupLeaders=null;
+	  String termName=null, fileName=null;
+	  ArrayList[] clusters = null;
+	  int n=0, tierIndex=0, p=0;
+	  int computedDistance=0;
+	  Iterator<Entry<String, int[]>> distIter = null;
+	  Entry<String, int[]> distEntry = null;
+	  ArrayList<Entry<String, Double>> termFileCoverage = null;
+	  ArrayList<Entry<String, Double>>[] tiersFileCoverage = null;
+	  double maxCoverage=0;
+	  Random gen=null;
+	  double maxColorReduction=0.5;
+	  double colorReductionUnit=0;
+	  int maxArity=0;
+	  int[] baseColor=null;
+	  int[] termColor=null;
 	  
 	  ArrayList<Entry<String, Integer>> entryList = new ArrayList<Entry<String,Integer>>();	
+	  ArrayList<Entry<String, int[]>> allTermsOccurrences = new ArrayList<Entry<String,int[]>>();
+	  HashMap<String, int[]> distances = new HashMap<String, int[]>();	  
 	
+	  //creating a list of terms with arities
 	  arityIterator = termsArity.entrySet().iterator();
 	  while(arityIterator.hasNext()){
 		arityEntry=arityIterator.next();
@@ -544,29 +577,427 @@ public class ModelProject extends Observable implements Runnable{
 	  }
 	  
 	  //ordering the list from highest to lowest arities
-	  SortUtils.recQuickSortArities(entryList, 0, entryList.size()-1);
+	  SortUtils.recQuickSortEntryListByIntVal(entryList, 0, entryList.size()-1);
 	  
+	  /* ***VERBOSE*** */
 	  for(int i=0; i<entryList.size(); ++i)
 		System.out.println(i+") "+entryList.get(i).getKey()+" - "+entryList.get(i).getValue());
-
+	  /* ***VERBOSE*** */
+	  
 	  //getting 14 statically chosen colors
 	  colors=getStaticChosenColors();
 
+	  //choosing group leaders, up to a maximum of maxClusterLimit, by taking the commonalities with highest arities
+	  groupLeaders = new ArrayList<String>();
+	  
 	  for(int i=0, k=1; i<entryList.size(); ++i){
 		for(String comm : commonalitiesCandidates)
-		  if(comm.compareTo(entryList.get(i).getKey())==0)
- 		    System.out.println((k++)+") "+entryList.get(i).getKey()+" - "+entryList.get(i).getValue());
-		if(k==14) break;		  
-	  }
+		  if(comm.compareTo(entryList.get(i).getKey())==0){
+			groupLeaders.add(comm);
 
+			/* ***VERBOSE*** */
+			if(verbose5) System.out.println((k++)+") "+entryList.get(i).getKey()+" - "+entryList.get(i).getValue());
+			/* ***VERBOSE*** */
+
+			break;
+		  }
+		if(k>maxClusterLimit || k>=colors.length) break;		  
+	  }
 	  
+	  //creating the array that will hold bottom and upper boundary occurrences of leaders
+	  leadersBoundaries= new int[groupLeaders.size()][2];
+	  
+	  for(int k=0; k<filesProject.size(); k++){//for each file
+		allTermsOccurrences.clear();
+		  
+		//building occurrences list
+		termsIterator=relevantTerms.entrySet().iterator();
+		while(termsIterator.hasNext()){
+		  termsEntry=termsIterator.next();
+		  
+		  termOccurrences=relevantTerms.get(termsEntry.getKey()).get(filesProject.get(k).readPathFileUTF8());
+//		  termOccurrences=termsEntry.getValue().get(filesProject.get(k).readPathFileUTF8());
+		  if(termOccurrences!=null) for(int[] occurr : termOccurrences)//adding term's occurrences
+			allTermsOccurrences.add(new AbstractMap.SimpleEntry<String, int[]>(termsEntry.getKey(), occurr));
+		}
 		
+		//ordering the list by index position, the int at index 0 of entries values
+		SortUtils.recQuickSortOccurrences(allTermsOccurrences, 0, allTermsOccurrences.size()-1); 
+
+		System.out.println("PRINTING LIST:");
+		for(int m=0; m<allTermsOccurrences.size(); ++m){
+		  System.out.println("("+m+") "+allTermsOccurrences.get(m).getKey()+" * "
+				  +allTermsOccurrences.get(m).getValue()[0]+"-"+allTermsOccurrences.get(m).getValue()[1]);
+		}
+
+		//initializing bottom boundaries of leaders, at index 0 in leadersBoundaries
+		for(int m=0; m<leadersBoundaries.length; ++m) leadersBoundaries[m][0]=-1;
+
+		//searching first occurrences to initialize upper boundaries of leaders, at index 1 in leadersBoundaries
+		for(int m=0; m<groupLeaders.size(); ++m){
+		  for(n=0; n<allTermsOccurrences.size(); ++n)
+			if(allTermsOccurrences.get(n).getKey().compareTo(groupLeaders.get(m))==0){
+			  leadersBoundaries[m][1]=n; break;
+			}
+		}
+		
+		System.out.println("PRINTING STARTING BOUNDARIES:");
+		for(int m=0; m<leadersBoundaries.length; ++m){
+		  System.out.println("leader: "+groupLeaders.get(m)+" * "+leadersBoundaries[m][0]+"-"+leadersBoundaries[m][1]);
+		}
+		
+		
+		//calculating distances
+		for(int i=0; i<allTermsOccurrences.size(); ++i){
+		  termName=allTermsOccurrences.get(i).getKey();
+		  
+		  //if the upper boundary of a leader has been reached, it must be updated
+		  for(int m=0; m<groupLeaders.size(); ++m) if(termName.compareTo(groupLeaders.get(m))==0){
+			  
+			leadersBoundaries[m][0]=leadersBoundaries[m][1];//moving bottom boundary
+			for(n=leadersBoundaries[m][1]+1; n<allTermsOccurrences.size(); ++n)
+			  if(allTermsOccurrences.get(n).getKey().compareTo(termName)==0){
+				leadersBoundaries[m][1]=n; break;
+			  }
+			
+			if(n==allTermsOccurrences.size()) leadersBoundaries[m][1]=-1;//there are no further occurrences
+
+			System.out.println("("+i+")FOUND UPPER BOUNDARY: "+termName+"\tNew Boundary: "+leadersBoundaries[m][1]);
+
+			termName=null; break;
+		  }		  
+		  if(termName==null) continue;//reached upper boundary of a leader
+		  
+		  //current term is not a leader
+		  if(distances.get(termName)==null){//initializing term's minimum distances array
+			tmpArr=new int[groupLeaders.size()];
+			for(int u=0; u<tmpArr.length; ++u) tmpArr[u]=-1;
+			distances.put(termName, tmpArr);
+		  }
+		  
+		  //getting minimum distances for this term
+		  currentMinDistances=distances.get(termName);
+		  
+		  //calculating current distances from leaders
+		  for(int j=0; j<leadersBoundaries.length; ++j){
+			if(currentMinDistances[j]==0) continue;
+
+			//getting term's occurrence start and offset
+			tmpArr=allTermsOccurrences.get(i).getValue();
+			
+			if(leadersBoundaries[j][0]>=0){//bottom boundary
+			  computedDistance=i-leadersBoundaries[j][0];
+
+			  //getting leader bottom boundary's occurrence start and offset
+			  leaderStartOffset=allTermsOccurrences.get(leadersBoundaries[j][0]).getValue();
+			  
+			  //if there is an intersection between term and leader, distance is 0
+			  if(tmpArr[0]>=leaderStartOffset[0] && tmpArr[0]<=leaderStartOffset[1]-1)
+				computedDistance=0;
+			  
+			  System.out.println("("+i+")FOUND TERM: "+termName+"\tTo Bottom Boundary: "+computedDistance
+					  +"\nBottom["+j+"][0]: "+leadersBoundaries[j][0]);
+			  
+			}
+			else computedDistance=-1;
+			
+			if(leadersBoundaries[j][1]>=0){//upper boundary
+			  if(computedDistance<0 || leadersBoundaries[j][1]-i<computedDistance)
+			    computedDistance=leadersBoundaries[j][1]-i;
+
+			  //getting leader upper boundary's occurrence start and offset
+			  leaderStartOffset=allTermsOccurrences.get(leadersBoundaries[j][1]).getValue();
+
+			  //if there is an intersection between term and leader, distance is 0
+			  if(leaderStartOffset[0]>=tmpArr[0] && leaderStartOffset[0]<=tmpArr[1]-1)
+				computedDistance=0;
+			  
+			  System.out.println("("+i+")FOUND TERM: "+termName+"\tTo Upper Boundary: "+computedDistance
+					  +"\nUpper["+j+"][1]: "+leadersBoundaries[j][1]);
+			}
+			
+			//updating minimum distance between term and leader, if necessary
+			if(computedDistance<currentMinDistances[j] || currentMinDistances[j]==-1){
+			  System.out.println("("+i+")UPDATING MINIMUM DISTANCE: "+termName
+				  +"\tOld["+j+"]: "+currentMinDistances[j]+"\tNew["+j+"]: "+computedDistance);
+				
+				currentMinDistances[j]=computedDistance;
+			}
+		  }
+		  
+		  //updating minimum distances for this term
+		  distances.put(termName, currentMinDistances);		  
+		}
+
+	  }
+	  
+	  
+	  //calculating clusters
+	  clusters = new ArrayList[groupLeaders.size()];
+	  for(int l=0; l<clusters.length; ++l){
+		clusters[l]=new ArrayList<String>();
+		clusters[l].add(groupLeaders.get(l));
+	  }
+	  
+	  distIter = distances.entrySet().iterator();
+	  while(distIter.hasNext()){//for each term
+		distEntry = distIter.next();
+
+		computedDistance=-1;
+		tmpArr=distEntry.getValue();
+		
+		/* ***DEBUG*** */
+		if(debugColors){
+		  System.out.println("--distEntry: "+distEntry.getKey());
+		  for(int h=0; h<tmpArr.length; ++h) System.out.println("--("+h+"): "+tmpArr[h]);
+		}
+		/* ***DEBUG*** */
+		
+		tierIndex=0;
+		currentMinDistances = new int[tmpArr.length];//used to remember tier leaders, if any
+		for(int l=0; l<currentMinDistances.length; ++l) currentMinDistances[l]=-1;
+		
+		for(int j=0; j<tmpArr.length; ++j){//searching for nearest leader
+		  if(computedDistance<0 || tmpArr[j]<computedDistance){
+			computedDistance=tmpArr[j];
+			
+			//found a more near leader
+			for(int l=0; l<currentMinDistances.length; ++l) currentMinDistances[l]=-1;
+			tierIndex=0;
+			currentMinDistances[tierIndex++]=j;
+		  }
+		  else if(tmpArr[j]==computedDistance) currentMinDistances[tierIndex++]=j;
+		}
+		
+		if(currentMinDistances[1]<0)//no tier leaders, adding term to a cluster
+		  ((ArrayList<String>)clusters[currentMinDistances[0]]).add(distEntry.getKey());
+		else{//there are tier leaders
+			
+		  System.out.println("********GOT A LEADER TIE!!!!********");
+
+		  //initializing arrays to compute coverages, where the coverage of a term is:
+		  //(numer of sentences in which a term appears in a file/number of sentences in that file)			
+		  if(termFileCoverage==null) termFileCoverage = new ArrayList<Entry<String,Double>>();
+		  else termFileCoverage.clear();
+		  
+		  if(tiersFileCoverage==null) tiersFileCoverage = new ArrayList[groupLeaders.size()];	
+		  for(int j=0; j<currentMinDistances.length; ++j) tiersFileCoverage[j]=null;
+		  for(int j=0; j<currentMinDistances.length && currentMinDistances[j]>=0; ++j)
+			  tiersFileCoverage[currentMinDistances[j]]= new ArrayList<Entry<String, Double>>();
+	      
+	      //computing coverages for current term for all files in which it appears
+	      for(ModelFile modelFile : filesProject)
+	    	if(modelFile.getTermsAriety().get(distEntry.getKey())!=null)
+	    	  termFileCoverage.add(
+	    		new AbstractMap.SimpleEntry<String, Double>( distEntry.getKey(), 
+	    		(double)modelFile.getTermsAriety().get(distEntry.getKey())/(double)modelFile.getTermsInSentencesSet().size() ) );	      
+	      
+	      //computing coverages for tier leaders for all files
+	      for(int i=0; i<tiersFileCoverage.length; ++i)
+	    	if(tiersFileCoverage[i]!=null) for(ModelFile modelFile : filesProject)
+	    	  tiersFileCoverage[i].add(
+	    		new AbstractMap.SimpleEntry<String, Double>( groupLeaders.get(i), 
+	    		(double)modelFile.getTermsAriety().get(groupLeaders.get(i))/(double)modelFile.getTermsInSentencesSet().size() ) );
+	    				
+	      //ordering coverages by highest to lowest
+	      SortUtils.recQuickSortEntryListByDoubleVal(termFileCoverage, 0, termFileCoverage.size()-1);
+	      for(int i=0; i<tiersFileCoverage.length; ++i) if(tiersFileCoverage[i]!=null)
+	    	SortUtils.recQuickSortEntryListByDoubleVal(tiersFileCoverage[i], 0, tiersFileCoverage[i].size()-1);
+	      
+	      //adding term to the tier leader with the highest coverage in the same file in which term has the highest coverage
+	      tiers = new int[groupLeaders.size()];
+	      for(p=0; p<termFileCoverage.size(); ++p){
+	    	fileName=termFileCoverage.get(p).getKey();
+	    	
+	    	maxCoverage=0;
+	    	tierIndex=0;
+	    	for(int i=0; i<tiersFileCoverage.length; ++i) if(tiersFileCoverage[i]!=null){
+	    	  for(Entry<String, Double> entry : tiersFileCoverage[i])
+	    		if(entry.getKey().compareTo(fileName)==0){
+	    		  if(entry.getValue()>maxCoverage){//found a tier with a better coverage
+	  	  			for(int l=0; l<tiers.length; ++l) tiers[l]=-1;
+	  	  			tierIndex=0; tiers[tierIndex++]=i;
+	    			maxCoverage=entry.getValue();	    			
+	    		  }
+		  		  else if(entry.getValue()==maxCoverage) tiers[tierIndex++]=i;
+	    		  break;
+	    		}
+	    	}
+	    	
+			if(tiers[1]<0){//tiers[0] wins, adding term to its cluster
+			  ((ArrayList<String>)clusters[tiers[0]]).add(distEntry.getKey());
+			  break;
+			}
+			else{//there is a tie on coverages too, comparing coverages of next file for remaining tiers
+			  for(int i=0; i<tiersFileCoverage.length; ++i){
+				for(tierIndex=0; tierIndex<tiers.length; ++tierIndex) if(tiers[tierIndex]==i) break;
+				if(tierIndex==tiers.length) tiersFileCoverage[i]=null;
+			  }
+			}
+
+	      }
+	      if(p==termFileCoverage.size()){//coverages for all files checked, there is still a tie
+	    	p=0;
+	    	for(int index : tiers) if(index>=0) ++p;
+	    	gen = new Random(); tierIndex=gen.nextInt(1024)%p;
+	    	
+	    	//adding term to a randomly chosen cluster among remaining tiers
+	    	((ArrayList<String>)clusters[tiers[tierIndex]]).add(distEntry.getKey());
+	      }
+		}
+		
+	  }
+	  
+	  /* ****DEBUG*** */
+	  if(debugColors) for(ArrayList arr : clusters){
+		System.out.println("---Cluster leader: "+arr.get(0));
+		for(String term : (ArrayList<String>)arr) System.out.println("-Term: "+term);
+	  }
+	  /* ****DEBUG*** */
+	  
+	  //assigning colors to terms, with saturation based on arities
+//	  assignColorsArityGraduation(colors, clusters);
+	  
+	  //assigning colors to terms, with saturation based on terms distances from leaders
+	  assignColorsDistanceGraduation(colors, clusters, distances);
+
+	}
+
+	/**
+	 * Assigns a color to each term, basing on terms clusters. 
+	 * The saturation of each term's color depends on its arity, relatively to the max arity in its cluster.
+	 * 
+	 * @param colors - int[][] containing colors in the form of a 3-position int[] containing RGB values
+	 * @param clusters - terms clusters with same size of colors, the actual type must be an array of ArrayList<String>
+	 */
+	private void assignColorsArityGraduation(int[][] colors, ArrayList[] clusters) {
+		double maxColorReduction=0.35;
+		double colorReductionUnit=0;
+		int maxArity=0;
+		int[] baseColor=null;
+		int[] termColor=null;
+		
+		for(int k=0; k<clusters.length; ++k){
+		  //getting term with max arity in the cluster
+		  for(String term : (ArrayList<String>)clusters[k]) if(termsArity.get(term)>maxArity) maxArity=termsArity.get(term);		  
+
+		  colorReductionUnit=maxColorReduction/(maxArity-1);
+
+		  //assigning colors
+		  baseColor=colors[k];
+		  for(String term : (ArrayList<String>)clusters[k]){
+			termColor=new int[3];
+			termColor[0]=(int)((double)baseColor[0]*(1.0-colorReductionUnit*(maxArity-termsArity.get(term))));			
+			termColor[1]=(int)((double)baseColor[1]*(1.0-colorReductionUnit*(maxArity-termsArity.get(term))));			
+			termColor[2]=(int)((double)baseColor[2]*(1.0-colorReductionUnit*(maxArity-termsArity.get(term))));			
+			termsColor.put(term, termColor);
+
+			/* ***DEBUG*** */
+			if(debugColors)
+			  System.out.println("Base Color for term '"+term+"' is: ("+baseColor[0]+"."+baseColor[1]+"."+baseColor[2]+")"
+				+"\nmaxArity: "+maxArity+"\ttermsArity.get(term): "+termsArity.get(term)+"\tcolorReductionUnit: "+colorReductionUnit
+				+"\nExact Color for term '"+term+"' is: ("+termColor[0]+"."+termColor[1]+"."+termColor[2]+")");
+			/* ***DEBUG*** */
+		  }
+		}
+	}
+
+	/**
+	 * Assigns a color to each term, basing on terms clusters. 
+	 * The saturation of each term's color depends on its distance from the cluster's leader.
+	 * 
+	 * @param colors - int[][] containing colors in the form of a 3-position int[] containing RGB values
+	 * @param clusters - terms clusters with same size of colors, the actual type must be an array of ArrayList<String>.
+	 * The first String element of each cluster must be the cluster leader.
+	 * @param distances - HashMap mapping each term to an int[] containing the distances between that term and cluster leaders, 
+	 * with same size and indexes as colors and clusters. The map does not need to contain distances of clusters leaders,
+	 * and if present they're ignored.
+	 */
+	@SuppressWarnings("unchecked")
+	private void assignColorsDistanceGraduation(int[][] colors, ArrayList[] clusters, HashMap<String, int[]> distances) {
+		double maxColorReduction=0.35;
+		double colorReductionUnit=0;
+		int maxDistance=0;
+		int[] baseColor=null;
+		int[] termColor=null;
+		String termName=null;
+
+		for(int k=0; k<clusters.length; ++k){
+		  //getting term's maximum distance from leader in the cluster
+		  for(int j=1; j<((ArrayList<String>)clusters[k]).size(); ++j){
+			termName=((ArrayList<String>)clusters[k]).get(j);
+			if(distances.get(termName)[k]>maxDistance) maxDistance=distances.get(termName)[k];		  
+		  }
+
+		  colorReductionUnit=maxColorReduction/(maxDistance+1);
+
+		  //assigning colors
+		  baseColor=colors[k];
+		  
+		  //setting base color to the cluster leader
+		  termsColor.put(((ArrayList<String>)clusters[k]).get(0), baseColor);
+		  System.out.println("***Base Color for cluster '"+((ArrayList<String>)clusters[k]).get(0)
+				  			 +"' is: ("+baseColor[0]+"."+baseColor[1]+"."+baseColor[2]+")");
+
+		  //setting terms colors
+		  for(int j=1; j<((ArrayList<String>)clusters[k]).size(); ++j){
+			termName=((ArrayList<String>)clusters[k]).get(j);
+			termColor=new int[3];
+			termColor[0]=(int)((double)baseColor[0]*(1.0-colorReductionUnit*(distances.get(termName)[k]+1)));			
+			termColor[1]=(int)((double)baseColor[1]*(1.0-colorReductionUnit*(distances.get(termName)[k]+1)));
+			termColor[2]=(int)((double)baseColor[2]*(1.0-colorReductionUnit*(distances.get(termName)[k]+1)));
+			termsColor.put(termName, termColor);
+			
+			/* ***DEBUG*** */
+			if(debugColors)
+			  System.out.println("\nmaxDistance: "+maxDistance+"\tTerm Distance: "+distances.get(termName)[k]
+				+"\tcolorReductionUnit: "+colorReductionUnit
+				+"\nExact Color for term '"+termName+"' is: ("+termColor[0]+"."+termColor[1]+"."+termColor[2]+")");
+			/* ***DEBUG*** */
+		  }
+		}
+	}
+
+	/**
+	 * Assigns a color to each term, basing on terms clusters. 
+	 * The saturation of each term's color depends on its distance from the cluster's leader.
+	 * 
+	 * @param colors - int[][] containing colors in the form of a 3-position int[] containing RGB values
+	 * @param clusters - terms clusters with same size of colors, the actual type must be an array of ArrayList<String>.
+	 * The first String element of each cluster must be the cluster leader.
+	 * @param distances - HashMap mapping each term to an int[] containing the distances between that term and cluster leaders, 
+	 * with same size and indexes as colors and clusters. The map does not need to contain distances of clusters leaders,
+	 * and if present they're ignored.
+	 */
+	@SuppressWarnings("unchecked")
+	private void assignColorsClusterBasic(int[][] colors, ArrayList[] clusters) {
+		int[] baseColor=null;
+		int[] termColor=null;
+		String termName=null;
+
+		for(int k=0; k<clusters.length; ++k){
+		  //assigning colors
+		  baseColor=colors[k];
+		  
+		  System.out.println("***Color for cluster '"+((ArrayList<String>)clusters[k]).get(0)
+				  			 +"' is: ("+baseColor[0]+"."+baseColor[1]+"."+baseColor[2]+")");
+
+		  //setting terms colors
+		  for(int j=0; j<((ArrayList<String>)clusters[k]).size(); ++j){
+			termName=((ArrayList<String>)clusters[k]).get(j);
+			termColor=new int[3];
+			termColor[0]=baseColor[0];			
+			termColor[1]=baseColor[1];
+			termColor[2]=baseColor[2];
+			termsColor.put(termName, termColor);
+		  }
+		}
 	}
 
 	/**
 	 * Assigns a color to each relevant term, based on sentences separation and arities.
 	 */
-	private void assignColorsBySets() {
+	private void computeColorsBySets() {
 		double card=0;
 		int cardUpper=0;
 		int intersectionSize;
@@ -643,9 +1074,8 @@ public class ModelProject extends Observable implements Runnable{
 			System.out.println("**Set#"+k);
 			for(String term : termsInSentencesSet.get(k)) System.out.println(term);
 		  }
-		  for(int k=0; k<colors.length; ++k){
-			System.out.println("**Color#"+k+": "+colors[k][0]+"."+colors[k][1]+"."+colors[k][2]);
-		  }
+		  for(int k=0; k<colors.length; ++k)
+			System.out.println("**Color#"+k+": "+colors[k][0]+"."+colors[k][1]+"."+colors[k][2]);		  
 		}
 		/* ***DEBUG*** */
 			  
@@ -737,22 +1167,22 @@ public class ModelProject extends Observable implements Runnable{
 
 		//14 colori diversi
 		colors=new int[14][3];
-		colors[0][0]=230; colors[0][1]=0; colors[0][2]=0;//			230.0.0
-		colors[1][0]=0; colors[1][1]=230; colors[1][2]=0;//			0.230.0
-		colors[2][0]=0; colors[2][1]=0; colors[2][2]=230;//			0.0.230
-		colors[3][0]=255; colors[3][1]=230; colors[3][2]=0;//		255.230.0
-		colors[4][0]=230; colors[4][1]=0; colors[4][2]=230;//		230.0.230
-		colors[5][0]=0; colors[5][1]=255; colors[5][2]=255;//		0.255.255
+		colors[0][0]=255; colors[0][1]=0; colors[0][2]=0;
+		colors[1][0]=0; colors[1][1]=255; colors[1][2]=0;
+		colors[2][0]=0; colors[2][1]=0; colors[2][2]=255;
+		colors[3][0]=255; colors[3][1]=255; colors[3][2]=0;
+		colors[4][0]=255; colors[4][1]=0; colors[4][2]=255;
+		colors[5][0]=0; colors[5][1]=255; colors[5][2]=255;
 		
-		colors[6][0]=255; colors[6][1]=128; colors[6][2]=0;//		255.128.0
-		colors[7][0]=136; colors[7][1]=255; colors[7][2]=0;//		136.255.0
-		colors[8][0]=0; colors[8][1]=128; colors[8][2]=255;//		0.128.255
+		colors[6][0]=255; colors[6][1]=120; colors[6][2]=0;
+		colors[7][0]=100; colors[7][1]=115; colors[7][2]=0;
+		colors[8][0]=90; colors[8][1]=70; colors[8][2]=180;		
+		colors[9][0]=180; colors[9][1]=180; colors[9][2]=90;
 		
-		colors[9][0]=150; colors[9][1]=40; colors[9][2]=0;//		150.40.0
-		colors[10][0]=255; colors[10][1]=0; colors[10][2]=85;//		255.0.85
-		colors[11][0]=0; colors[11][1]=170; colors[11][2]=90;//		0.170.90
-		colors[12][0]=180; colors[12][1]=180; colors[12][2]=90;//	180.180.90
-		colors[13][0]=100; colors[13][1]=60; colors[13][2]=160;//	100.60.160
+		colors[10][0]=255; colors[10][1]=0; colors[10][2]=85;
+		colors[11][0]=0; colors[11][1]=170; colors[11][2]=90;
+		colors[12][0]=140; colors[12][1]=55; colors[12][2]=0;
+		colors[13][0]=0; colors[13][1]=128; colors[13][2]=255;
 				
 		return colors;
 		

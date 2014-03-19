@@ -13,12 +13,15 @@ import java.awt.Component;
 
 
 
+
 //import javax.swing.JComponent;
 //import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.JTextArea;
 //import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import view.EditorView.CenteredTextPane;
 
 public class FeaturePanel extends JLayeredPane {
 
@@ -43,15 +46,7 @@ public class FeaturePanel extends JLayeredPane {
 	private String labelName=null;
 
 //	private JTextField jta=null;
-	private JTextArea jta=null;
-
-	/**
-	 * Creates a new default FeaturePanel. <br>
-	 */
-	public FeaturePanel(Component parent){
-		super();
-//		this.parent=parent;
-	}
+	private CenteredTextPane jta=null;
 	
 //	/**
 //	 * Creates a new default FeaturePanel. <br>
@@ -64,7 +59,7 @@ public class FeaturePanel extends JLayeredPane {
 	/**
 	 * Creates a new default FeaturePanel. <br>
 	 */
-	public FeaturePanel(JTextArea jta){
+	public FeaturePanel(CenteredTextPane jta){
 		super();
 		this.jta=jta;
 	}
@@ -110,7 +105,7 @@ public class FeaturePanel extends JLayeredPane {
 	 * 
 	 * @return - a String containing the name.
 	 */
-	public JTextArea getTextArea(){
+	public CenteredTextPane getTextArea(){
 		return jta;
 	}
 
