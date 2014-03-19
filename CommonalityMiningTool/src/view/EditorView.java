@@ -4127,12 +4127,12 @@ public class EditorView extends JFrame implements Observer{
 	  else newName=((FeaturePanel)popUpElement).getLabelName();
 	  
 	  for(String tmp : startingCommonalities) if(tmp.compareTo(newName)==0){
-		((FeaturePanel)popUpElement).getTextArea().setText(newName+"{C}");
+		((FeaturePanel)popUpElement).getTextArea().setText(newName+"\n{C}");
 		return;
 	  }
 	  
 	  for(String tmp : startingVariabilities) if(tmp.compareTo(newName)==0){
-		((FeaturePanel)popUpElement).getTextArea().setText(newName+"{V}");
+		((FeaturePanel)popUpElement).getTextArea().setText(newName+"\n{V}");
 		return;
 	  }
 	}	
@@ -4155,11 +4155,11 @@ public class EditorView extends JFrame implements Observer{
 			found=false;
 			  
 			for(String comm : startingCommonalities) if(featTmp.getLabelName().compareTo(comm)==0){
-		      featTmp.getTextArea().setText(comm+"{C}"); found=true; break;
+		      featTmp.getTextArea().setText(comm+"\n{C}"); found=true; break;
 			}
 			  
 			if(!found) for(String comm : startingVariabilities) if(featTmp.getLabelName().compareTo(comm)==0){
-			  featTmp.getTextArea().setText(comm+"{V}"); found=true; break;
+			  featTmp.getTextArea().setText(comm+"\n{V}"); found=true; break;
 			}
 		  }
 		  
@@ -4173,11 +4173,11 @@ public class EditorView extends JFrame implements Observer{
 			featTmp = (FeaturePanel)tmp.getElement();
 			found=false;
 				  
-			for(String comm : startingCommonalities) if(featTmp.getLabelName().compareTo(comm+"{C}")==0){
+			for(String comm : startingCommonalities) if(featTmp.getLabelName().compareTo(comm+"\n{C}")==0){
 			  featTmp.getTextArea().setText(comm); found=true; break;
 			}
 				  
-			if(!found) for(String comm : startingVariabilities) if(featTmp.getLabelName().compareTo(comm+"{V}")==0){
+			if(!found) for(String comm : startingVariabilities) if(featTmp.getLabelName().compareTo(comm+"\n{V}")==0){
 			  featTmp.getTextArea().setText(comm); found=true; break;
 			}
 		  }
@@ -5200,7 +5200,7 @@ public class EditorView extends JFrame implements Observer{
     		
     		//getting feature name
     		featureName=((FeaturePanel)groupMember).getLabelName();
-    		if (menuViewCommsOrVars.isSelected()) featureName=featureName.substring(0, featureName.length()-3);
+    		if (menuViewCommsOrVars.isSelected()) featureName=featureName.substring(0, featureName.length()-4);
 
     		//getting the type of the feature: extracted commonality, extracted variability or added by the user
     		if(relevantTerms.get(featureName)==null) featuresTyped.add(featureName);//a non-extracted feature
@@ -5219,7 +5219,7 @@ public class EditorView extends JFrame implements Observer{
     	}
     	else{//search asked on a single feature
     	  featureName=((FeaturePanel)getPopUpElement()).getLabelName();
-    	  if (menuViewCommsOrVars.isSelected()) featureName=featureName.substring(0, featureName.length()-3);
+    	  if (menuViewCommsOrVars.isSelected()) featureName=featureName.substring(0, featureName.length()-4);
 
     	  //getting the type of the feature: extracted commonality, extracted variability or added by the user
     	  if(relevantTerms.get(featureName)==null) featuresTyped.add(featureName);//a non-extracted feature

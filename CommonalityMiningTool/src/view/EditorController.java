@@ -816,16 +816,15 @@ public class EditorController implements
     	if(editorView.getMenuViewCommsOrVars().isSelected()){
     		  
     	  done=false;
-    	  for(String tmp : editorView.getStartingCommonalities()) if(oldFeatureName.compareTo(tmp+"{C}")==0){
+    	  for(String tmp : editorView.getStartingCommonalities()) if(oldFeatureName.compareTo(tmp+"\n{C}")==0){
       		((FeaturePanel)popupElement).getTextArea().setText(oldFeatureName.substring(0, oldFeatureName.length()-3));
       		done=true;
     	  }
     	  
-    	  if(!done) for(String tmp : editorView.getStartingVariabilities()) if(oldFeatureName.compareTo(tmp+"{V}")==0)
+    	  if(!done) for(String tmp : editorView.getStartingVariabilities()) if(oldFeatureName.compareTo(tmp+"\n{V}")==0)
       		((FeaturePanel)popupElement).getTextArea().setText(oldFeatureName.substring(0, oldFeatureName.length()-3));
     	}    	  
     	
-        System.out.println("Renaming: "+popupElement.getName()); 
         ((FeaturePanel)popupElement).getTextArea().setEditable(true);
         ((FeaturePanel)popupElement).getTextArea().getCaret().setVisible(true);
         
