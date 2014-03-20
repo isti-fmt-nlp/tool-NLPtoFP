@@ -59,6 +59,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.net.URL;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -534,11 +535,14 @@ public class EditorView extends JFrame implements Observer{
 	/**label for occurrences navigation*/
 	private JPanel occurrsLabelPanel = null;
 
-	/**last highlighted tag for each relevant term and file*/
+	/**last highlighted tag for each feature and file*/
 	private HashMap<String, HashMap<String, Object>> lastHighlightedTag=null;
 
-	/**last removed highlight tags for each relevant term and file*/
-	private HashMap<String, HashMap<String, ArrayList<Highlight>>> lastRemovedHighlights=null;
+	/**last removed highlight tags for each feature and file*/
+//	private HashMap<String, HashMap<String, ArrayList<Highlight>>> lastRemovedHighlights=null;
+	/** For each feature name(outer map's Key) and file name(inner map's Key), there is a list
+	 *  of last removed highlight tags, each potentially having a list of replacement tags*/
+	private HashMap<String, HashMap<String, ArrayList<Entry<Highlight, ArrayList<Highlight>>>>> lastRemovedHighlights=null;
 	
 	/**relevant terms occurrences panel*/
 	private JTabbedPane occursTabbedPane = null;
@@ -5411,7 +5415,8 @@ public class EditorView extends JFrame implements Observer{
 		textIndexes = new HashMap<String, HashMap<String, Integer>>();
 		currentFiles = new HashMap<String, String>();
 		lastHighlightedTag = new HashMap<String, HashMap<String, Object>>();
-		lastRemovedHighlights = new HashMap<String, HashMap<String, ArrayList<Highlight>>>();
+//		lastRemovedHighlights = new HashMap<String, HashMap<String, ArrayList<Highlight>>>();
+		lastRemovedHighlights = new HashMap<String, HashMap<String, ArrayList<Entry<Highlight, ArrayList<Highlight>>>>>();
 
 		//adding components to panel		
 		searchPanel.add(legendPanel);
@@ -5553,11 +5558,14 @@ public class EditorView extends JFrame implements Observer{
 //		  int occurrenceIndex =0;//current index in the text of occurrence to highlite
 		  int[] occurrence=null;//current index in the text of occurrence to highlite
 		  Object highlightTag=null;//highlight tag that will be added to the text
-		  ArrayList<Highlight> lastRemovedTags=null;//last removed highlight tags
-		  ArrayList<Highlight> tagsToRemove=null;//highlight tags to remove
+		  ArrayList<Entry<Highlight,ArrayList<Highlight>>> tagsToRemove=null;//highlight tags to remove
+		  ArrayList<Highlight> tagToRemoveReplacements=null;//replacements to last removed tags
+		  ArrayList<Entry<Highlight,ArrayList<Highlight>>> lastRemovedTags=null;//last removed or modified highlight tags
+		  Highlight tagToRestore=null;//last removed tag, to be restored
 		  
-		  String fileName=((JScrollPane)occursTabbedPane.getSelectedComponent()).getName();
+		  
 
+		  String fileName=((JScrollPane)occursTabbedPane.getSelectedComponent()).getName();
 		  JTextArea jta= textTabs.get(fileName);
 		  currentIndex= textIndexes.get(currentSelectedFeatureName).get(fileName);
 
@@ -5588,31 +5596,84 @@ public class EditorView extends JFrame implements Observer{
 
 		  
 		  //initializing of lastRemovedHighlights, if necessary
-		  if(lastRemovedHighlights.get(currentSelectedFeatureName)==null) 
-			  lastRemovedHighlights.put(currentSelectedFeatureName, new HashMap<String, ArrayList<Highlight>>());
+//		  if(lastRemovedHighlights.get(currentSelectedFeatureName)==null) 
+//			  lastRemovedHighlights.put(currentSelectedFeatureName, new HashMap<String, ArrayList<Highlight>>());
 
-		  //re-putting last removed highlighted commonality tags for this term and file
+		  if(lastRemovedHighlights.get(currentSelectedFeatureName)==null) 
+			  lastRemovedHighlights.put(currentSelectedFeatureName, 
+				new HashMap<String, ArrayList<Entry<Highlight,ArrayList<Highlight>>>>());
+
+		  //restoring last removed highlighted tags for this term and file
 		  lastRemovedTags=lastRemovedHighlights.get(currentSelectedFeatureName).get(fileName);
 
 		  if(lastRemovedTags!=null) try{
-			for(int h=0; h<lastRemovedTags.size(); ++h)
-			  hilite.addHighlight(lastRemovedTags.get(h).getStartOffset(), lastRemovedTags.get(h).getEndOffset(),
-				  lastRemovedTags.get(h).getPainter());
+			for(int h=0; h<lastRemovedTags.size(); ++h){
+			  tagToRestore=lastRemovedTags.get(h).getKey();
+			  
+			  //removing replacements tags
+			  if(lastRemovedTags.get(h).getValue()!=null)
+			    for(Highlight tmp : lastRemovedTags.get(h).getValue()) hilite.removeHighlight(tmp);
+				
+			  //re-putting last removed tag
+			  hilite.addHighlight(tagToRestore.getStartOffset(), tagToRestore.getEndOffset(), tagToRestore.getPainter());
+			}
 		  } catch (BadLocationException e) {
 			System.out.println("BadLocationException\nTerm: "+currentSelectedFeatureName+" - occurrence: "+occurrence);
 			e.printStackTrace();
 		  }
 
 		  //checking what highlighted tags already are in next occurrence text interval
-		  tagsToRemove = new ArrayList<Highlight>();
-		  for (Highlight tmp: hilite.getHighlights())
-//			if (tmp.getStartOffset()>=occurrence && tmp.getEndOffset()<=
-//			    occurrence+relevantTermsVersions.get(currentSelectedFeatureName).get(fileName).length())
-//			  tagsToRemove.add(tmp);
-			if (tmp.getStartOffset()>=occurrence[0] && tmp.getEndOffset()<=occurrence[1]) tagsToRemove.add(tmp);
+		  tagsToRemove = new ArrayList<Entry<Highlight, ArrayList<Highlight>>>();
+		  for (Highlight tmp: hilite.getHighlights()){
 
+			//tag will be removed
+			if (tmp.getStartOffset()>=occurrence[0] && tmp.getEndOffset()<=occurrence[1]){
+			  hilite.removeHighlight(tmp);
+
+			  tagsToRemove.add(new  AbstractMap.SimpleEntry<Highlight, ArrayList<Highlight>>(tmp, null));
+			}
+			
+			//tag will be replaced
+			else if(tmp.getStartOffset()>=occurrence[0] && tmp.getStartOffset()<=occurrence[1]
+					&& tmp.getEndOffset()>occurrence[1]){//tmp surround ending part of new tag
+			  tagToRemoveReplacements = new ArrayList<Highlight>();
+			  try {
+				tagToRemoveReplacements.add((Highlight)hilite.addHighlight(
+					occurrence[1]+1, tmp.getEndOffset(), tmp.getPainter()));
+			  } catch (BadLocationException e) { e.printStackTrace();}
+			  
+			  hilite.removeHighlight(tmp);
+			  tagsToRemove.add(new  AbstractMap.SimpleEntry<Highlight, ArrayList<Highlight>>(tmp, tagToRemoveReplacements));				
+			}
+			else if(tmp.getStartOffset()<occurrence[0] && tmp.getEndOffset()>=occurrence[0]
+					&& tmp.getEndOffset()<=occurrence[1]){//tmp surround starting part of new tag
+			  tagToRemoveReplacements = new ArrayList<Highlight>();
+			  try {
+				tagToRemoveReplacements.add((Highlight)hilite.addHighlight(
+					tmp.getStartOffset(), occurrence[0], tmp.getPainter()));
+			  } catch (BadLocationException e) { e.printStackTrace();}
+			  
+			  hilite.removeHighlight(tmp);
+			  tagsToRemove.add(new  AbstractMap.SimpleEntry<Highlight, ArrayList<Highlight>>(tmp, tagToRemoveReplacements));				
+			}
+			else if(tmp.getStartOffset()<occurrence[0] 
+					&& tmp.getEndOffset()>occurrence[1]){//tmp entirely surround the new tag
+			  tagToRemoveReplacements = new ArrayList<Highlight>();
+			  try {
+				tagToRemoveReplacements.add((Highlight)hilite.addHighlight(
+					tmp.getStartOffset(), occurrence[0], tmp.getPainter()));
+				tagToRemoveReplacements.add((Highlight)hilite.addHighlight(
+					occurrence[1]+1, tmp.getEndOffset(), tmp.getPainter()));
+			  } catch (BadLocationException e) { e.printStackTrace();}
+			  
+			  hilite.removeHighlight(tmp);
+			  tagsToRemove.add(new  AbstractMap.SimpleEntry<Highlight, ArrayList<Highlight>>(tmp, tagToRemoveReplacements));				
+			}
+
+		  }
+		  
 		  //removing highlight tags that already are in next occurrence text interval
-		  for (Highlight tmp: tagsToRemove) hilite.removeHighlight(tmp);
+//		  for (Highlight tmp: tagsToRemove) hilite.removeHighlight(tmp);
 
 		  //saving last removed highlight tags in lastRemovedHighlights
 		  lastRemovedHighlights.get(currentSelectedFeatureName).put(fileName, tagsToRemove);
@@ -5863,29 +5924,32 @@ public class EditorView extends JFrame implements Observer{
 		  ArrayList<int[]> occurrIndexesList=null;
 		  int[] occurrence=null;
 		  Object highlightTag=null;//highlight tag that will be added to the text
-		  ArrayList<Highlight> lastRemovedTags=null;//last removed highlighted commonality tags 
-		  ArrayList<Highlight> commTagsToRemove=null;//commonality tags to highlight
+		  ArrayList<Entry<Highlight,ArrayList<Highlight>>> tagsToRemove=null;//commonality tags to highlight
+		  ArrayList<Highlight> tagToRemoveReplacements=null;//replacements to last removed tags
+		  ArrayList<Entry<Highlight,ArrayList<Highlight>>> lastRemovedTags=null;//last removed or modified highlight tags
+		  Highlight tagToRestore=null;//last removed tag, to be restored
+
 			
 		  JTextArea jta= textTabs.get(file);
 		  
-		  System.out.println("\n***selectCurrentOccurrence***\n");
-		  System.out.println(
-			 "currentSelectedFeatureName: "+currentSelectedFeatureName+"\tfile: "+file
-			+"\nlastHighlightedTag.get("+currentSelectedFeatureName+"): "+lastHighlightedTag.get(currentSelectedFeatureName)
-			);
-		  if(lastHighlightedTag.get(currentSelectedFeatureName)!=null)
-			System.out.println(
-	"lastHighlightedTag.get("+currentSelectedFeatureName+").get("+((JScrollPane)occursTabbedPane.getSelectedComponent()).getName()+"):\n"
-	+lastHighlightedTag.get(currentSelectedFeatureName).get(((JScrollPane)occursTabbedPane.getSelectedComponent()).getName()));
-			  
-		  System.out.println("lastRemovedHighlights.get("+currentSelectedFeatureName+"): "
-		  +lastRemovedHighlights.get(currentSelectedFeatureName));
-		  if(lastRemovedHighlights.get(currentSelectedFeatureName)!=null){
-			System.out.println("lastRemovedHighlights.get("+currentSelectedFeatureName+").get(file): ");
-			for(Highlight tmp : lastRemovedHighlights.get(currentSelectedFeatureName).get(file))
-			  System.out.println("*) "+tmp.toString());
-			  
-		  }
+//		  System.out.println("\n***selectCurrentOccurrence***\n");
+//		  System.out.println(
+//			 "currentSelectedFeatureName: "+currentSelectedFeatureName+"\tfile: "+file
+//			+"\nlastHighlightedTag.get("+currentSelectedFeatureName+"): "+lastHighlightedTag.get(currentSelectedFeatureName)
+//			);
+//		  if(lastHighlightedTag.get(currentSelectedFeatureName)!=null)
+//			System.out.println(
+//	"lastHighlightedTag.get("+currentSelectedFeatureName+").get("+((JScrollPane)occursTabbedPane.getSelectedComponent()).getName()+"):\n"
+//	+lastHighlightedTag.get(currentSelectedFeatureName).get(((JScrollPane)occursTabbedPane.getSelectedComponent()).getName()));
+//			  
+//		  System.out.println("lastRemovedHighlights.get("+currentSelectedFeatureName+"): "
+//		  +lastRemovedHighlights.get(currentSelectedFeatureName));
+//		  if(lastRemovedHighlights.get(currentSelectedFeatureName)!=null){
+//			System.out.println("lastRemovedHighlights.get("+currentSelectedFeatureName+").get(file): ");
+//			for(Highlight tmp : lastRemovedHighlights.get(currentSelectedFeatureName).get(file))
+//			  System.out.println("*) "+tmp.toString());
+//			  
+//		  }
 					  
 		  int currentIndex= textIndexes.get(currentSelectedFeatureName).get(file);
 
@@ -5909,32 +5973,94 @@ public class EditorView extends JFrame implements Observer{
 		  
 		  //initializing of lastRemovedHighlights, if necessary
 		  if(lastRemovedHighlights.get(currentSelectedFeatureName)==null) 
-			  lastRemovedHighlights.put(currentSelectedFeatureName, new HashMap<String, ArrayList<Highlight>>());
+			  lastRemovedHighlights.put(currentSelectedFeatureName, new HashMap<String, ArrayList<Entry<Highlight,ArrayList<Highlight>>>>());
 		  
 		  //re-putting last removed highlighted commonality tags for this term and file, if any
 		  lastRemovedTags=lastRemovedHighlights.get(currentSelectedFeatureName).get(file);
 		  
-		  if(lastRemovedTags!=null) try{
-		    for(int h=0; h<lastRemovedTags.size(); ++h)
-			  hilite.addHighlight(lastRemovedTags.get(h).getStartOffset(), lastRemovedTags.get(h).getEndOffset(),
-			  lastRemovedTags.get(h).getPainter());
+		  if(lastRemovedTags!=null) try{			  
+			for(int h=0; h<lastRemovedTags.size(); ++h){
+			  tagToRestore = lastRemovedTags.get(h).getKey();
+
+			  //removing replacements tags
+			  if(lastRemovedTags.get(h).getValue()!=null)
+				for(Highlight tmp : lastRemovedTags.get(h).getValue()) hilite.removeHighlight(tmp);
+
+			  //re-putting last removed tag
+			  hilite.addHighlight(tagToRestore.getStartOffset(), tagToRestore.getEndOffset(), tagToRestore.getPainter());
+			}
+			  
+			  
+//		    for(int h=0; h<lastRemovedTags.size(); ++h)
+//			  hilite.addHighlight(lastRemovedTags.get(h).getStartOffset(), lastRemovedTags.get(h).getEndOffset(),
+//			  lastRemovedTags.get(h).getPainter());
 		  } catch (BadLocationException e) {
 			System.out.println("BadLocationException\nTerm: "+currentSelectedFeatureName+" - occurrence: "+occurrence);
 			e.printStackTrace();
 		  }
 		  
 		  //checking what highlighted tags already are in next occurrence text interval
-		  commTagsToRemove = new ArrayList<Highlight>();
-		  for (Highlight tmp: hilite.getHighlights())
-			if (tmp.getStartOffset()>=occurrence[0] && tmp.getEndOffset()<=occurrence[1]) commTagsToRemove.add(tmp);
+		  tagsToRemove = new ArrayList<Entry<Highlight, ArrayList<Highlight>>>();
+		  for (Highlight tmp: hilite.getHighlights()){
+
+			//tag will be removed
+			if (tmp.getStartOffset()>=occurrence[0] && tmp.getEndOffset()<=occurrence[1]){
+			  hilite.removeHighlight(tmp);
+
+			  tagsToRemove.add(new  AbstractMap.SimpleEntry<Highlight, ArrayList<Highlight>>(tmp, null));
+			}
+			
+			//tag will be replaced
+			else if(tmp.getStartOffset()>=occurrence[0] && tmp.getStartOffset()<=occurrence[1]
+					&& tmp.getEndOffset()>occurrence[1]){//tmp surround ending part of new tag
+			  tagToRemoveReplacements = new ArrayList<Highlight>();
+			  try {
+				tagToRemoveReplacements.add((Highlight)hilite.addHighlight(
+					occurrence[1]+1, tmp.getEndOffset(), tmp.getPainter()));
+			  } catch (BadLocationException e) { e.printStackTrace();}
+			  
+			  hilite.removeHighlight(tmp);
+			  tagsToRemove.add(new  AbstractMap.SimpleEntry<Highlight, ArrayList<Highlight>>(tmp, tagToRemoveReplacements));				
+			}
+			else if(tmp.getStartOffset()<occurrence[0] && tmp.getEndOffset()>=occurrence[0]
+					&& tmp.getEndOffset()<=occurrence[1]){//tmp surround starting part of new tag
+			  tagToRemoveReplacements = new ArrayList<Highlight>();
+			  try {
+				tagToRemoveReplacements.add((Highlight)hilite.addHighlight(
+					tmp.getStartOffset(), occurrence[0], tmp.getPainter()));
+			  } catch (BadLocationException e) { e.printStackTrace();}
+			  
+			  hilite.removeHighlight(tmp);
+			  tagsToRemove.add(new  AbstractMap.SimpleEntry<Highlight, ArrayList<Highlight>>(tmp, tagToRemoveReplacements));				
+			}
+			else if(tmp.getStartOffset()<occurrence[0] 
+					&& tmp.getEndOffset()>occurrence[1]){//tmp entirely surround the new tag
+			  tagToRemoveReplacements = new ArrayList<Highlight>();
+			  try {
+				tagToRemoveReplacements.add((Highlight)hilite.addHighlight(
+					tmp.getStartOffset(), occurrence[0], tmp.getPainter()));
+				tagToRemoveReplacements.add((Highlight)hilite.addHighlight(
+					occurrence[1]+1, tmp.getEndOffset(), tmp.getPainter()));
+			  } catch (BadLocationException e) { e.printStackTrace();}
+			  
+			  hilite.removeHighlight(tmp);
+			  tagsToRemove.add(new  AbstractMap.SimpleEntry<Highlight, ArrayList<Highlight>>(tmp, tagToRemoveReplacements));				
+			}
+
+		  }
+			  
+			  
+			  
+			  
+//			if (tmp.getStartOffset()>=occurrence[0] && tmp.getEndOffset()<=occurrence[1]) tagsToRemove.add(tmp);
 
 		  //removing highlighted tags that already are in next occurrence text interval
-		  for (Highlight tmp: commTagsToRemove) hilite.removeHighlight(tmp);
+//		  for (Highlight tmp: tagsToRemove) hilite.removeHighlight(tmp);
 		  
 		  //saving last removed Commonality tags in lastRemovedCommHighlights
 		  lastRemovedHighlights.get(currentSelectedFeatureName).put((
 		    (JScrollPane)occursTabbedPane.getSelectedComponent()).getName(), 
-		    commTagsToRemove);		  
+		    tagsToRemove);		  
 
 		  
 		  //getting correct highlighter for this feature name
