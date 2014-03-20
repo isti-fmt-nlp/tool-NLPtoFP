@@ -805,6 +805,7 @@ public class EditorView extends JFrame implements Observer{
     	popMenuItemShowControlPoint.addActionListener(editorController);
     	popMenuItemHideControlPoint.addActionListener(editorController);
     	
+    	//initializing main structures
 		visibleOrderDraggables = new OrderedList();
 		startConnectorDots = new ArrayList<JComponent>();
 		startIncludesDots = new ArrayList<JComponent>();

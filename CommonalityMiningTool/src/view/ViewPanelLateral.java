@@ -5,7 +5,10 @@
  */
 package view;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -52,18 +55,20 @@ public class ViewPanelLateral extends JFrame
 	
 	private static boolean debug=true;//variabile usata per attivare stampe di debug
 
-	/** Costruttore
+	/** 
+	 * Constructor.
 	 * 
-	 * @param menuTree
+	 * @param menuTree - the JPopupMenu to be used with the laterale panel
 	 */
-	public ViewPanelLateral(JPopupMenu menuTree)
-	{
+	public ViewPanelLateral(JPopupMenu menuTree){
 		this.menuTree = menuTree;
 		
-		panelTree.setLayout(null);
-		panelTree.setBounds(new Rectangle(18,10,300,702));//+50?
-//		panelTree.setBounds(new Rectangle(18,10,300,652));//+50?
-//		panelTree.setBounds(new Rectangle(18,60,300,652));
+		panelTree.setLayout(new BorderLayout());
+//		panelTree.setBounds(new Rectangle(18,10,300,702));//+50?
+		panelTree.setMinimumSize(
+		  new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width/10, Toolkit.getDefaultToolkit().getScreenSize().height));
+		panelTree.setPreferredSize(panelTree.getMinimumSize());
+		panelTree.setLocation(0, 0);
 		panelTree.setBorder(BorderFactory.createCompoundBorder(
 				BorderFactory.createEtchedBorder(EtchedBorder.RAISED), 
 						BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)));
@@ -74,8 +79,7 @@ public class ViewPanelLateral extends JFrame
 	 * 
 	 * @param s - the project name
 	 */
-	public void createTree(String s)
-	{
+	public void createTree(String s){
 	    final String tmp = s;
 		
 		if(s.length() == 0 || s == null)
@@ -89,13 +93,15 @@ public class ViewPanelLateral extends JFrame
 		treeModel = new DefaultTreeModel(rootTree);
 			
 		treeView = new JTree(treeModel);
-		treeView.setBounds(5,5,290,690);//-50?
+//		treeView.setBounds(5,5,290,690);//-50?
+		treeView.setPreferredSize(panelTree.getPreferredSize());
+		treeView.setMinimumSize(panelTree.getMinimumSize());
 //		treeProject.setBounds(5,5,290,640);//-50?
 		treeView.setCellRenderer(new ColorTree(s, rootTree, analysisLeafTree));
 		treeView.addMouseListener(getTreeMouseAdapter(tmp));	
 		
 		panelTree.removeAll();
-		panelTree.add(treeView);
+		panelTree.add(treeView, BorderLayout.CENTER);
 	}
 	
 	/** 
@@ -130,7 +136,7 @@ public class ViewPanelLateral extends JFrame
 			analysisLeafTree.add("NO");
 		}	
 		panelTree.removeAll();
-		panelTree.add(treeView);
+		panelTree.add(treeView, BorderLayout.CENTER);
 	}
 
 	/**

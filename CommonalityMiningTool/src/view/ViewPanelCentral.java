@@ -5,9 +5,12 @@
  */
 package view;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -26,6 +29,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -34,6 +38,7 @@ import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -62,7 +67,7 @@ public class ViewPanelCentral{
 	/**the root central panel used for feature selection*/
 	private JPanel panelSelection = null;
 	
-	private JTabbedPane [] tabFeatures = null;
+	private JTabbedPane tabFeaturesCandidates = null;
 	
 	/**the panel containing the candidate feature's checkboxes */
 	private JPanel panelFeatures = null;
@@ -102,10 +107,16 @@ public class ViewPanelCentral{
 	private HashMap<String, HashMap<String, ArrayList<Highlight>>> lastRemovedHighlights=null;
 
 	
-	
 	/**relevant terms occurrences panel*/
 	private JTabbedPane occursTabbedPane = null;
 	
+	/**relevant terms search buttons panel*/
+	private JPanel buttonPanel = null;
+	
+	/**relevant terms search panel*/
+	private JPanel searchPanel= null;
+	
+
 	/**the JTextAreas of search panel*/
 	private HashMap<String, JTextArea> textTabs = null;
 	/**association between relevant terms and current selected tab file names in search panel*/
@@ -116,27 +127,17 @@ public class ViewPanelCentral{
 	
 	//costanti enumerative
 	public static enum FeatureType{ COMMONALITIES, VARIABILITIES };
-	//	private int occurrLinesSpan=2;	
 	
-	private final Highlighter.HighlightPainter[] highlightPainter = 
-	{
+	private final Highlighter.HighlightPainter[] highlightPainter = {
 			  new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW),
 			  new DefaultHighlighter.DefaultHighlightPainter(Color.CYAN)
 	};
 
-	/** Costruttore
-	 * 
-	 * @param buttonCommonalitiesEnd
-	 */
-	public ViewPanelCentral(/*JButton buttonCommonalitiesEnd*/)
-	{
-//		this.buttonSelectionEnd = buttonCommonalitiesEnd;
-
+	public ViewPanelCentral(){
 		panelAnalysis = new JPanel();
-		panelAnalysis.setLayout(null);
-		panelAnalysis.setBounds(320, 10, 1100, 702);//+50? 
-//		panelAnalysis.setBounds(320, 10, 1100, 652);//+50? 
-//		panelAnalysis.setBounds(320, 60, 1100, 652); 
+		panelAnalysis.setLayout(new BorderLayout());
+		panelAnalysis.setPreferredSize(panelAnalysis.getMinimumSize());
+		panelAnalysis.setLocation(0, 0);		
 	}
 	
 	/** 
@@ -145,29 +146,19 @@ public class ViewPanelCentral{
 	 * @param s - String array containing analysis result files paths of the chosen file
 	 * @param relevantTerm ArrayList containing file relevant terms 
 	 */
-	public void createTabFile(String [] s, ArrayList <String> relevantTerm)
-	{
+	public void createTabFile(String [] s, ArrayList <String> relevantTerm){
 		if(s == null || relevantTerm == null)
 			return;
 		
 		tabFile = new JTabbedPane();
-//		tabFile.setBounds(0, 0, 1100, 612); /*original*/
-//		tabFile.setBounds(0, 0, 750, 652); /*modified*///+50?
-		tabFile.setBounds(0, 0, 750, 702); /*modified*///+50?
+		tabFile.setPreferredSize(panelAnalysis.getPreferredSize());
 		
-		tabFile.addTab("Text to analyze", getTabTextFile(s[0], relevantTerm)); 
-		
-//		tabFile.addTab("Sentence splitting", getTabTextFile(s[1], null)); 
-//		tabFile.addTab("Term extraction", getTabTextFile(s[2], null)); 
-//		tabFile.addTab("Annotation", getTabTextFile(s[3], null)); 
-
+		tabFile.addTab("Text to analyze", getTabTextFile(s[0], relevantTerm)); 		
 		tabFile.addTab("Sentence splitting", getTabHTMLFile(s[1])); 
 		tabFile.addTab("Term extraction", getTabHTMLFile(s[2])); 
-//		tabFile.addTab("Annotation", getTabHTMLFile(s[3])); 
 
 		panelAnalysis.removeAll();
-		panelAnalysis.add(tabFile);
-//		panelAnalysis.setBounds(320, 100, 700, 450); /*modified*/
+		panelAnalysis.add(tabFile, BorderLayout.CENTER);
 	}
 	
 	/** 
@@ -191,61 +182,81 @@ public class ViewPanelCentral{
 		if(alF == null || alFeaturesCand == null) return;
 		
 		this.relevantTerms=relevantTerms;
-//		this.originalTermsVersions=new HashMap<String, HashMap<String, ArrayList<String>>>();
 		this.originalTermsVersions=relevantTermsFilesVersions;
-//		if(relevantTermsVersions.get(name)!=null) 
-//			this.relevantTermsVersions.put(name, relevantTermsVersions.get(name));
-//
-//		for(String[] str : relevantTermsBothVersions) originalTermsVersions.put(str[0], str[1]);
-		
-		tabFeatures = new JTabbedPane[2];
-		
-		tabFeatures[0] = new JTabbedPane(); 
-//		tabFeatures[0].setBounds(0, 0, 510, 652);//+50?
-		tabFeatures[0].setBounds(0, 0, 510, 702);//+50?
-		
-		for(int i = 0; i < alF.size(); i++)
-			tabFeatures[0].add(new File(alF.get(i)).getName().substring(0,
-	    		new File(alF.get(i)).getName().length() - 6), getTabHTMLFile(alF.get(i)));
-					
-		tabFeatures[1] = new JTabbedPane(); 
-//		tabFeatures[1].setBounds(510, 0, 535, 652);//+50?
-		tabFeatures[1].setBounds(510, 0, 535, 702);//+50?
-		
-		tabFeatures[1].add( displayText+"Candidates", getTabFeaturesCandidates(alFeaturesCand, alFeaturesSel,
+
+		createSearchPanel();
+
+		tabFeaturesCandidates = new JTabbedPane(); 
+
+		tabFeaturesCandidates.add( displayText+"Candidates", getTabFeaturesCandidates(alFeaturesCand, alFeaturesSel,
 									alFeaturesToHighlight, buttonSelectionEnd, fType));
-		if( selectFilePath != null) tabFeatures[1].add("Selected"+displayText, getTabHTMLFile(selectFilePath));		
+		if( selectFilePath != null) tabFeaturesCandidates.add("Selected"+displayText, getTabHTMLFile(selectFilePath));		
 		
 		panelAnalysis.removeAll();
-		panelAnalysis.add(tabFeatures[0]);
-		panelAnalysis.add(tabFeatures[1]);
+		
+		JSplitPane splitterPanelInner = null;
+		splitterPanelInner = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		splitterPanelInner.setContinuousLayout(true);
+		splitterPanelInner.setDividerSize(6);
+		splitterPanelInner.setResizeWeight(0.5);
+		splitterPanelInner.setPreferredSize(
+		  new Dimension(9*Toolkit.getDefaultToolkit().getScreenSize().width/10-6, Toolkit.getDefaultToolkit().getScreenSize().height));
+		
+		searchPanel.setPreferredSize(
+				  new Dimension(splitterPanelInner.getPreferredSize().width/2-3, splitterPanelInner.getPreferredSize().height));
 
+		tabFeaturesCandidates.setPreferredSize(
+				  new Dimension(splitterPanelInner.getPreferredSize().width/2-3, splitterPanelInner.getPreferredSize().height));
+
+		splitterPanelInner.setLeftComponent(searchPanel);
+		splitterPanelInner.setRightComponent(tabFeaturesCandidates);
+
+		panelAnalysis.add(splitterPanelInner, BorderLayout.CENTER);
 	}
 	
-	/** Creates or updates the tab showing selected features
+	/** 
+	 * Creates or updates the tab showing selected features
 	 * 
 	 * @param s -  path of the HTML file containing the selected commonalities
 	 * @param type - type of the selected features
 	 */
 	public void refreshTabFeaturesSelected(String s, FeatureType type){
-		if(tabFeatures[1].getTabCount() == 2) tabFeatures[1].remove(1);
+		if(tabFeaturesCandidates.getTabCount() == 2) tabFeaturesCandidates.remove(1);
 		String title=null;
 		if (type == ViewPanelCentral.FeatureType.COMMONALITIES) title="Selected Commonalities";
 		else title="Selected Variabilities";
-		tabFeatures[1].add(title, getTabHTMLFile(s));
+		tabFeaturesCandidates.add(title, getTabHTMLFile(s));
 		panelAnalysis.removeAll();
-		panelAnalysis.add(tabFeatures[0]);
-		panelAnalysis.add(tabFeatures[1]);
+		
+		JSplitPane splitterPanelInner = null;
+		splitterPanelInner = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		splitterPanelInner.setContinuousLayout(true);
+		splitterPanelInner.setDividerSize(6);
+		splitterPanelInner.setResizeWeight(0.5);
+		splitterPanelInner.setPreferredSize(
+		  new Dimension(9*Toolkit.getDefaultToolkit().getScreenSize().width/10-6, Toolkit.getDefaultToolkit().getScreenSize().height));
+		
+		searchPanel.setPreferredSize(
+				  new Dimension(splitterPanelInner.getPreferredSize().width/2, splitterPanelInner.getPreferredSize().height));
+
+		tabFeaturesCandidates.setPreferredSize(
+				  new Dimension(splitterPanelInner.getPreferredSize().width/2, splitterPanelInner.getPreferredSize().height));
+
+		splitterPanelInner.setLeftComponent(searchPanel);
+		splitterPanelInner.setRightComponent(tabFeaturesCandidates);
+
+		panelAnalysis.add(splitterPanelInner, BorderLayout.CENTER);
+
 	}
 	
 	/* -= FUNZIONI lettura parametri =- */
 	
-	/** Lettura del pannello panelAnalysis
+	/**
+	 * Lettura del pannello panelAnalysis
 	 * 
 	 * @return panelAnalysis
 	 */
-	public JPanel getPanelAnalysis()
-	{
+	public JPanel getPanelAnalysis(){
 		return panelAnalysis;
 	}
 	
@@ -266,16 +277,15 @@ public class ViewPanelCentral{
 	/* -= FUNZIONI Ausiliarie =- */
 	
 	
-	/** Returns a scrollable panel with the content of file s1, highlighting the relevant terms if al is not null.
+	/** 
+	 * Returns a scrollable panel with the content of file s1, highlighting the relevant terms if al is not null.
 	 * 
 	 * @param s1 - path of the file 
 	 * @param al - if not null, the terms in al will be highlighted 
 	 * @return JScrollPane - the scrollable panel containing the text of the file
 	 */
-	private JScrollPane getTabTextFile(String s1, ArrayList <String> al)
-	{
-		try
-		{
+	private JScrollPane getTabTextFile(String s1, ArrayList <String> al){
+		try{
 			String s = getFileContent(s1);
 		    
     		/* ***VERBOSE****/
@@ -293,14 +303,7 @@ public class ViewPanelCentral{
 		    
 		    return getTabTextString(s1, s, al);
 
-		}
-		catch(FileNotFoundException e)
-		{
-			System.out.println("Exception tabTextFile: " + e.getMessage());
-			return null;
-		} 
-		catch (IOException e) 
-		{
+		}catch (IOException e){
 			System.out.println("Exception tabTextFile: " + e.getMessage());
 			return null;
 		}
@@ -414,17 +417,11 @@ public class ViewPanelCentral{
 		String s = "";
 		String tmp=null;   
 		try {
-			BufferedReader br =
-					new BufferedReader(
-							new FileReader(s1));    
+			BufferedReader br = new BufferedReader(new FileReader(s1));    
 			  
 			while((tmp = br.readLine()) != null) s = s + tmp + "\n";
 			br.close();
-		}catch(FileNotFoundException e){
-			System.out.println("Exception tabTextFile: " + e.getMessage());
-			return null;
-		} 
-		catch (IOException e) {
+		}catch (IOException e) {
 			System.out.println("Exception tabTextFile: " + e.getMessage());
 			return null;
 		}
@@ -458,28 +455,18 @@ public class ViewPanelCentral{
 			  for(int[] occurr: occurrences) hilite.addHighlight(occurr[0], occurr[1], highlightPainter[0]);
 			}
 			
-//			int pos = 0;			
-//			for(int i = 0; i < al.size(); i++){
-//				while((pos = text.toUpperCase().indexOf(al.get(i).toUpperCase(), pos)) >= 0){	
-//					if(ModelProject.isValidOccurrence(al.get(i), text, pos) )
-//						hilite.addHighlight(pos, pos + al.get(i).length(), highlightPainter[0]);
-//					
-//					pos += al.get(i).length();
-//				}    
-//			}		
-		}
-		catch(BadLocationException e){
+		}catch(BadLocationException e){
 			System.out.println("Exception tabTextFile: " + e.getMessage());
 			return null;
 		}
 		return jtc;
 	}
 	
-	/** Crea un tab per un file HTML
+	/** 
+	 * Create a tab containing an HTML file.
 	 * 
-	 * @param s path del file HTML
-	 * 
-	 * @return JScrollPane creato
+	 * @param s - HTML file path
+	 * @return - the new JScrollPane
 	 */
 	private JScrollPane getTabHTMLFile(String s){	
 		String html=null;
@@ -508,13 +495,7 @@ public class ViewPanelCentral{
 			  ep.read(strReader, html);
 			  strReader.close();
 			}
-		} 
-		catch (FileNotFoundException e){
-			System.out.println("FileNotFoundException getTabHTMLFile: " + e.getMessage());
-			e.printStackTrace();
-			return null;
-		} 
-		catch (IOException e){
+		}catch (IOException e){
 			System.out.println("IOException getTabHTMLFile: " + e.getMessage());
 			e.printStackTrace();
 			return null;
@@ -531,38 +512,31 @@ public class ViewPanelCentral{
 	 * @param fType - a FeatureType constant representing the type of features
 	 * @return - the JScrollPane created
 	 */
-	private JScrollPane getTabFeaturesCandidates(ArrayList <String> alFeaturesCand, ArrayList <String> alFeaturesSel,
+	private JPanel getTabFeaturesCandidates(ArrayList <String> alFeaturesCand, ArrayList <String> alFeaturesSel,
 				ArrayList <String> alFeaturesToHighlight, JButton buttonSelectionEnd, FeatureType fType){
 
 		String addTermText=null;
 		JCheckBox checkBoxTmp=null;//temporary variable for CheckBoxes creation
 		JPanel checkBoxIconPanelTmp=null;//temporary variable for CheckBoxes panels creation
 		
-//		ImageIcon icon = new ImageIcon(getClass().getResource("/Search/magnifier glasses-min2.png"));
-//		ImageIcon icon = new ImageIcon(getClass().getResource("/Search/magnifier glasses-min3.png"));
 		ImageIcon iconSearch = new ImageIcon(getClass().getResource("/Search/magnifier glasses-min3.png"));
 		ImageIcon iconNoSearch = new ImageIcon(getClass().getResource("/Search/magnifier glasses_NO_SEARCH.png"));
 		JLabel iconLabel = null;
 
-//		JButton fileSearchButton = null;
-
 		panelSelection = new JPanel();
 		panelSelection.setBackground(Color.WHITE);
-//		jpG.setOpaque(true);
-		panelSelection.setBounds(0, 0, 550, 652);
-		panelSelection.setLayout(null);
+//		panelSelection.setBounds(0, 0, 550, 652);
+		panelSelection.setLayout(new BorderLayout());
 		
 		panelFeatures = new JPanel();
 		panelFeatures.setBackground(Color.WHITE);
-//		panelCommonalities.setOpaque(true);
-		panelFeatures.setBounds(30,10,510,260);
+//		panelFeatures.setBounds(30,10,510,260);
 		panelFeatures.setLayout(new GridLayout(0, 1));
-		panelFeatures.setBorder(BorderFactory.createCompoundBorder(
-				BorderFactory.createEtchedBorder(EtchedBorder.RAISED), 
-						BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)));
+//		panelFeatures.setBorder(BorderFactory.createCompoundBorder(
+//				BorderFactory.createEtchedBorder(EtchedBorder.RAISED), 
+//				BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)));
 		
-		checkBoxFeatures = new ArrayList <JCheckBox> ();
-		
+		checkBoxFeatures = new ArrayList <JCheckBox> ();		
 
 		if(alFeaturesSel == null){//there are no Features Selected
 		  for(int i = 0; i < alFeaturesCand.size(); i++){
@@ -618,75 +592,120 @@ public class ViewPanelCentral{
 
 			  checkBoxIconPanelTmp.add(iconLabel);
 
-//			  iconLabel.addMouseListener(getTermSearchIconListener("Extracted", alFeaturesSel.get(i), alFeaturesToHighlight));
 			  checkBoxFeatures.add(checkBoxTmp); panelFeatures.add(checkBoxIconPanelTmp);
 			}
 		  }
 		}
 		
-		JScrollPane jsp = new JScrollPane(panelFeatures, 
+		JScrollPane scrollPanelFeatures = new JScrollPane(panelFeatures, 
 				   ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				   ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		jsp.setBounds(15, 10, 490, 260);
+		scrollPanelFeatures.setBounds(15, 10, 490, 260);
+		scrollPanelFeatures.setBorder(BorderFactory.createCompoundBorder(
+				BorderFactory.createEtchedBorder(EtchedBorder.RAISED), 
+				BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)));
+
 
 		if(fType==FeatureType.COMMONALITIES) addTermText="Add term at the commonality candidates:";
 		else addTermText="Add term at the variability candidates:";
-		JLabel jl = new JLabel(addTermText);
-		jl.setBounds(16, 271, 400, 30);
+		JLabel addTermLabel = new JLabel(addTermText);
+		addTermLabel.setBounds(16, 271, 400, 30);
 		
-		final JTextField jtf = new JTextField();
-		jtf.setBounds(12, 293, 400, 30);
+		final JTextField addTermField = new JTextField();
+		addTermField.setBounds(12, 293, 400, 30);
 
 		buttonFeaturesAdd = new JButton("Add");
 		buttonFeaturesAdd.setBounds(425, 293, 80, 30);
 		buttonFeaturesAdd.addActionListener(
-				new ActionListener()
-				{
+				new ActionListener(){
+					
 					@Override
-					public void actionPerformed(ActionEvent arg0) 
-					{
-						addCheckBox(jtf.getText());
-						jtf.setText("");
+					public void actionPerformed(ActionEvent arg0){
+						addCheckBox(addTermField.getText());
+						addTermField.setText("");
 					}
 				});
+		
+		JPanel addTermPanel = new JPanel();
+		addTermPanel.setLayout(new BoxLayout(addTermPanel, BoxLayout.LINE_AXIS));
+		addTermPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+		addTermPanel.add(Box.createHorizontalGlue());
+		addTermPanel.add(addTermField);
+		addTermPanel.add(Box.createHorizontalGlue());
+		addTermPanel.add(buttonFeaturesAdd);
+		addTermPanel.add(Box.createHorizontalGlue());
+		
+		JPanel selectionControlPanel = new JPanel();
+		selectionControlPanel.setLayout(new BoxLayout(selectionControlPanel, BoxLayout.PAGE_AXIS));
+		selectionControlPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+//		selectionControlPanel.add(Box.createVerticalGlue());
+		selectionControlPanel.add(addTermPanel);
+		selectionControlPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+		selectionControlPanel.add(buttonSelectionEnd);
 
+		
+//		  buttonPane.add(Box.createHorizontalGlue());
+//		  buttonPane.add(prevOccurrButton);
+//		  buttonPane.add(Box.createHorizontalGlue());
+//		  buttonPane.add(occurrsLabelPanel);
+//		  buttonPane.add(Box.createHorizontalGlue());
+//		  buttonPane.add(nextOccurrButton);
+//		  buttonPane.add(Box.createHorizontalGlue());
+//		  buttonPane.add(XForwardOccurrButton);
+//		  buttonPane.add(Box.createHorizontalGlue());
+
+		
+		//adding components to panel		
+		panelSelection.add(scrollPanelFeatures, BorderLayout.CENTER);
+//		panelSelection.add(addTermField);
+//		panelSelection.add(addTermLabel);
+//		panelSelection.add(buttonFeaturesAdd);
+		panelSelection.add(selectionControlPanel, BorderLayout.SOUTH);
+//		panelSelection.add(buttonSelectionEnd, BorderLayout.SOUTH);
+
+		return panelSelection;
+	}
+	
+	/**
+	 * Returns the panel used to search terms occurrences.
+	 * 
+	 * @return - the JPanel used to search terms occurrences
+	 */
+	private JPanel createSearchPanel(){
+		searchPanel = new JPanel();
+		searchPanel.setLayout(new BorderLayout());
+		
 		//adding control buttons and a label for term occurences navigation
 		XBackwardOccurrButton = new JButton("<<("+occurrJumpSpan+")");
-//		XBackwardOccurrButton.setBounds(20, 370, 76, 22);
-		XBackwardOccurrButton.setBounds(20, 340, 76, 22);
+		XBackwardOccurrButton.setPreferredSize(new Dimension(76, 22));
 		XBackwardOccurrButton.addActionListener(getOccurrNavButtonListener(-occurrJumpSpan));
 
 		prevOccurrButton = new JButton("<");
-		prevOccurrButton.setBounds(100, 340, 76, 22);
+		prevOccurrButton.setPreferredSize(new Dimension(76, 22));
 		prevOccurrButton.addActionListener(getOccurrNavButtonListener(-1));
 		
 		occurrsLabel = new JLabel("<html><div style=\"text-align: center;\">" + "x/y" + "</html>");
 
 		occurrsLabelPanel = new JPanel();
 		occurrsLabelPanel.add(occurrsLabel);
-		occurrsLabelPanel.setBounds(186, 340, 146, 22);
+		occurrsLabelPanel.setPreferredSize(new Dimension(150, 22));
 		occurrsLabelPanel.setBackground(Color.LIGHT_GRAY);
 
-//		occurrsLabel.setBounds(210, 370, 80, 20);
-//		occurrsLabel.setBackground(Color.BLUE);
-
 		nextOccurrButton = new JButton(">");
-		nextOccurrButton.setBounds(342, 340, 76, 22);
+		nextOccurrButton.setPreferredSize(new Dimension(76, 22));
 		nextOccurrButton.addActionListener(getOccurrNavButtonListener(1));
 
 		XForwardOccurrButton = new JButton(">>("+occurrJumpSpan+")");
-		XForwardOccurrButton.setBounds(422, 340, 76, 22);
+		XForwardOccurrButton.setPreferredSize(new Dimension(76, 22));
 		XForwardOccurrButton.addActionListener(getOccurrNavButtonListener(occurrJumpSpan));
-		
-//		private int occurrJumpSpan=4;	//defines the number x of occurences jumped by X...wardButtons
-
-		
 		
 		//adding text area for term occurences visualization		
 		occursTabbedPane = new JTabbedPane();
-//		occursTabbedPane.setBounds(15, 395, 490, 194);//+50?
-//		occursTabbedPane.setBounds(15, 395, 490, 244);
-		occursTabbedPane.setBounds(15, 365, 490, 274);//+50?
+		occursTabbedPane.setPreferredSize(new Dimension(490, 574));
+		
+		//adding buttons panel for term occurences navigation
+		buttonPanel = new JPanel();
+		buttonPanel.setPreferredSize(new Dimension(occursTabbedPane.getPreferredSize().width, 40));
 		
 		//initializing utility maps
 		textTabs = new HashMap<String, JTextArea>();
@@ -695,213 +714,9 @@ public class ViewPanelCentral{
 		lastHighlightedTag = new HashMap<String, HashMap<String, Object>>();
 		lastRemovedHighlights = new HashMap<String, HashMap<String, ArrayList<Highlight>>>();
 
-		//adding components to panel		
-		panelSelection.add(jsp);
-		panelSelection.add(jtf);
-		panelSelection.add(jl);
-		panelSelection.add(buttonFeaturesAdd);
-		panelSelection.add(occursTabbedPane);
-		panelSelection.add(buttonSelectionEnd);
-
-//		return jpG;
-		return new JScrollPane(panelSelection);
-
-//		return new JScrollPane(jpG, 
-//				   ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-//				   ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-	}
-
-	/**
-	 * (Manuel M.) Returns a new ActionListener for features view buttons. The behaviour changes based on the parameter.
-	 * 
-	 * @param type - String representing the required behaviour type
-	 * @param term - String representing the name of the feature candidate
-	 * @param alFeaturesToHighlight - if not null, the terms in alFeaturesToHighlight will be highlighted 
-	 * @return the new ActionListener
-	 */
-//	private MouseAdapter getCheckBoxMouseListener(String type) {
-	private ActionListener getTermSearchButtonListener(String type, final String term, final ArrayList<String> alFeaturesToHighlight) {
-		
-		
-//		private ActionListener getOccurrNavButtonListener(final int jump) {
-//			if (jump==0) return null;
-//			return new ActionListener() {
-//				@Override
-//				public void actionPerformed(ActionEvent ae){		
-		
-//		if (type=="CommInserted") return new MouseAdapter(){			
-//		if (type=="CommInserted") return new ActionListener(){			
-					
-//			@Override
-//			public void mouseClicked(MouseEvent me){							
-
-//			public void actionPerformed(ActionEvent ae){							
-//			  if(me.getButton() == 3){
-//				for(int i = 0; i < checkBoxCommonalities.size(); i++){
-//				  if(checkBoxCommonalities.get(i).equals(me.getSource())) {
-//					removeCheckBox(checkBoxCommonalities.get(i).getText());
-//					break;  
-//				  }
-//				}	
-//			  }
-//			}			
-//		};
-
-//		if (type=="CommExtracted") return new MouseAdapter(){			
-		if (type=="Extracted") return new ActionListener(){			
-			
-//			@SuppressWarnings({ "rawtypes" })
-//			@Override
-//			public void mouseClicked(MouseEvent me){	
-
-			@SuppressWarnings({ "rawtypes" })
-			@Override
-			public void actionPerformed(ActionEvent ae){	
-			
-			
-			//creation of occurrences navigation panel
-			  occursTabbedPane.removeAll();
-			  textTabs.clear();
-//			  textIndexes.clear();
-			  HashMap<String, ArrayList<int[]>> filesListTmp = null;//files list for a term
-//			  ArrayList<String> termArrListTmp = null;//temporary array to call getTabTextString method
-//			  int index=0;
-			  
-			  Iterator<Entry<String, ArrayList<int[]>>> filesIterator = null;
-			  Entry<String, ArrayList<int[]>> occurrencesList = null;
-//			  ArrayList<String> termArrListTmp = null;//temporary array to call getTabTextString method
-//			  int index=0;
-
-			  
-			  //variables used to remember last selected tab for each relevant term
-			  Component[] compArrTmp = null;
-			  String tabTitle = null;
-
-//			  for(int i = 0; i < checkBoxCommonalities.size(); i++){
-//				if(checkBoxCommonalities.get(i).equals(me.getSource())){
-//				  currentSelectedCheckBox=i;
-				  currentSelectedCheckBox=term;
-//				  termArrListTmp = new ArrayList<String>();
-//				  termArrListTmp.add(checkBoxCommonalities.get(i).getText());
-				  
-				  
-				  
-				  
-				  /* ***DEBUG*** */
-				  if (debug) System.out.println("\nCLICCATO SU UN TERMINE!()\nTerm="+term);
-				  /* ***DEBUG*** */
-
-//				  filesListTmp = relevantTerms.get(checkBoxCommonalities.get(i).getText());
-
-				  /* ***DEBUG*** */
-				  if (debug) System.out.println("relevantTerms.get(term)="+relevantTerms.get(term));
-				  /* ***DEBUG*** */
-
-				  filesListTmp = relevantTerms.get(term);
-
-				  /* ***DEBUG*** */
-				  if (debug) System.out.println("filesListTmp.entrySet().iterator()="+filesListTmp.entrySet().iterator());
-				  /* ***DEBUG*** */
-
-				  filesIterator = filesListTmp.entrySet().iterator();
-				  
-//				  if(alFeaturesToHighlight!=null){//removing from the list features that are substrings of term
-//					termArrListTmp = new ArrayList<String>();
-//					for(int f=0; f<alFeaturesToHighlight.size(); ++f){
-//					  index=0;
-//					  //get first occurrence, if any
-//					  index = term.toUpperCase().indexOf(alFeaturesToHighlight.get(f).toUpperCase());
-//
-//					  if (index > -1 && ModelProject.isValidOccurrence(alFeaturesToHighlight.get(f), term, index))
-//						  break;//start checking next relevant term occurrences in this line
-//
-//					  //add occurrence to relevantTerms, if it is valid
-//					  if ()
-//						addCharIndexToOccursList(fileProject.get(k).readTermRelevant().get(h),
-//						fileProject.get(k).readPathFileUTF8(), charcount+index);
-//
-//					  //incrementing index to search for next occurrence
-//					  index+=fileProject.get(k).readTermRelevant().get(h).length();
-//					}	
-//				  }
-				  
-				  
-				  while (filesIterator.hasNext()) {//for each file a JScrollPane is added
-					  
-					occurrencesList = filesIterator.next();
-
-//					JScrollPane jScrP = getTabTextFile((String)occurrencesList.getKey(), termArrListTmp);
-					JScrollPane jScrP = getRegisteredTabTextFile(term, 
-							(String)occurrencesList.getKey(), alFeaturesToHighlight/*termArrListTmp*/);
-//					JScrollPane jScrP = getRegisteredTabTextFile(checkBoxCommonalities.get(i).getText(), 
-//							  (String)occurrencesList.getKey(), null/*termArrListTmp*/, false);
-					occursTabbedPane.addTab((String)occurrencesList.getKey(), jScrP);
-//					selectCurrentOccurrence(currentSelectedCheckBox, (String)occurrencesList.getKey());
-					
-		    		/* ***VERBOSE****/
-					if (verbose) System.out.println("\n***\nNumero di componenti di jScrP: "+jScrP.getComponentCount());
-					for (int h=0; h<jScrP.getComponentCount(); h++){
-						System.out.println("Classe del componente "+h+": "+jScrP.getComponent(h).getClass());
-					}
-					System.out.println("Classe del ViewPort: "+jScrP.getViewport().getClass());
-					/* ***VERBOSE****/
-
-				  }
-
-				  //adding occurences navigation controls
-				  panelSelection.add(nextOccurrButton);
-				  nextOccurrButton.setVisible(true);
-				  panelSelection.add(prevOccurrButton);
-				  prevOccurrButton.setVisible(true);
-				  panelSelection.add(XForwardOccurrButton);
-				  XForwardOccurrButton.setVisible(true);
-				  panelSelection.add(XBackwardOccurrButton);
-				  XBackwardOccurrButton.setVisible(true);
-				  panelSelection.add(occurrsLabelPanel);
-				  occurrsLabelPanel.setVisible(true);
-//				  jpG.validate();
-				  panelSelection.repaint();
-				  
-				  //restoring previous occurences panel state, if any.
-				  if (!currentFiles.containsKey(term)) currentFiles.put(term, 
-							  ( (JScrollPane)occursTabbedPane.getSelectedComponent() ).getName());
-//				  if (!currentFiles.containsKey(checkBoxCommonalities.get(i).getText()))
-//					  currentFiles.put(checkBoxCommonalities.get(i).getText(), 
-//							  ( (JScrollPane)occursTabbedPane.getSelectedComponent() ).getName());
-				  else {
-					  tabTitle = currentFiles.get(term);
-//					  tabTitle = currentFiles.get(checkBoxCommonalities.get(i).getText());
-					  compArrTmp = occursTabbedPane.getComponents();
-					  for (int k=0; k< compArrTmp.length; ++k)
-						  if (compArrTmp[k].getName()==tabTitle) occursTabbedPane.setSelectedComponent(compArrTmp[k]);
-				  }
-				  
-				  selectCurrentOccurrence(currentSelectedCheckBox, term);
-//				  selectCurrentOccurrence(currentSelectedCheckBox, (JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
-//				  break;				  
-//				}
-//			  }
-			  
-			  occursTabbedPane.addMouseListener(
-				new MouseAdapter(){
-
-				  @Override
-				  public void mouseClicked(MouseEvent me){						
-					selectCurrentOccurrence(currentSelectedCheckBox,
-						((JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
-					currentFiles.put(currentSelectedCheckBox, ((JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
-//					currentFiles.put(checkBoxCommonalities.get(currentSelectedCheckBox).getText(),
-//							((JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
-				  }
-				  
-				}
-			  );
-			  
-			}
-
-		};	
-		else return null;
-	
+		searchPanel.add(buttonPanel, BorderLayout.NORTH);
+		searchPanel.add(occursTabbedPane, BorderLayout.CENTER);
+		return searchPanel;
 	}
 
 	/**
@@ -966,19 +781,25 @@ public class ViewPanelCentral{
 		  }
 
 		  //adding occurences navigation controls
-		  panelSelection.add(nextOccurrButton);
-		  nextOccurrButton.setVisible(true);
-		  panelSelection.add(prevOccurrButton);
-		  prevOccurrButton.setVisible(true);
-		  panelSelection.add(XForwardOccurrButton);
-		  XForwardOccurrButton.setVisible(true);
-		  panelSelection.add(XBackwardOccurrButton);
-		  XBackwardOccurrButton.setVisible(true);
-		  panelSelection.add(occurrsLabelPanel);
-		  occurrsLabelPanel.setVisible(true);
-		  //				  jpG.validate();
-		  panelSelection.repaint();
-
+		  buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
+		  buttonPanel.setBorder(BorderFactory.createEmptyBorder(3, 5, 6, 5));
+//		  buttonPanel.setLocation(0, 10);
+		  
+		  buttonPanel.add(Box.createHorizontalGlue());
+		  buttonPanel.add(XBackwardOccurrButton);
+		  buttonPanel.add(Box.createHorizontalGlue());
+		  buttonPanel.add(prevOccurrButton);
+		  buttonPanel.add(Box.createHorizontalGlue());
+		  buttonPanel.add(occurrsLabelPanel);
+		  buttonPanel.add(Box.createHorizontalGlue());
+		  buttonPanel.add(nextOccurrButton);
+		  buttonPanel.add(Box.createHorizontalGlue());
+		  buttonPanel.add(XForwardOccurrButton);
+		  buttonPanel.add(Box.createHorizontalGlue());
+//		  buttonPane.add(Box.createRigidArea(new Dimension(10, 0)));
+		  
+		  searchPanel.repaint();
+		  
 		  //restoring previous occurences panel state, if any.
 		  if (!currentFiles.containsKey(term)) currentFiles.put(term, 
 				  ((JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
@@ -1037,17 +858,11 @@ public class ViewPanelCentral{
 			  
 			  JTextArea jta= textTabs.get(( (JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
 			  currentIndex= textIndexes.get(currentSelectedCheckBox).get(fileName);
-//			  int currentIndex= textIndexes.get(checkBoxCommonalities.get(currentSelectedCheckBox).getText()).get((
-//						(JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
 
 			  //calculate next occurrence index to use, depending on the jump parameter
 			  occurrFilesList = relevantTerms.get(currentSelectedCheckBox);
-//			  occurrFilesList = relevantTerms.get(checkBoxCommonalities.get(currentSelectedCheckBox).getText());
 			  occurrIndexesList=occurrFilesList.get(fileName);
-			  
-//			  previousIndex=currentIndex;
-//			  previousOccurrenceIndex = occurrIndexesList.get(previousIndex);
-			  
+			  			  
 			  if (jump>0){
 				if (currentIndex<occurrIndexesList.size()-jump) currentIndex+=jump;
 				else currentIndex=occurrIndexesList.size()-1;
@@ -1128,12 +943,9 @@ public class ViewPanelCentral{
 
 			  //updating current occurrence index for this file
 			  textIndexes.get(currentSelectedCheckBox).put(fileName, currentIndex);
-//			  textIndexes.get(checkBoxCommonalities.get(currentSelectedCheckBox).getText()).put(
-//				  		((JScrollPane)occursTabbedPane.getSelectedComponent()).getName(), currentIndex);
 
 			  //updating occurrences label
 			  occurrsLabel.setText( (currentIndex+1)+"/"+occurrIndexesList.size()+"[Index: "+occurrence[0]+"]");
-
 
 			  /* ***VERBOSE****/					
 			  if (verbose) System.out.println(
@@ -1141,8 +953,6 @@ public class ViewPanelCentral{
 				+"\noccurrenceIndex: "+occurrence
 				+"\ncurrentSelectedCheckBox(il testo): "+currentSelectedCheckBox
 				+"\ncurrentSelectedCheckBox(lunghezza): "+currentSelectedCheckBox.length()
-//				+"\ncurrentSelectedCheckBox(il testo): "+checkBoxCommonalities.get(currentSelectedCheckBox).getText()
-//				+"\ncurrentSelectedCheckBox(lunghezza): "+checkBoxCommonalities.get(currentSelectedCheckBox).getText().length()
 				+"\ncurrentIndex: "+currentIndex
 				+"\n*****\n");					
 			  /* ***VERBOSE****/
@@ -1167,12 +977,9 @@ public class ViewPanelCentral{
 			
 		  JTextArea jta= textTabs.get(file);
 		  int currentIndex= textIndexes.get(currentSelectedCheckBox).get(file);
-//		  int currentIndex= textIndexes.get(checkBoxCommonalities.get(currentSelectedCheckBox).getText()).get(
-//					( (JScrollPane)occursTabbedPane.getSelectedComponent()).getName());
 
 		  //calculating current occurrence index for selection
 		  occurrFilesList = relevantTerms.get(currentSelectedCheckBox);
-//		  occurrFilesList = relevantTerms.get(checkBoxCommonalities.get(currentSelectedCheckBox).getText());
 		  occurrIndexesList=occurrFilesList.get(file);
 		  occurrence = occurrIndexesList.get(currentIndex);
 
@@ -1218,10 +1025,6 @@ public class ViewPanelCentral{
 		  //saving last removed Commonality tags in lastRemovedCommHighlights
 		  lastRemovedHighlights.get(currentSelectedCheckBox).put(file, commTagsToRemove);
 		  
-
-		  
-//		  if(lastHighlightedTag!=null) hilite.removeHighlight(lastHighlightedTag);
-		  
 		  //highlighting current occurrence and saving it in lastHighlightedTag		  		  
 		  try {
 //			lastHighlightedTag.get(currentSelectedCheckBox).put(
@@ -1251,12 +1054,12 @@ public class ViewPanelCentral{
 		
 	}	
 
-	/** Aggiunge una JCheckBox al tab delle commonalities candidates
+	/** 
+	 * Adds a JCheckBox to the commonalities candidates tab.
 	 * 
-	 * @param s stringa contenente il nome da aggiungere
+	 * @param s - String containing the feature name to be added
 	 */
-	private void addCheckBox(String s) 
-	{
+	private void addCheckBox(String s){
 		if(s == null || s.trim().equals(""))
 			return;
 		
@@ -1283,12 +1086,12 @@ public class ViewPanelCentral{
 		panelFeatures.validate();
 	}
 	
-	/** Rimuove una JCheckBox dal tab delle commonalities candidates
+	/** 
+	 * Removes a JCheckBox from the commonalities candidates tab.
 	 * 
-	 * @param s stringa contenente il nome da rimuovere
+	 * @param s - String containing the feature name to be removed
 	 */
-	private void removeCheckBox(String s) 
-	{
+	private void removeCheckBox(String s){
 		if(s == null)
 			return;
 		

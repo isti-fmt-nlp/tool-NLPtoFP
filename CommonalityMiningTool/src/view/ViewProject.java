@@ -8,8 +8,10 @@ package view;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -36,9 +38,12 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 
+import view.EditorView.EditorSplitPane;
 import view.EditorView.FilterFileProject;
 
 
@@ -46,7 +51,6 @@ public class ViewProject implements Observer, Runnable{
 
 	private static boolean verbose=false;//variable used to activate prints in the code
 	
-//	private static final String savedProjectsDir = "Usage Tries";
 	private static final String savedProjectsDir = "Usage Tries/ANALISYS";
 	
 	private ModelProject modelProject = null;
@@ -78,9 +82,6 @@ public class ViewProject implements Observer, Runnable{
 	//Diagram Management Menu items	
 	private JMenuItem menuDiagramRestart=null, menuDiagramOpen=null;
 
-//	private JButton buttonProjectCP=null, buttonProjectSP=null,
-//					buttonProjectLF=null, buttonProjectEC=null, buttonProjectEV=null;
-	
 	private JPopupMenu menuTreeProject = null;
 	
 	private JMenuItem menuTree = null;
@@ -99,53 +100,56 @@ public class ViewProject implements Observer, Runnable{
 	
 	private ViewPanelCentral panelCentralProject = null;
 	
-	/** Costruttore
+	private JSplitPane splitterPanelMain = null;
+	
+//	private JSplitPane splitterPanelInner = null;
+	
+	/** 
+	 * Constructor of the project's view.
 	 * 
-	 * @param modelProject
+	 * @param modelProject - the model that will be represented by this view.
 	 */
-	public ViewProject(ModelProject modelProject)
-	{
+	public ViewProject(ModelProject modelProject){
 		this.modelProject = modelProject;
 		
-		/* Creazione JFrame */
+		/* Initializing JFrame */
 		frameProject.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//		frameProject.setExtendedState(JFrame.MAXIMIZED_BOTH);
-//		frameProject.setLocationRelativeTo(null);
-		frameProject.setLayout(null);		
+		frameProject.setLayout(new BorderLayout());				
 		frameProject.setSize(Toolkit.getDefaultToolkit().getScreenSize());
-		frameProject.setLocation(0,  0);
-//		frameProject.setSize(700, 400);
-//		frameProject.setMaximizedBounds(null);
+		frameProject.setPreferredSize(Toolkit.getDefaultToolkit().getScreenSize());
+
 		frameProject.setJMenuBar(menu);
+		
+		splitterPanelMain = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		splitterPanelMain.setContinuousLayout(true);
+//		splitterPanel.setOneTouchExpandable(true);
+//		splitterPanel.setDividerLocation(0.5);
+		splitterPanelMain.setDividerSize(6);
+		splitterPanelMain.setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width,
+				Toolkit.getDefaultToolkit().getScreenSize().height));
+		
+//		splitterPanelInner = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+//		splitterPanelInner.setContinuousLayout(true);
+//		splitterPanelInner.setDividerSize(6);
+//		splitterPanelInner.setPreferredSize(
+//		  new Dimension(4*Toolkit.getDefaultToolkit().getScreenSize().width/5, Toolkit.getDefaultToolkit().getScreenSize().height));
+		
+		frameProject.add(splitterPanelMain, BorderLayout.CENTER);
+
 	}
 	
 	/** 
 	 * Thread: Manages the throbber.
 	 */
 	@Override
-	public void run() {
+	public void run(){
 		JLabel jl1 = new JLabel("Analysing input files...");
 		jl1.setBounds(new Rectangle(20,10,250,30));
 		
 		System.out.println("getClass().getResource(/Throbber/\"throbber.gif\"): "+getClass().getResource("/Throbber/throbber.gif"));
 		System.out.println("getClass(): "+getClass());
-		
-//		ImageIcon i=null;
-//		try {
-//			i = new ImageIcon(ImageIO.read(this.getClass().getResource("throbber.gif")));
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 		ImageIcon i = new ImageIcon(getClass().getResource("/Throbber/throbber.gif"));
 
-//	    System.out.println("./src/DATA/Throbber/throbber.gif: "+getClass().getResource("./src/DATA/Throbber/throbber.gif"));
-
-
-//	    System.out.println("throbber.gif: "+getClass().getResource("/throbber.gif"));
-
-//		ImageIcon i = new ImageIcon("./src/DATA/Throbber/throbber.gif");
-		
 		JLabel jl2  = new JLabel();
 		jl2.setBounds(new Rectangle(270,10,35,35));
 		jl2.setIcon(i);		
@@ -158,27 +162,27 @@ public class ViewProject implements Observer, Runnable{
 		jf.add(jl2);
 		jf.setVisible(true);
 		
-		while(!stateThrobber) jf.repaint();
+		while(!stateThrobber){ jf.repaint(); /*System.out.println("throbbing...");*/}
 		
 		jf.setVisible(false);
 		jf.dispose();
 	}
 	
-	/** Setta lo stato del throbber
+	/** 
+	 * Sets the throbber's state.
 	 * 
-	 * @param b
+	 * @param b - boolean indicating throbber state to be set
 	 */
-	private void setStateThrobber(boolean b)
-	{
+	private void setStateThrobber(boolean b){
 		stateThrobber = b; 
 	}
 	
-	/** Crea ed inizializza le strutture della GUI, aggiungendo ad ognuno di esse come ascoltare degli eventi il controllore 
+	/** 
+	 * Creates ed initializes the GUI structures, adding the controller to each component that needs it.
 	 * 
-	 * @param controllerProject controllore
+	 * @param controllerProject - the controller
 	 */
-	public void addListener(ControllerProject controllerProject) 
-	{
+	public void addListener(ControllerProject controllerProject){
 		this.controllerProject = controllerProject;
 		
 		/* Creazione MenuBar */
@@ -284,38 +288,6 @@ public class ViewProject implements Observer, Runnable{
 		menu.add(menuDiagram);
 
 		
-//		/* Creazione Bottoni */
-//		buttonProjectCP = new JButton("Create Project");
-//		buttonProjectCP.addActionListener(controllerProject);
-//		buttonProjectCP.setBounds(new Rectangle(10,5,180,35));
-//		
-//		buttonProjectSP = new JButton("Save Project");
-//		buttonProjectSP.addActionListener(controllerProject);
-//		buttonProjectSP.setBounds(new Rectangle(220,5,180,35));
-//		buttonProjectSP.setEnabled(false);
-//		
-//		buttonProjectLF = new JButton("Load File");
-//		buttonProjectLF.addActionListener(controllerProject);
-//		buttonProjectLF.setBounds(new Rectangle(430,5,180,35));
-//		buttonProjectLF.setEnabled(false);
-//		
-//		buttonProjectEC = new JButton("Extract Commonalities");
-//		buttonProjectEC.addActionListener(controllerProject);
-//		buttonProjectEC.setBounds(new Rectangle(650,5,180,35));
-//		buttonProjectEC.setEnabled(false);
-//		
-//		buttonProjectEV = new JButton("Extract Variabilities");
-//		buttonProjectEV.addActionListener(controllerProject);
-//		buttonProjectEV.setBounds(new Rectangle(870,5,180,35));
-//		buttonProjectEV.setEnabled(false);
-//		
-//		frameProject.add(buttonProjectCP);
-//		frameProject.add(buttonProjectSP);
-//		frameProject.add(buttonProjectLF);
-//		frameProject.add(buttonProjectEC);
-//		frameProject.add(buttonProjectEV);
-		
-		
 		menuTree = new JMenuItem("Delete Selected File");
 		menuTree.addActionListener(controllerProject);
 		
@@ -327,22 +299,20 @@ public class ViewProject implements Observer, Runnable{
 
 		buttonCommonalitiesSelectionEnd = new JButton("Select Commonalities");
 		buttonCommonalitiesSelectionEnd.setBounds(330, 640, 180, 30);//+50?
-//		buttonCommonalitiesSelectionEnd.setBounds(330, 590, 180, 30);//+50?
 		buttonCommonalitiesSelectionEnd.addActionListener(controllerProject);
 		
 		buttonVariabilitiesSelectionEnd= new JButton("Select Variabilities");
 		buttonVariabilitiesSelectionEnd.setBounds(330, 640, 180, 30);//+50?
-//		buttonVariabilitiesSelectionEnd.setBounds(330, 590, 180, 30);//+50?
 		buttonVariabilitiesSelectionEnd.addActionListener(controllerProject);
 		
 		/* Creazione pannello centrale */
-//		panelCentralProject = new ViewPanelCentral(lastButtonSelectionEnd);
 		panelCentralProject = new ViewPanelCentral();
 		
 		frameProject.addWindowListener(controllerProject);
 		frameProject.setVisible(true);
-
+		frameProject.setLocation(0, 0);
 		frameProject.setExtendedState(frameProject.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+		frameProject.validate();
 	}
 	
 	/** 
@@ -357,7 +327,8 @@ public class ViewProject implements Observer, Runnable{
 			//stopping throbber
 			frameProject.setEnabled(true);
 			setStateThrobber(true);
-			//colouring of Green all input file nodes in the tree
+			
+			//setting color Green to all input file nodes in the tree
 			panelLateralProject.setAnalysisLeafTree();	
 			
 	    	//activating menu items
@@ -446,14 +417,18 @@ public class ViewProject implements Observer, Runnable{
 		else if(o.equals("End Commonalities Selected")){
 			panelCentralProject.refreshTabFeaturesSelected(
 				modelProject.readPathCommonalitiesSelectedHTML(), ViewPanelCentral.FeatureType.COMMONALITIES);
-			frameProject.remove(panelCentralProject.getPanelAnalysis());
-			frameProject.add(panelCentralProject.getPanelAnalysis());	
+			splitterPanelMain.setRightComponent(panelCentralProject.getPanelAnalysis());
+//			splitterPanelInner.setLeftComponent(panelCentralProject.getPanelAnalysis());
+//			frameProject.remove(panelCentralProject.getPanelAnalysis());
+//			frameProject.add(panelCentralProject.getPanelAnalysis());	
 		}
 		else if(o.equals("End Variabilities Selected")){
 			panelCentralProject.refreshTabFeaturesSelected(
 				modelProject.readPathVariabilitiesSelectedHTML(), ViewPanelCentral.FeatureType.VARIABILITIES);
-			frameProject.remove(panelCentralProject.getPanelAnalysis());
-			frameProject.add(panelCentralProject.getPanelAnalysis());	
+			splitterPanelMain.setRightComponent(panelCentralProject.getPanelAnalysis());
+//			splitterPanelInner.setLeftComponent(panelCentralProject.getPanelAnalysis());
+//			frameProject.remove(panelCentralProject.getPanelAnalysis());
+//			frameProject.add(panelCentralProject.getPanelAnalysis());	
 		}
 		else if(o.equals("Input File Deleted")){
 //			if (panelLateralProject.getAnalysisLeafTree().size())
@@ -463,7 +438,7 @@ public class ViewProject implements Observer, Runnable{
 		  frameProject.setEnabled(true);
 		  setStateThrobber(true);
 
-		  //colouring of Green all input file nodes in the tree
+		  //setting color Green to all input file nodes in the tree
 		  panelLateralProject.setAnalysisLeafTree();	
 
 		  //activating menu items
@@ -521,11 +496,10 @@ public class ViewProject implements Observer, Runnable{
 		    	return null;
 	}
 	
-	/** Cancella il progetto
-	 * 
+	/** 
+	 * Deletes the project.
 	 */
-	public void deleteProjectDialog()
-	{
+	public void deleteProjectDialog(){
 		JFrame f = new JFrame("Delete Project");
 		
     	Object[] options = {"No","Yes"};			
@@ -533,11 +507,12 @@ public class ViewProject implements Observer, Runnable{
 		int i = JOptionPane.showOptionDialog(
 				f, "Do you want delete the project?", "Delete Project", JOptionPane.OK_OPTION, JOptionPane.NO_OPTION, null, options, options[1]);
 		
-		if(i == 1)
-		{
+		if(i == 1){
 			modelProject.deleteProject();
-			frameProject.remove(panelLateralProject.getPanelTree());
-			frameProject.remove(panelCentralProject.getPanelAnalysis());
+//			splitterPanelInner.removeAll();
+			splitterPanelMain.removeAll();
+//			frameProject.remove(panelLateralProject.getPanelTree());
+//			frameProject.remove(panelCentralProject.getPanelAnalysis());
 			panelLateralProject = new ViewPanelLateral(menuTreeProject);
 			panelCentralProject = new ViewPanelCentral();
 			frameProject.repaint();
@@ -872,8 +847,8 @@ public class ViewProject implements Observer, Runnable{
 	 */
 	public void loadPanelLateral(String s, ArrayList <String> al){
 
-		frameProject.remove(panelLateralProject.getPanelTree());
-		frameProject.remove(panelCentralProject.getPanelAnalysis());   
+//		frameProject.remove(panelLateralProject.getPanelTree());
+//		frameProject.remove(panelCentralProject.getPanelAnalysis());   
 		
 		panelLateralProject = new ViewPanelLateral(menuTreeProject);
 		
@@ -890,9 +865,6 @@ public class ViewProject implements Observer, Runnable{
 	    			modelProject.loadAnalysisFileProject());
 		}
 
-//    	buttonProjectSP.setEnabled(true);
-//    	buttonProjectLF.setEnabled(true);
-
 		//activating menu items
 		menuProjectDelete.setEnabled(true);
     	menuProjectSave.setEnabled(true);
@@ -904,17 +876,18 @@ public class ViewProject implements Observer, Runnable{
     	  menuFeaturesExtractComm.setEnabled(true);
     	}
     	
-    	frameProject.add(panelLateralProject.getPanelTree());	    	
+		splitterPanelMain.setLeftComponent(panelLateralProject.getPanelTree());
+//		splitterPanelMain.setRightComponent(splitterPanelInner); 
+		
+//    	frameProject.add(panelLateralProject.getPanelTree());	    	
     	frameProject.repaint();   
 
 	}
 	
 	/** 
 	 * Loads the central panel according to user selection on lateral project tree.
-	 * 
 	 */
-	public void loadPanelCentral()
-	{
+	public void loadPanelCentral(){
 		int i = -1;
 		
 		if((i = panelLateralProject.getAnalysisLeaf()) != -1){
@@ -939,8 +912,10 @@ public class ViewProject implements Observer, Runnable{
 				  modelProject.readCommonalitiesCandidates(), lastButtonSelectionEnd);
 			}
 
-			frameProject.remove(panelCentralProject.getPanelAnalysis());
-			frameProject.add(panelCentralProject.getPanelAnalysis());
+//			splitterPanelInner.setLeftComponent(panelCentralProject.getPanelAnalysis());
+			splitterPanelMain.setRightComponent(panelCentralProject.getPanelAnalysis());
+//			frameProject.remove(panelCentralProject.getPanelAnalysis());
+//			frameProject.add(panelCentralProject.getPanelAnalysis());
 			frameProject.repaint();
 		}
 	}
