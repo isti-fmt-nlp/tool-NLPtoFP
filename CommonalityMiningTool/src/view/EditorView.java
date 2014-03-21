@@ -76,6 +76,7 @@ import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Box.Filler;
 import javax.swing.Action;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
@@ -132,6 +133,8 @@ import javax.swing.text.Highlighter.Highlight;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.events.StartDocument;
+
+import com.ibm.icu.impl.InvalidFormatException;
 
 import view.EditorModel.StringWrapper;
 import view.ViewPanelCentral.FeatureType;
@@ -321,9 +324,11 @@ public class EditorView extends JFrame implements Observer{
 	/** URL of the new group starting dot icon*/
 	private static URL ORGroupDotIconURL=EditorView.class.getResource("/ORGroup Start Dot.png");
 	/** URL of the new mandatory connector ending dot icon*/
-	private static URL mandatoryConnectorEndDotIconURL=EditorView.class.getResource("/Mandatory Connector End Dot.png");
+	private static URL mandatoryConnectorEndDotIconURL=EditorView.class.getResource("/Mandatory End Dot2.png");
+//	private static URL mandatoryConnectorEndDotIconURL=EditorView.class.getResource("/Mandatory Connector End Dot.png");
 	/** URL of the new optional connector ending dot icon*/
-	private static URL optionalConnectorEndDotIconURL=EditorView.class.getResource("/Optional Connector End Dot.png");
+	private static URL optionalConnectorEndDotIconURL=EditorView.class.getResource("/Optional End Dot2.png");
+//	private static URL optionalConnectorEndDotIconURL=EditorView.class.getResource("/Optional Connector End Dot.png");
 	/** URL of the new constraint dot icon*/
 	private static URL constraintDotIconURL=EditorView.class.getResource("/Constraint Dot.png");
 	/** URL of the new constraint control point dot icon*/
@@ -517,7 +522,7 @@ public class EditorView extends JFrame implements Observer{
 //	private JPanel panelFeatures = null;
 	
 	/** The panel searchFrame used to search for feature occurrences*/
-	private JPanel searchPanel = null;
+	private JSplitPane searchPanel = null;
 
 //	/** List of selected features names*/
 //	private ArrayList<JLabel> labelFeatures = new ArrayList<JLabel> ();
@@ -547,6 +552,9 @@ public class EditorView extends JFrame implements Observer{
 	/**relevant terms occurrences panel*/
 	private JTabbedPane occursTabbedPane = null;
 	
+	/**relevant terms search buttons panel*/
+	private JPanel buttonPanel = null;
+
 	/**the JTextAreas of search panel*/
 	private HashMap<String, JTextArea> textTabs = null;
 	/**association between relevant terms and current selected tab file names in search panel*/
@@ -629,14 +637,6 @@ public class EditorView extends JFrame implements Observer{
 	  this.relevantTerms = new HashMap<String, HashMap<String, ArrayList<int[]>>>();
 	  this.relevantTermsVersions = new HashMap<String, HashMap<String, ArrayList<String>>>();
 		  
-//	  System.out.println("relevantTermsVersions: ");
-//	  for(String[] strArr : relevantTermsVersions) System.out.println(strArr[0]+" - "+strArr[1]);
-
-//	  Iterator<Entry<String, HashMap<String, ArrayList<int[]>>>> termVersionsIter = relevantTerms.entrySet().iterator();
-//	  Entry<String, HashMap<String, ArrayList<int[]>>> termVersionsEntry=null;
-//	  Iterator<Entry<String, ArrayList<int[]>>> fileVersionsIter = null;
-//	  Entry<String, ArrayList<int[]>> fileVersionsEntry=null;
-
 	  /* ***VERBOSE*** */
 	  //printing all relevantTerms occurrences
 	  Iterator<Entry<String, HashMap<String, ArrayList<int[]>>>> termIterVERB = relevantTerms.entrySet().iterator();
@@ -664,14 +664,7 @@ public class EditorView extends JFrame implements Observer{
 		  this.termsColor.put(name, colorsMap.get(name));
 		  this.relevantTerms.put(name, relevantTerms.get(name));
 		  if(relevantTermsVersions.get(name)!=null) 
-		      this.relevantTermsVersions.put(name, relevantTermsVersions.get(name));
-		  
-//		  for(String[] str : relevantTermsVersions)
-//			if(str[0].compareTo(name)==0) this.relevantTermsVersions.put(str[0], str[1]);
-//		  for(int i=0; i<relevantTermsVersions.size(); ++i)
-//			if(relevantTermsVersions.get(i)[1].compareTo(name)==0)
-//			  this.relevantTermsVersions.add(relevantTermsVersions.get(i));
-				  
+		      this.relevantTermsVersions.put(name, relevantTermsVersions.get(name));		  
 		}
 	  
 	  if(variabilitiesSelected!=null)
@@ -681,11 +674,6 @@ public class EditorView extends JFrame implements Observer{
 		  this.relevantTerms.put(name, relevantTerms.get(name));
 		  if(relevantTermsVersions.get(name)!=null) 
 		      this.relevantTermsVersions.put(name, relevantTermsVersions.get(name));
-//		  for(String[] str : relevantTermsVersions)
-//			if(str[0].compareTo(name)==0) this.relevantTermsVersions.put(str[0], str[1]);
-//		  for(int i=0; i<relevantTermsVersions.size(); ++i)
-//			if(relevantTermsVersions.get(i)[1].compareTo(name)==0)
-//			  this.relevantTermsVersions.add(relevantTermsVersions.get(i));
 		}
 	  
 
@@ -1690,8 +1678,6 @@ public class EditorView extends JFrame implements Observer{
      * @return the visible center point of the anchor
      */
     public Point2D getVisibleStartAnchorCenter(JComponent anchor) {
-//    	double x=(anchor.getLocationOnScreen().getX()-splitterPanel.getLocationOnScreen().getX()+anchor.getWidth()/2);
-//    	double y=(anchor.getLocationOnScreen().getY()-splitterPanel.getLocationOnScreen().getY()+anchor.getHeight()/2+3);
     	double x=(anchor.getLocationOnScreen().getX()-diagramPanel.getLocationOnScreen().getX()+anchor.getWidth()/2);
     	double y=(anchor.getLocationOnScreen().getY()-diagramPanel.getLocationOnScreen().getY()+anchor.getHeight()/2+3);
     	
@@ -3996,6 +3982,12 @@ public class EditorView extends JFrame implements Observer{
 		modified=mod;
 	}
 	
+	/** Tells the size of a feature panel*/
+	public Dimension getFeatureSize(){
+		return new Dimension(120+featureBorderSize, 60+featureBorderSize);
+	}
+	
+	
 
 	/**
 	 * Reset item used for dragging tools.*/
@@ -4386,6 +4378,23 @@ public class EditorView extends JFrame implements Observer{
 		Entry<String, int[]> colorEntry=null;
 		int[] color=null;
 		Color featColor=null;
+
+		Iterator<Entry<String, HashMap<String, ArrayList<int[]>>>> termIter = null;
+		Entry<String, HashMap<String, ArrayList<int[]>>> termEntry = null;
+
+		Iterator<Entry<String, ArrayList<int[]>>> fileIter = null;
+		Entry<String, ArrayList<int[]>> fileEntry = null;
+		
+		Iterator<Entry<String, HashMap<String, ArrayList<String>>>> termVersionIter = null;
+		Entry<String, HashMap<String, ArrayList<String>>> termVersionEntry = null;
+
+		Iterator<Entry<String, ArrayList<String>>> fileVersionIter = null;
+		Entry<String, ArrayList<String>> fileVersionEntry = null;
+		
+		ArrayList<String> arrStr = null;
+		
+		String tmpLine=null;
+
 		
 		//saving diagram graphic elements data
 		String savePath = pathProject + "/" + s + "_DiagView.xml"; 
@@ -4545,7 +4554,47 @@ public class EditorView extends JFrame implements Observer{
 		}
 		
 		xml+=	 "</featureColors>"
-			  +"</Diagram>";
+				+"<featureOccurrences>";
+		
+		//saving feature occurrences in files
+		termIter=relevantTerms.entrySet().iterator();
+		tmpLine=null;
+		while(termIter.hasNext()){
+		  termEntry=termIter.next();
+				
+		  tmpLine=termEntry.getKey()+"\t";
+		  fileIter=termEntry.getValue().entrySet().iterator();
+		  while(fileIter.hasNext()){
+			fileEntry=fileIter.next();
+				  
+			tmpLine+="f: "+fileEntry.getKey()+" i: ";
+			for(int[] index : fileEntry.getValue()) tmpLine+=index[0]+"-"+index[1]+" ";		
+		  }
+		  xml+=tmpLine+"\n";			
+		}
+		
+		xml+=	 "</featureOccurrences>"
+				+"<featureVersions>";
+		
+		//saving feature versions
+		termVersionIter = relevantTermsVersions.entrySet().iterator();
+		tmpLine=null;
+		while(termVersionIter.hasNext()){
+		  termVersionEntry=termVersionIter.next();
+		  tmpLine=termVersionEntry.getKey();
+			  
+		  fileVersionIter=termVersionEntry.getValue().entrySet().iterator();
+		  while(fileVersionIter.hasNext()){
+			fileVersionEntry=fileVersionIter.next();
+			
+			tmpLine+="\tf:\t"+fileVersionEntry.getKey();
+			for(String version : fileVersionEntry.getValue()) tmpLine+="\t"+version;
+		  }
+		  xml+=tmpLine+"\n";			
+		}	  
+
+		xml+=	 "</featureVersions>"
+				+"</Diagram>";
 		
 		//saving xml string on file
 		try{
@@ -4579,11 +4628,16 @@ public class EditorView extends JFrame implements Observer{
 	  OrderedListNode tmp=null;
 	  try {
 		stream=new FileInputStream(diagramDataPath);
-		System.out.println("EditorView: *** PARSING: "+diagramDataPath+" ***");
+
+		/* ***DEBUG*** */
+		if(debug2) System.out.println("EditorView: *** PARSING: "+diagramDataPath+" ***");
+		/* ***DEBUG*** */
+
 		saxParser = saxFactory.newSAXParser();
 		saxParser.parse(stream, xmlHandler);
 
-		System.out.println("\nResult of parsing:\n"
+		/* ***DEBUG*** */
+		if(debug2) System.out.println("\nResult of parsing:\n"
 				+"Features:\n"+xmlHandler.featuresList
 				+"\nConnectors:\n"+xmlHandler.connectorsList
 				+"\nGroups:\n"+xmlHandler.groupsList
@@ -4592,9 +4646,14 @@ public class EditorView extends JFrame implements Observer{
 				+"\nStarting Commonalities:\n"+xmlHandler.startingComm
 				+"\nStarting Variabilities:\n"+xmlHandler.startingVars
 				+"\nFeatures Colors:\n"+xmlHandler.featureColors
+				+"\nFeatures Occurrences:\n"+xmlHandler.featureOccurrences
+				+"\nFeatures Versions:\n"+xmlHandler.featureVersions
 				+"\n");
+		/* ***DEBUG*** */
 
 		if(xmlHandler.featureColors!=null) loadStartingTermsColor(xmlHandler.featureColors);
+		if(xmlHandler.featureOccurrences!=null) loadStartingTermsOccurrences(xmlHandler.featureOccurrences);
+		if(xmlHandler.featureVersions!=null) loadStartingTermsVersions(xmlHandler.featureVersions);
 		if(xmlHandler.featuresList!=null) loadFeatures(xmlHandler.featuresList);
 		if(xmlHandler.connectorsList!=null) loadConnectors(xmlHandler.connectorsList);
 		if(xmlHandler.groupsList!=null) loadGroups(xmlHandler.groupsList);
@@ -4616,7 +4675,6 @@ public class EditorView extends JFrame implements Observer{
 //		constControlPoint.setVisible(false);		  
 		
 	  } catch (Exception e) {
-		System.out.println("Error while loading saved diagram");
 		e.printStackTrace(); 
 		throw new RuntimeException("Error while loading saved diagram");
 	  }
@@ -4652,14 +4710,10 @@ public class EditorView extends JFrame implements Observer{
 		//getting RGB color as a String
 		rgbValues=featureData[featureData.length-3].split("-");		
 		rgbIntValues=new int[3];
-		System.out.println("rgbValues: ");
-		for(String k: rgbValues) System.out.println("-"+k);
 		rgbIntValues[0]=new Integer(rgbValues[0].substring(6));
 		rgbIntValues[1]=new Integer(rgbValues[1]);
 		rgbIntValues[2]=new Integer(rgbValues[2]);		
-		featureColor=getNewColor(rgbIntValues);
-		
-//		featureColor = getNewColor(termsColor.get(featureName));
+		featureColor=getNewColor(rgbIntValues);		
 
 		//getting feature location in the diagram
 		for (i=4; i<featureData[featureData.length-2].length(); ++i)
@@ -4705,12 +4759,16 @@ public class EditorView extends JFrame implements Observer{
 	  for(String connector : connectors){
 		connectorData=connector.split(" ");
 		
-		System.out.println("Printing connectors strings:");
-		for (String s : connectorData) System.out.println("s: "+s);
-		System.out.println("startConnectorName="+connectorData[0].substring(10));
-		System.out.println("startOwnerName="+connectorData[2].substring(11));
-		System.out.println("endConnectorName="+connectorData[3].substring(8));
-		System.out.println("endOwnerName="+connectorData[5].substring(9));
+		/* ***DEBUG*** */
+		if(debug2){
+			System.out.println("Printing connectors strings:");
+			for (String s : connectorData) System.out.println("s: "+s);
+			System.out.println("startConnectorName="+connectorData[0].substring(10));
+			System.out.println("startOwnerName="+connectorData[2].substring(11));
+			System.out.println("endConnectorName="+connectorData[3].substring(8));
+			System.out.println("endOwnerName="+connectorData[5].substring(9));
+		}
+		/* ***DEBUG*** */
 
 		//getting data of start anchor of this connector
 		startConnectorName=connectorData[0].substring(10);
@@ -4928,13 +4986,17 @@ public class EditorView extends JFrame implements Observer{
 	  for(String connector : connectors){
 		constraintData=connector.split(" ");
 
-		System.out.println("Printing constraint strings:");
-		for (String s : constraintData) System.out.println("s: "+s);
-		System.out.println("startConstraintName="+constraintData[0].substring(10));
-		System.out.println("startOwnerName="+constraintData[2].substring(11));
-		System.out.println("endConstraintName="+constraintData[3].substring(8));
-		System.out.println("endOwnerName="+constraintData[5].substring(9));
-		System.out.println("controlName="+constraintData[6].substring(12));
+		/* ***DEBUG*** */
+		if(debug2){
+			System.out.println("Printing constraint strings:");
+			for (String s : constraintData) System.out.println("s: "+s);
+			System.out.println("startConstraintName="+constraintData[0].substring(10));
+			System.out.println("startOwnerName="+constraintData[2].substring(11));
+			System.out.println("endConstraintName="+constraintData[3].substring(8));
+			System.out.println("endOwnerName="+constraintData[5].substring(9));
+			System.out.println("controlName="+constraintData[6].substring(12));
+		}
+		/* ***DEBUG*** */
 
 		//getting data of start anchor of this constraint
 		startConstraintName=constraintData[0].substring(10);
@@ -4953,17 +5015,12 @@ public class EditorView extends JFrame implements Observer{
 		endY=Integer.valueOf(constraintData[4].substring(i+1));
 
 		endOwnerName=constraintData[5].substring(9);		
-
-		System.out.println("startX="+startX+", startY="+startY+", endX="+endX+", endY="+endY);
 		
 		//getting data of control point of this constraint
 		controlName=constraintData[6].substring(12);
 
 		for (i=4; i<constraintData[7].length(); ++i) if (constraintData[7].charAt(i)=='.') break;
 		
-		System.out.println("constraintData[7].substring(4, "+i+")="+constraintData[7].substring(4, i)
-						  +"\tconstraintData[7].substring("+i+"+1)="+constraintData[7].substring(i+1));
-
 		controlX=Integer.valueOf(constraintData[7].substring(4, i));
 		controlY=Integer.valueOf(constraintData[7].substring(i+1));		
 		
@@ -5043,21 +5100,10 @@ public class EditorView extends JFrame implements Observer{
 	    endConstraint.setControlPoint(constControlPoint);
 //	    constControlPoint.setVisible(false);
 	    
-	    System.out.println("constControlPoint.getLocation(): "+constControlPoint.getLocation());
-
 		//adding constraint to draw list
 		addConstraintToDrawLists(startConstraint, (startConstraintName.startsWith(startIncludesNamePrefix)) ?
-			ItemsType.START_INCLUDES_DOT : ItemsType.START_EXCLUDES_DOT);	  
-	  
-	  
-//	  	startConstraint.setOtherEnd(endConstraint);
-//		endConstraint.setOtherEnd(startConstraint);
-//		
-//		//adding connector to draw list
-//		startConnectorDots.add(startConnector);
+			ItemsType.START_INCLUDES_DOT : ItemsType.START_EXCLUDES_DOT);	  	  
 	  }
-
-
 	}
 
 	/**
@@ -5118,9 +5164,9 @@ public class EditorView extends JFrame implements Observer{
 		//getting RGB values as String
 		rgbValues=lineElements[lineElements.length-1].split("-");
 		
-		System.out.println("featureName: "+featureName+", rgbValues: "+lineElements[lineElements.length-1]);
-		for(String k : rgbValues) System.out.println("rgb element: "+k);
-//		System.out.println("Red="+rgbValues[0]+"Green="+rgbValues[1]+"Blue="+rgbValues[2]);
+		/* ***DEBUG*** */
+		if(debug2) System.out.println("featureName: "+featureName+", rgbValues: "+lineElements[lineElements.length-1]);
+		/* ***DEBUG*** */
 
 		rgbIntValues=new int[3];
 		rgbIntValues[0]=new Integer(rgbValues[0]);
@@ -5129,6 +5175,129 @@ public class EditorView extends JFrame implements Observer{
 		termsColor.put(featureName, rgbIntValues);
 	  }
 	  
+	}
+	
+	/**
+	 * Loads the different versions of starting features, as they appear in input files.
+	 * 
+	 * @param featureVersions - String containing the versions of starting features in input files, one feature per line
+	 */
+	private void loadStartingTermsVersions(String featureVersions) {
+		String[] versionLines=featureVersions.split("\n");
+		String[] strArr=null;
+		String termName=null, fileName=null;
+		relevantTermsVersions=new HashMap<String, HashMap<String, ArrayList<String>>>();
+		HashMap<String, ArrayList<String>> filesVersionsMap=null;
+		ArrayList<String> versions=null;
+		
+		for(String versionLine : versionLines){
+		  filesVersionsMap = new HashMap<String, ArrayList<String>>();
+
+		  strArr=versionLine.split("\t");
+		  termName=strArr[0];
+
+		  for(int i=1;i<strArr.length; ++i){
+			//a new file name has been found
+			if(strArr[i].compareTo("f:")==0){ 
+			  versions=new ArrayList<String>();
+			  
+			  ++i; fileName=strArr[i]; ++i;
+			  for(; i<strArr.length; ++i){
+				if(strArr[i].compareTo("f:")==0){
+				  filesVersionsMap.put(fileName, versions);
+				  --i; break;
+				}				
+				else versions.add(strArr[i]);
+			  }
+
+			}
+
+		  }
+		  //adding last association file-versions
+		  filesVersionsMap.put(fileName, versions);
+		  relevantTermsVersions.put(termName, filesVersionsMap);
+
+		}
+		
+	}
+	
+	/**
+	 * Loads the occurrences of starting features in input files.
+	 * 
+	 * @param featureOccurrences - String containing the occurrences for each starting feature and file, one feature per line
+	 * @throws InvalidFormatException  - if the string format is invalid
+	 */
+	private void loadStartingTermsOccurrences(String featureOccurrences) throws InvalidFormatException {
+	  String[] occurrenceLines=featureOccurrences.split("\n");
+	  String termName=null;
+	  String fileName=null;
+	  String[] tokens=null;
+	  HashMap<String, ArrayList<int[]>> fileMap=null;
+	  ArrayList<int[]> occurrences=null;
+	  int[] occurrIndexes=null;
+	  String[] occurrStringIndexes=null;
+
+	  relevantTerms=new HashMap<String, HashMap<String,ArrayList<int[]>>>();
+
+	  for(String occurrenceLine : occurrenceLines){
+		fileMap=new HashMap<String, ArrayList<int[]>>();
+		tokens=occurrenceLine.split("\t");
+
+		if(tokens.length!=2) throw new InvalidFormatException("Uncorrect format for relevant terms string");
+
+		termName=tokens[0];
+		tokens=tokens[1].split(" ");
+
+		/* ***DEBUG*** */
+		if(debug2){
+		  System.out.println("Found Term: "+termName);
+		  System.out.println("Printing tokens!");
+		  for(String str:tokens) System.out.println(str);
+		}
+		/* ***DEBUG*** */
+
+		for(int i=0;i<tokens.length; ++i){
+		  //a new file name has been found
+		  if(tokens[i].compareTo("f:")==0){ 
+			occurrences=new ArrayList<int[]>();
+
+			++i; fileName=tokens[i]; ++i;
+			while(tokens[i].compareTo("i:")!=0){ fileName+=" "+tokens[i]; ++i;}
+
+			/* ***DEBUG*** */
+			if(debug2) System.out.println("\tFound file: "+fileName);
+			/* ***DEBUG*** */
+
+			if(tokens[i].compareTo("i:")!=0) throw new InvalidFormatException("Uncorrect format for relevant terms string");			  
+			else ++i;
+
+			//loading occurrence indexes of this file
+			for(; i<tokens.length; ++i){
+
+			  /* ***DEBUG*** */
+			  if(debug2) System.out.println("***Token: "+tokens[i]);
+			  /* ***DEBUG*** */
+
+			  if(tokens[i].compareTo("f:")==0){ --i; break;}
+
+			  occurrStringIndexes=tokens[i].split("-");
+			  occurrIndexes=new int[2];
+			  occurrIndexes[0]=Integer.valueOf(occurrStringIndexes[0]);
+			  occurrIndexes[1]=Integer.valueOf(occurrStringIndexes[1]);
+			  occurrences.add(occurrIndexes);
+
+			  /* ***DEBUG*** */
+			  if(debug2) System.out.println("\t\tFound occurrence: "+tokens[i]);
+			  /* ***DEBUG*** */
+
+			}
+			fileMap.put(fileName, occurrences);			  
+		  }
+
+		}
+		relevantTerms.put(termName, fileMap);
+	  }
+
 	}
 
 	/**
@@ -5175,8 +5344,12 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @return - the JScrollPane created
 	 */
-	protected JScrollPane getTabFeaturesCandidates(){
+	protected JSplitPane getTabFeaturesCandidates(){
 		JPanel featuresPanel = null, legendPanel=null;
+		
+		JPanel occurrencesPanel = null;
+		JPanel termsPanel = null;
+
 		JLabel passiveCommColorLabel=null, passiveVarsColorLabel=null, nonExtractedColorLabel=null;
 		JLabel activeCommColorLabel=null, activeVarsColorLabel=null;
 
@@ -5259,11 +5432,22 @@ public class EditorView extends JFrame implements Observer{
 		for(String tmp: variabilitiesExtracted) variabilitiesToHighlight.add(tmp);
 		
 		//creating panel elements
-		searchPanel = new JPanel();
+		searchPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+//		searchPanel.setLayout(new BorderLayout());
+		
+		occurrencesPanel = new JPanel();
+		occurrencesPanel.setLayout(new BorderLayout());
+		termsPanel = new JPanel();
+		termsPanel.setLayout(new BorderLayout());
+		
 		searchPanel.setBackground(Color.WHITE);
+		searchPanel.setPreferredSize(searchFrame.getPreferredSize());
+		searchPanel.setContinuousLayout(true);
+		searchPanel.setDividerSize(5);
+		searchPanel.setResizeWeight(0.);
 //		searchPanel.setOpaque(true);
-		searchPanel.setBounds(0, 0, 900, 700);
-		searchPanel.setLayout(null);
+//		searchPanel.setBounds(0, 0, 900, 700);
+//		searchPanel.setLayout(null);
 		
 		featuresPanel = new JPanel();
 		featuresPanel.setBackground(Color.WHITE);
@@ -5275,7 +5459,6 @@ public class EditorView extends JFrame implements Observer{
 						BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)));
 		
 		//creating panelFeatures
-//		colorRGB[0]=160; colorRGB[1]=160; colorRGB[2]=0;
 		//getting color for extracted commonalities
 		commBackColor=getNewColor(PCcol);
 		for(int i = 0; i < commonalitiesExtracted.size(); i++){
@@ -5288,7 +5471,6 @@ public class EditorView extends JFrame implements Observer{
 		  featuresPanel.add(iconLabel);
 		}
 		
-//		colorRGB[0]=0; colorRGB[1]=160; colorRGB[2]=160;
 		//getting color for extracted variabilities
 		varsBackColor=getNewColor(PVcol);
 		for(int i = 0; i < variabilitiesExtracted.size(); i++){
@@ -5301,7 +5483,6 @@ public class EditorView extends JFrame implements Observer{
 		  featuresPanel.add(iconLabel);
 		}
 
-//		colorRGB[0]=160; colorRGB[1]=0; colorRGB[2]=0;
 		//getting color for not extracted features
 		nonExtrBackColor=getNewColor(NEcol);
 		for(int i = 0; i < featuresTyped.size(); i++){
@@ -5314,12 +5495,12 @@ public class EditorView extends JFrame implements Observer{
 		
 		//creating scrollingFeaturesPanel from panelFeatures
 		JScrollPane scrollingFeaturesPanel = new JScrollPane(featuresPanel);
-		scrollingFeaturesPanel.setBounds(270, 10, 620, 210);
+//		scrollingFeaturesPanel.setBounds(270, 10, 620, 210);
 		
 		//creating legend panel
 		legendPanel = new JPanel();
-		legendPanel.setBounds(5, 10, 260, 210);
-		legendPanel.setLayout(null);
+//		legendPanel.setBounds(5, 10, 260, 210);
+		legendPanel.setLayout(new GridLayout(5, 2, 2, 10));
 		
 		passiveCommColorLabel=new JLabel();
 		passiveCommColorLabel.setBackground(commBackColor);
@@ -5367,15 +5548,18 @@ public class EditorView extends JFrame implements Observer{
 		activeVarsTextLabel.setFont(new Font("Dialog", Font.ITALIC|Font.BOLD, 12));
 		
 		legendPanel.add(passiveCommColorLabel);
-		legendPanel.add(passiveVarsColorLabel);
-		legendPanel.add(nonExtractedColorLabel);
-		legendPanel.add(activeCommColorLabel);
-		legendPanel.add(activeVarsColorLabel);
-		
 		legendPanel.add(passiveCommTextLabel);
+
+		legendPanel.add(passiveVarsColorLabel);
 		legendPanel.add(passiveVarsTextLabel);
+
+		legendPanel.add(nonExtractedColorLabel);
 		legendPanel.add(nonExtractedTextLabel);
+
+		legendPanel.add(activeCommColorLabel);
 		legendPanel.add(activeCommTextLabel);
+
+		legendPanel.add(activeVarsColorLabel);		
 		legendPanel.add(activeVarsTextLabel);
 		
 		legendPanel.setBackground(Color.LIGHT_GRAY);
@@ -5383,32 +5567,42 @@ public class EditorView extends JFrame implements Observer{
 		
 		//adding control buttons and a label for term occurences navigation
 		XBackwardOccurrButton = new JButton("<<("+occurrJumpSpan+")");
-		XBackwardOccurrButton.setBounds(30, 230, 100, 22);
+//		XBackwardOccurrButton.setBounds(30, 230, 100, 22);
+		XBackwardOccurrButton.setPreferredSize(new Dimension(76, 22));
 		XBackwardOccurrButton.addActionListener(getOccurrNavButtonListener(-occurrJumpSpan));
 
 		prevOccurrButton = new JButton("<");
-		prevOccurrButton.setBounds(185, 230, 100, 22);
+//		prevOccurrButton.setBounds(185, 230, 100, 22);
+		prevOccurrButton.setPreferredSize(new Dimension(76, 22));
 		prevOccurrButton.addActionListener(getOccurrNavButtonListener(-1));
 		
 		occurrsLabel = new JLabel("<html><div style=\"text-align: center;\">" + "x/y" + "</html>");
 
 		occurrsLabelPanel = new JPanel();
 		occurrsLabelPanel.add(occurrsLabel);
-		occurrsLabelPanel.setBounds(315, 230, 270, 22);
+//		occurrsLabelPanel.setBounds(315, 230, 270, 22);
+		occurrsLabelPanel.setPreferredSize(new Dimension(150, 22));
 		occurrsLabelPanel.setBackground(Color.LIGHT_GRAY);
 
 		nextOccurrButton = new JButton(">");
-		nextOccurrButton.setBounds(615, 230, 100, 22);
+//		nextOccurrButton.setBounds(615, 230, 100, 22);
+		nextOccurrButton.setPreferredSize(new Dimension(76, 22));
 		nextOccurrButton.addActionListener(getOccurrNavButtonListener(1));
 
 		XForwardOccurrButton = new JButton(">>("+occurrJumpSpan+")");
-		XForwardOccurrButton.setBounds(770, 230, 100, 22);
+//		XForwardOccurrButton.setBounds(770, 230, 100, 22);
+		XForwardOccurrButton.setPreferredSize(new Dimension(76, 22));
 		XForwardOccurrButton.addActionListener(getOccurrNavButtonListener(occurrJumpSpan));
 		
 
 		//adding text area for term occurences visualization		
 		occursTabbedPane = new JTabbedPane();
-		occursTabbedPane.setBounds(10, 270, 880, 390);
+//		occursTabbedPane.setBounds(10, 270, 880, 390);
+		occursTabbedPane.setPreferredSize(new Dimension(880, 390));
+		
+		//adding buttons panel for term occurences navigation
+		buttonPanel = new JPanel();
+		buttonPanel.setPreferredSize(new Dimension(occursTabbedPane.getPreferredSize().width, 40));
 		
 		//initializing utility maps
 		textTabs = new HashMap<String, JTextArea>();
@@ -5419,11 +5613,26 @@ public class EditorView extends JFrame implements Observer{
 		lastRemovedHighlights = new HashMap<String, HashMap<String, ArrayList<Entry<Highlight, ArrayList<Highlight>>>>>();
 
 		//adding components to panel		
-		searchPanel.add(legendPanel);
-		searchPanel.add(scrollingFeaturesPanel);
-		searchPanel.add(occursTabbedPane);
-
-		return new JScrollPane(searchPanel);
+		termsPanel.add(legendPanel, BorderLayout.WEST);
+		termsPanel.add(scrollingFeaturesPanel, BorderLayout.CENTER);
+		termsPanel.setPreferredSize(
+			new Dimension(searchPanel.getPreferredSize().width, searchPanel.getPreferredSize().height/3));		
+//		searchPanel.add(legendPanel);
+//		searchPanel.add(scrollingFeaturesPanel);
+//		searchPanel.add(occursTabbedPane);
+		occurrencesPanel.add(buttonPanel, BorderLayout.NORTH);
+		occurrencesPanel.add(occursTabbedPane, BorderLayout.CENTER);
+		occurrencesPanel.setPreferredSize(
+				new Dimension(searchPanel.getPreferredSize().width, 2*searchPanel.getPreferredSize().height/3));
+//		searchPanel.add(termsPanel, BorderLayout.NORTH);
+//		searchPanel.add(occurrencesPanel, BorderLayout.CENTER);
+		searchPanel.setLeftComponent(termsPanel);
+		searchPanel.setRightComponent(occurrencesPanel);
+		
+		
+		
+		
+		return searchPanel;
 	}
 
 	/**
@@ -5497,17 +5706,32 @@ public class EditorView extends JFrame implements Observer{
 		  }
 
 		  //adding occurences navigation controls
-		  searchPanel.add(nextOccurrButton);
-		  nextOccurrButton.setVisible(true);
-		  searchPanel.add(prevOccurrButton);
-		  prevOccurrButton.setVisible(true);
-		  searchPanel.add(XForwardOccurrButton);
-		  XForwardOccurrButton.setVisible(true);
-		  searchPanel.add(XBackwardOccurrButton);
-		  XBackwardOccurrButton.setVisible(true);
-		  searchPanel.add(occurrsLabelPanel);
-		  occurrsLabelPanel.setVisible(true);
-		  searchPanel.repaint();
+		  buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
+		  buttonPanel.setBorder(BorderFactory.createEmptyBorder(3, 5, 6, 5));
+		  
+		  buttonPanel.add(Box.createHorizontalGlue());
+		  buttonPanel.add(XBackwardOccurrButton);
+		  buttonPanel.add(Box.createHorizontalGlue());
+		  buttonPanel.add(prevOccurrButton);
+		  buttonPanel.add(Box.createHorizontalGlue());
+		  buttonPanel.add(occurrsLabelPanel);
+		  buttonPanel.add(Box.createHorizontalGlue());
+		  buttonPanel.add(nextOccurrButton);
+		  buttonPanel.add(Box.createHorizontalGlue());
+		  buttonPanel.add(XForwardOccurrButton);
+		  buttonPanel.add(Box.createHorizontalGlue());
+
+//		  searchPanel.add(nextOccurrButton);
+//		  nextOccurrButton.setVisible(true);
+//		  searchPanel.add(prevOccurrButton);
+//		  prevOccurrButton.setVisible(true);
+//		  searchPanel.add(XForwardOccurrButton);
+//		  XForwardOccurrButton.setVisible(true);
+//		  searchPanel.add(XBackwardOccurrButton);
+//		  XBackwardOccurrButton.setVisible(true);
+//		  searchPanel.add(occurrsLabelPanel);
+//		  occurrsLabelPanel.setVisible(true);
+//		  searchPanel.repaint();
 
 		  //restoring previous occurences panel state, if any.
 		  if (!currentFiles.containsKey(term)) currentFiles.put(term, 

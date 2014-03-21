@@ -13,6 +13,8 @@ public class ViewXMLHandler extends DefaultHandler {
 	boolean inStartingComm=false;
 	boolean inStartingVars=false;
 	boolean inFeatureColors=false;		
+	boolean inFeatureOccurrences=false;		
+	boolean inFeatureVersions=false;		
 
 	public String featuresList=null;
 	public String connectorsList=null;
@@ -22,6 +24,8 @@ public class ViewXMLHandler extends DefaultHandler {
 	public String startingComm=null;
 	public String startingVars=null;
 	public String featureColors=null;	
+	public String featureOccurrences=null;	
+	public String featureVersions=null;	
 	
 	public void startElement(String uri, String localName, String qName, Attributes atts) {
 	  if (qName.equals("features")) inFeaturesList=true;
@@ -32,6 +36,8 @@ public class ViewXMLHandler extends DefaultHandler {
 	  else if (qName.equals("startingCommonalities")) inStartingComm=true;
 	  else if (qName.equals("startingVariabilities")) inStartingVars=true;
 	  else if (qName.equals("featureColors")) inFeatureColors=true;
+	  else if (qName.equals("featureOccurrences")) inFeatureOccurrences=true;
+	  else if (qName.equals("featureVersions")) inFeatureVersions=true;
 	  
 	  System.out.println("*START*\nuri: "+uri+"\nlocalName: "+localName+"\nqName: "+qName+"\nAttribute:");
 	  for(int i=0; i< atts.getLength(); ++i)
@@ -48,6 +54,8 @@ public class ViewXMLHandler extends DefaultHandler {
 	  else if (qName.equals("startingCommonalities")) inStartingComm=false;
 	  else if (qName.equals("startingVariabilities")) inStartingVars=false;
 	  else if (qName.equals("featureColors")) inFeatureColors=false;
+	  else if (qName.equals("featureOccurrences")) inFeatureOccurrences=false;
+	  else if (qName.equals("featureVersions")) inFeatureVersions=false;
 		  
 	  System.out.println("*END*\nuri: "+uri+"\nlocalName: "+localName+"\nqName: "+qName);
 	}
@@ -87,6 +95,14 @@ public class ViewXMLHandler extends DefaultHandler {
 	  else if (inFeatureColors){
 		if (featureColors==null) featureColors=tmp;
 		else featureColors+=tmp;		  
+	  }
+	  else if (inFeatureOccurrences){
+		if (featureOccurrences==null) featureOccurrences=tmp;
+		else featureOccurrences+=tmp;		  
+	  }
+	  else if (inFeatureVersions){
+		if (featureVersions==null) featureVersions=tmp;
+		else featureVersions+=tmp;		  
 	  }
 	}
 }

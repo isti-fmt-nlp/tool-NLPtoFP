@@ -10,6 +10,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -605,22 +606,30 @@ public class ViewPanelCentral{
 		JScrollPane scrollPanelFeatures = new JScrollPane(panelFeatures, 
 				   ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				   ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		scrollPanelFeatures.setBounds(15, 10, 490, 260);
-		scrollPanelFeatures.setBorder(BorderFactory.createCompoundBorder(
+//		scrollPanelFeatures.setBounds(15, 10, 490, 260);
+//		scrollPanelFeatures.setLocation(15, 10);
+		scrollPanelFeatures.setPreferredSize(new Dimension(490, 260));
+			scrollPanelFeatures.setBorder(BorderFactory.createCompoundBorder(
 				BorderFactory.createEtchedBorder(EtchedBorder.RAISED), 
 				BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)));
 
 
-		if(fType==FeatureType.COMMONALITIES) addTermText="Add term at the commonality candidates:";
-		else addTermText="Add term at the variability candidates:";
+		if(fType==FeatureType.COMMONALITIES) addTermText="Add New Commonality:";
+		else addTermText="Add New Variability:";
 		JLabel addTermLabel = new JLabel(addTermText);
-		addTermLabel.setBounds(16, 271, 400, 30);
+//		addTermLabel.setBounds(16, 271, 400, 30);
+//		addTermLabel.setLocation(16, 271);
+		addTermLabel.setPreferredSize(new Dimension(200, 20));
 		
 		final JTextField addTermField = new JTextField();
-		addTermField.setBounds(12, 293, 400, 30);
+//		addTermField.setBounds(12, 293, 400, 30);
+//		addTermField.setLocation(12, 293);
+		addTermField.setPreferredSize(new Dimension(200, 20));
 
 		buttonFeaturesAdd = new JButton("Add");
-		buttonFeaturesAdd.setBounds(425, 293, 80, 30);
+//		buttonFeaturesAdd.setBounds(425, 293, 80, 30);
+//		buttonFeaturesAdd.setLocation(425, 293);
+		buttonFeaturesAdd.setPreferredSize(new Dimension(80, 20));
 		buttonFeaturesAdd.addActionListener(
 				new ActionListener(){
 					
@@ -633,7 +642,7 @@ public class ViewPanelCentral{
 		
 		JPanel addTermPanel = new JPanel();
 		addTermPanel.setLayout(new BoxLayout(addTermPanel, BoxLayout.LINE_AXIS));
-		addTermPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+//		addTermPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		addTermPanel.add(Box.createHorizontalGlue());
 		addTermPanel.add(addTermField);
 		addTermPanel.add(Box.createHorizontalGlue());
@@ -642,23 +651,11 @@ public class ViewPanelCentral{
 		
 		JPanel selectionControlPanel = new JPanel();
 		selectionControlPanel.setLayout(new BoxLayout(selectionControlPanel, BoxLayout.PAGE_AXIS));
-		selectionControlPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+//		selectionControlPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 //		selectionControlPanel.add(Box.createVerticalGlue());
+		selectionControlPanel.add(addTermLabel);
 		selectionControlPanel.add(addTermPanel);
-		selectionControlPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 		selectionControlPanel.add(buttonSelectionEnd);
-
-		
-//		  buttonPane.add(Box.createHorizontalGlue());
-//		  buttonPane.add(prevOccurrButton);
-//		  buttonPane.add(Box.createHorizontalGlue());
-//		  buttonPane.add(occurrsLabelPanel);
-//		  buttonPane.add(Box.createHorizontalGlue());
-//		  buttonPane.add(nextOccurrButton);
-//		  buttonPane.add(Box.createHorizontalGlue());
-//		  buttonPane.add(XForwardOccurrButton);
-//		  buttonPane.add(Box.createHorizontalGlue());
-
 		
 		//adding components to panel		
 		panelSelection.add(scrollPanelFeatures, BorderLayout.CENTER);

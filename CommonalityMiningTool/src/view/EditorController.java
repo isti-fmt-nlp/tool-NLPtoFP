@@ -841,6 +841,7 @@ public class EditorController implements
     	
 //    	if(searchFrame==null){
     	  searchFrame=new JFrame("Search Feature in Input Files");
+    	  searchFrame.setPreferredSize(new Dimension(900, 700));
     	  searchFrame.setSize(900, 700);
     	  searchFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
     	  editorView.setSearchFrame(searchFrame);
@@ -1272,28 +1273,29 @@ public class EditorController implements
 		ArrayList<String> startingVariabilities=editorView.getStartingVariabilities();
 		JLayeredPane diagramPanel=editorView.getDiagramPanel();
 		Point position=new Point();
+		
 		//adding starting commonalities
-		int i=10, j=10;
+		int i=5, j=10;
 		for(String name : startingCommonalities){
-		  if(i>=diagramPanel.getWidth()){ i=10; j+=55;}
+		  if(i>=diagramPanel.getWidth()){ i=5; j+=5+editorView.getFeatureSize().height;}
 		  position.x=i+(int)diagramPanel.getLocationOnScreen().getX();
 		  position.y=j+(int)diagramPanel.getLocationOnScreen().getY();
 		  editorView.setToolDragPosition(position);
 		  editorView.setFeatureToAddName(name);
 		  editorModel.addUnrootedNamedFeature(name, 
 				  EditorView.featureNamePrefix+editorView.getFeaturesCount(), FeatureTypes.COMMONALITY);
-		  i+=70;
+		  i+=5+editorView.getFeatureSize().width;
 		}
 		//adding starting variabilities
 		for(String name : startingVariabilities){
-		  if(i>=diagramPanel.getWidth()){ i=10; j+=55;}
+		  if(i>=diagramPanel.getWidth()){ i=5; j+=5+editorView.getFeatureSize().height;}
 		  position.x=i+(int)diagramPanel.getLocationOnScreen().getX();
 		  position.y=j+(int)diagramPanel.getLocationOnScreen().getY();
 		  editorView.setToolDragPosition(position);
 		  editorView.setFeatureToAddName(name);
 		  editorModel.addUnrootedNamedFeature(name, 
 				  EditorView.featureNamePrefix+editorView.getFeaturesCount(), FeatureTypes.VARIABILITY);
-		  i+=70;
+		  i+=5+editorView.getFeatureSize().width;
 		}
 		editorView.fitDiagram();
 	}

@@ -185,7 +185,7 @@ public class ViewProject implements Observer, Runnable{
 	public void addListener(ControllerProject controllerProject){
 		this.controllerProject = controllerProject;
 		
-		/* Creazione MenuBar */
+		//creating MenuBar
 		
 		/*MenuProject*/
 		menuProject = new JMenu("Project");
@@ -294,18 +294,23 @@ public class ViewProject implements Observer, Runnable{
 		menuTreeProject = new JPopupMenu("Men� Tree");
 		menuTreeProject.add(menuTree);
 		
-		/* Creazione pannello laterale */
+		//creating lateral panel
 		panelLateralProject = new ViewPanelLateral(menuTreeProject);
 
+		//creating buttons to select feature candidates
 		buttonCommonalitiesSelectionEnd = new JButton("Select Commonalities");
-		buttonCommonalitiesSelectionEnd.setBounds(330, 640, 180, 30);//+50?
+//		buttonCommonalitiesSelectionEnd.setBounds(330, 640, 180, 30);//+50?
+//		buttonCommonalitiesSelectionEnd.setLocation(330, 640);//+50?
+		buttonCommonalitiesSelectionEnd.setPreferredSize(new Dimension(180, 20));//+50?
 		buttonCommonalitiesSelectionEnd.addActionListener(controllerProject);
 		
 		buttonVariabilitiesSelectionEnd= new JButton("Select Variabilities");
-		buttonVariabilitiesSelectionEnd.setBounds(330, 640, 180, 30);//+50?
-		buttonVariabilitiesSelectionEnd.addActionListener(controllerProject);
+//		buttonVariabilitiesSelectionEnd.setBounds(330, 640, 180, 30);//+50?
+//		buttonVariabilitiesSelectionEnd.setLocation(330, 640);//+50?
+		buttonVariabilitiesSelectionEnd.setPreferredSize(new Dimension(180, 20));//+50?
+			buttonVariabilitiesSelectionEnd.addActionListener(controllerProject);
 		
-		/* Creazione pannello centrale */
+		//creating central panel
 		panelCentralProject = new ViewPanelCentral();
 		
 		frameProject.addWindowListener(controllerProject);

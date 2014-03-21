@@ -2098,31 +2098,12 @@ public class ModelProject extends Observable implements Runnable{
 		  br1 = new BufferedReader(new FileReader(pathTermsVersions));			
 		}catch(FileNotFoundException e){ return true;}
 
-//		while(termIter.hasNext()){
-//			  termEntry=termIter.next();
-//			  termFilesVersions=termEntry.getKey();
-//			  fileIter=termEntry.getValue().entrySet().iterator();
-//			  while(fileIter.hasNext()){
-//				fileEntry=fileIter.next();
-//				termFilesVersions+="\tf:\t"+fileEntry.getKey();
-//				arrStr=fileEntry.getValue();
-//				for(String version : arrStr) termFilesVersions+="\t"+version;
-//			  }
-//			  pw2.println(termFilesVersions);
-//			}	  
-		
-		
-		
 		while( (s1 = br1.readLine()) != null ){
 		  filesVersionsMap = new HashMap<String, ArrayList<String>>();
 
 		  strArr=s1.split("\t");
 		  termName=strArr[0];
 
-//		  if(relevantTermsVersions.get(strArr[0])==null) 
-//			 relevantTermsVersions.put(strArr[0], new HashMap<String, ArrayList<String>>());		  
-//		  filesVersionsMap=relevantTermsVersions.get(strArr[0]);
-		  
 		  for(int i=1;i<strArr.length; ++i){
 			//a new file name has been found
 			if(strArr[i].compareTo("f:")==0){ 
@@ -2150,9 +2131,6 @@ public class ModelProject extends Observable implements Runnable{
 		  relevantTermsVersions.put(termName, filesVersionsMap);
 
 		}
-
-//		  for(int k=1; k<strArr.length; k+=2) filesVersionsMap.put(strArr[k], strArr[k+1]);
-//		}
 
 		/* ****VERBOSE */
 		if(verbose5) printRelevantTermsVersions();
