@@ -21,10 +21,14 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
@@ -33,6 +37,7 @@ import javax.swing.JLayeredPane;
 
 import view.EditorModel.GroupTypes;
 import view.EditorModel.ConstraintTypes;
+import view.EditorView.ItemsType;
 import view.EditorView.activeItems;
 import main.*;
 import main.FeatureNode.FeatureTypes;
@@ -59,6 +64,9 @@ public class EditorController implements
 	/** Path where diagram files will be saved*/
 	private String diagramPath = null;		
 
+	/** Project name*/
+	private String projectName = null;
+
 	/** Path where SXFM exported files will be saved*/
 	private String sxfmPath = null;		
 	
@@ -71,6 +79,10 @@ public class EditorController implements
 	
 	/** Old name of the feature about to be renamed*/
 	private String oldFeatureName=null;
+
+	/** A logic grid, used to place features in the diagram when the view is automatically created from a model*/
+	boolean[][] logicGrid=null;
+
 	
 	/** Costruttore
 	 * 
@@ -452,12 +464,16 @@ public class EditorController implements
 				editorView.setActiveItem(activeItems.DRAGGING_EXTERN_CONSTRAINT);
 				editorView.setLastAnchorFocused(anchorPanel);
 				editorView.setLastFeatureFocused(featurePanel);
-				System.out.println("Trying to remove a constraint:"
-					+"\nanchorPanelName: "+anchorPanelName+"featurePanel.getID(): "+featurePanel.getID()
-					+"((FeaturePanel)otherEndFeaturePanel).getID(): "+((FeaturePanel)otherEndFeaturePanel).getID());
 				//the other end of the constraint is attached to a feature panel
 				if(otherEndFeaturePanel.getName().startsWith(EditorView.featureNamePrefix) ){
-			      if(anchorPanelName.startsWith(EditorView.startIncludesNamePrefix))
+
+				  /* ***DEBUG*** */
+				  if(debug2) System.out.println("Trying to remove a constraint:"
+							+"\nanchorPanelName: "+anchorPanelName+"featurePanel.getID(): "+featurePanel.getID()
+							+"((FeaturePanel)otherEndFeaturePanel).getID(): "+((FeaturePanel)otherEndFeaturePanel).getID());
+				  /* ***DEBUG*** */
+
+				  if(anchorPanelName.startsWith(EditorView.startIncludesNamePrefix))
 					editorModel.removeConstraint(featurePanel.getID(),
 						((FeaturePanel)otherEndFeaturePanel).getID(), ConstraintTypes.INCLUDES);
 			      if(anchorPanelName.startsWith(EditorView.endIncludesNamePrefix))
@@ -470,6 +486,7 @@ public class EditorController implements
 					editorModel.removeConstraint(((FeaturePanel)otherEndFeaturePanel).getID(),
 							featurePanel.getID(), ConstraintTypes.EXCLUDES);
 				}
+				//the other end of the constraint is not attached to a feature panel
 				else editorView.detachAnchor(featurePanel, anchorPanel);
 					
 			  }
@@ -1014,7 +1031,7 @@ public class EditorController implements
 
 		editorView.setLastPositionX(e.getX());
 		editorView.setLastPositionY(e.getY());
-		editorModel.addUnrootedCommonality(EditorView.featureNamePrefix+editorView.getFeaturesCount(), 
+		editorModel.addUnrootedCommonality(/*EditorView.featureNamePrefix+*/""+editorView.getFeaturesCount(), 
 					EditorView.featureNamePrefix+editorView.getFeaturesCount());
 	  }
 	}
@@ -1258,11 +1275,12 @@ public class EditorController implements
 	 * Sets the path used for saving the project and that used to export SXFM files into.
 	 * @param pathProject - the path used for saving the project
 	 */
-	public void setSavePath(String pathProject) {
-		System.out.println("setSavePath(): pathProject="+pathProject);
+	public void setSavePath(String pathProject/*, String projectName*/) {
 		this.diagramPath=pathProject;		
 		this.sxfmPath=pathProject+sxfmSubPath;
 		this.imagesPath=pathProject+imagesSubPath;
+		this.projectName=diagramPath;
+		System.out.println("setSavePath(): pathProject="+pathProject+"\nprojectName="+projectName);
 	}
 
 	/**
@@ -1274,7 +1292,19 @@ public class EditorController implements
 		JLayeredPane diagramPanel=editorView.getDiagramPanel();
 		Point position=new Point();
 		
+		//adding root feature
+		editorModel.addUnrootedFeatureNoNotify(projectName, ""+editorView.getFeaturesCount(), FeatureTypes.COMMONALITY);
+//		editorView.incrFeaturesCount();
+
 		//adding starting commonalities
+
+		/*		
+		for(String name : startingCommonalities){
+		  editorModel.addSubFeatureNoNotify(name, projectName, ""+editorView.getFeaturesCount(), FeatureTypes.COMMONALITY);
+//		  editorView.incrFeaturesCount();			
+		}
+		 */
+
 		int i=5, j=10;
 		for(String name : startingCommonalities){
 		  if(i>=diagramPanel.getWidth()){ i=5; j+=5+editorView.getFeatureSize().height;}
@@ -1282,22 +1312,466 @@ public class EditorController implements
 		  position.y=j+(int)diagramPanel.getLocationOnScreen().getY();
 		  editorView.setToolDragPosition(position);
 		  editorView.setFeatureToAddName(name);
-		  editorModel.addUnrootedNamedFeature(name, 
-				  EditorView.featureNamePrefix+editorView.getFeaturesCount(), FeatureTypes.COMMONALITY);
+		  editorModel.addUnrootedNamedFeature(name, ""+editorView.getFeaturesCount(), FeatureTypes.COMMONALITY);
+//		  editorModel.addUnrootedNamedFeature(name, 
+//					EditorView.featureNamePrefix+editorView.getFeaturesCount(), FeatureTypes.COMMONALITY);
 		  i+=5+editorView.getFeatureSize().width;
 		}
+
+		/*		
 		//adding starting variabilities
+		for(String name : startingVariabilities){
+		  editorModel.addSubFeatureNoNotify(name, projectName, ""+editorView.getFeaturesCount(), FeatureTypes.VARIABILITY);
+//		  editorView.incrFeaturesCount();			
+		}
+ 		*/	
+		
 		for(String name : startingVariabilities){
 		  if(i>=diagramPanel.getWidth()){ i=5; j+=5+editorView.getFeatureSize().height;}
 		  position.x=i+(int)diagramPanel.getLocationOnScreen().getX();
 		  position.y=j+(int)diagramPanel.getLocationOnScreen().getY();
 		  editorView.setToolDragPosition(position);
 		  editorView.setFeatureToAddName(name);
-		  editorModel.addUnrootedNamedFeature(name, 
-				  EditorView.featureNamePrefix+editorView.getFeaturesCount(), FeatureTypes.VARIABILITY);
+		  editorModel.addUnrootedNamedFeature(name, ""+editorView.getFeaturesCount(), FeatureTypes.VARIABILITY);
+//		  editorModel.addUnrootedNamedFeature(name, 
+//				  EditorView.featureNamePrefix+editorView.getFeaturesCount(), FeatureTypes.VARIABILITY);
 		  i+=5+editorView.getFeatureSize().width;
 		}
+
+//		createViewFromModel();
+
+
+
 		editorView.fitDiagram();
 	}
+
+	/**
+	 * Creates a feature diagram from a feature model. The model must represent a single feature tree,
+	 *  with only 1 feature without parent(the root feature).
+	 */
+	private void createViewFromModel() {
+		int[] featureLogicCell=null;//coordinates of a cell in the logic grid
+		int gridSize=0;
+		ArrayList<Entry<FeatureNode, int[]>> nodesToExpand = null;//next feature nodes to elaborate
+		Dimension featureSize=editorView.getFeatureSize();
+		JLayeredPane diagramPanel=editorView.getDiagramPanel();
+		
+		HashMap<String, FeatureNode> featuresList = editorModel.getFeaturesList();
+
+		if(featuresList.size()%2==0) gridSize=featuresList.size()+1;
+		else gridSize=featuresList.size();
+		
+		//initializing logicGrid
+		logicGrid=new boolean[gridSize][gridSize];
+		for(int i =0; i<logicGrid.length; ++i) for(int j =0; j<logicGrid.length; ++j) logicGrid[i][j]=false;
+		
+		//getting root feature
+		FeatureNode rootFeature = editorModel.getUniqueRootfeature();
+		
+		//logic position of root feature is at the top-middle of the grid
+		featureLogicCell = new int[2];
+		featureLogicCell[0]=gridSize/2+1;
+		featureLogicCell[1]=0;
+		
+		if(rootFeature==null){
+		  editorView.errorDialog("Cold not create diagram! Missing unique root feature in featureTree");
+		  return;
+		}
+		
+		//initializign the list of next nodes to expand
+		nodesToExpand = new ArrayList<Map.Entry<FeatureNode,int[]>>();
 	
+		//adding root feature to the diagram
+		Point rootLocationOnDiagram = new Point();
+		rootLocationOnDiagram.x =featureLogicCell[0]*(featureSize.width+5);
+		rootLocationOnDiagram.y=featureLogicCell[1]*(featureSize.width+5);
+		rootLocationOnDiagram.x+=(int)diagramPanel.getLocationOnScreen().getX();
+		rootLocationOnDiagram.y+=(int)diagramPanel.getLocationOnScreen().getY();
+
+		editorView.directlyAddFeatureToDiagram(
+				rootFeature.getName(), EditorView.featureNamePrefix+rootFeature.getID(), 
+				rootLocationOnDiagram.x, rootLocationOnDiagram.y, featureSize.width, featureSize.height, 
+				Color.black );
+		
+		editorView.incrFeaturesCount();			
+		
+		//adding starting element to the list, the root feature
+		nodesToExpand.add(new AbstractMap.SimpleEntry<FeatureNode, int[]>(rootFeature, featureLogicCell));
+		
+		recBuildDiagram(nodesToExpand);
+		
+		
+	}
+
+	/**
+	 * Recursevely build the diagram elements representing the subtrees rooted in the nodes of nodesToExpand list.
+	 * If the list contains the diagram root feature, the entire tree will be built.
+	 * 
+	 * @param nodesToExpand - list of feature nodes with their position in the logic grid.
+	 */
+	private void recBuildDiagram(ArrayList<Entry<FeatureNode, int[]>> nodesToExpand) {
+	  int currentNodesToExpand=0;
+//	  ArrayList<FeatureNode> children = null;
+	  int totalChildren=0, childrenPlaced=0;
+	  int k=0;
+	  FeatureNode currentNode=null;
+	  GroupPanel groupPanel=null;
+	  ConstraintPanel startConstraintPanel=null, endConstraintPanel=null, controlConstraintPanel=null;
+	  FeaturePanel featurePanel = null, endFeaturePanel = null;
+	  AnchorPanel endAnchorPanel=null, startAnchorPanel=null;
+	  int[] currentNodePosition=null, firstChildPosition=new int[2];
+	  boolean correctlyPlaced=false;
+	  Dimension featureSize=editorView.getFeatureSize();
+	  Point childLocationOnDiagram=new Point();
+	  Point locationInFeature=new Point();
+	  JLayeredPane diagramPanel=editorView.getDiagramPanel();
+	  ImageIcon groupLineLengthIcon = editorView.getGroupLineIcon();
+		
+	  while(nodesToExpand.size()>0){
+		currentNodesToExpand=nodesToExpand.size();
+		for(int i=0; i<currentNodesToExpand; ++i){//adding to the diagram the children of each node to expand
+		  currentNode=nodesToExpand.get(i).getKey();
+		  currentNodePosition=nodesToExpand.get(i).getValue();
+		  
+		  //calculating total number of children
+		  totalChildren=currentNode.getSubFeatures().size();
+		  for(GroupNode group : currentNode.getSubGroups()) totalChildren+=group.getMembers().size();
+		  
+		  //calulating first child position in the logic grid
+		  if(totalChildren%2==0) firstChildPosition[0]=currentNodePosition[0]-currentNodesToExpand/2+1;
+		  else firstChildPosition[0]=currentNodePosition[0]-currentNodesToExpand/2;		  
+		  firstChildPosition[1]=currentNodePosition[1]+1;
+		  
+		  //trying to place the children in the logic grid
+		  correctlyPlaced=false;
+		  while(!correctlyPlaced){
+			//checking if there are some location already occupied in the logic grid
+			for(k=firstChildPosition[0]; k<firstChildPosition[0]+currentNodesToExpand-1; ++k)
+			  if(logicGrid[k][firstChildPosition[1]]) break;
+
+			//if there are occupied cells in this line, next line will be checked
+			if(k<firstChildPosition[0]+currentNodesToExpand-1) ++firstChildPosition[1];
+			else correctlyPlaced=true;
+		  }
+		  
+		  //placing the children in the logic grid
+		  for(k=firstChildPosition[0]; k<firstChildPosition[0]+currentNodesToExpand-1; ++k)
+			logicGrid[k][firstChildPosition[1]]=true;		
+
+		  //adding the children to the feature diagram
+		  childrenPlaced=0;
+				  
+		  //adding alternative groups
+		  //initializing alternative group location
+		  locationInFeature.x=featureSize.width/2-17; 
+		  locationInFeature.y=featureSize.height-13;
+		  
+		  for(GroupNode group : currentNode.getSubGroups()){
+			if(group.getCardinality().y>1) continue;//this is an or group
+			else{
+			  //creating group				
+			  groupPanel=(GroupPanel)editorView.buildConnectionDot(
+					  ItemsType.ALT_GROUP_START_CONNECTOR, EditorView.altGroupNamePrefix+group.getID(),
+					  locationInFeature.x, locationInFeature.y); 
+				
+			  //adding group to the feature				
+			  editorView.directlyAddGroupToFeature(groupPanel,
+					  editorView.getFeaturePanel(EditorView.featureNamePrefix+currentNode.getID()),
+					  ItemsType.OR_GROUP_START_CONNECTOR);
+				
+			  //adding group members
+			  for(FeatureNode child : group.getMembers()){
+				childLocationOnDiagram.x =(firstChildPosition[0]+childrenPlaced)*(featureSize.width+5);
+				childLocationOnDiagram.y=firstChildPosition[1]*(featureSize.height+15);
+				childLocationOnDiagram.x+=(int)diagramPanel.getLocationOnScreen().getX();
+				childLocationOnDiagram.y+=(int)diagramPanel.getLocationOnScreen().getY();
+
+				//adding child feature to the diagram
+				featurePanel = editorView.directlyAddFeatureToDiagram(
+						child.getName(), EditorView.featureNamePrefix+child.getID(), 
+						childLocationOnDiagram.x, childLocationOnDiagram.y, featureSize.width, featureSize.height, 
+						Color.black );
+
+				//connecting child with the group
+				endAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
+						ItemsType.END_MANDATORY_CONNECTOR, EditorView.endMandatoryNamePrefix+editorView.getConnectorsCount(),
+						featurePanel.getWidth()/2-endAnchorPanel.getWidth()/2, 0);
+				
+				editorView.directlyAddAnchorToFeature(endAnchorPanel,featurePanel);
+			  
+				//adding mutual references to the panel
+				groupPanel.getMembers().add(endAnchorPanel);
+				endAnchorPanel.setOtherEnd(groupPanel);
+
+				//adding the child to nodes to expand list
+				currentNodePosition=new int[2];
+				currentNodePosition[0]=firstChildPosition[0]+childrenPlaced;
+				currentNodePosition[1]=firstChildPosition[1];
+				nodesToExpand.add(new AbstractMap.SimpleEntry<FeatureNode, int[]>(child, currentNodePosition));
+				
+				editorView.incrFeaturesCount();			
+				++childrenPlaced;
+			  }
+
+			  if(groupPanel.getMembers().size()<2){//the group must have at least 2 ending dots to draw its arc
+
+				//adding missing dot to the group
+				endAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
+						ItemsType.END_MANDATORY_CONNECTOR, EditorView.endMandatoryNamePrefix+editorView.getConnectorsCount(),
+						groupPanel.getLocation().x+groupLineLengthIcon.getIconWidth(),
+						groupPanel.getLocation().y+groupLineLengthIcon.getIconHeight()+groupPanel.getHeight()-3);
+
+				editorView.directlyAddAnchorToDiagram(endAnchorPanel);
+
+				//adding mutual references to the panels
+				groupPanel.getMembers().add(endAnchorPanel);
+				endAnchorPanel.setOtherEnd(groupPanel);
+			  }
+			  
+			  /*groupLocationInFeature=*/nextAltGroupLocation(groupPanel.getSize(), featureSize, locationInFeature);			  
+			}
+
+		  }
+		  
+		  //adding mandatory and optional subfeatures		  
+		  //initializing start panels location
+		  locationInFeature.x=featureSize.width/2-5; 
+		  locationInFeature.y=featureSize.height-13;
+
+		  for(FeatureNode subFeature : currentNode.getSubFeatures()){
+			childLocationOnDiagram.x =(firstChildPosition[0]+childrenPlaced)*(featureSize.width+5);
+			childLocationOnDiagram.y=firstChildPosition[1]*(featureSize.height+15);
+			childLocationOnDiagram.x+=(int)diagramPanel.getLocationOnScreen().getX();
+			childLocationOnDiagram.y+=(int)diagramPanel.getLocationOnScreen().getY();
+
+			//adding sub feature to the diagram
+			featurePanel = editorView.directlyAddFeatureToDiagram(
+					subFeature.getName(), EditorView.featureNamePrefix+subFeature.getID(), 
+					childLocationOnDiagram.x, childLocationOnDiagram.y, featureSize.width, featureSize.height, 
+					Color.black );
+
+			//getting start anchor panel
+			if(subFeature.getCardinality().x>0) startAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
+					  ItemsType.START_MANDATORY_CONNECTOR, EditorView.startMandatoryNamePrefix+editorView.getConnectorsCount(),
+					  locationInFeature.x, locationInFeature.y);				
+			else startAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
+					  ItemsType.START_OPTIONAL_CONNECTOR, EditorView.startOptionalNamePrefix+editorView.getConnectorsCount(),
+					  locationInFeature.x, locationInFeature.y);
+			
+			//getting end anchor panel
+			if(subFeature.getCardinality().x>0) endAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
+					ItemsType.END_MANDATORY_CONNECTOR, EditorView.endMandatoryNamePrefix+editorView.getConnectorsCount(),
+					featurePanel.getWidth()/2-endAnchorPanel.getWidth()/2, 0);
+			else endAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
+					ItemsType.END_OPTIONAL_CONNECTOR, EditorView.endOptionalNamePrefix+editorView.getConnectorsCount(),
+					featurePanel.getWidth()/2-endAnchorPanel.getWidth()/2, 0);
+
+			//connecting sub feature with the parent feature
+			editorView.directlyAddAnchorToFeature(endAnchorPanel, featurePanel);
+			editorView.directlyAddAnchorToFeature(startAnchorPanel, 
+					editorView.getFeaturePanel(EditorView.featureNamePrefix+currentNode.getID()));
+
+			//adding mutual references to the panels
+			startAnchorPanel.setOtherEnd(endAnchorPanel);
+			endAnchorPanel.setOtherEnd(startAnchorPanel);
+
+			//adding the child to nodes to expand list
+			currentNodePosition=new int[2];
+			currentNodePosition[0]=firstChildPosition[0]+childrenPlaced;
+			currentNodePosition[1]=firstChildPosition[1];
+			nodesToExpand.add(new AbstractMap.SimpleEntry<FeatureNode, int[]>(subFeature, currentNodePosition));
+
+			editorView.incrFeaturesCount();			
+			++childrenPlaced;
+		  }
+		  
+		  //adding or groups
+		  //initializing alternative group location
+		  locationInFeature.x=featureSize.width/2+7; 
+		  locationInFeature.y=featureSize.height-13;		  
+		  for(GroupNode group : currentNode.getSubGroups()){
+			if(group.getCardinality().y==1) continue;//this is an alternative group
+			else{
+			  //creating group				
+			  groupPanel=(GroupPanel)editorView.buildConnectionDot(
+					  ItemsType.OR_GROUP_START_CONNECTOR, EditorView.altGroupNamePrefix+group.getID(),
+					  locationInFeature.x, locationInFeature.y); 
+					
+			  //adding group to the feature				
+			  editorView.directlyAddGroupToFeature(groupPanel,
+					  editorView.getFeaturePanel(EditorView.featureNamePrefix+currentNode.getID()), 
+					  ItemsType.ALT_GROUP_START_CONNECTOR);
+
+			  //adding group members
+			  for(FeatureNode child : group.getMembers()){
+				childLocationOnDiagram.x =(firstChildPosition[0]+childrenPlaced)*(featureSize.width+5);
+				childLocationOnDiagram.y=firstChildPosition[1]*(featureSize.height+15);
+				childLocationOnDiagram.x+=(int)diagramPanel.getLocationOnScreen().getX();
+				childLocationOnDiagram.y+=(int)diagramPanel.getLocationOnScreen().getY();
+
+				//adding child feature to the diagram
+				featurePanel = editorView.directlyAddFeatureToDiagram(
+						child.getName(), EditorView.featureNamePrefix+child.getID(), 
+						childLocationOnDiagram.x, childLocationOnDiagram.y, featureSize.width, featureSize.height, 
+						Color.black );
+
+				//connecting child with the group
+				endAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
+						ItemsType.END_MANDATORY_CONNECTOR, EditorView.endMandatoryNamePrefix+editorView.getConnectorsCount(),
+						featurePanel.getWidth()/2-endAnchorPanel.getWidth()/2, 0);
+
+				editorView.directlyAddAnchorToFeature(endAnchorPanel,featurePanel);
+
+				//adding mutual references to the panels
+				groupPanel.getMembers().add(endAnchorPanel);
+				endAnchorPanel.setOtherEnd(groupPanel);
+
+				//adding the child to nodes to expand list
+				currentNodePosition=new int[2];
+				currentNodePosition[0]=firstChildPosition[0]+childrenPlaced;
+				currentNodePosition[1]=firstChildPosition[1];
+				nodesToExpand.add(new AbstractMap.SimpleEntry<FeatureNode, int[]>(child, currentNodePosition));
+
+				editorView.incrFeaturesCount();			
+				++childrenPlaced;
+			  }
+
+			  if(groupPanel.getMembers().size()<2){//the group must have at least 2 ending dots to draw its arc
+
+				//adding missing dot to the group
+				endAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
+						ItemsType.END_MANDATORY_CONNECTOR, EditorView.endMandatoryNamePrefix+editorView.getConnectorsCount(),
+						groupPanel.getLocation().x+groupLineLengthIcon.getIconWidth(),
+						groupPanel.getLocation().y+groupLineLengthIcon.getIconHeight()+groupPanel.getHeight()-3);
+
+				editorView.directlyAddAnchorToDiagram(endAnchorPanel);
+
+				//adding mutual references to the panel
+				groupPanel.getMembers().add(endAnchorPanel);
+				endAnchorPanel.setOtherEnd(groupPanel);
+			  }
+
+			  /*groupLocationInFeature=*/nextOrGroupLocation(groupPanel.getSize(), featureSize, locationInFeature);			  
+			}
+		  }
+
+		  //removing current node from nodes to expand list
+		  nodesToExpand.remove(currentNode);
+		}
+	  }
+		
+	  //adding constraints
+	  for(String[] constraint : editorModel.getConstraints()){
+			
+		//checking how the panels are located in the diagram
+		featurePanel = editorView.getFeaturePanel(EditorView.featureNamePrefix+constraint[1]);
+		endFeaturePanel = editorView.getFeaturePanel(EditorView.featureNamePrefix+constraint[2]);
+
+		//adding starting constraint panel
+		if(endFeaturePanel.getX()>featurePanel.getX()){
+		  locationInFeature.x=featureSize.width-10; locationInFeature.y=featureSize.height/2-12;
+		}
+		else{
+		  locationInFeature.x=0; locationInFeature.y=featureSize.height/2-12;
+		}
+
+		if(constraint[0].startsWith(EditorModel.includesConstraintNamePrefix))
+		  startConstraintPanel = (ConstraintPanel)editorView.buildConnectionDot(
+			ItemsType.START_INCLUDES_DOT, 
+			EditorView.startIncludesNamePrefix+constraint[0].substring(EditorModel.includesConstraintNamePrefix.length()),
+			locationInFeature.x, locationInFeature.y); 
+		else
+		  startConstraintPanel = (ConstraintPanel)editorView.buildConnectionDot(
+			ItemsType.START_EXCLUDES_DOT, 
+			EditorView.startExcludesNamePrefix+constraint[0].substring(EditorModel.excludesConstraintNamePrefix.length()),
+			locationInFeature.x, locationInFeature.y); 
+
+		
+		editorView.directlyAddAnchorToFeature(startConstraintPanel, featurePanel);
+
+		//adding ending constraint panel
+		if(endFeaturePanel.getX()>featurePanel.getX()){
+		  locationInFeature.x=0; locationInFeature.y=featureSize.height/2-12;
+		}
+		else{
+		  locationInFeature.x=featureSize.width-10; locationInFeature.y=featureSize.height/2-12;
+		}
+
+		if(constraint[0].startsWith(EditorModel.includesConstraintNamePrefix))
+		  endConstraintPanel = (ConstraintPanel)editorView.buildConnectionDot(
+			ItemsType.END_INCLUDES_DOT, 
+			EditorView.endIncludesNamePrefix+constraint[0].substring(EditorModel.includesConstraintNamePrefix.length()),
+			locationInFeature.x, locationInFeature.y); 
+		else
+		  endConstraintPanel = (ConstraintPanel)editorView.buildConnectionDot(
+			ItemsType.END_EXCLUDES_DOT, 
+			EditorView.endExcludesNamePrefix+constraint[0].substring(EditorModel.excludesConstraintNamePrefix.length()),
+			locationInFeature.x, locationInFeature.y); 
+
+		editorView.directlyAddAnchorToFeature(endConstraintPanel, endFeaturePanel);
+
+		//adding constraint control panel
+		if(endFeaturePanel.getX()>featurePanel.getX()) locationInFeature.x=endFeaturePanel.getX();
+		else locationInFeature.x=endFeaturePanel.getX()+featureSize.width-10; 
+		locationInFeature.y=endFeaturePanel.getY()+featureSize.height/2-12;
+		 
+		controlConstraintPanel = (ConstraintPanel)editorView.buildConnectionDot(
+			ItemsType.CONSTRAINT_CONTROL_POINT, 
+			EditorView.constraintControlPointNamePrefix+editorView.getConstraintControlsCount(),
+			locationInFeature.x, locationInFeature.y); 
+
+		editorView.incrConstraintControlsCount();
+
+		editorView.directlyAddAnchorToDiagram(controlConstraintPanel);
+
+		//adding mutual references to the panels
+		startConstraintPanel.setOtherEnd(endConstraintPanel);
+		startConstraintPanel.setControlPoint(controlConstraintPanel);
+		endConstraintPanel.setOtherEnd(startConstraintPanel);
+		endConstraintPanel.setControlPoint(controlConstraintPanel);
+		
+		//setting counters
+		
+		/*TO DO */
+
+	  }
+	}
+
+	/**
+	 * Sets the Point groupLocationInFeature to the next group location for an alternative group in a feature panel.
+	 * 
+	 * @param groupPanelSize - size of the group panel
+	 * @param featureSizee - size of the feature panel
+	 * @param groupLocationInFeature - previous group location
+	 */
+	private /*Point */void nextAltGroupLocation(Dimension groupPanelSize, Dimension featureSize, Point groupLocationInFeature) {
+	  if(groupLocationInFeature.x-groupPanelSize.width-2>0)
+		groupLocationInFeature.x-=groupPanelSize.width+2;
+	  else if(groupLocationInFeature.y-groupPanelSize.height-2>featureSize.height/2)
+		groupLocationInFeature.y-=groupPanelSize.height+2;
+	  else{
+		groupLocationInFeature.x=featureSize.width/2-17; 
+		groupLocationInFeature.y=featureSize.height-13;		  
+	  }
+//		return null;
+	}
+	
+	/**
+	 * Sets the Point groupLocationInFeature to the next group location for an or group in a feature panel.
+	 * 
+	 * @param groupPanelSize - size of the group panel
+	 * @param featureSizee - size of the feature panel
+	 * @param groupLocationInFeature - previous group location
+	 */
+	private /*Point */void nextOrGroupLocation(Dimension groupPanelSize, Dimension featureSize, Point groupLocationInFeature) {
+	  if(groupLocationInFeature.x+groupPanelSize.width+2<featureSize.width-10)
+		groupLocationInFeature.x+=groupPanelSize.width+2;
+	  else if(groupLocationInFeature.y-groupPanelSize.height-2>featureSize.height/2)
+		groupLocationInFeature.y-=groupPanelSize.height+2;
+	  else{
+		groupLocationInFeature.x=featureSize.width/2+7; 
+		groupLocationInFeature.y=featureSize.height-13;		  
+	  }
+//		return null;
+	}
 }

@@ -136,6 +136,7 @@ import javax.xml.stream.events.StartDocument;
 
 import com.ibm.icu.impl.InvalidFormatException;
 
+import view.EditorModel.GroupTypes;
 import view.EditorModel.StringWrapper;
 import view.ViewPanelCentral.FeatureType;
 import main.ModelXMLHandler;
@@ -415,10 +416,12 @@ public class EditorView extends JFrame implements Observer{
 	
 	/** Number of connector dots created*/
 	private int connectorsCount=0;
-	/** Number of includes constraint dots created*/
-	private int includesCount=0;
-	/** Number of excludes constraint dots created*/
-	private int excludesCount=0;
+//	/** Number of includes constraint dots created*/
+//	private int constraintCount=0;
+//	/** Number of excludes constraint dots created*/
+//	private int constraintCount=0;
+	/** Number of constraint dots created*/
+	private int constraintsCount=0;
 	/** Number of constraint control point dots created*/
 	private int constraintControlsCount=0;
 	/** Number of Alternative Groups created*/
@@ -2753,7 +2756,6 @@ public class EditorView extends JFrame implements Observer{
 	private void addFeatureToDiagram(String name) {
 	  Color featureColor=null;
 	  
-	  
 	  //the new feature must be dropped on the diagram panel for it to be added
 	  if( diagramPanel.getLocationOnScreen().getX()>toolDragPosition.x ||
 		  diagramPanel.getLocationOnScreen().getX()+diagramPanel.getWidth()<=toolDragPosition.x ||
@@ -3060,8 +3062,9 @@ public class EditorView extends JFrame implements Observer{
 		newConstraintEndDot.setControlPoint(newConstraintControlPointDot);
 		newConstraintControlPointDot.setVisible(false);
 
-		addConstraintToDrawLists(
-			newConstraintStartDot, 
+		++constraintsCount;
+		
+		addConstraintToDrawLists( newConstraintStartDot, 
 		  (isActiveItem==activeItems.DRAGGING_TOOL_INCLUDES) ?
 			ItemsType.START_INCLUDES_DOT : ItemsType.START_EXCLUDES_DOT);
 		
@@ -3242,7 +3245,7 @@ public class EditorView extends JFrame implements Observer{
 	 * @param name - String representing the name of the connection dot
 	 * @return A new JComponent representing the connection dot
 	 */
-	private JComponent buildConnectionDot(ItemsType type, String name, int x, int y) {
+	protected JComponent buildConnectionDot(ItemsType type, String name, int x, int y) {
 		JComponent imagePanel=null;
 
 		ImageIcon connectorIcon=null;
@@ -3289,8 +3292,8 @@ public class EditorView extends JFrame implements Observer{
 			imagePanel = new ConstraintPanel();  
 			if(name!=null) imagePanel.setName(name);
 			else{
-			  imagePanel.setName(startIncludesNamePrefix+includesCount);
-			  ++includesCount;
+			  imagePanel.setName(startIncludesNamePrefix+constraintsCount);
+//			  ++constraintsCount;
 			}
 			connectorIcon = new ImageIcon(constraintDotIconURL);
 			break;
@@ -3298,8 +3301,8 @@ public class EditorView extends JFrame implements Observer{
 			imagePanel = new ConstraintPanel();  
 			if(name!=null) imagePanel.setName(name);
 			else{
-			  imagePanel.setName(endIncludesNamePrefix+includesCount);
-			  ++includesCount;
+			  imagePanel.setName(endIncludesNamePrefix+constraintsCount);
+//			  ++constraintsCount;
 			}
 			connectorIcon = new ImageIcon(constraintDotIconURL);
 			break;		
@@ -3307,8 +3310,8 @@ public class EditorView extends JFrame implements Observer{
 			imagePanel = new ConstraintPanel();  
 			if(name!=null) imagePanel.setName(name);
 			else{
-			  imagePanel.setName(startExcludesNamePrefix+excludesCount);
-			  ++excludesCount;
+			  imagePanel.setName(startExcludesNamePrefix+constraintsCount);
+//			  ++constraintsCount;
 			}
 			connectorIcon = new ImageIcon(constraintDotIconURL);
 			break;
@@ -3316,8 +3319,8 @@ public class EditorView extends JFrame implements Observer{
 			imagePanel = new ConstraintPanel();  
 			if(name!=null) imagePanel.setName(name);
 			else{
-			  imagePanel.setName(endExcludesNamePrefix+excludesCount);
-			  ++excludesCount;
+			  imagePanel.setName(endExcludesNamePrefix+constraintsCount);
+//			  ++constraintsCount;
 			}
 			connectorIcon = new ImageIcon(constraintDotIconURL);
 			break;
@@ -3972,6 +3975,15 @@ public class EditorView extends JFrame implements Observer{
 		toolDragPosition=p;
 	}
 
+	/**
+	 * Returns the ImageIcon of a starting connector line between a group and one of its ending anchor.
+	 * 
+	 * @return an ImageIcon of a starting connector line
+	 */
+	public ImageIcon getGroupLineIcon(){
+	  return new ImageIcon(groupLineLengthIconURL);
+	}
+
 	/** Tells if the view has been modified since last save*/
 	public boolean getModified(){
 		return modified;
@@ -3984,6 +3996,11 @@ public class EditorView extends JFrame implements Observer{
 	
 	/** Tells the size of a feature panel*/
 	public Dimension getFeatureSize(){
+		return new Dimension(120+featureBorderSize, 60+featureBorderSize);
+	}
+	
+	/** Tells the size of a feature panel*/
+	public Dimension getAnchorSize(){
 		return new Dimension(120+featureBorderSize, 60+featureBorderSize);
 	}
 	
@@ -4035,6 +4052,77 @@ public class EditorView extends JFrame implements Observer{
 	/** Returns the number of features added to the diagram */
 	public int getFeaturesCount(){
 		return featuresCount;
+	}
+	
+	/** Increments the value of field featuresCount by 1. 
+	 * {@link featuresCount}
+	 */
+	public void incrFeaturesCount(){
+		++featuresCount;
+	}	
+	
+	/** Returns the number of alternative groups added to the diagram */
+	public int getAltGroupsCount(){
+		return altGroupsCount;
+	}
+	
+	/** Increments the value of field altGroupsCount by 1. 
+	 * {@link featuresCount}
+	 */
+	public void incrAltGroupsCount(){
+		++altGroupsCount;
+	}	
+	
+	/** Returns the number of or groups added to the diagram */
+	public int getOrGroupsCount(){
+		return orGroupsCount;
+	}
+	
+	/** Increments the value of field orGroupsCount by 1. 
+	 * {@link featuresCount}
+	 */
+	public void incrOrGroupsCount(){
+		++orGroupsCount;
+	}
+	
+	/** Returns the number of includes added to the diagram */
+	public int getIncludesCount(){
+		return constraintsCount;
+	}
+	
+	/** Increments the value of field includesCount by 1. 	 */
+	public void incrIncludesCount(){
+		++constraintsCount;
+	}
+	
+	/** Returns the number of excludes added to the diagram */
+	public int getExcludesCount(){
+		return constraintsCount;
+	}
+	
+	/** Increments the value of field excludesCount by 1. */
+	public void incrExcludesCount(){
+		++constraintsCount;
+	}
+	
+	/** Returns the number of connectors added to the diagram */
+	public int getConnectorsCount(){
+		return connectorsCount;
+	}
+	
+	/** Increments the value of field connectorsCount by 1. */
+	public void incrConnectorsCount(){
+		++connectorsCount;
+	}
+	
+	/** Returns the number of constraint controls pointsadded to the diagram */
+	public int getConstraintControlsCount(){
+		return constraintControlsCount;
+	}
+	
+	/** Increments the value of field constraintControlsCount by 1. */
+	public void incrConstraintControlsCount(){
+		++constraintControlsCount;
 	}
 
 	/** Returns an ArrayList<String> representing the starting commonalities*/
@@ -4523,7 +4611,7 @@ public class EditorView extends JFrame implements Observer{
 		//saving miscellaneous data, mainly counters
 		xml+=	 "</constraints>"
 			    +"<misc>"
-				+"connectorsCount="+connectorsCount+" includesCount="+includesCount+" excludesCount="+excludesCount
+				+"connectorsCount="+connectorsCount+" includesCount="+constraintsCount+" excludesCount="+constraintsCount
 				+" constraintControlsCount="+constraintControlsCount+" altGroupsCount="+altGroupsCount
 				+" orGroupsCount="+orGroupsCount+" featuresCount="+featuresCount
 			    +"</misc>"
@@ -4729,13 +4817,7 @@ public class EditorView extends JFrame implements Observer{
 		height=Integer.valueOf(featureData[featureData.length-1].substring(i+1));
 		
 		//building feature panel
-		FeaturePanel newFeature=buildFeaturePanel(featureName, containerName, x, y, featureColor);
-		newFeature.setSize(width, height);
-		
-		visibleOrderDraggables.addToTop(newFeature);
-		diagramPanel.setLayer(newFeature, 0);
-		diagramPanel.add(newFeature);
-		diagramPanel.setComponentZOrder(newFeature, 0);
+		directlyAddFeatureToDiagram(featureName, containerName, x, y, width, height, featureColor);
 	  }
 	}
 
@@ -4799,6 +4881,8 @@ public class EditorView extends JFrame implements Observer{
 		else{//adding connector to its owner feature panel
 		  OrderedListNode tmp=visibleOrderDraggables.getFirst();
 		  while(tmp!=null){
+			System.out.println("((JComponent)tmp.getElement()).getName(): "+((JComponent)tmp.getElement()).getName()
+					+"\nstartOwnerName: "+startOwnerName);
 			if(((JComponent)tmp.getElement()).getName().compareTo(startOwnerName)==0){
 			  owner=(FeaturePanel)tmp.getElement(); break;
 			}
@@ -4908,10 +4992,7 @@ public class EditorView extends JFrame implements Observer{
 		  if(owner==null)
 		    throw new RuntimeException("Couldn't find feature '"+groupOwnerName+"' as owner of '"+groupConnectorName);
 
-		  visibleOrderDraggables.addToTop(group);
-		  owner.setLayer(group, 0);
-		  owner.add(group);
-		  owner.setComponentZOrder(group, 0);
+		  directlyAddGroupToFeature(group, owner, groupType);
 		}
 
 		//adding members
@@ -4978,13 +5059,13 @@ public class EditorView extends JFrame implements Observer{
 	  String controlName=null;
 	  int controlX=0, controlY=0;
 	  int i=0;
-	  String[] connectors=constraintsList.split("\n");
+	  String[] constraints=constraintsList.split("\n");
 	  ConstraintPanel startConstraint=null, endConstraint=null;
 	  JComponent constControlPoint=null;
 	  FeaturePanel owner=null;
 	  
-	  for(String connector : connectors){
-		constraintData=connector.split(" ");
+	  for(String constraint : constraints){
+		constraintData=constraint.split(" ");
 
 		/* ***DEBUG*** */
 		if(debug2){
@@ -5102,7 +5183,9 @@ public class EditorView extends JFrame implements Observer{
 	    
 		//adding constraint to draw list
 		addConstraintToDrawLists(startConstraint, (startConstraintName.startsWith(startIncludesNamePrefix)) ?
-			ItemsType.START_INCLUDES_DOT : ItemsType.START_EXCLUDES_DOT);	  	  
+			ItemsType.START_INCLUDES_DOT : ItemsType.START_EXCLUDES_DOT);	
+		
+		++constraintsCount;
 	  }
 	}
 
@@ -5114,8 +5197,8 @@ public class EditorView extends JFrame implements Observer{
 	private void loadMiscellaneous(String misc) {
 	  String[] values=misc.split(" ");
 	  connectorsCount=Integer.valueOf(values[0].substring(16));
-	  includesCount=Integer.valueOf(values[1].substring(14));
-	  excludesCount=Integer.valueOf(values[2].substring(14));
+	  constraintsCount=Integer.valueOf(values[1].substring(14));
+	  constraintsCount=Integer.valueOf(values[2].substring(14));
 	  constraintControlsCount=Integer.valueOf(values[3].substring(24));
 	  altGroupsCount=Integer.valueOf(values[4].substring(15));
 	  orGroupsCount=Integer.valueOf(values[5].substring(14));
@@ -6233,6 +6316,112 @@ public class EditorView extends JFrame implements Observer{
 		  //updating occurrences label
 		  occurrsLabel.setText( (currentIndex+1)+"/"+occurrIndexesList.size()+"[Index: "+occurrence[0]+"]");
 		
+	}
+
+	/**
+	 * Returns the feaure panel with the given ID.
+	 * 
+	 * @param id - the feature panel ID
+	 * @return - the feaure panel with the given ID, or null if not present
+	 */
+	public FeaturePanel getFeaturePanel(String id) {
+	  boolean found = false;
+	  
+	  OrderedListNode tmp = visibleOrderDraggables.getFirst();
+	  while(tmp!=null){
+		if(((JComponent)tmp.getElement()).getName().startsWith(featureNamePrefix) 
+			&& ((JComponent)tmp.getElement()).getName().compareTo(id)==0){ found=true; break;}
+		tmp=tmp.getNext();
+	  }		  	  
+
+	  if(found) return (FeaturePanel)tmp.getElement();
+	  else return null;
+	}
+
+	/**
+	 * Adds a feature panel to the diagram panel without need of notifications from the model.
+	 * 
+	 * @param featureName - the feature name
+	 * @param featureID - the feature ID
+	 * @param x - x position of new feature panel on the diagram panel
+	 * @param y - y position of new feature panel on the diagram panel
+	 * @param width - width of the new feature panel
+	 * @param height - heightof of the new feature panel
+	 * @param featureColor - color of the new feature panel
+	 * @return - the new feature panel added to the diagram
+	 */
+	public FeaturePanel directlyAddFeatureToDiagram(String featureName, String featureID, int x, int y,
+											int width, int height, Color featureColor) {
+		FeaturePanel newFeature=buildFeaturePanel(featureName, featureNamePrefix+featureID, x, y, featureColor);
+		if(width<=0) width=120+featureBorderSize;
+		if(height<=0) height=60+featureBorderSize;
+		newFeature.setSize(width, height);
+		
+		visibleOrderDraggables.addToTop(newFeature);
+		diagramPanel.setLayer(newFeature, 0);
+		diagramPanel.add(newFeature);
+		diagramPanel.setComponentZOrder(newFeature, 0);
+		
+		return newFeature;
+	}
+
+	/**
+	 * Directly adds an anchor to a feature, without removing it from the diagram panel.<br>
+	 * This method is used to add anchors that have never been added to the diagram panel, on a feature panel.
+	 * 
+	 * @param anchorPanel - the anchor to add
+	 * @param featurePanel -  the feature on which the anchor must be added
+	 */
+	public void directlyAddAnchorToFeature(AnchorPanel anchorPanel, FeaturePanel featurePanel) {
+		visibleOrderDraggables.addToTop(anchorPanel);
+		featurePanel.setLayer(anchorPanel, 0);
+		featurePanel.add(anchorPanel);
+		featurePanel.setComponentZOrder(anchorPanel, 0);
+
+		//adding start anchor to draw list
+		if(anchorPanel.getName().startsWith(startMandatoryNamePrefix)
+		   || anchorPanel.getName().startsWith(startOptionalNamePrefix) )
+		  startConnectorDots.add(anchorPanel);
+		else if(anchorPanel.getName().startsWith(startExcludesNamePrefix))
+		  startExcludesDots.add(anchorPanel);
+		else if(anchorPanel.getName().startsWith(startIncludesNamePrefix))
+		  startIncludesDots.add(anchorPanel);
+	}
+
+	/**
+	 * Adds a group to a feature panel without need of notifications from the model.
+	 * 
+	 * @param group - the group to be added to the feature
+	 * @param owner - the feature taht will be the owner of the group
+	 * @param groupType 
+	 */
+	public void directlyAddGroupToFeature(GroupPanel group, FeaturePanel owner, ItemsType groupType) {
+		visibleOrderDraggables.addToTop(group);
+		owner.setLayer(group, 0);
+		owner.add(group);
+		owner.setComponentZOrder(group, 0);
+
+		//adding group to draw list
+		if(groupType==ItemsType.ALT_GROUP_START_CONNECTOR) altGroupPanels.add(group);
+		else orGroupPanels.add(group);
+	}
+
+	/**
+	 * Directly adds an anchor to the diagram.<br>
+	 * This method is used to add single anchors, it's up to the caller to be sure the anchor is part of a group or link.
+	 * 
+	 * @param anchorPanel - the anchor to add
+	 */
+	public void directlyAddAnchorToDiagram(AnchorPanel anchorPanel) {
+		visibleOrderDraggables.addToTop(anchorPanel);
+		diagramPanel.setLayer(anchorPanel, 0);
+		diagramPanel.add(anchorPanel);
+		diagramPanel.setComponentZOrder(anchorPanel, 0);
+
+		//adding start anchor to draw list
+		if(anchorPanel.getName().startsWith(startMandatoryNamePrefix)
+		   || anchorPanel.getName().startsWith(startOptionalNamePrefix) )
+		  startConnectorDots.add(anchorPanel);
 	}		
 	
 }

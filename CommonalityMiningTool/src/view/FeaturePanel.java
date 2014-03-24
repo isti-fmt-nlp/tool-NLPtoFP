@@ -70,7 +70,9 @@ public class FeaturePanel extends JLayeredPane {
 	 * @return - a String containing the ID.
 	 */
 	public String getID(){
-		return getName();
+		String compName=getName();
+		return compName.substring(EditorView.featureNamePrefix.length(), compName.length());
+		//		return getName();
 	}
 
 //	/**

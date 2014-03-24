@@ -147,10 +147,10 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		
 		//setting diagrams save path
 		String[] strArr=modelProject.getPathProject().split("/");
-		String projectname=strArr[strArr.length-1];
+		String projectName=strArr[strArr.length-1];
 		String diagramsSavePath=modelProject.getPathProject();
-		diagramsSavePath=diagramsSavePath.substring(0, diagramsSavePath.length()-projectname.length())
-		  +diagramRelativePath+"/"+projectname;
+		diagramsSavePath=diagramsSavePath.substring(0, diagramsSavePath.length()-projectName.length())
+		  +diagramRelativePath+"/"+projectName;
 		
 //		editorController.setSavePath(modelProject.getPathProject()+diagramPath);
 		editorController.setSavePath(diagramsSavePath);
@@ -221,6 +221,9 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 //		  editorController.setSavePath(diagramsSavePath);
 		  String[] strArr=s.split("/");
 		  s=s.substring(0, s.length()-strArr[strArr.length-2].length()-1-strArr[strArr.length-1].length()-1);
+		  
+//		  strArr=modelProject.getPathProject().split("/");
+		  
 		  editorController.setSavePath(s);
 
 		  //adding the view as observer to the model

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Observable;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -65,7 +66,7 @@ public class EditorModel extends Observable{
 //		public int length() { return string.length();}
 	}
 	
-	private static boolean debug = false;
+	private static boolean debug = true;
 
 	/** enumeration used to specify a group type in the model*/
 	public static enum GroupTypes { ALT_GROUP, OR_GROUP, N_M_GROUP};
@@ -83,7 +84,7 @@ public class EditorModel extends Observable{
 //	private HashMap<String, FeatureNode> rootLinkedFeatures = new HashMap<String, FeatureNode>();
 
 	/** feature nodes that are not descendant of root */
-	private HashMap<String, FeatureNode> unrootedFeatures = new HashMap<String, FeatureNode>();
+	private HashMap<String, FeatureNode> featuresList = new HashMap<String, FeatureNode>();
 
 	/** groups(with at least a member)*/
 	private HashMap<String, GroupNode> groups= new HashMap<String, GroupNode>();
@@ -104,10 +105,10 @@ public class EditorModel extends Observable{
 	/** prefix of any includes constraint name*/
 	public static String includesConstraintNamePrefix="---INCLUDE---#";
 	
-	/** Number of includes constraint created*/
-	private int includesCount=0;
-	/** Number of excludes constraint created*/
-	private int excludesCount=0;
+//	/** Number of includes constraint created*/
+//	private int includesCount=0;
+//	/** Number of excludes constraint created*/
+//	private int excludesCount=0;
 	
 	
 
@@ -162,10 +163,51 @@ public class EditorModel extends Observable{
 	 * @param type - type of the feature to create, a value from the FeatureTypes enum type
 	 */
 	private void addUnrootedFeature(String name, String id, FeatureTypes type) {
-		FeatureNode newFeature = new FeatureNode(type, name, id, 1, 1);
-		unrootedFeatures.put(id, newFeature);
+		FeatureNode newFeature = null;
+		if(type == FeatureTypes.COMMONALITY) newFeature = new FeatureNode(type, name, id, 1, 1);
+		else newFeature = new FeatureNode(type, name, id, 0, 1);
+		featuresList.put(id, newFeature);
 		setChanged();
 		notifyObservers("New Feature Correctly Added");
+	}
+
+	/**
+	 * Adds a newly created feature named name of the specified type to the unrooted features,
+	 *  without notifying the observers afterward.
+	 * 
+	 * @param featureName - String containing the name of the new feature
+	 * @param id - String containing the ID of the new feature
+	 * @param type - type of the feature to create, a value from the FeatureTypes enum type
+	 */
+	public void addUnrootedFeatureNoNotify(String featureName, String id, FeatureTypes type) {
+		FeatureNode newFeature = null;
+		if(type == FeatureTypes.COMMONALITY) newFeature = new FeatureNode(type, featureName, id, 1, 1);
+		else newFeature = new FeatureNode(type, featureName, id, 0, 1);
+		featuresList.put(id, newFeature);
+	}
+
+	/**
+	 * Adds a newly created feature named name of the specified type and adds it as a subfeature to parent feature,
+	 *  without notifying the observers afterward.
+	 * 
+	 * @param newFeatureName - the name of the new child feature
+	 * @param parentNameID - the ID of parent feature
+	 * @param id - String containing the ID of the new feature
+	 * @param type - type of the new child feature, a value from the FeatureTypes enum type
+	 */
+	public void addSubFeatureNoNotify(String newFeatureName, String parentNameID, String id, FeatureTypes type) {
+		FeatureNode child = null;
+		if(type == FeatureTypes.COMMONALITY) child = new FeatureNode(type, newFeatureName, id, 1, 1);
+		else child = new FeatureNode(type, newFeatureName, id, 0, 1);
+		featuresList.put(id, child);
+		
+		FeatureNode parent= searchFeature(parentNameID);
+		if ( parent!=null && child!=null && parent!=child && child.getParent()==null  
+			&& !isDescendantOf(parent, child) && !isDescendantOf(child, parent)){
+		  parent.getSubFeatures().add(child);
+		  child.setParent(parent);
+		}
+
 	}
 
 	/**
@@ -176,18 +218,27 @@ public class EditorModel extends Observable{
 	 */
 	public void addUnrootedNamedFeature(String name, String id, FeatureTypes type) {
 		FeatureNode newFeature = new FeatureNode(type, name, id, 1, 1);
-		unrootedFeatures.put(id, newFeature);
+		featuresList.put(id, newFeature);
 		setChanged();
 		notifyObservers("New Named Feature Correctly Added");
 	}
 
 	/**
-	 * Returns the HashMap containing all features that are not descendant of root 
+	 * Returns the HashMap containing all features that are not descendant of root.
 	 * 
-	 * @return - unrootedFeatures, an object of type: HashMap<String, FeatureNode>
+	 * @return - featuresList, an object of type: HashMap<String, FeatureNode>
 	 */
 	public HashMap<String, FeatureNode> getUnrootedFeatures(){
-		return unrootedFeatures;
+		return featuresList;
+	}
+
+	/**
+	 * Returns the list containing all constraints in the model.
+	 * 
+	 * @return - constraints, an object of type: ArrayList<String[]>
+	 */
+	public ArrayList<String[]> getConstraints(){
+		return constraints;
 	}
 	
 	/**
@@ -196,21 +247,21 @@ public class EditorModel extends Observable{
 	 * This method is called when an existing ending anchor of a group is dropped, <br>
 	 * to merge connectors see mergeConnectorWithGroup(String, String, String).
 	 * 
-	 * @param groupOwner - the feature owner of the group
-	 * @param groupMember - the feature to be grouped
+	 * @param groupOwnerID - the ID of feature owner of the group
+	 * @param groupMemberID - the ID of feature to be grouped
 	 * @param groupName - the name of the group
 	 * @param type 
 	 * 
 	 * @see {@link EditorModel#mergeConnectorWithGroup(String, String, String)}
 	 */
-	public void addFeatureToGroup(String groupOwner, String groupMember, String groupName, GroupTypes type){
+	public void addFeatureToGroup(String groupOwnerID, String groupMemberID, String groupName, GroupTypes type){
 	  FeatureNode parent= null;
 	  GroupNode group = searchGroup(groupName);
-	  FeatureNode sub= searchFeature(groupMember);
+	  FeatureNode sub= searchFeature(groupMemberID);
 	  boolean groupFound= (group==null)? false : true;
 	  int maxCardinality=0;
 	  
-	  if(groupOwner!=null) parent=searchFeature(groupOwner);
+	  if(groupOwnerID!=null) parent=searchFeature(groupOwnerID);
 		  
 	  //if the candidate member is not found, operation is aborted
 	  if (sub==null){ 
@@ -253,22 +304,22 @@ public class EditorModel extends Observable{
 	 * This method is called when a starting anchor must be merged with a group, <br>
 	 * to drop a group ending anchor on a feature see addFeatureToGroup(String, String, String).
 	 * 
-	 * @param groupOwner - the feature owner of the group, or null if the group is not owned by a feature
-	 * @param groupMember - the feature to be grouped, or null if only an anchor must be grouped
+	 * @param groupOwnerID - ID of the feature owner of the group, or null if the group is not owned by a feature
+	 * @param groupMemberID - ID of the feature to be grouped, or null if only an anchor must be grouped
 	 * @param groupName - the name of the group	 
 	 * @param type 
 	 * 
 	 * @see {@link EditorModel#addFeatureToGroup(String, String, String)}
 	 */
-	public void mergeConnectorWithGroup(String groupOwner, String groupMember, String groupName, GroupTypes type){
+	public void mergeConnectorWithGroup(String groupOwnerID, String groupMemberID, String groupName, GroupTypes type){
 	  FeatureNode parent = null;
 	  GroupNode group = searchGroup(groupName);
 	  FeatureNode sub = null;
 	  boolean groupFound = false;
 	  int maxCardinality=0;
 	  
-	  if(groupOwner!=null) parent = searchFeature(groupOwner);
-	  if(groupMember!=null) sub = searchFeature(groupMember);
+	  if(groupOwnerID!=null) parent = searchFeature(groupOwnerID);
+	  if(groupMemberID!=null) sub = searchFeature(groupMemberID);
 	  groupFound = (group==null)? false : true;
 	  
 	  //if the candidate member is not found, merging does not modify the model
@@ -312,12 +363,12 @@ public class EditorModel extends Observable{
 	 * If the two features are already connected in any way, this method does nothing.<br>
 	 * As a side effect, if the minimum cardinality of subFeature is 0, it is set to 1.
 	 * 
-	 * @param parentFeature - the parent feature to link
-	 * @param subFeature - the sub-feature to link
+	 * @param parentFeatureID - the ID of parent feature to link
+	 * @param subFeatureID - the ID of sub-feature to link
 	 */
-	public void addMandatoryLink(String parentFeature, String subFeature){
-	  FeatureNode parent= searchFeature(parentFeature);
-	  FeatureNode sub= searchFeature(subFeature);
+	public void addMandatoryLink(String parentFeatureID, String subFeatureID){
+	  FeatureNode parent= searchFeature(parentFeatureID);
+	  FeatureNode sub= searchFeature(subFeatureID);
 	  Point subCard=null;
 	  
 	  if ( parent!=null && sub!=null && parent!=sub && sub.getParent()==null  
@@ -342,12 +393,12 @@ public class EditorModel extends Observable{
 	 * If the two features are already connected in any way, this method does nothing.
 	 * As a side effect, the minimum cardinality of subFeature is set to 0.
 	 * 
-	 * @param parentFeature - the parent feature to link
-	 * @param subFeature - the sub-feature to link
+	 * @param parentFeatureID - the ID of parent feature to link
+	 * @param subFeatureID - the ID of sub-feature to link
 	 */
-	public void addOptionalLink(String parentFeature, String subFeature){
-	  FeatureNode parent= searchFeature(parentFeature);
-	  FeatureNode sub= searchFeature(subFeature);
+	public void addOptionalLink(String parentFeatureID, String subFeatureID){
+	  FeatureNode parent= searchFeature(parentFeatureID);
+	  FeatureNode sub= searchFeature(subFeatureID);
 	  
 	  if ( parent!=null && sub!=null && parent!=sub && sub.getParent()==null  
 		   && !isDescendantOf(parent, sub) && !isDescendantOf(sub, parent)){
@@ -368,14 +419,14 @@ public class EditorModel extends Observable{
 	/**
 	 * Adds a constraint from startingFeature to endingFeature, if it is legal.<br>
 	 * 
-	 * @param startingFeature - the feature from which the constraint starts
-	 * @param endingFeature - the feature on which the constraint ends
+	 * @param startingFeatureID - ID of the feature from which the constraint starts
+	 * @param endingFeatureID - ID of the feature on which the constraint ends
 	 * @param type - a ConstraintTypes value representing the type of constraint
 	 * @param IDnum - a String representing the unique sequential number of this constraint
 	 */
-	public void addConstraint(String startingFeature, String endingFeature, ConstraintTypes type, String IDnum){
-	  FeatureNode starting= searchFeature(startingFeature);
-	  FeatureNode ending= searchFeature(endingFeature);
+	public void addConstraint(String startingFeatureID, String endingFeatureID, ConstraintTypes type, String IDnum){
+	  FeatureNode starting= searchFeature(startingFeatureID);
+	  FeatureNode ending= searchFeature(endingFeatureID);
 	  String[] newConstraint=null;
 	  
 	  if ( starting==null || ending==null || starting==ending){
@@ -387,15 +438,15 @@ public class EditorModel extends Observable{
 	  switch(type){
 	    case INCLUDES:
 	      for(String[] strArr: constraints){
-		    if (strArr[1].compareTo(startingFeature)==0
-		    	&& strArr[2].compareTo(endingFeature)==0){//exclude or equivalent include already present
+		    if (strArr[1].compareTo(startingFeatureID)==0
+		    	&& strArr[2].compareTo(endingFeatureID)==0){//exclude or equivalent include already present
 		  	  setChanged();
 		  	  notifyObservers("Constraint Not Added");			
 		  	  return;	    	  
 		    }
 		    if (strArr[0].startsWith(excludesConstraintNamePrefix)
-		    	&& strArr[1].compareTo(endingFeature)==0
-		    	&& strArr[2].compareTo(startingFeature)==0){//exclude already present
+		    	&& strArr[1].compareTo(endingFeatureID)==0
+		    	&& strArr[2].compareTo(startingFeatureID)==0){//exclude already present
 		      setChanged();
 		      notifyObservers("Constraint Not Added");
 		      return;	    	  
@@ -418,10 +469,10 @@ public class EditorModel extends Observable{
 	      break;
 	    case EXCLUDES:
 		  for(String[] strArr: constraints){
-			if ( (strArr[1].compareTo(startingFeature)==0
-			      && strArr[2].compareTo(endingFeature)==0) ||
-			     (strArr[1].compareTo(endingFeature)==0
-			      && strArr[2].compareTo(startingFeature)==0) ){//exclude or include already present
+			if ( (strArr[1].compareTo(startingFeatureID)==0
+			      && strArr[2].compareTo(endingFeatureID)==0) ||
+			     (strArr[1].compareTo(endingFeatureID)==0
+			      && strArr[2].compareTo(startingFeatureID)==0) ){//exclude or include already present
 			  setChanged();
 			  notifyObservers("Constraint Not Added");			
 			  return;	    	  
@@ -457,8 +508,8 @@ public class EditorModel extends Observable{
 	      newConstraint=new String[3];
 	      newConstraint[0]=includesConstraintNamePrefix+IDnum;
 //	      newConstraint[0]=includesConstraintNamePrefix+includesCount;
-	      newConstraint[1]=startingFeature;
-	      newConstraint[2]=endingFeature;
+	      newConstraint[1]=startingFeatureID;
+	      newConstraint[2]=endingFeatureID;
 	      constraints.add(newConstraint);
 //	      ++includesCount;
 	      break;
@@ -466,8 +517,8 @@ public class EditorModel extends Observable{
 		  newConstraint=new String[3];
 		  newConstraint[0]=excludesConstraintNamePrefix+IDnum;
 //		  newConstraint[0]=excludesConstraintNamePrefix+excludesCount;
-		  newConstraint[1]=startingFeature;
-		  newConstraint[2]=endingFeature;
+		  newConstraint[1]=startingFeatureID;
+		  newConstraint[2]=endingFeatureID;
 		  constraints.add(newConstraint);
 //		  ++excludesCount;
 		  break;
@@ -477,13 +528,13 @@ public class EditorModel extends Observable{
 	}
 	
 	/**
-	 * AdRemoves a constraint from startingFeature to endingFeature, if present.<br>
+	 * Removes a constraint from startingFeature to endingFeature, if present.<br>
 	 * 
-	 * @param startingFeature - the feature from which the constraint starts
-	 * @param endingFeature - the feature on which the constraint ends
+	 * @param startingFeatureID - the feature from which the constraint starts
+	 * @param endingFeatureID - the feature on which the constraint ends
 	 * @param type - a ConstraintTypes value representing the type of constraint
 	 */
-	public void removeConstraint(String startingFeature, String endingFeature, ConstraintTypes type){
+	public void removeConstraint(String startingFeatureID, String endingFeatureID, ConstraintTypes type){
 	  boolean found=false;
 	  String[] strArr=null;
 	  switch(type){
@@ -491,8 +542,8 @@ public class EditorModel extends Observable{
 		for(int i=0; i<constraints.size(); ++i){
 		  strArr=constraints.get(i);
 		  if ( strArr[0].startsWith(includesConstraintNamePrefix)
-			   && strArr[1].compareTo(startingFeature)==0
-			   && strArr[2].compareTo(endingFeature)==0 ){ found=true; break;}
+			   && strArr[1].compareTo(startingFeatureID)==0
+			   && strArr[2].compareTo(endingFeatureID)==0 ){ found=true; break;}
 		}
 		if(found) constraints.remove(strArr);
 	    break;
@@ -500,11 +551,11 @@ public class EditorModel extends Observable{
 		for(int i=0; i<constraints.size(); ++i){
 		  strArr=constraints.get(i);
 		  if ( strArr[0].startsWith(excludesConstraintNamePrefix)
-			   && strArr[1].compareTo(startingFeature)==0
-			   && strArr[2].compareTo(endingFeature)==0 ){ found=true; break;}
+			   && strArr[1].compareTo(startingFeatureID)==0
+			   && strArr[2].compareTo(endingFeatureID)==0 ){ found=true; break;}
 		  else if ( strArr[0].startsWith(excludesConstraintNamePrefix)
-				   && strArr[1].compareTo(endingFeature)==0
-				   && strArr[2].compareTo(startingFeature)==0 ){ found=true; break;}
+				   && strArr[1].compareTo(endingFeatureID)==0
+				   && strArr[2].compareTo(startingFeatureID)==0 ){ found=true; break;}
 		}
 		if(found) constraints.remove(strArr);
 		break;		
@@ -523,13 +574,13 @@ public class EditorModel extends Observable{
 	 * Adds a group to a feature.<br>
 	 * If the feature and the members of the group and are already connected in any way, this method does nothing.
 	 * 
-	 * @param feature - the feature that will take the group
+	 * @param featureID - ID of the feature that will take the group
 	 * @param group - the group to be added
 	 */
-	public void addGroupToFeature(String feature, String group){
-	  FeatureNode featureNode = searchFeature(feature);
+	public void addGroupToFeature(String featureID, String group){
+	  FeatureNode featureNode = searchFeature(featureID);
 	  GroupNode groupNode = searchGroup(group);
-	  System.out.println("addGroupToFeature(): "+feature+" = "+featureNode+"  "+group+" = "+groupNode);
+	  System.out.println("addGroupToFeature(): "+featureID+" = "+featureNode+"  "+group+" = "+groupNode);
 	  
 	  if ( featureNode==null){
 		setChanged();
@@ -559,12 +610,12 @@ public class EditorModel extends Observable{
 	/**
 	 * Removes a group from a feature in the model.
 	 * 
-	 * @param feature - the feature owner of the group
+	 * @param featureID - ID of the feature owner of the group
 	 * @param group - the group to remove
 	 */
-	public void removeGroupFromFeature(String feature, String group){
+	public void removeGroupFromFeature(String featureID, String group){
 	  System.out.println("RemoveGroupFromfeature");
-	  FeatureNode featureNode = searchFeature(feature);
+	  FeatureNode featureNode = searchFeature(featureID);
 	  GroupNode groupNode = searchGroup(group);
 	  
 	  if ( featureNode!=null && groupNode!=null){
@@ -588,12 +639,12 @@ public class EditorModel extends Observable{
 	/**
 	 * Removes a direct link(not grouped) between two features in the model.
 	 * 
-	 * @param parentFeature - the parent feature
-	 * @param subFeature - the sub-feature
+	 * @param parentFeatureID - ID of the parent feature
+	 * @param subFeatureID - ID of the sub-feature
 	 */
-	public void removeLink(String parentFeature, String subFeature){
-	  FeatureNode parent= searchFeature(parentFeature);
-	  FeatureNode sub= searchFeature(subFeature);
+	public void removeLink(String parentFeatureID, String subFeatureID){
+	  FeatureNode parent= searchFeature(parentFeatureID);
+	  FeatureNode sub= searchFeature(subFeatureID);
 	  if (parent!=null && sub!=null){
 		if (parent.getSubFeatures().contains(sub)){
 		  parent.getSubFeatures().remove(sub);
@@ -610,15 +661,16 @@ public class EditorModel extends Observable{
 	/**
 	 * Removes a feature from a group.
 	 * 
-	 * @param parentFeature - the parent feature
-	 * @param subFeature - the sub-feature
+	 * @param groupOwnerID - the group's owner feature ID
+	 * @param groupMemberID - the group's member feature ID
+	 * @param groupName - the group's name
 	 */
-	public void removeFeatureFromGroup(String groupOwner, String groupMember, String groupName){		
+	public void removeFeatureFromGroup(String groupOwnerID, String groupMemberID, String groupName){		
 	  FeatureNode parent = null;
-	  FeatureNode sub= searchFeature(groupMember);
+	  FeatureNode sub= searchFeature(groupMemberID);
 	  GroupNode group = searchGroup(groupName);
 		  
-	  if(groupOwner!=null) parent = searchFeature(groupOwner);
+	  if(groupOwnerID!=null) parent = searchFeature(groupOwnerID);
 
 	  //if the group or the member was not found, operation is aborted
 	  if(sub==null || group==null) {
@@ -684,7 +736,7 @@ public class EditorModel extends Observable{
 	public void deleteFeature(String name) {
 //	  FeatureNode parentFeature=null;
 //	  GroupNode parentGroup=null;	  
-	  FeatureNode featurefound=unrootedFeatures.get(name);
+	  FeatureNode featurefound=featuresList.get(name);
 //	  if (featurefound==null) featurefound=rootLinkedFeatures.get(name);
 	  if (featurefound==null){
 		setChanged();
@@ -728,7 +780,7 @@ public class EditorModel extends Observable{
 	  for(String[] strArr: strArrList) constraints.remove(strArr);
 
 	  //removing the feature from his feature list
-	  if(unrootedFeatures.containsKey(name)) unrootedFeatures.remove(name);
+	  if(featuresList.containsKey(name)) featuresList.remove(name);
 //	  if(rootLinkedFeatures.containsKey(name)) rootLinkedFeatures.remove(name);
 	  setChanged();
 	  notifyObservers("Feature Deleted");
@@ -753,7 +805,7 @@ public class EditorModel extends Observable{
 	 * @param newName - the new name of the feature
 	 */
 	public void changeFeatureName(String id, String newName){
-	  FeatureNode featurefound=unrootedFeatures.get(id);
+	  FeatureNode featurefound=featuresList.get(id);
 	  if (featurefound==null){
 		setChanged();
 		notifyObservers("Feature Not Renamed");		  
@@ -768,16 +820,16 @@ public class EditorModel extends Observable{
 	/**
 	 * Search for a feature node named name in the model.
 	 * 
-	 * @param name - the name of the feature to search for
+	 * @param featureID - the ID of the feature to search for
 	 * @return - a FeatureNode object representing the feature found, or null if it's not present in the model
 	 */
-	private FeatureNode searchFeature(String name){
-	  FeatureNode featurefound=unrootedFeatures.get(name);
+	private FeatureNode searchFeature(String featureID){
+	  FeatureNode featurefound=featuresList.get(featureID);
 //	  if(featurefound==null) featurefound=rootLinkedFeatures.get(name);
 //	  if(featurefound==null) featurefound=unrootedFeatures.get(name);
 	  
 	  /* ***DEBUG*** */
-	  if(debug && featurefound!=null) System.out.println("searchFeature("+name+"): "+featurefound.getID());
+	  if(debug && featurefound!=null) System.out.println("searchFeature("+featureID+"): "+featurefound.getID());
 	  /* ***DEBUG*** */
 
 	  return featurefound;
@@ -798,6 +850,31 @@ public class EditorModel extends Observable{
 
 	  return groupfound;
 	}
+	
+	/**
+	 * Returns the list of all features in the model.
+	 * 
+	 * @return - an HashMap<String, FeatureNode>, mapping each feature ID to the correspondent featureNode
+	 */
+	public HashMap<String, FeatureNode> getFeaturesList(){
+		return featuresList;
+	}
+	
+	/**
+	 * Returns the root feature of this model, if it is unique.
+	 * 
+	 * @return - the unique root featureNode if present, null otherwise
+	 */
+	public FeatureNode getUniqueRootfeature(){
+		FeatureNode unique = null;
+		for(Entry<String, FeatureNode> feature : featuresList.entrySet()){
+		  if(feature.getValue().getParent()!=null) continue;
+		  else if(unique!=null) return null;//there is more than 1 unrooted feature
+		  else unique=feature.getValue();
+		};
+		return unique;
+	}
+	
 	
 	/**
 	 * Uses a Depth first recursive search algorithm to check if the feature descendant <br>
@@ -867,7 +944,7 @@ public class EditorModel extends Observable{
 			+"\nDelete done?"+(oldFile.delete()?"yes":"no"));
 	  }
 	  
-	  for(Map.Entry<String,FeatureNode> feature : unrootedFeatures.entrySet()){
+	  for(Map.Entry<String,FeatureNode> feature : featuresList.entrySet()){
 	    //skipping features that have a parent feature
 		if(feature.getValue().getParent()!=null) continue;
 		
@@ -886,8 +963,10 @@ public class EditorModel extends Observable{
 				+"<constraints>";
 
 		for(String[] strArr: constraints){
-		  if(strArr[0].startsWith(includesConstraintNamePrefix)) xml+=strArr[0]+": ~"+strArr[1]+" or "+strArr[2]+"\n";
-		  else xml+=strArr[0]+": ~"+strArr[1]+" or ~"+strArr[2]+"\n";
+		  if(strArr[0].startsWith(includesConstraintNamePrefix))
+			xml+=strArr[0].substring(includesConstraintNamePrefix.length())+": ~"+strArr[1]+" or "+strArr[2]+"\n";
+		  else 
+			xml+=strArr[0].substring(excludesConstraintNamePrefix.length())+": ~"+strArr[1]+" or ~"+strArr[2]+"\n";
 		}
 
 		xml+=	 "</constraints>"
@@ -932,7 +1011,7 @@ public class EditorModel extends Observable{
 	  date=cal.get(Calendar.YEAR)+"-"+cal.get(Calendar.MONTH+1)
 			  +"-"+cal.get(Calendar.DAY_OF_MONTH)+" "+cal.get(Calendar.HOUR_OF_DAY)+":"+cal.get(Calendar.MINUTE);
 
-	  for(Map.Entry<String,FeatureNode> feature : unrootedFeatures.entrySet()){
+	  for(Map.Entry<String,FeatureNode> feature : featuresList.entrySet()){
 	    //skipping features that have a parent feature
 		if(feature.getValue().getParent()!=null) continue;
 		
@@ -950,8 +1029,10 @@ public class EditorModel extends Observable{
 				+"<constraints>";
 
 		for(String[] strArr: constraints){
-		  if(strArr[0].startsWith(includesConstraintNamePrefix)) xml+=strArr[0]+": ~"+strArr[1]+" or "+strArr[2]+"\n";
-		  else xml+=strArr[0]+": ~"+strArr[1]+" or ~"+strArr[2]+"\n";
+		  if(strArr[0].startsWith(includesConstraintNamePrefix))
+			xml+=strArr[0].substring(includesConstraintNamePrefix.length())+": ~"+strArr[1]+" or "+strArr[2]+"\n";
+		  else
+			xml+=strArr[0].substring(excludesConstraintNamePrefix.length())+": ~"+strArr[1]+" or ~"+strArr[2]+"\n";
 		}
 
 		xml+=	 "</constraints>"
@@ -1097,7 +1178,8 @@ public class EditorModel extends Observable{
 	  ModelXMLHandler xmlHandler = new ModelXMLHandler();
 	  StringWrapper featureTree=null;
 	  String[] strArr=null, tmpArr=null, newConstraint=null;
-
+	  int negations=0;
+	  
 	  EditorModel newModel=new EditorModel();
 	  
 	  System.out.println("EditorModel: ***PARSING ALL XML MODEL FILES***");
@@ -1135,13 +1217,20 @@ public class EditorModel extends Observable{
 		strArr=xmlHandler.constraints.split("\n");
 	  
 		for(String constr: strArr){
+		  negations=0;
 		  tmpArr=constr.split(" ");		
 		  newConstraint=new String[3];
 		  newConstraint[0]=tmpArr[0].substring(0, tmpArr[0].length()-1);
-		  if(tmpArr[1].charAt(0)=='~') newConstraint[1]=tmpArr[1].substring(1);
+		  if(tmpArr[1].charAt(0)=='~'){ ++negations; newConstraint[1]=tmpArr[1].substring(1);}
 		  else newConstraint[1]=tmpArr[1];
-		  if(tmpArr[3].charAt(0)=='~') newConstraint[2]=tmpArr[3].substring(1);
+		  if(tmpArr[3].charAt(0)=='~'){ ++negations; newConstraint[2]=tmpArr[3].substring(1);}
 		  else newConstraint[2]=tmpArr[3];
+		  
+		  /*new stuff*/
+		  if(negations==2) newConstraint[0]=excludesConstraintNamePrefix+newConstraint[0];
+		  else newConstraint[0]=includesConstraintNamePrefix+newConstraint[0];
+		  /*new stuff*/
+
 		  newModel.constraints.add(newConstraint);
 		}
 	  }
@@ -1315,7 +1404,7 @@ public class EditorModel extends Observable{
 		parent.getSubFeatures().add(newFeature);
 		newFeature.setParent(parent);
 	  }
-	  unrootedFeatures.put(featureID, newFeature);
+	  featuresList.put(featureID, newFeature);
 //	  unrootedFeatures.put(featureName, newFeature);
 	  
 	  return newFeature;
@@ -1427,7 +1516,7 @@ public class EditorModel extends Observable{
 		    +"' with parent feature '"+(groupOwner==null ? "null": groupOwner.getID())+"'");
 		  parentGroup.getMembers().add(newFeature);
 		  newFeature.setParent(groupOwner);
-		  unrootedFeatures.put(featureID, newFeature);
+		  featuresList.put(featureID, newFeature);
 //		  unrootedFeatures.put(featureName, newFeature);
 		  
 		  return newFeature;
