@@ -19,6 +19,8 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
+import main.CMTConstants;
+
 public class ControllerProject implements ActionListener, WindowListener, MouseListener{
 	
 	private static boolean verbose=false;//variabile usata per attivare stampe nel codice
@@ -130,7 +132,7 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 	  else if(ae.getActionCommand().equals("Select Variabilities")){
 			viewProject.showFeaturesSelected(ViewPanelCentral.FeatureType.VARIABILITIES);
 	  }
-	  else if(ae.getActionCommand().equals("New Diagram")){
+	  else if(ae.getActionCommand().equals("Create Diagram")){
 		//creating model
 		EditorModel editorModel= new EditorModel();
 
@@ -147,13 +149,15 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		
 		//setting diagrams save path
 		String[] strArr=modelProject.getPathProject().split("/");
-		String projectName=strArr[strArr.length-1];
-		String diagramsSavePath=modelProject.getPathProject();
-		diagramsSavePath=diagramsSavePath.substring(0, diagramsSavePath.length()-projectName.length())
-		  +diagramRelativePath+"/"+projectName;
+//		String projectName=strArr[strArr.length-1];
+//		String diagramsSavePath=modelProject.getPathProject();
+//		diagramsSavePath=diagramsSavePath.substring(0, diagramsSavePath.length()-projectName.length())
+//		  +diagramRelativePath+"/"+projectName;
 		
 //		editorController.setSavePath(modelProject.getPathProject()+diagramPath);
-		editorController.setSavePath(diagramsSavePath);
+//		editorController.setSavePath(diagramsSavePath);
+		
+		editorController.setSavePath(strArr[strArr.length-1]);
 		
 		//adding the view as observer to the model
 		editorModel.addObserver(editorView);
@@ -170,11 +174,15 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		String s1=null;		
 		String diagramDataPath=null;
 		ArrayList<String> featureModelDataPaths=new ArrayList<String>();
-		
+		String[] strArr=null;
+		String projectName=null;
 		//detting diagrams save path
 
-//		String[] strArr=modelProject.getPathProject().split("/");
-//		String projectname=strArr[strArr.length-1];
+		if(modelProject.getPathProject()!=null){
+		  strArr=modelProject.getPathProject().split("/");
+		  projectName=strArr[strArr.length-1];
+		}
+		else projectName = null;
 //		String diagramsSavePath=modelProject.getPathProject();
 //		diagramsSavePath=diagramsSavePath.substring(0, diagramsSavePath.length()-projectname.length())
 //				+diagramRelativePath+"/"+projectname;
@@ -183,11 +191,12 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 //		String loadDirectory=modelProject.getPathProject()+diagramPath+"/"+saveFilesSubPath;  
 
 //		String loadDirectory=diagramsSavePath+"/"+saveFilesSubPath;  
-		String loadDirectory=diagramPath;  
+//		String loadDirectory=diagramPath; 
+//		String loadDirectory=CMTConstants.saveDiagramDir+"/"+projectName;
+		String loadDirectory=CMTConstants.saveDiagramDir;
 		
 		String s = null;
 		if((s = viewProject.loadDiagramDialog(loadDirectory)) != null) try{
-//		  BufferedReader br1 = new BufferedReader(new FileReader(loadDirectory+"/"+s));
 		  BufferedReader br1 = new BufferedReader(new FileReader(s));
 		  diagramDataPath=br1.readLine();
 		  while( (s1 = br1.readLine()) != null ) featureModelDataPaths.add(s1);
@@ -208,31 +217,32 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		  return;
 		}
 
-		  //creating an empty view
-		  EditorView editorView= new EditorView();
+		//creating an empty view
+		EditorView editorView= new EditorView();
 
-		  //creating controller
-		  EditorController editorController =new EditorController(editorView, editorModel);
-		  
-		  
-		  //setting diagrams save path
-//		  editorController.setSavePath(modelProject.getPathProject()+diagramPath);		  
+		//creating controller
+		EditorController editorController =new EditorController(editorView, editorModel);
 
-//		  editorController.setSavePath(diagramsSavePath);
-		  String[] strArr=s.split("/");
-		  s=s.substring(0, s.length()-strArr[strArr.length-2].length()-1-strArr[strArr.length-1].length()-1);
-		  
-//		  strArr=modelProject.getPathProject().split("/");
-		  
-		  editorController.setSavePath(s);
 
-		  //adding the view as observer to the model
-		  editorModel.addObserver(editorView);
+		//setting diagrams save path
+		//editorController.setSavePath(modelProject.getPathProject()+diagramPath);		  
 
-		  if( !editorView.prepareUI(editorController) ){
-			  System.out.println("Controller not set. Closing...");
-			  return;
-		  }
+		//editorController.setSavePath(diagramsSavePath);
+//		/*String[]*/ strArr=s.split("/");
+//		s=s.substring(0, s.length()-strArr[strArr.length-2].length()-1-strArr[strArr.length-1].length()-1);
+
+		//strArr=modelProject.getPathProject().split("/");
+
+		//editorController.setSavePath(s);
+		editorController.setSavePath(projectName);
+
+		//adding the view as observer to the model
+		editorModel.addObserver(editorView);
+
+		if( !editorView.prepareUI(editorController) ){
+		  System.out.println("Controller not set. Closing...");
+		  return;
+		}
 
 		//loading saved view data
 		try{
@@ -246,11 +256,9 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 	  else if(ae.getActionCommand().equals("Exit")){
 		if(modelProject.readStateProject()[1]){
 		  if(viewProject.saveProjectDialog() == 0){
-			if(modelProject.readStateProject()[0])
-			  modelProject.deleteProject();
+			if(modelProject.readStateProject()[0]) modelProject.deleteProject();
 		  }
-		  else
-			modelProject.saveProject();
+		  else modelProject.saveProject();
 		}
 		viewProject.closeProject();
 	  }

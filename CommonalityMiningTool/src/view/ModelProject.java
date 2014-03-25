@@ -6,6 +6,7 @@
 package view;
 
 import java.awt.Color;
+import main.CMTConstants;
 import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -1298,24 +1299,38 @@ public class ModelProject extends Observable implements Runnable{
 		workerProject = new ArrayList <Thread> ();
 		
 		nameProject = s;
-		pathProject = "../"+savedProjectsDir+"/" + s;
-		pathXML = pathProject + "/" + s + ".xml"; 
-		pathCommonalitiesCandidates = pathProject + "/CommanalitiesC.log";
-		pathCommonalitiesSelected = pathProject + "/CommanalitiesS.log";
-		pathCommonalitiesSelectedHTML = pathProject + "/CommanalitiesS.html";
+//		pathProject = "../"+savedProjectsDir+"/" + s;
+//		pathXML = pathProject + "/" + s + ".xml"; 
+//		pathCommonalitiesCandidates = pathProject + "/CommanalitiesC.log";
+//		pathCommonalitiesSelected = pathProject + "/CommanalitiesS.log";
+//		pathCommonalitiesSelectedHTML = pathProject + "/CommanalitiesS.html";
+//
+//		pathVariabilitiesCandidates = pathProject + "/VariabilitiesC.log";
+//		pathVariabilitiesSelected = pathProject + "/VariabilitiesS.log";
+//		pathVariabilitiesSelectedHTML = pathProject + "/VariabilitiesS.html";
+//		
+//		pathRelevantTerms = pathProject + "/RelevantTerms.log";
+//		
+//		pathTermsVersions = pathProject + "/TermsVersions.log";
+		
+		pathProject = CMTConstants.saveAnalisysDir+"/" + s;
+		pathXML = CMTConstants.saveAnalisysDir + "/" + s + ".xml"; 
 
-		pathVariabilitiesCandidates = pathProject + "/VariabilitiesC.log";
-		pathVariabilitiesSelected = pathProject + "/VariabilitiesS.log";
-		pathVariabilitiesSelectedHTML = pathProject + "/VariabilitiesS.html";
+		pathCommonalitiesCandidates = pathProject + CMTConstants.CCsubpath;
+		pathCommonalitiesSelected = pathProject + CMTConstants.CSsubpath;
+		pathCommonalitiesSelectedHTML = pathProject + CMTConstants.CSHsubpath;
+
+		pathVariabilitiesCandidates = pathProject + CMTConstants.VCsubpath;
+		pathVariabilitiesSelected = pathProject + CMTConstants.VSsubpath;
+		pathVariabilitiesSelectedHTML = pathProject + CMTConstants.VSHsubpath;
 		
-		pathRelevantTerms = pathProject + "/RelevantTerms.log";
-		
-		pathTermsVersions = pathProject + "/TermsVersions.log";
+		pathRelevantTerms = pathProject + CMTConstants.RTsubpath;		
+		pathTermsVersions = pathProject + CMTConstants.TVsubpath;
 		
 		stateProject[0] = true;
 		stateProject[1] = true;
 		
-		System.out.println("pathProject: "+pathProject);
+		System.out.println("pathProject: "+pathProject+"\nnameProject: "+nameProject+"\npathXML: "+pathXML);
 		
 		if(new File(pathProject).mkdirs() == false)
 			return false;		
@@ -1804,9 +1819,10 @@ public class ModelProject extends Observable implements Runnable{
 		return pathProject;
 	}
 	
-	/** Saves the project.
+	/** 
+	 * Saves the project.
 	 * 
-	 * @return an xml file containing the project saved informations
+	 * @return - an xml file containing the saved project informations
 	 */
 	public File saveProject(){		
 		String s ="<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" + nameProject + "<node>Input";
@@ -1819,10 +1835,7 @@ public class ModelProject extends Observable implements Runnable{
 		s += "</node><node>Commonalities</node></root>";
 		
 		try{
-			PrintWriter pw1 =
-			        new PrintWriter(
-			        		new BufferedWriter(
-			        				new FileWriter(pathXML)));
+			PrintWriter pw1 = new PrintWriter(new BufferedWriter(new FileWriter(pathXML)));
 			pw1.print(s);
 			pw1.close();
 			
@@ -1849,6 +1862,7 @@ public class ModelProject extends Observable implements Runnable{
 		} 
 		catch (IOException e){
 			System.out.println("Exception saveProject: " + e.getMessage());
+			e.printStackTrace();
 			return null;
 		}
 		return new File(pathXML);
@@ -1895,6 +1909,8 @@ public class ModelProject extends Observable implements Runnable{
 	 * @throws IOException
 	 */
 	private void saveRelevantTermsVersions() throws IOException {
+		if(relevantTermsVersions==null) return;
+		
 		Iterator<Entry<String, HashMap<String, ArrayList<String>>>> termIter = 
 			relevantTermsVersions.entrySet().iterator();
 		Entry<String, HashMap<String, ArrayList<String>>> termEntry=null;
@@ -1992,20 +2008,38 @@ public class ModelProject extends Observable implements Runnable{
 			workerProject = new ArrayList <Thread> ();
 			
 			nameProject = s.substring(0, s.length() - 4);
-			pathProject = "../"+savedProjectsDir+"/" + nameProject;
-			pathXML = pathProject + "/" + nameProject + ".xml"; 
-			pathCommonalitiesCandidates = pathProject + "/CommanalitiesC.log";
-			pathCommonalitiesSelected = pathProject + "/CommanalitiesS.log";
-			pathCommonalitiesSelectedHTML = pathProject + "/CommanalitiesS.html";
+//			pathProject = "../"+savedProjectsDir+"/" + nameProject;
+//			pathXML = "../"+savedProjectsDir + "/" + s + ".xml"; 
+//			pathCommonalitiesCandidates = pathProject + "/CommanalitiesC.log";
+//			pathCommonalitiesSelected = pathProject + "/CommanalitiesS.log";
+//			pathCommonalitiesSelectedHTML = pathProject + "/CommanalitiesS.html";
+//
+//			pathVariabilitiesCandidates = pathProject + "/VariabilitiesC.log";
+//			pathVariabilitiesSelected = pathProject + "/VariabilitiesS.log";
+//			pathVariabilitiesSelectedHTML = pathProject + "/VariabilitiesS.html";
+//			
+//			pathRelevantTerms = pathProject + "/RelevantTerms.log";
+//			
+//			pathTermsVersions = pathProject + "/TermsVersions.log";
+			
+//			pathProject = CMTConstants.savedProjectsDir+"/" + s;
+//			pathXML = CMTConstants.savedProjectsDir + "/" + s + ".xml"; 
+			pathProject = CMTConstants.saveAnalisysDir+"/" + nameProject;
+			pathXML = CMTConstants.saveAnalisysDir + "/" + nameProject + ".xml"; 
 
-			pathVariabilitiesCandidates = pathProject + "/VariabilitiesC.log";
-			pathVariabilitiesSelected = pathProject + "/VariabilitiesS.log";
-			pathVariabilitiesSelectedHTML = pathProject + "/VariabilitiesS.html";
+			pathCommonalitiesCandidates = pathProject + CMTConstants.CCsubpath;
+			pathCommonalitiesSelected = pathProject + CMTConstants.CSsubpath;
+			pathCommonalitiesSelectedHTML = pathProject + CMTConstants.CSHsubpath;
+
+			pathVariabilitiesCandidates = pathProject + CMTConstants.VCsubpath;
+			pathVariabilitiesSelected = pathProject + CMTConstants.VSsubpath;
+			pathVariabilitiesSelectedHTML = pathProject + CMTConstants.VSHsubpath;
 			
-			pathRelevantTerms = pathProject + "/RelevantTerms.log";
+			pathRelevantTerms = pathProject + CMTConstants.RTsubpath;		
+			pathTermsVersions = pathProject + CMTConstants.TVsubpath;			
 			
-			pathTermsVersions = pathProject + "/TermsVersions.log";
-			
+			System.out.println("pathProject: "+pathProject+"\nnameProject: "+nameProject+"\npathXML: "+pathXML);
+
 			SAXParser parser = spf.newSAXParser();
 			parser.parse(pathXML, parserXML);
 			
@@ -2042,13 +2076,16 @@ public class ModelProject extends Observable implements Runnable{
 			return parserXML.readNameFile();
 		} 
 		catch (ParserConfigurationException e){
-			System.out.println("Exception loadProject: " + e.getMessage());
+			System.out.println("ParserConfigurationException loadProject: " + e.getMessage());
+			e.printStackTrace();
 			return null;
 		}catch (SAXException e){
-			System.out.println("Exception loadProject: " + e.getMessage());
+			System.out.println("SAXException loadProject: " + e.getMessage());
+			e.printStackTrace();
 			return null;
 		}catch (IOException e){
-			System.out.println("Exception loadProject: " + e.getMessage());
+			System.out.println("IOException loadProject: " + e.getMessage());
+			e.printStackTrace();
 			return null;
 		} 
 	}

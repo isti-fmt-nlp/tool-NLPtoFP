@@ -1,6 +1,7 @@
 package view;
 
 import java.awt.BorderLayout;
+import main.CMTConstants;
 import java.awt.CheckboxMenuItem;
 import java.awt.Color;
 import java.awt.Component;
@@ -924,12 +925,15 @@ public class EditorController implements
   			editorView.errorDialog("Error during save.");
   		  else try{
   			//checking if the diagrams save directory must be created
-  			File dir=new File(diagramPath+"/"+saveFilesSubPath);		
-  			if(!dir.isDirectory() && !dir.mkdirs() ) 
+			File dir=new File(CMTConstants.saveDiagramDir);
+//			File dir=new File(diagramPath+"/"+saveFilesSubPath);
+  			
+			if(!dir.isDirectory() && !dir.mkdirs() ) 
   			  throw new IOException("Save Directory can't be created.");
   				
   			PrintWriter pw1 = new PrintWriter(new BufferedWriter(
-  					new FileWriter(diagramPath+"/"+saveFilesSubPath+"/"+s) ));
+  					new FileWriter(CMTConstants.saveDiagramDir+"/"+s) ));
+//  				new FileWriter(diagramPath+"/"+saveFilesSubPath+"/"+s) ));
   			pw1.println(diagDataPath);
   			for(String path : modelDataPaths) pw1.println(path);
   			pw1.close();  	
@@ -957,12 +961,14 @@ public class EditorController implements
     	  if(modelDataPaths==null) editorView.errorDialog("Error during save.");
     	  else try{
     		//checking if the SXFM files save directory must be created
-    		File dir=new File(sxfmPath+"/"+saveFilesSubPath);		
+      		File dir=new File(CMTConstants.saveDiagramDir);		
+//    		File dir=new File(sxfmPath+"/"+saveFilesSubPath);		
     		if(!dir.isDirectory() && !dir.mkdirs() ) 
     		  throw new IOException("Save Directory can't be created.");
 
     		PrintWriter pw1 = new PrintWriter(new BufferedWriter(
-    				new FileWriter(sxfmPath+"/"+saveFilesSubPath+"/"+s) ));
+  					new FileWriter(CMTConstants.saveDiagramDir+"/"+s) ));
+//    				new FileWriter(sxfmPath+"/"+saveFilesSubPath+"/"+s) ));
     		for(String path : modelDataPaths) pw1.println(path);
     		pw1.close();  	
     	  }catch (IOException ex){
@@ -1272,15 +1278,28 @@ public class EditorController implements
 	}
 
 	/**
-	 * Sets the path used for saving the project and that used to export SXFM files into.
-	 * @param pathProject - the path used for saving the project
+	 * Sets the paths used for saving the project and for exported SXFM and images files.
+	 * 
+	 * @param projectName - the name of analisys project, used for saving the project. 
+	 * If null, a default directory will be used.
 	 */
-	public void setSavePath(String pathProject/*, String projectName*/) {
-		this.diagramPath=pathProject;		
-		this.sxfmPath=pathProject+sxfmSubPath;
-		this.imagesPath=pathProject+imagesSubPath;
-		this.projectName=diagramPath;
-		System.out.println("setSavePath(): pathProject="+pathProject+"\nprojectName="+projectName);
+	public void setSavePath(/*String pathProject, */String projectName){		
+		if(projectName!=null){
+		  this.diagramPath=CMTConstants.saveDiagramDir+"/"+projectName;
+		  this.projectName=projectName;
+		}
+		else{			
+		  this.diagramPath=CMTConstants.saveDiagramDir+"/"+CMTConstants.customSaveDiagramDir;
+		  this.projectName=CMTConstants.customSaveDiagramDir;
+		}
+		this.sxfmPath=diagramPath+CMTConstants.sxfmSubPath;
+		this.imagesPath=diagramPath+CMTConstants.imagesSubPath;		
+//		this.diagramPath=pathProject;		
+//		this.sxfmPath=pathProject+sxfmSubPath;
+//		this.imagesPath=pathProject+imagesSubPath;
+//		this.projectName=diagramPath;
+		System.out.println("setSavePath(): diagramPath="+diagramPath+"\nprojectName="
+							+projectName+"\nthis.projectName="+this.projectName);
 	}
 
 	/**
@@ -1401,8 +1420,7 @@ public class EditorController implements
 
 		editorView.directlyAddFeatureToDiagram(
 				rootFeature.getName(), EditorView.featureNamePrefix+rootFeature.getID(), 
-				rootLocationOnDiagram.x, rootLocationOnDiagram.y, featureSize.width, featureSize.height, 
-				Color.black );
+				rootLocationOnDiagram.x, rootLocationOnDiagram.y, featureSize.width, featureSize.height);
 		
 		editorView.incrFeaturesCount();			
 		
@@ -1522,8 +1540,7 @@ public class EditorController implements
 					  //adding child feature to the diagram
 					  featurePanel = editorView.directlyAddFeatureToDiagram(
 							  child.getName(), EditorView.featureNamePrefix+child.getID(), 
-							  childLocationOnDiagram.x, childLocationOnDiagram.y, featureSize.width, featureSize.height, 
-							  Color.black );
+							  childLocationOnDiagram.x, childLocationOnDiagram.y, featureSize.width, featureSize.height);
 
 					  //connecting child with the group
 					  endAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
@@ -1580,8 +1597,7 @@ public class EditorController implements
 			  //adding sub feature to the diagram
 			  featurePanel = editorView.directlyAddFeatureToDiagram(
 					  subFeature.getName(), EditorView.featureNamePrefix+subFeature.getID(), 
-					  childLocationOnDiagram.x, childLocationOnDiagram.y, featureSize.width, featureSize.height, 
-					  Color.black );
+					  childLocationOnDiagram.x, childLocationOnDiagram.y, featureSize.width, featureSize.height);
 
 			  //getting start anchor panel
 			  if(subFeature.getCardinality().x>0) startAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
@@ -1652,8 +1668,7 @@ public class EditorController implements
 					  //adding child feature to the diagram
 					  featurePanel = editorView.directlyAddFeatureToDiagram(
 							  child.getName(), EditorView.featureNamePrefix+child.getID(), 
-							  childLocationOnDiagram.x, childLocationOnDiagram.y, featureSize.width, featureSize.height, 
-							  Color.black );
+							  childLocationOnDiagram.x, childLocationOnDiagram.y, featureSize.width, featureSize.height);
 
 					  //connecting child with the group
 					  endAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(

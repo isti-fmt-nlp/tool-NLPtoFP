@@ -19,7 +19,6 @@ public /*final */class CommonalityMiningTool
 //		Application application = Application.getApplication();
 //		Image image = Toolkit.getDefaultToolkit().getImage("./src/DATA/Program/CMT.png");
 //		application.setDockIconImage(image);
-		System.out.println("Cartella attuale: "+System.getProperty("user.dir"));
 
 		ModelProject modelProject = new ModelProject();
 		ViewProject viewProject = new ViewProject(modelProject);		

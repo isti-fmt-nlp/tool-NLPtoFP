@@ -617,7 +617,11 @@ public class EditorView extends JFrame implements Observer{
 	/** Variable used to track elements that collided with vertical border during group drag*/
 	private ArrayList<JComponent> collidedElementY=new ArrayList<JComponent>();
 
-	public EditorView(){}
+	public EditorView(){
+	  this.termsColor = new HashMap<String, int[]>();
+	  this.relevantTerms = new HashMap<String, HashMap<String, ArrayList<int[]>>>();
+	  this.relevantTermsVersions = new HashMap<String, HashMap<String, ArrayList<String>>>();		
+	}
 	
 	/**
 	 * Creates a new EditorView, with lists of starting features and associated colors,
@@ -3444,7 +3448,7 @@ public class EditorView extends JFrame implements Observer{
 		
 		//creating text
 		FeaturePanel container = new FeaturePanel(textLabel);
-		if(containerName==null) container.setName(featureNamePrefix+featuresCount);
+		if(containerName==null) container.setName(/*featureNamePrefix+*/""+featuresCount);
 		else container.setName(containerName);
 		container.setLayout(null);
 		container.setBounds(x, y, 120+featureBorderSize, 60+featureBorderSize);
@@ -4826,7 +4830,7 @@ public class EditorView extends JFrame implements Observer{
 		height=Integer.valueOf(featureData[featureData.length-1].substring(i+1));
 		
 		//building feature panel
-		directlyAddFeatureToDiagram(featureName, featureNamePrefix+containerName, x, y, width, height, featureColor);
+		directlyAddFeatureToDiagram(featureName, featureNamePrefix+containerName, x, y, width, height);
 	  }
 	}
 
@@ -6359,8 +6363,15 @@ public class EditorView extends JFrame implements Observer{
 	 * @param featureColor - color of the new feature panel
 	 * @return - the new feature panel added to the diagram
 	 */
-	public FeaturePanel directlyAddFeatureToDiagram(String featureName, String featureID, 
-													int x, int y, int width, int height, Color featureColor) {
+	public FeaturePanel directlyAddFeatureToDiagram(String featureName, String featureID, int x, int y, int width, int height) {
+		Color featureColor = null;
+		
+		if (featureName==null){
+		  featureName=featureNamePrefix+featuresCount;
+		  featureColor=Color.BLACK;
+		}
+		else featureColor = getNewColor(termsColor.get(featureName));		
+
 		
 		FeaturePanel newFeature=buildFeaturePanel(featureName, featureID, x, y, featureColor);
 		if(width<=0) width=120+featureBorderSize;
