@@ -163,9 +163,10 @@ public class EditorModel extends Observable{
 	 * @param type - type of the feature to create, a value from the FeatureTypes enum type
 	 */
 	private void addUnrootedFeature(String name, String id, FeatureTypes type) {
-		FeatureNode newFeature = null;
-		if(type == FeatureTypes.COMMONALITY) newFeature = new FeatureNode(type, name, id, 1, 1);
-		else newFeature = new FeatureNode(type, name, id, 0, 1);
+//		FeatureNode newFeature = null;
+		FeatureNode newFeature = new FeatureNode(type, name, id, (type == FeatureTypes.COMMONALITY)? 1 : 0, 1);
+//		if(type == FeatureTypes.COMMONALITY) newFeature = new FeatureNode(type, name, id, 1, 1);
+//		else newFeature = new FeatureNode(type, name, id, 0, 1);
 		featuresList.put(id, newFeature);
 		setChanged();
 		notifyObservers("New Feature Correctly Added");
@@ -180,9 +181,11 @@ public class EditorModel extends Observable{
 	 * @param type - type of the feature to create, a value from the FeatureTypes enum type
 	 */
 	public void addUnrootedFeatureNoNotify(String featureName, String id, FeatureTypes type) {
-		FeatureNode newFeature = null;
-		if(type == FeatureTypes.COMMONALITY) newFeature = new FeatureNode(type, featureName, id, 1, 1);
-		else newFeature = new FeatureNode(type, featureName, id, 0, 1);
+//		FeatureNode newFeature = null;
+		FeatureNode newFeature = new FeatureNode(type, featureName, id, (type == FeatureTypes.COMMONALITY)? 1 : 0, 1);
+//		if (type == FeatureTypes.COMMONALITY) newFeature = new FeatureNode(type, featureName, id, 1, 1);
+//		else newFeature = new FeatureNode(type, featureName, id, 0, 1);
+		System.out.println("adding: unrooted feature: "+id);
 		featuresList.put(id, newFeature);
 	}
 
@@ -196,14 +199,16 @@ public class EditorModel extends Observable{
 	 * @param type - type of the new child feature, a value from the FeatureTypes enum type
 	 */
 	public void addSubFeatureNoNotify(String newFeatureName, String parentNameID, String id, FeatureTypes type) {
-		FeatureNode child = null;
-		if(type == FeatureTypes.COMMONALITY) child = new FeatureNode(type, newFeatureName, id, 1, 1);
-		else child = new FeatureNode(type, newFeatureName, id, 0, 1);
+//		FeatureNode child = null;
+		FeatureNode child = new FeatureNode(type, newFeatureName, id, (type==FeatureTypes.COMMONALITY)? 1: 0, 1);
+//		if(type == FeatureTypes.COMMONALITY) child = new FeatureNode(type, newFeatureName, id, 1, 1);
+//		else child = new FeatureNode(type, newFeatureName, id, 0, 1);
 		featuresList.put(id, child);
 		
 		FeatureNode parent= searchFeature(parentNameID);
-		if ( parent!=null && child!=null && parent!=child && child.getParent()==null  
-			&& !isDescendantOf(parent, child) && !isDescendantOf(child, parent)){
+		System.out.println("parentNameID: "+parentNameID+"\tparent="+parent);
+		if ( parent!=null/* && child!=null && parent!=child && child.getParent()==null  
+			&& !isDescendantOf(parent, child) && !isDescendantOf(child, parent)*/){
 		  parent.getSubFeatures().add(child);
 		  child.setParent(parent);
 		}

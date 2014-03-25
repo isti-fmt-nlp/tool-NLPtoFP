@@ -3999,11 +3999,10 @@ public class EditorView extends JFrame implements Observer{
 		return new Dimension(120+featureBorderSize, 60+featureBorderSize);
 	}
 	
-	/** Tells the size of a feature panel*/
+	/** Tells the size of an anchor panel*/
 	public Dimension getAnchorSize(){
-		return new Dimension(120+featureBorderSize, 60+featureBorderSize);
-	}
-	
+		return new Dimension(10, 10);
+	}	
 	
 
 	/**
@@ -4054,6 +4053,11 @@ public class EditorView extends JFrame implements Observer{
 		return featuresCount;
 	}
 	
+	/** Sets the number of features added to the diagram */
+	public void setFeaturesCount(int featuresCount){
+		this.featuresCount=featuresCount;
+	}
+	
 	/** Increments the value of field featuresCount by 1. 
 	 * {@link featuresCount}
 	 */
@@ -4064,6 +4068,11 @@ public class EditorView extends JFrame implements Observer{
 	/** Returns the number of alternative groups added to the diagram */
 	public int getAltGroupsCount(){
 		return altGroupsCount;
+	}
+	
+	/** Returns the number of alternative groups added to the diagram */
+	public void setAltGroupsCount(int altGroupsCount){
+		this.altGroupsCount=altGroupsCount;
 	}
 	
 	/** Increments the value of field altGroupsCount by 1. 
@@ -4078,6 +4087,11 @@ public class EditorView extends JFrame implements Observer{
 		return orGroupsCount;
 	}
 	
+	/** Sets the number of or groups added to the diagram */
+	public void setOrGroupsCount(int orGroupsCount){
+		this.orGroupsCount=orGroupsCount;
+	}
+	
 	/** Increments the value of field orGroupsCount by 1. 
 	 * {@link featuresCount}
 	 */
@@ -4086,22 +4100,17 @@ public class EditorView extends JFrame implements Observer{
 	}
 	
 	/** Returns the number of includes added to the diagram */
-	public int getIncludesCount(){
+	public int getConstraintsCount(){
 		return constraintsCount;
+	}
+	
+	/** Sets the number of includes added to the diagram */
+	public void setConstraintsCount(int constraintsCount){
+		this.constraintsCount=constraintsCount;
 	}
 	
 	/** Increments the value of field includesCount by 1. 	 */
-	public void incrIncludesCount(){
-		++constraintsCount;
-	}
-	
-	/** Returns the number of excludes added to the diagram */
-	public int getExcludesCount(){
-		return constraintsCount;
-	}
-	
-	/** Increments the value of field excludesCount by 1. */
-	public void incrExcludesCount(){
+	public void incrConstraintsCount(){
 		++constraintsCount;
 	}
 	
@@ -4817,7 +4826,7 @@ public class EditorView extends JFrame implements Observer{
 		height=Integer.valueOf(featureData[featureData.length-1].substring(i+1));
 		
 		//building feature panel
-		directlyAddFeatureToDiagram(featureName, containerName, x, y, width, height, featureColor);
+		directlyAddFeatureToDiagram(featureName, featureNamePrefix+containerName, x, y, width, height, featureColor);
 	  }
 	}
 
@@ -6330,7 +6339,7 @@ public class EditorView extends JFrame implements Observer{
 	  OrderedListNode tmp = visibleOrderDraggables.getFirst();
 	  while(tmp!=null){
 		if(((JComponent)tmp.getElement()).getName().startsWith(featureNamePrefix) 
-			&& ((JComponent)tmp.getElement()).getName().compareTo(id)==0){ found=true; break;}
+			&& ((FeaturePanel)tmp.getElement()).getID().compareTo(id)==0){ found=true; break;}
 		tmp=tmp.getNext();
 	  }		  	  
 
@@ -6350,9 +6359,10 @@ public class EditorView extends JFrame implements Observer{
 	 * @param featureColor - color of the new feature panel
 	 * @return - the new feature panel added to the diagram
 	 */
-	public FeaturePanel directlyAddFeatureToDiagram(String featureName, String featureID, int x, int y,
-											int width, int height, Color featureColor) {
-		FeaturePanel newFeature=buildFeaturePanel(featureName, featureNamePrefix+featureID, x, y, featureColor);
+	public FeaturePanel directlyAddFeatureToDiagram(String featureName, String featureID, 
+													int x, int y, int width, int height, Color featureColor) {
+		
+		FeaturePanel newFeature=buildFeaturePanel(featureName, featureID, x, y, featureColor);
 		if(width<=0) width=120+featureBorderSize;
 		if(height<=0) height=60+featureBorderSize;
 		newFeature.setSize(width, height);

@@ -1291,20 +1291,25 @@ public class EditorController implements
 		ArrayList<String> startingVariabilities=editorView.getStartingVariabilities();
 		JLayeredPane diagramPanel=editorView.getDiagramPanel();
 		Point position=new Point();
-		
+		int i=0;
+		String[] strArr=projectName.split("/");
+		String rootName = strArr[strArr.length-1];
 		//adding root feature
-		editorModel.addUnrootedFeatureNoNotify(projectName, ""+editorView.getFeaturesCount(), FeatureTypes.COMMONALITY);
+		System.out.println("Adding root: "+rootName);
+		editorModel.addUnrootedFeatureNoNotify(rootName, ""+0, FeatureTypes.COMMONALITY);
+		++i;
 //		editorView.incrFeaturesCount();
 
 		//adding starting commonalities
 
-		/*		
 		for(String name : startingCommonalities){
-		  editorModel.addSubFeatureNoNotify(name, projectName, ""+editorView.getFeaturesCount(), FeatureTypes.COMMONALITY);
+		  System.out.println("Adding commonality: "+name);
+		  editorModel.addSubFeatureNoNotify(name, ""+0, ""+i, FeatureTypes.COMMONALITY);
+		  ++i;
 //		  editorView.incrFeaturesCount();			
 		}
-		 */
 
+		/*		
 		int i=5, j=10;
 		for(String name : startingCommonalities){
 		  if(i>=diagramPanel.getWidth()){ i=5; j+=5+editorView.getFeatureSize().height;}
@@ -1317,15 +1322,17 @@ public class EditorController implements
 //					EditorView.featureNamePrefix+editorView.getFeaturesCount(), FeatureTypes.COMMONALITY);
 		  i+=5+editorView.getFeatureSize().width;
 		}
+		 */
 
-		/*		
 		//adding starting variabilities
 		for(String name : startingVariabilities){
-		  editorModel.addSubFeatureNoNotify(name, projectName, ""+editorView.getFeaturesCount(), FeatureTypes.VARIABILITY);
+		  System.out.println("Adding variability: "+name);
+		  editorModel.addSubFeatureNoNotify(name, ""+0, ""+i, FeatureTypes.VARIABILITY);
+		  ++i;
 //		  editorView.incrFeaturesCount();			
 		}
- 		*/	
 		
+		/*		
 		for(String name : startingVariabilities){
 		  if(i>=diagramPanel.getWidth()){ i=5; j+=5+editorView.getFeatureSize().height;}
 		  position.x=i+(int)diagramPanel.getLocationOnScreen().getX();
@@ -1337,11 +1344,12 @@ public class EditorController implements
 //				  EditorView.featureNamePrefix+editorView.getFeaturesCount(), FeatureTypes.VARIABILITY);
 		  i+=5+editorView.getFeatureSize().width;
 		}
+ 		*/	
 
-//		createViewFromModel();
+		createViewFromModel();
 
 
-
+		editorView.getDiagramPanel().validate();
 		editorView.fitDiagram();
 	}
 
@@ -1364,6 +1372,9 @@ public class EditorController implements
 		//initializing logicGrid
 		logicGrid=new boolean[gridSize][gridSize];
 		for(int i =0; i<logicGrid.length; ++i) for(int j =0; j<logicGrid.length; ++j) logicGrid[i][j]=false;
+		
+		editorView.getDiagramPanel().setSize(gridSize*(featureSize.width+10), gridSize*(featureSize.height+30));
+
 		
 		//getting root feature
 		FeatureNode rootFeature = editorModel.getUniqueRootfeature();
@@ -1421,7 +1432,13 @@ public class EditorController implements
 	  AnchorPanel endAnchorPanel=null, startAnchorPanel=null;
 	  int[] currentNodePosition=null, firstChildPosition=new int[2];
 	  boolean correctlyPlaced=false;
+	  int maxFeatureID=0;
+	  int maxOrGroupID=0;
+	  int maxAltGroupID=0;
+	  int maxConstraintID=0;
+	  int maxTmp=0;
 	  Dimension featureSize=editorView.getFeatureSize();
+	  Dimension anchorSize=editorView.getAnchorSize();
 	  Point childLocationOnDiagram=new Point();
 	  Point locationInFeature=new Point();
 	  JLayeredPane diagramPanel=editorView.getDiagramPanel();
@@ -1430,242 +1447,266 @@ public class EditorController implements
 	  while(nodesToExpand.size()>0){
 		currentNodesToExpand=nodesToExpand.size();
 		for(int i=0; i<currentNodesToExpand; ++i){//adding to the diagram the children of each node to expand
-		  currentNode=nodesToExpand.get(i).getKey();
-		  currentNodePosition=nodesToExpand.get(i).getValue();
-		  
+		  currentNode=nodesToExpand.get(0).getKey();
+
+		  //updating maxFeatureID
+		  try{
+			  maxTmp=Integer.parseInt(currentNode.getID());
+			  if(maxTmp>maxFeatureID) maxFeatureID=maxTmp;
+		  }catch(NumberFormatException e){}
+
+		  currentNodePosition=nodesToExpand.get(0).getValue();
+
 		  //calculating total number of children
 		  totalChildren=currentNode.getSubFeatures().size();
 		  for(GroupNode group : currentNode.getSubGroups()) totalChildren+=group.getMembers().size();
-		  
+
 		  //calulating first child position in the logic grid
-		  if(totalChildren%2==0) firstChildPosition[0]=currentNodePosition[0]-currentNodesToExpand/2+1;
-		  else firstChildPosition[0]=currentNodePosition[0]-currentNodesToExpand/2;		  
+		  if(totalChildren%2==0) firstChildPosition[0]=currentNodePosition[0]-totalChildren/2+1;
+		  else firstChildPosition[0]=currentNodePosition[0]-totalChildren/2;		  
 		  firstChildPosition[1]=currentNodePosition[1]+1;
-		  
+
 		  //trying to place the children in the logic grid
 		  correctlyPlaced=false;
 		  while(!correctlyPlaced){
-			//checking if there are some location already occupied in the logic grid
-			for(k=firstChildPosition[0]; k<firstChildPosition[0]+currentNodesToExpand-1; ++k)
-			  if(logicGrid[k][firstChildPosition[1]]) break;
+			  //checking if there are some location already occupied in the logic grid
+			  for(k=firstChildPosition[0]; k<firstChildPosition[0]+totalChildren-1; ++k){
+				  System.out.println("logicGrid="+logicGrid+"\nk="+k+"\tfirstChildPosition[1]="+firstChildPosition[1]);
+				  if(logicGrid[k][firstChildPosition[1]]) break;			
+			  }
 
-			//if there are occupied cells in this line, next line will be checked
-			if(k<firstChildPosition[0]+currentNodesToExpand-1) ++firstChildPosition[1];
-			else correctlyPlaced=true;
+			  //if there are occupied cells in this line, next line will be checked
+			  if(k<firstChildPosition[0]+totalChildren-1) ++firstChildPosition[1];
+			  else correctlyPlaced=true;
 		  }
-		  
+
 		  //placing the children in the logic grid
-		  for(k=firstChildPosition[0]; k<firstChildPosition[0]+currentNodesToExpand-1; ++k)
-			logicGrid[k][firstChildPosition[1]]=true;		
+		  for(k=firstChildPosition[0]; k<firstChildPosition[0]+totalChildren-1; ++k)
+			  logicGrid[k][firstChildPosition[1]]=true;		
 
 		  //adding the children to the feature diagram
 		  childrenPlaced=0;
-				  
+
 		  //adding alternative groups
 		  //initializing alternative group location
 		  locationInFeature.x=featureSize.width/2-17; 
 		  locationInFeature.y=featureSize.height-13;
-		  
+
 		  for(GroupNode group : currentNode.getSubGroups()){
-			if(group.getCardinality().y>1) continue;//this is an or group
-			else{
-			  //creating group				
-			  groupPanel=(GroupPanel)editorView.buildConnectionDot(
-					  ItemsType.ALT_GROUP_START_CONNECTOR, EditorView.altGroupNamePrefix+group.getID(),
-					  locationInFeature.x, locationInFeature.y); 
-				
-			  //adding group to the feature				
-			  editorView.directlyAddGroupToFeature(groupPanel,
-					  editorView.getFeaturePanel(EditorView.featureNamePrefix+currentNode.getID()),
-					  ItemsType.OR_GROUP_START_CONNECTOR);
-				
-			  //adding group members
-			  for(FeatureNode child : group.getMembers()){
-				childLocationOnDiagram.x =(firstChildPosition[0]+childrenPlaced)*(featureSize.width+5);
-				childLocationOnDiagram.y=firstChildPosition[1]*(featureSize.height+15);
-				childLocationOnDiagram.x+=(int)diagramPanel.getLocationOnScreen().getX();
-				childLocationOnDiagram.y+=(int)diagramPanel.getLocationOnScreen().getY();
+			  if(group.getCardinality().y>1) continue;//this is an or group
+			  else{
 
-				//adding child feature to the diagram
-				featurePanel = editorView.directlyAddFeatureToDiagram(
-						child.getName(), EditorView.featureNamePrefix+child.getID(), 
-						childLocationOnDiagram.x, childLocationOnDiagram.y, featureSize.width, featureSize.height, 
-						Color.black );
+				  //updating maxOrGroupID
+				  try{
+					  maxTmp=Integer.parseInt(group.getID());
+					  if(maxTmp>maxOrGroupID) maxOrGroupID=maxTmp;
+				  }catch(NumberFormatException e){}				
 
-				//connecting child with the group
-				endAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
-						ItemsType.END_MANDATORY_CONNECTOR, EditorView.endMandatoryNamePrefix+editorView.getConnectorsCount(),
-						featurePanel.getWidth()/2-endAnchorPanel.getWidth()/2, 0);
-				
-				editorView.directlyAddAnchorToFeature(endAnchorPanel,featurePanel);
-			  
-				//adding mutual references to the panel
-				groupPanel.getMembers().add(endAnchorPanel);
-				endAnchorPanel.setOtherEnd(groupPanel);
+				  //creating group				
+				  groupPanel=(GroupPanel)editorView.buildConnectionDot(
+						  ItemsType.ALT_GROUP_START_CONNECTOR, EditorView.altGroupNamePrefix+group.getID(),
+						  locationInFeature.x, locationInFeature.y); 
 
-				//adding the child to nodes to expand list
-				currentNodePosition=new int[2];
-				currentNodePosition[0]=firstChildPosition[0]+childrenPlaced;
-				currentNodePosition[1]=firstChildPosition[1];
-				nodesToExpand.add(new AbstractMap.SimpleEntry<FeatureNode, int[]>(child, currentNodePosition));
-				
-				editorView.incrFeaturesCount();			
-				++childrenPlaced;
+				  //adding group to the feature				
+				  editorView.directlyAddGroupToFeature(groupPanel,
+						  editorView.getFeaturePanel(/*EditorView.featureNamePrefix+*/currentNode.getID()),
+						  ItemsType.OR_GROUP_START_CONNECTOR);
+
+				  //adding group members
+				  for(FeatureNode child : group.getMembers()){
+					  childLocationOnDiagram.x =(firstChildPosition[0]+childrenPlaced)*(featureSize.width+10);
+					  childLocationOnDiagram.y=firstChildPosition[1]*(featureSize.height+30);
+					  childLocationOnDiagram.x+=(int)diagramPanel.getLocationOnScreen().getX();
+					  childLocationOnDiagram.y+=(int)diagramPanel.getLocationOnScreen().getY();
+
+					  //adding child feature to the diagram
+					  featurePanel = editorView.directlyAddFeatureToDiagram(
+							  child.getName(), EditorView.featureNamePrefix+child.getID(), 
+							  childLocationOnDiagram.x, childLocationOnDiagram.y, featureSize.width, featureSize.height, 
+							  Color.black );
+
+					  //connecting child with the group
+					  endAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
+							  ItemsType.END_MANDATORY_CONNECTOR, EditorView.endMandatoryNamePrefix+editorView.getConnectorsCount(),
+							  featureSize.width/2-anchorSize.width/2, 0);
+
+					  editorView.directlyAddAnchorToFeature(endAnchorPanel,featurePanel);
+
+					  //adding mutual references to the panel
+					  groupPanel.getMembers().add(endAnchorPanel);
+					  endAnchorPanel.setOtherEnd(groupPanel);
+
+					  //adding the child to nodes to expand list
+					  currentNodePosition=new int[2];
+					  currentNodePosition[0]=firstChildPosition[0]+childrenPlaced;
+					  currentNodePosition[1]=firstChildPosition[1];
+					  nodesToExpand.add(new AbstractMap.SimpleEntry<FeatureNode, int[]>(child, currentNodePosition));
+
+					  editorView.incrFeaturesCount();			
+					  ++childrenPlaced;
+				  }
+
+				  if(groupPanel.getMembers().size()<2){//the group must have at least 2 ending dots to draw its arc
+
+					  //adding missing dot to the group
+					  endAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
+							  ItemsType.END_MANDATORY_CONNECTOR, EditorView.endMandatoryNamePrefix+editorView.getConnectorsCount(),
+							  groupPanel.getLocation().x+groupLineLengthIcon.getIconWidth(),
+							  groupPanel.getLocation().y+groupLineLengthIcon.getIconHeight()+groupPanel.getHeight()-3);
+
+					  editorView.directlyAddAnchorToDiagram(endAnchorPanel);
+
+					  //adding mutual references to the panels
+					  groupPanel.getMembers().add(endAnchorPanel);
+					  endAnchorPanel.setOtherEnd(groupPanel);
+				  }
+
+				  /*groupLocationInFeature=*/nextAltGroupLocation(groupPanel.getSize(), featureSize, locationInFeature);			  
 			  }
-
-			  if(groupPanel.getMembers().size()<2){//the group must have at least 2 ending dots to draw its arc
-
-				//adding missing dot to the group
-				endAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
-						ItemsType.END_MANDATORY_CONNECTOR, EditorView.endMandatoryNamePrefix+editorView.getConnectorsCount(),
-						groupPanel.getLocation().x+groupLineLengthIcon.getIconWidth(),
-						groupPanel.getLocation().y+groupLineLengthIcon.getIconHeight()+groupPanel.getHeight()-3);
-
-				editorView.directlyAddAnchorToDiagram(endAnchorPanel);
-
-				//adding mutual references to the panels
-				groupPanel.getMembers().add(endAnchorPanel);
-				endAnchorPanel.setOtherEnd(groupPanel);
-			  }
-			  
-			  /*groupLocationInFeature=*/nextAltGroupLocation(groupPanel.getSize(), featureSize, locationInFeature);			  
-			}
 
 		  }
-		  
+
 		  //adding mandatory and optional subfeatures		  
 		  //initializing start panels location
 		  locationInFeature.x=featureSize.width/2-5; 
 		  locationInFeature.y=featureSize.height-13;
 
 		  for(FeatureNode subFeature : currentNode.getSubFeatures()){
-			childLocationOnDiagram.x =(firstChildPosition[0]+childrenPlaced)*(featureSize.width+5);
-			childLocationOnDiagram.y=firstChildPosition[1]*(featureSize.height+15);
-			childLocationOnDiagram.x+=(int)diagramPanel.getLocationOnScreen().getX();
-			childLocationOnDiagram.y+=(int)diagramPanel.getLocationOnScreen().getY();
+			  childLocationOnDiagram.x =(firstChildPosition[0]+childrenPlaced)*(featureSize.width+10);
+			  childLocationOnDiagram.y=firstChildPosition[1]*(featureSize.height+30);
+			  childLocationOnDiagram.x+=(int)diagramPanel.getLocationOnScreen().getX();
+			  childLocationOnDiagram.y+=(int)diagramPanel.getLocationOnScreen().getY();
 
-			//adding sub feature to the diagram
-			featurePanel = editorView.directlyAddFeatureToDiagram(
-					subFeature.getName(), EditorView.featureNamePrefix+subFeature.getID(), 
-					childLocationOnDiagram.x, childLocationOnDiagram.y, featureSize.width, featureSize.height, 
-					Color.black );
+			  //adding sub feature to the diagram
+			  featurePanel = editorView.directlyAddFeatureToDiagram(
+					  subFeature.getName(), EditorView.featureNamePrefix+subFeature.getID(), 
+					  childLocationOnDiagram.x, childLocationOnDiagram.y, featureSize.width, featureSize.height, 
+					  Color.black );
 
-			//getting start anchor panel
-			if(subFeature.getCardinality().x>0) startAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
+			  //getting start anchor panel
+			  if(subFeature.getCardinality().x>0) startAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
 					  ItemsType.START_MANDATORY_CONNECTOR, EditorView.startMandatoryNamePrefix+editorView.getConnectorsCount(),
 					  locationInFeature.x, locationInFeature.y);				
-			else startAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
+			  else startAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
 					  ItemsType.START_OPTIONAL_CONNECTOR, EditorView.startOptionalNamePrefix+editorView.getConnectorsCount(),
 					  locationInFeature.x, locationInFeature.y);
-			
-			//getting end anchor panel
-			if(subFeature.getCardinality().x>0) endAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
-					ItemsType.END_MANDATORY_CONNECTOR, EditorView.endMandatoryNamePrefix+editorView.getConnectorsCount(),
-					featurePanel.getWidth()/2-endAnchorPanel.getWidth()/2, 0);
-			else endAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
-					ItemsType.END_OPTIONAL_CONNECTOR, EditorView.endOptionalNamePrefix+editorView.getConnectorsCount(),
-					featurePanel.getWidth()/2-endAnchorPanel.getWidth()/2, 0);
 
-			//connecting sub feature with the parent feature
-			editorView.directlyAddAnchorToFeature(endAnchorPanel, featurePanel);
-			editorView.directlyAddAnchorToFeature(startAnchorPanel, 
-					editorView.getFeaturePanel(EditorView.featureNamePrefix+currentNode.getID()));
+			  //getting end anchor panel
+			  if(subFeature.getCardinality().x>0) endAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
+					  ItemsType.END_MANDATORY_CONNECTOR, EditorView.endMandatoryNamePrefix+editorView.getConnectorsCount(),
+					  featureSize.width/2-anchorSize.width/2, 0);
+			  else endAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
+					  ItemsType.END_OPTIONAL_CONNECTOR, EditorView.endOptionalNamePrefix+editorView.getConnectorsCount(),
+					  featureSize.width/2-anchorSize.width/2, 0);
 
-			//adding mutual references to the panels
-			startAnchorPanel.setOtherEnd(endAnchorPanel);
-			endAnchorPanel.setOtherEnd(startAnchorPanel);
+			  //connecting sub feature with the parent feature
+			  editorView.directlyAddAnchorToFeature(endAnchorPanel, featurePanel);
+			  editorView.directlyAddAnchorToFeature(startAnchorPanel, 
+					  editorView.getFeaturePanel(/*EditorView.featureNamePrefix+*/currentNode.getID()));
 
-			//adding the child to nodes to expand list
-			currentNodePosition=new int[2];
-			currentNodePosition[0]=firstChildPosition[0]+childrenPlaced;
-			currentNodePosition[1]=firstChildPosition[1];
-			nodesToExpand.add(new AbstractMap.SimpleEntry<FeatureNode, int[]>(subFeature, currentNodePosition));
+			  //adding mutual references to the panels
+			  startAnchorPanel.setOtherEnd(endAnchorPanel);
+			  endAnchorPanel.setOtherEnd(startAnchorPanel);
 
-			editorView.incrFeaturesCount();			
-			++childrenPlaced;
+			  //adding sub feature to nodes to expand list
+			  currentNodePosition=new int[2];
+			  currentNodePosition[0]=firstChildPosition[0]+childrenPlaced;
+			  currentNodePosition[1]=firstChildPosition[1];
+			  nodesToExpand.add(new AbstractMap.SimpleEntry<FeatureNode, int[]>(subFeature, currentNodePosition));
+
+			  editorView.incrFeaturesCount();			
+			  ++childrenPlaced;
 		  }
-		  
+
 		  //adding or groups
 		  //initializing alternative group location
 		  locationInFeature.x=featureSize.width/2+7; 
 		  locationInFeature.y=featureSize.height-13;		  
 		  for(GroupNode group : currentNode.getSubGroups()){
-			if(group.getCardinality().y==1) continue;//this is an alternative group
-			else{
-			  //creating group				
-			  groupPanel=(GroupPanel)editorView.buildConnectionDot(
-					  ItemsType.OR_GROUP_START_CONNECTOR, EditorView.altGroupNamePrefix+group.getID(),
-					  locationInFeature.x, locationInFeature.y); 
-					
-			  //adding group to the feature				
-			  editorView.directlyAddGroupToFeature(groupPanel,
-					  editorView.getFeaturePanel(EditorView.featureNamePrefix+currentNode.getID()), 
-					  ItemsType.ALT_GROUP_START_CONNECTOR);
+			  if(group.getCardinality().y==1) continue;//this is an alternative group
+			  else{
 
-			  //adding group members
-			  for(FeatureNode child : group.getMembers()){
-				childLocationOnDiagram.x =(firstChildPosition[0]+childrenPlaced)*(featureSize.width+5);
-				childLocationOnDiagram.y=firstChildPosition[1]*(featureSize.height+15);
-				childLocationOnDiagram.x+=(int)diagramPanel.getLocationOnScreen().getX();
-				childLocationOnDiagram.y+=(int)diagramPanel.getLocationOnScreen().getY();
+				  //updating maxAltGroupID
+				  try{
+					  maxTmp=Integer.parseInt(group.getID());
+					  if(maxTmp>maxAltGroupID) maxAltGroupID=maxTmp;
+				  }catch(NumberFormatException e){}		
 
-				//adding child feature to the diagram
-				featurePanel = editorView.directlyAddFeatureToDiagram(
-						child.getName(), EditorView.featureNamePrefix+child.getID(), 
-						childLocationOnDiagram.x, childLocationOnDiagram.y, featureSize.width, featureSize.height, 
-						Color.black );
+				  //creating group				
+				  groupPanel=(GroupPanel)editorView.buildConnectionDot(
+						  ItemsType.OR_GROUP_START_CONNECTOR, EditorView.altGroupNamePrefix+group.getID(),
+						  locationInFeature.x, locationInFeature.y); 
 
-				//connecting child with the group
-				endAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
-						ItemsType.END_MANDATORY_CONNECTOR, EditorView.endMandatoryNamePrefix+editorView.getConnectorsCount(),
-						featurePanel.getWidth()/2-endAnchorPanel.getWidth()/2, 0);
+				  //adding group to the feature				
+				  editorView.directlyAddGroupToFeature(groupPanel,
+						  editorView.getFeaturePanel(/*EditorView.featureNamePrefix+*/currentNode.getID()), 
+						  ItemsType.ALT_GROUP_START_CONNECTOR);
 
-				editorView.directlyAddAnchorToFeature(endAnchorPanel,featurePanel);
+				  //adding group members
+				  for(FeatureNode child : group.getMembers()){
+					  childLocationOnDiagram.x =(firstChildPosition[0]+childrenPlaced)*(featureSize.width+10);
+					  childLocationOnDiagram.y=firstChildPosition[1]*(featureSize.height+30);
+					  childLocationOnDiagram.x+=(int)diagramPanel.getLocationOnScreen().getX();
+					  childLocationOnDiagram.y+=(int)diagramPanel.getLocationOnScreen().getY();
 
-				//adding mutual references to the panels
-				groupPanel.getMembers().add(endAnchorPanel);
-				endAnchorPanel.setOtherEnd(groupPanel);
+					  //adding child feature to the diagram
+					  featurePanel = editorView.directlyAddFeatureToDiagram(
+							  child.getName(), EditorView.featureNamePrefix+child.getID(), 
+							  childLocationOnDiagram.x, childLocationOnDiagram.y, featureSize.width, featureSize.height, 
+							  Color.black );
 
-				//adding the child to nodes to expand list
-				currentNodePosition=new int[2];
-				currentNodePosition[0]=firstChildPosition[0]+childrenPlaced;
-				currentNodePosition[1]=firstChildPosition[1];
-				nodesToExpand.add(new AbstractMap.SimpleEntry<FeatureNode, int[]>(child, currentNodePosition));
+					  //connecting child with the group
+					  endAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
+							  ItemsType.END_MANDATORY_CONNECTOR, EditorView.endMandatoryNamePrefix+editorView.getConnectorsCount(),
+							  featureSize.width/2-anchorSize.width/2, 0);
 
-				editorView.incrFeaturesCount();			
-				++childrenPlaced;
+					  editorView.directlyAddAnchorToFeature(endAnchorPanel,featurePanel);
+
+					  //adding mutual references to the panels
+					  groupPanel.getMembers().add(endAnchorPanel);
+					  endAnchorPanel.setOtherEnd(groupPanel);
+
+					  //adding the child to nodes to expand list
+					  currentNodePosition=new int[2];
+					  currentNodePosition[0]=firstChildPosition[0]+childrenPlaced;
+					  currentNodePosition[1]=firstChildPosition[1];
+					  nodesToExpand.add(new AbstractMap.SimpleEntry<FeatureNode, int[]>(child, currentNodePosition));
+
+					  editorView.incrFeaturesCount();			
+					  ++childrenPlaced;
+				  }
+
+				  if(groupPanel.getMembers().size()<2){//the group must have at least 2 ending dots to draw its arc
+
+					  //adding missing dot to the group
+					  endAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
+							  ItemsType.END_MANDATORY_CONNECTOR, EditorView.endMandatoryNamePrefix+editorView.getConnectorsCount(),
+							  groupPanel.getLocation().x+groupLineLengthIcon.getIconWidth(),
+							  groupPanel.getLocation().y+groupLineLengthIcon.getIconHeight()+groupPanel.getHeight()-3);
+
+					  editorView.directlyAddAnchorToDiagram(endAnchorPanel);
+
+					  //adding mutual references to the panel
+					  groupPanel.getMembers().add(endAnchorPanel);
+					  endAnchorPanel.setOtherEnd(groupPanel);
+				  }
+
+				  /*groupLocationInFeature=*/nextOrGroupLocation(groupPanel.getSize(), featureSize, locationInFeature);			  
 			  }
-
-			  if(groupPanel.getMembers().size()<2){//the group must have at least 2 ending dots to draw its arc
-
-				//adding missing dot to the group
-				endAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
-						ItemsType.END_MANDATORY_CONNECTOR, EditorView.endMandatoryNamePrefix+editorView.getConnectorsCount(),
-						groupPanel.getLocation().x+groupLineLengthIcon.getIconWidth(),
-						groupPanel.getLocation().y+groupLineLengthIcon.getIconHeight()+groupPanel.getHeight()-3);
-
-				editorView.directlyAddAnchorToDiagram(endAnchorPanel);
-
-				//adding mutual references to the panel
-				groupPanel.getMembers().add(endAnchorPanel);
-				endAnchorPanel.setOtherEnd(groupPanel);
-			  }
-
-			  /*groupLocationInFeature=*/nextOrGroupLocation(groupPanel.getSize(), featureSize, locationInFeature);			  
-			}
 		  }
 
 		  //removing current node from nodes to expand list
-		  nodesToExpand.remove(currentNode);
+//		  nodesToExpand.remove(currentNode);
+		  nodesToExpand.remove(0);
 		}
 	  }
-		
+
 	  //adding constraints
 	  for(String[] constraint : editorModel.getConstraints()){
-			
+
 		//checking how the panels are located in the diagram
-		featurePanel = editorView.getFeaturePanel(EditorView.featureNamePrefix+constraint[1]);
-		endFeaturePanel = editorView.getFeaturePanel(EditorView.featureNamePrefix+constraint[2]);
+		featurePanel = editorView.getFeaturePanel(/*EditorView.featureNamePrefix+*/constraint[1]);
+		endFeaturePanel = editorView.getFeaturePanel(/*EditorView.featureNamePrefix+*/constraint[2]);
 
 		//adding starting constraint panel
 		if(endFeaturePanel.getX()>featurePanel.getX()){
@@ -1675,17 +1716,30 @@ public class EditorController implements
 		  locationInFeature.x=0; locationInFeature.y=featureSize.height/2-12;
 		}
 
-		if(constraint[0].startsWith(EditorModel.includesConstraintNamePrefix))
+		if(constraint[0].startsWith(EditorModel.includesConstraintNamePrefix)){
 		  startConstraintPanel = (ConstraintPanel)editorView.buildConnectionDot(
 			ItemsType.START_INCLUDES_DOT, 
 			EditorView.startIncludesNamePrefix+constraint[0].substring(EditorModel.includesConstraintNamePrefix.length()),
 			locationInFeature.x, locationInFeature.y); 
-		else
+
+		  //updating maxConstraintID
+		  try{
+			maxTmp=Integer.parseInt(constraint[0].substring(EditorModel.includesConstraintNamePrefix.length()));
+			if(maxTmp>maxConstraintID) maxConstraintID=maxTmp;
+		  }catch(NumberFormatException e){}					  
+		}
+		else{
 		  startConstraintPanel = (ConstraintPanel)editorView.buildConnectionDot(
 			ItemsType.START_EXCLUDES_DOT, 
 			EditorView.startExcludesNamePrefix+constraint[0].substring(EditorModel.excludesConstraintNamePrefix.length()),
 			locationInFeature.x, locationInFeature.y); 
 
+		  //updating maxConstraintID
+		  try{
+			maxTmp=Integer.parseInt(constraint[0].substring(EditorModel.excludesConstraintNamePrefix.length()));
+			if(maxTmp>maxConstraintID) maxConstraintID=maxTmp;
+		  }catch(NumberFormatException e){}					  
+		}
 		
 		editorView.directlyAddAnchorToFeature(startConstraintPanel, featurePanel);
 
@@ -1731,9 +1785,11 @@ public class EditorController implements
 		endConstraintPanel.setControlPoint(controlConstraintPanel);
 		
 		//setting counters
+		if(maxFeatureID>editorView.getFeaturesCount()) editorView.setFeaturesCount(maxFeatureID); 
+		if(maxOrGroupID>editorView.getOrGroupsCount()) editorView.setOrGroupsCount(maxOrGroupID); 
+		if(maxAltGroupID>editorView.getAltGroupsCount()) editorView.setAltGroupsCount(maxAltGroupID); 
+		if(maxConstraintID>editorView.getConstraintsCount()) editorView.setConstraintsCount(maxConstraintID); 
 		
-		/*TO DO */
-
 	  }
 	}
 
