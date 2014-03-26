@@ -14,7 +14,6 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -25,12 +24,12 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 	
 	private static boolean verbose=false;//variabile usata per attivare stampe nel codice
 	
-	/** path used to save diagrams and feature models xml files*/
-	private static String diagramPath="../Usage Tries/DIAGRAMS";
-	private static String diagramRelativePath="../DIAGRAMS";
-	
-	/** Path where general loadable diagram files will be saved*/
-	private static String saveFilesSubPath="saved diagrams"; 
+//	/** path used to save diagrams and feature models xml files*/
+//	private static String diagramPath="../Usage Tries/DIAGRAMS";
+//	private static String diagramRelativePath="../DIAGRAMS";
+//	
+//	/** Path where general loadable diagram files will be saved*/
+//	private static String saveFilesSubPath="saved diagrams"; 
 
 	private ViewProject viewProject = null;
 	
@@ -162,6 +161,9 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		//adding the view as observer to the model
 		editorModel.addObserver(editorView);
 
+		//setting default close operation for the editor frame
+		editorView.setOnCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
 		if(!editorView.prepareUI(editorController) ){
 		  System.out.println("Controller not set. Closing...");
 		  return;
@@ -176,7 +178,7 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		ArrayList<String> featureModelDataPaths=new ArrayList<String>();
 		String[] strArr=null;
 		String projectName=null;
-		//detting diagrams save path
+		//getting diagrams save path
 
 		if(modelProject.getPathProject()!=null){
 		  strArr=modelProject.getPathProject().split("/");
@@ -238,6 +240,9 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 
 		//adding the view as observer to the model
 		editorModel.addObserver(editorView);
+		
+		//setting default close operation for the editor frame
+		editorView.setOnCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 		if( !editorView.prepareUI(editorController) ){
 		  System.out.println("Controller not set. Closing...");

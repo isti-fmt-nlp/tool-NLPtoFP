@@ -1,7 +1,9 @@
 package view;
 
 import java.awt.BorderLayout;
+
 import main.CMTConstants;
+
 import java.awt.CheckboxMenuItem;
 import java.awt.Color;
 import java.awt.Component;
@@ -17,8 +19,10 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -771,6 +775,8 @@ public class EditorController implements
 	  String diagDataPath=null;
 	  ArrayList<String> modelDataPaths=null;
 	  boolean done=false;
+	  int operation=0;
+	  EditorView currentView=null;
 	  
 	  //commands from diagram popup menu
 	  JComponent popupElement=editorView.getPopUpElement();
@@ -945,13 +951,97 @@ public class EditorController implements
   		  }
   		}    	  
       }
-	  //menuFiles command: Open Diagram
-      else if(e.getActionCommand().equals("Open Diagram")){
+	  //menuFiles command: Load Diagram    
+      else if(e.getActionCommand().equals("New Diagram")){
+    	//creating model
+  		editorModel= new EditorModel();
+
+  		//getting the close opearation of this frame
+  		operation=editorView.getOnCloseOperation();
+
+  		//creating view
+  		currentView=editorView;
+  		editorView= new EditorView();
+
+  		//setting diagrams save path
+  		setSavePath(null);
+  		
+  		//adding the view as observer to the model
+  		editorModel.addObserver(editorView);
+
+		//setting default close operation for the new frame
+		editorView.setOnCloseOperation(operation);
+
+		if(!editorView.prepareUI(this) ){
+  		  System.out.println("Controller not set. Closing...");
+  		  return;
+  		}      	  
+  		currentView.dispose();
+      }
+      
+      else if(e.getActionCommand().equals("Load Diagram")){
+  		String s1=null;		
+  		String diagramDataPath=null;
+  		ArrayList<String> featureModelDataPaths=new ArrayList<String>();
+  		String projectName=null;
+  		
+  		//getting diagrams save path
+  		projectName = null;
+  		//loading general diagram save file
+  		String loadDirectory=CMTConstants.saveDiagramDir;
+  		
   		String s = null;
-  		if((s = editorView.loadXMLDialog(diagramPath)) != null)
-  		  System.out.println("You selected "+s+" file.");
-//  				s.substring(0, s.length() - 4)
-    	  
+  		if((s = editorView.loadXMLDialog(loadDirectory)) != null) try{
+  		  BufferedReader br1 = new BufferedReader(new FileReader(s));
+  		  diagramDataPath=br1.readLine();
+  		  while( (s1 = br1.readLine()) != null ) featureModelDataPaths.add(s1);
+  		  br1.close();
+  		}catch (Exception ex) {
+  		  editorView.errorDialog("Error while reading general save file");
+  		  ex.printStackTrace();
+  		  return;
+  		}
+  		else return;
+  		  
+  		//creating model
+  		try{
+  		  editorModel= EditorModel.loadSavedModel(featureModelDataPaths);
+  		}catch(Exception ex){
+  		  ex.printStackTrace();
+  		  editorView.errorDialog("Error while loading model.");
+  		  return;
+  		}
+
+  		//getting the close opearation of this frame
+  		operation=editorView.getOnCloseOperation();
+
+  		//creating an empty view
+  		currentView=editorView;
+  		editorView= new EditorView();
+
+  		//setting diagrams save path
+  		setSavePath(projectName);
+
+  		//adding the view as observer to the model
+  		editorModel.addObserver(editorView);
+
+		//setting default close operation for the new frame
+		editorView.setOnCloseOperation(operation);
+
+  		if( !editorView.prepareUI(this) ){
+  		  System.out.println("Controller not set. Closing...");
+  		  return;
+  		}
+
+  		//loading saved view data
+  		try{
+  		  editorView.loadSavedDiagram(diagramDataPath);
+  		}catch(Exception ex){
+  		  ex.printStackTrace();
+  		  editorView.errorDialog("Error while loading diagram.");
+  		  return;
+  		}
+  		currentView.dispose();
       }
 	  //menuFiles command: Export as SXFM
       else if(e.getActionCommand().equals("Export as SXFM")){
@@ -1037,8 +1127,8 @@ public class EditorController implements
 
 		editorView.setLastPositionX(e.getX());
 		editorView.setLastPositionY(e.getY());
-		editorModel.addUnrootedCommonality(/*EditorView.featureNamePrefix+*/""+editorView.getFeaturesCount(), 
-					EditorView.featureNamePrefix+editorView.getFeaturesCount());
+		editorModel.addUnrootedCommonality(EditorView.featureNamePrefix+editorView.getFeaturesCount(), 
+				/*EditorView.featureNamePrefix*/""+editorView.getFeaturesCount());
 	  }
 	}
 

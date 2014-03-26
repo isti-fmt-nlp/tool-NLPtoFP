@@ -1,53 +1,33 @@
 package view;
 
-import java.awt.AWTEvent;
-import java.awt.AWTException;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Event;
 import java.awt.FileDialog;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
-import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Robot;
-import java.awt.Shape;
-import java.awt.Stroke;
 import java.awt.Toolkit;
-import java.awt.Transparency;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.event.TextEvent;
-import java.awt.event.TextListener;
 import java.awt.geom.Arc2D;
-import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.QuadCurve2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -66,22 +46,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Stack;
 
 import javax.imageio.ImageIO;
+import javax.jws.Oneway;
 import javax.swing.BorderFactory;
-import javax.swing.Box.Filler;
-import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -93,23 +68,17 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JRadioButton;
 import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
-import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.BoxView;
@@ -121,7 +90,6 @@ import javax.swing.text.Highlighter;
 import javax.swing.text.IconView;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.LabelView;
-import javax.swing.text.LayeredHighlighter;
 import javax.swing.text.ParagraphView;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
@@ -132,14 +100,9 @@ import javax.swing.text.ViewFactory;
 import javax.swing.text.Highlighter.Highlight;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.stream.events.StartDocument;
 
 import com.ibm.icu.impl.InvalidFormatException;
 
-import view.EditorModel.GroupTypes;
-import view.EditorModel.StringWrapper;
-import view.ViewPanelCentral.FeatureType;
-import main.ModelXMLHandler;
 import main.OrderedList;
 import main.OrderedListNode;
 import main.SortUtils;
@@ -287,57 +250,53 @@ public class EditorView extends JFrame implements Observer{
 	}
 
 	/** prefix of any feature ID*/
-	public static String featureNamePrefix="---FEATURE---#";
+	public static final String featureNamePrefix="---FEATURE---#";
 	/** prefix of any text area owned by feature panels*/
-	public static String textAreaNamePrefix="---TEXTAREA---";
+	public static final String textAreaNamePrefix="---TEXTAREA---";
 	/** prefix of any connector starting dot name*/
-	public static String startMandatoryNamePrefix="---START_MANDATORY---#";
+	public static final String startMandatoryNamePrefix="---START_MANDATORY---#";
 	/** prefix of any connector ending dot name*/
-	public static String endMandatoryNamePrefix="---END_MANDATORY---#";
+	public static final String endMandatoryNamePrefix="---END_MANDATORY---#";
 	/** prefix of any connector starting dot name*/
-	public static String startOptionalNamePrefix="---START_OPTIONAL---#";
+	public static final String startOptionalNamePrefix="---START_OPTIONAL---#";
 	/** prefix of any connector ending dot name*/
-	public static String endOptionalNamePrefix="---END_OPTIONAL---#";
+	public static final String endOptionalNamePrefix="---END_OPTIONAL---#";
 	/** prefix of any connector starting dot name*/
-	public static String startIncludesNamePrefix="---START_INCLUDES---#";
+	public static final String startIncludesNamePrefix="---START_INCLUDES---#";
 	/** prefix of any connector ending dot name*/
-	public static String endIncludesNamePrefix="---END_INCLUDES---#";
+	public static final String endIncludesNamePrefix="---END_INCLUDES---#";
 	/** prefix of any connector starting dot name*/
-	public static String startExcludesNamePrefix="---START_EXCLUDES---#";
+	public static final String startExcludesNamePrefix="---START_EXCLUDES---#";
 	/** prefix of any connector ending dot name*/
-	public static String endExcludesNamePrefix="---END_EXCLUDES---#";
+	public static final String endExcludesNamePrefix="---END_EXCLUDES---#";
 	/** prefix of any constraint control point dot name*/
-	public static String constraintControlPointNamePrefix="---CONSTRAINT_CONTROL_POINT---#";
+	public static final String constraintControlPointNamePrefix="---CONSTRAINT_CONTROL_POINT---#";
 	/** prefix of any group Alternative Gtarting dot name*/
-	public static String altGroupNamePrefix="---ALT_GROUP---#";
+	public static final String altGroupNamePrefix="---ALT_GROUP---#";
 	/** prefix of any Or Group starting dot name*/
-	public static String orGroupNamePrefix="---OR_GROUP---#";
+	public static final String orGroupNamePrefix="---OR_GROUP---#";
 	/** name ofthe diagram panel*/
-	public static String diagramPanelName="---DIAGRAM_PANEL---";
+	public static final String diagramPanelName="---DIAGRAM_PANEL---";
 	
 	
-//	/** URL of the new feature icon*/
-//	private static URL newFeatureIconURL=EditorView.class.getResource("/feature rectangle2.png");
 	/** URL of the connector starting dot icon*/
-	private static URL connectorStartDotIconURL=EditorView.class.getResource("/Connector Start Dot.png");
+	private static final URL connectorStartDotIconURL=EditorView.class.getResource("/Connector Start Dot.png");
 	/** URL of the new group starting dot icon*/
-	private static URL ALTGroupDotIconURL=EditorView.class.getResource("/ALTGroup Start Dot.png");
+	private static final URL ALTGroupDotIconURL=EditorView.class.getResource("/ALTGroup Start Dot.png");
 	/** URL of the new group starting dot icon*/
-	private static URL ORGroupDotIconURL=EditorView.class.getResource("/ORGroup Start Dot.png");
+	private static final URL ORGroupDotIconURL=EditorView.class.getResource("/ORGroup Start Dot.png");
 	/** URL of the new mandatory connector ending dot icon*/
-	private static URL mandatoryConnectorEndDotIconURL=EditorView.class.getResource("/Mandatory End Dot2.png");
-//	private static URL mandatoryConnectorEndDotIconURL=EditorView.class.getResource("/Mandatory Connector End Dot.png");
+	private static final URL mandatoryConnectorEndDotIconURL=EditorView.class.getResource("/Mandatory End Dot2.png");
 	/** URL of the new optional connector ending dot icon*/
-	private static URL optionalConnectorEndDotIconURL=EditorView.class.getResource("/Optional End Dot2.png");
-//	private static URL optionalConnectorEndDotIconURL=EditorView.class.getResource("/Optional Connector End Dot.png");
+	private static final URL optionalConnectorEndDotIconURL=EditorView.class.getResource("/Optional End Dot2.png");
 	/** URL of the new constraint dot icon*/
-	private static URL constraintDotIconURL=EditorView.class.getResource("/Constraint Dot.png");
+	private static final URL constraintDotIconURL=EditorView.class.getResource("/Constraint Dot.png");
 	/** URL of the new constraint control point dot icon*/
-	private static URL constraintControlPointDotIconURL=EditorView.class.getResource("/Constraint Control Point Dot.png");
+	private static final URL constraintControlPointDotIconURL=EditorView.class.getResource("/Constraint Control Point Dot.png");
 	/** URL of the connector line-only icon*/
-	private static URL connectorLineLengthIconURL=EditorView.class.getResource("/Connector Line Length.png");
+	private static final URL connectorLineLengthIconURL=EditorView.class.getResource("/Connector Line Length.png");
 	/** URL of the group line-only icon*/
-	private static URL groupLineLengthIconURL=EditorView.class.getResource("/Group Line Length.png");
+	private static final URL groupLineLengthIconURL=EditorView.class.getResource("/Group Line Length.png");
 
 	/** maps tool names in the corresponding icon resource path*/
 	private static HashMap<String, String> toolIconPaths=null;
@@ -361,6 +320,9 @@ public class EditorView extends JFrame implements Observer{
 	
 	/** Tells if the diagram has been modified after last save*/
 	private boolean modified=true;
+	
+	/** Tells which action should be performed when the JFrame is closed*/
+	private int onCloseOperation = JFrame.DISPOSE_ON_CLOSE;
 	
 	/** The popup menu for all diagram panel elements*/
 	private JPopupMenu diagramElementsMenu = new JPopupMenu();
@@ -402,13 +364,14 @@ public class EditorView extends JFrame implements Observer{
 	private JMenu menuModify=null;//Diagram Properties Management Menu
 	
 	/** Files Menu items*/
-	private JMenuItem menuFilesSave=null, menuFilesOpen=null, menuFilesExportXML=null,
-					  menuFilesDelete=null, menuFilesExit=null, menuFilesExportAsPNG=null, menuFilesExportAsGIF=null;
+	private JMenuItem menuFilesNew=null, menuFilesLoad=null, menuFilesSave=null, menuFilesImportFromSXFM=null,
+					  menuFilesExportAsSXFM=null, menuFilesExportAsPNG=null, menuFilesExportAsGIF=null,
+					  menuFilesDelete=null, menuFilesExit=null;
 
 	/** View Menu items*/
-	private JMenuItem menuViewColored=null, menuViewCommsOrVars=null, 
-					  menuViewExtrOrInsert=null, menuViewFields=null,
-					  menuViewVisibleConstraints=null;
+	private JMenuItem /*menuViewColored=null,*/ menuViewCommsOrVars=null, 
+					  menuViewExtrOrInsert=null, menuViewFields=null/*,
+					  menuViewVisibleConstraints=null*/;
 	
 	/** Modify Menu items*/
 	private JMenuItem menuModifyBasicFM=null, menuModifyAdvancedFM=null;
@@ -416,10 +379,6 @@ public class EditorView extends JFrame implements Observer{
 	
 	/** Number of connector dots created*/
 	private int connectorsCount=0;
-//	/** Number of includes constraint dots created*/
-//	private int constraintCount=0;
-//	/** Number of excludes constraint dots created*/
-//	private int constraintCount=0;
 	/** Number of constraint dots created*/
 	private int constraintsCount=0;
 	/** Number of constraint control point dots created*/
@@ -431,27 +390,7 @@ public class EditorView extends JFrame implements Observer{
 	/** Number of features created*/
 	private int featuresCount=0;
 	
-	
-	
-	/** List of all connector ending dots,
-	 *  corresponding starting dots can be found in startConnectorDots at the same index
-	 */
-//	private static ArrayList<JComponent> endConnectorDots=null;
-	
-	//still unused
-	/** Previous location of all connector starting dots, with same indexes of the lists above*/
-//	private static ArrayList<Point> prevStartConnectorDotsLocation=null;
-	
-	//still unused
-	/** Previous location of all connector ending dots, with same indexes of the lists above*/
-//	private static ArrayList<Point> prevEndConnectorDotsLocation=null;
-	
-	//to revise
-	/** List of all connector dots that must be redrawn, with same indexes of the lists above*/
-//	private static ArrayList<Boolean> connectorDotsToRedraw=null;
-	
 	/** List of all connector starting dots*/
-//	corresponding ending dots can be found in endConnectorDots at the same index*/
 	private ArrayList<JComponent> startConnectorDots=null;
 	/** List of Includes costraints starting dots*/
 	private ArrayList<JComponent> startIncludesDots=null;
@@ -493,7 +432,6 @@ public class EditorView extends JFrame implements Observer{
 	/** Top level frame*/
 	private JFrame frameRoot = null;//frame root		
 	
-//	private static JFrame toolDragPanel = null;//temporary frame used to drag tools
 	/** Image used to drag tools*/
 	private BufferedImage toolDragImage = null;
 	/** Position of the dragged image*/
@@ -508,8 +446,6 @@ public class EditorView extends JFrame implements Observer{
 	private int verticalShift=0;
 	
 	/** The panel containing the diagram */
-//	private JLayeredPane diagramPanel=null;
-	/** The panel containing the diagram */
 	private ScrollLayeredPane diagramPanel=null;	
 	
 	/** The JScrollPane containing the diagramPanel */
@@ -520,74 +456,59 @@ public class EditorView extends JFrame implements Observer{
 	
 	/** The JFrame used to display search panels*/
 	private JFrame searchFrame=null;
-
-//	/**the panel containing the candidate feature's checkboxes */
-//	private JPanel panelFeatures = null;
-	
 	/** The panel searchFrame used to search for feature occurrences*/
 	private JSplitPane searchPanel = null;
-
-//	/** List of selected features names*/
-//	private ArrayList<JLabel> labelFeatures = new ArrayList<JLabel> ();
-	
 	/**buttons for navigating through commonalitie occurences in tab texts, the X...wardButtons move of x occurences, 
 	 where x is defined by occurrJumpSpan constant*/
 	private JButton nextOccurrButton = null, prevOccurrButton = null, XForwardOccurrButton = null, XBackwardOccurrButton = null;
-
 	/**defines the number x of occurences jumped by XForwardOccurrButton and XBackwardOccurrButton*/
 	private int occurrJumpSpan=4;
-
 	/**label for occurrences navigation*/
-	private JLabel occurrsLabel = null;
-	
+	private JLabel occurrsLabel = null;	
 	/**label for occurrences navigation*/
 	private JPanel occurrsLabelPanel = null;
-
 	/**last highlighted tag for each feature and file*/
 	private HashMap<String, HashMap<String, Object>> lastHighlightedTag=null;
-
-	/**last removed highlight tags for each feature and file*/
-//	private HashMap<String, HashMap<String, ArrayList<Highlight>>> lastRemovedHighlights=null;
 	/** For each feature name(outer map's Key) and file name(inner map's Key), there is a list
 	 *  of last removed highlight tags, each potentially having a list of replacement tags*/
-	private HashMap<String, HashMap<String, ArrayList<Entry<Highlight, ArrayList<Highlight>>>>> lastRemovedHighlights=null;
-	
+	private HashMap<String, HashMap<String, ArrayList<Entry<Highlight, ArrayList<Highlight>>>>> lastRemovedHighlights=null;	
 	/**relevant terms occurrences panel*/
-	private JTabbedPane occursTabbedPane = null;
-	
+	private JTabbedPane occursTabbedPane = null;	
 	/**relevant terms search buttons panel*/
 	private JPanel buttonPanel = null;
-
 	/**the JTextAreas of search panel*/
 	private HashMap<String, JTextArea> textTabs = null;
 	/**association between relevant terms and current selected tab file names in search panel*/
 	private HashMap<String, String> currentFiles = null;
 	/**indexes of current selected occurrences in project input files*/
 	private HashMap<String, HashMap<String, Integer>> textIndexes = null;	
-
 	/**current selected checkbox*/
 	private String currentSelectedFeatureName=null;
 	
-	/** HighlightPainter objects used for search command*/
-	private final Highlighter.HighlightPainter[] highlightPainter = {
-			  new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW),
-			  new DefaultHighlighter.DefaultHighlightPainter(Color.CYAN)
-	};
-	
-	private static int[] PCcol={160, 160, 0};
-	private static int[] PVcol={0, 160, 160};
-	private static int[] ACcol={255, 255, 0};
-	private static int[] AVcol={0, 255, 255};
-	private static int[] NEcol={160, 0, 0};
+//	private static int[] PCcol={160, 160, 0};
+//	private static int[] PVcol={0, 160, 160};
+//	private static int[] ACcol={255, 255, 0};
+//	private static int[] AVcol={0, 255, 255};
+//	private static int[] NEcol={160, 0, 0};
 
-	private static Highlighter.HighlightPainter passiveCommHighlightPainter =
-			new DefaultHighlighter.DefaultHighlightPainter(getNewColor(PCcol));
-	private static Highlighter.HighlightPainter passiveVarsHighlightPainter= 
-			new DefaultHighlighter.DefaultHighlightPainter(getNewColor(PVcol));
-	private static Highlighter.HighlightPainter activeCommHighlightPainter = 
-			new DefaultHighlighter.DefaultHighlightPainter(getNewColor(ACcol));
-	private static Highlighter.HighlightPainter activeVarsHighlightPainter = 
-			new DefaultHighlighter.DefaultHighlightPainter(getNewColor(AVcol));
+	/** RGB values of the colors used in the search for feature occurrences*/
+	private static int[] PCcol={160, 160, 0}, PVcol={0, 160, 160}, ACcol={255, 255, 0}, AVcol={0, 255, 255}, NEcol={160, 0, 0};
+
+//	private static Highlighter.HighlightPainter passiveCommHighlightPainter =
+//			new DefaultHighlighter.DefaultHighlightPainter(getNewColor(PCcol));
+//	private static Highlighter.HighlightPainter passiveVarsHighlightPainter= 
+//			new DefaultHighlighter.DefaultHighlightPainter(getNewColor(PVcol));
+//	private static Highlighter.HighlightPainter activeCommHighlightPainter = 
+//			new DefaultHighlighter.DefaultHighlightPainter(getNewColor(ACcol));
+//	private static Highlighter.HighlightPainter activeVarsHighlightPainter = 
+//			new DefaultHighlighter.DefaultHighlightPainter(getNewColor(AVcol));
+
+	/** HighlightPainter objects used to apply the colors in the search for feature occurrences*/
+	private static Highlighter.HighlightPainter passiveCommHighlightPainter = 
+			new DefaultHighlighter.DefaultHighlightPainter(getNewColor(PCcol)), 
+		passiveVarsHighlightPainter= new DefaultHighlighter.DefaultHighlightPainter(getNewColor(PVcol)), 
+		activeCommHighlightPainter = new DefaultHighlighter.DefaultHighlightPainter(getNewColor(ACcol)), 
+		activeVarsHighlightPainter = new DefaultHighlighter.DefaultHighlightPainter(getNewColor(AVcol));
 	
 	/** The splitter panel containing diagramPanel and toolsPanel*/
 	private EditorSplitPane splitterPanel=null;
@@ -706,20 +627,20 @@ public class EditorView extends JFrame implements Observer{
 		menuModify.setMnemonic(KeyEvent.VK_M);
 
 		/*Menu Files items*/
+		menuFilesNew = new JMenuItem("New Diagram");
+		menuFilesNew.addActionListener(editorController);
+		
 		menuFilesSave = new JMenuItem("Save Diagram");
 		menuFilesSave.addActionListener(editorController);
 		
-		menuFilesOpen = new JMenuItem("Open Diagram");
-		menuFilesOpen.addActionListener(editorController);
+		menuFilesLoad = new JMenuItem("Load Diagram");
+		menuFilesLoad.addActionListener(editorController);
 		
-		menuFilesExportXML = new JMenuItem("Export as SXFM");
-		menuFilesExportXML.addActionListener(editorController);
+		menuFilesImportFromSXFM = new JMenuItem("Import from SXFM");
+		menuFilesImportFromSXFM.addActionListener(editorController);
 		
-		menuFilesDelete = new JMenuItem("Delete Diagram");
-		menuFilesDelete.addActionListener(editorController);
-		
-		menuFilesExit = new JMenuItem("Exit");
-		menuFilesExit.addActionListener(editorController);
+		menuFilesExportAsSXFM = new JMenuItem("Export as SXFM");
+		menuFilesExportAsSXFM.addActionListener(editorController);
 		
 		menuFilesExportAsPNG = new JMenuItem("Export as PNG");
 		menuFilesExportAsPNG.addActionListener(editorController);
@@ -727,11 +648,19 @@ public class EditorView extends JFrame implements Observer{
 		menuFilesExportAsGIF = new JMenuItem("Export as GIF");
 		menuFilesExportAsGIF.addActionListener(editorController);
 
+		menuFilesDelete = new JMenuItem("Delete Diagram");
+		menuFilesDelete.addActionListener(editorController);
 		
+		menuFilesExit = new JMenuItem("Exit");
+		menuFilesExit.addActionListener(editorController);
+		
+		
+		menuFiles.add(menuFilesNew);
 		menuFiles.add(menuFilesSave);
-		menuFiles.add(menuFilesOpen);
+		menuFiles.add(menuFilesLoad);
 		menuFiles.addSeparator();
-		menuFiles.add(menuFilesExportXML);
+		menuFiles.add(menuFilesImportFromSXFM);
+		menuFiles.add(menuFilesExportAsSXFM);
 		menuFiles.add(menuFilesExportAsPNG);
 		menuFiles.add(menuFilesExportAsGIF);
 		menuFiles.addSeparator();
@@ -739,33 +668,38 @@ public class EditorView extends JFrame implements Observer{
 		menuFiles.add(menuFilesExit);
 
 		/*Menu View items*/
-		menuViewColored = new JCheckBoxMenuItem("Colour 'near' Features", false);
-		menuViewColored.addActionListener(editorController);
+//		menuViewColored = new JCheckBoxMenuItem("Colour 'near' Features", false);
+//		menuViewColored.addActionListener(editorController);
 		
 		menuViewCommsOrVars = new JCheckBoxMenuItem("View Commonality/Variability");
 		menuViewCommsOrVars.addActionListener(editorController);
 		
 		menuViewExtrOrInsert = new JMenuItem("View Extracted/Inserted");
 		menuViewExtrOrInsert.addActionListener(editorController);
+		menuViewExtrOrInsert.setEnabled(false);
+
 		
 		menuViewFields = new JMenuItem("View Feature's Fields");
 		menuViewFields.addActionListener(editorController);
+		menuViewFields.setEnabled(false);
 		
-		menuViewVisibleConstraints = new JMenuItem("View Diagram Constraints");
-		menuViewVisibleConstraints.addActionListener(editorController);
+//		menuViewVisibleConstraints = new JMenuItem("View Diagram Constraints");
+//		menuViewVisibleConstraints.addActionListener(editorController);
 		
-		menuView.add(menuViewColored);
+//		menuView.add(menuViewColored);
 		menuView.add(menuViewCommsOrVars);
 		menuView.add(menuViewExtrOrInsert);
 		menuView.add(menuViewFields);
-		menuView.add(menuViewVisibleConstraints);
+//		menuView.add(menuViewVisibleConstraints);
 
 		/*Menu Modify items*/
 		menuModifyBasicFM = new JRadioButtonMenuItem("Basic Feature Model");
 		menuModifyBasicFM.addActionListener(editorController);
+		menuModifyBasicFM.setEnabled(false);
 		
 		menuModifyAdvancedFM = new JRadioButtonMenuItem("Advanced Feature Model");
 		menuModifyAdvancedFM.addActionListener(editorController);	
+		menuModifyAdvancedFM.setEnabled(false);
 		
 		menuModify.add(menuModifyBasicFM);
 		menuModify.add(menuModifyAdvancedFM);
@@ -822,7 +756,8 @@ public class EditorView extends JFrame implements Observer{
 		//creating root frame
 		frameRoot=this;
 		setLayout(new BorderLayout());		
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(onCloseOperation);
+		System.out.println("current DefaultCloseOperation: "+onCloseOperation);
 
 		//creating tools panel
 		toolsPanel = new JPanel();		
@@ -1067,9 +1002,6 @@ public class EditorView extends JFrame implements Observer{
 		GroupPanel startPanel=null;
 		JComponent leftMost=null;
 		JComponent rightMost=null;
-		int[] orderedAnglesList=null;
-		int minX;
-		int maxX;
 		Arc2D groupArc=null;
 		
 		Graphics2D tempGraphics = (Graphics2D)g2.create();
@@ -1080,18 +1012,7 @@ public class EditorView extends JFrame implements Observer{
 
 		  groupArc=getGroupArc(startPanel, startPanel.getMembers());
 		  
-//		  leftMost = null; rightMost = null;
-//		  minX=100000; maxX=-100000;
 		  for (JComponent member : startPanel.getMembers()){
-//			//searching for the 2 extern anchor of the group
-//			if(member.getLocationOnScreen().getX()<minX){
-//			  minX=(int)member.getLocationOnScreen().getX();
-//			  leftMost=member;
-//			}
-//			if(member.getLocationOnScreen().getX()>maxX){
-//			  maxX=(int)member.getLocationOnScreen().getX();
-//			  rightMost=member;
-//			}
 			drawConnectionLine(g2, startPanel, member);				
 		  }
 		  
@@ -1100,7 +1021,6 @@ public class EditorView extends JFrame implements Observer{
 				  "\nLeftMost:"+leftMost
 				  +"\nrightMost:"+rightMost);
 		  /* ***DEBUG*** */
-
 		  
 		  //drawing the group arc
 		  if(!filled){
@@ -1112,8 +1032,6 @@ public class EditorView extends JFrame implements Observer{
 			  tempGraphics.fill(groupArc);
 		  }
 		  
-//		  //drawing the group arc
-//		  drawGroupArc(g2, startPanel, leftMost, rightMost, filled);
 		}
 	}
 	
@@ -2312,15 +2230,18 @@ public class EditorView extends JFrame implements Observer{
 	}
 
 	/**
-	 * Shifts horizontally the position of all draggables in the diagram panel.<br>
+	 * Shifts horizontally the position of all draggables in the diagram panel, 
+	 * including all invisible constraint control panels.<br>
 	 * If element is not null and is a draggable, it is not shifted.
 	 * 
 	 * @param enlargeX - the amount of horizontal shift
 	 * @param element - the JComponent that must not be shifted
 	 */
 	private void shiftAllDraggablesButOneHorizontal(int enlargeX, JComponent element) {
-	  OrderedListNode tmp= visibleOrderDraggables.getFirst();
 	  Point location=null;
+	  JComponent controlPanel = null;
+	  OrderedListNode tmp= visibleOrderDraggables.getFirst();
+
 	  while (tmp!=null){
 		if( !((JComponent)tmp.getElement()).equals(element) 
 		    && ((JComponent)tmp.getElement()).getParent().getName().startsWith(EditorView.diagramPanelName)){
@@ -2330,6 +2251,20 @@ public class EditorView extends JFrame implements Observer{
 		}
 		tmp=tmp.getNext();
 	  }		
+	  for(JComponent constraint : startIncludesDots){
+		controlPanel=((ConstraintPanel)constraint).getControlPoint();
+		if(controlPanel.isVisible()) continue;
+		location=controlPanel.getLocation();
+		location.x+=enlargeX;
+		controlPanel.setLocation(location);
+	  }
+	  for(JComponent constraint : startExcludesDots){
+		controlPanel=((ConstraintPanel)constraint).getControlPoint();
+		if(controlPanel.isVisible()) continue;
+		location=controlPanel.getLocation();
+		location.x+=enlargeX;
+		controlPanel.setLocation(location);
+	  }
 	}
 
 	/**
@@ -2355,15 +2290,17 @@ public class EditorView extends JFrame implements Observer{
 	}
 
 	/**
-	 * Shifts vertically the position of all draggables in the diagram panel.<br>
+	 * Shifts vertically the position of all draggables in the diagram panel,
+	 * including all invisible constraint control panels.<br>
 	 * If element is not null and is a draggable, it is not shifted.
 	 * 
 	 * @param enlargeY - the amount of vertical shift
 	 * @param element - the JComponent that must not be shifted
 	 */
 	private void shiftAllDraggablesButOneVertical(int enlargeY, JComponent element) {
-	  OrderedListNode tmp= visibleOrderDraggables.getFirst();
 	  Point location=null;
+	  JComponent controlPanel = null;
+	  OrderedListNode tmp= visibleOrderDraggables.getFirst();
 	  while (tmp!=null){
 		if( !((JComponent)tmp.getElement()).equals(element) 
 			&& ((JComponent)tmp.getElement()).getParent().getName().startsWith(EditorView.diagramPanelName)){
@@ -2373,6 +2310,20 @@ public class EditorView extends JFrame implements Observer{
 		}
 		tmp=tmp.getNext();
 	  }		
+	  for(JComponent constraint : startIncludesDots){
+		controlPanel=((ConstraintPanel)constraint).getControlPoint();
+		if(controlPanel.isVisible()) continue;
+		location=controlPanel.getLocation();
+		location.y+=enlargeY;
+		controlPanel.setLocation(location);
+	  }
+	  for(JComponent constraint : startExcludesDots){
+		controlPanel=((ConstraintPanel)constraint).getControlPoint();
+		if(controlPanel.isVisible()) continue;
+		location=controlPanel.getLocation();
+		location.y+=enlargeY;
+		controlPanel.setLocation(location);
+	  }
 	}
 
 	/**
@@ -3448,7 +3399,7 @@ public class EditorView extends JFrame implements Observer{
 		
 		//creating text
 		FeaturePanel container = new FeaturePanel(textLabel);
-		if(containerName==null) container.setName(/*featureNamePrefix+*/""+featuresCount);
+		if(containerName==null) container.setName(featureNamePrefix+featuresCount);
 		else container.setName(containerName);
 		container.setLayout(null);
 		container.setBounds(x, y, 120+featureBorderSize, 60+featureBorderSize);
@@ -3764,6 +3715,15 @@ public class EditorView extends JFrame implements Observer{
 		return featureColor;
 	}
 	
+	/** Sets the action that should be performed when the JFrame is closed*/
+	public void setOnCloseOperation(int operation){
+		onCloseOperation=operation;
+	};
+	
+	/** Gets the action that should be performed when the JFrame is closed*/
+	public int getOnCloseOperation(){
+		return onCloseOperation;
+	};
 
 	/** Returns the popup menu for all diagram panel elements*/
 	public JPopupMenu getDiagramElementsMenu(){
@@ -4388,7 +4348,8 @@ public class EditorView extends JFrame implements Observer{
 	public String loadXMLDialog(String pathProject){
 		FileDialog d = new FileDialog(new JFrame("Load File"));
     	d.setMode(FileDialog.LOAD);
-    	d.setFilenameFilter(new FilterFileProject());
+//    	d.setFilenameFilter(new FilterFileProject());
+	    d.setResizable(true);
     	
     	//checking if the diagrams save directory must be created
     	File dir=new File(pathProject);		
@@ -4400,8 +4361,32 @@ public class EditorView extends JFrame implements Observer{
     	d.setDirectory(pathProject);
 	    d.setVisible(true);
 	    
+	    System.out.println("DIR IS: "+d.getDirectory()+"\nFILE IS: "+d.getFile());
 	    if(d.getFile() == null) return null;
-	    return d.getFile().toString();
+	    return d.getDirectory()+d.getFile().toString();
+	    
+/*
+		FileDialog d = new FileDialog(new JFrame("Load File"));
+	    d.setResizable(true);
+    	d.setMode(FileDialog.LOAD);
+    	
+    	//checking if the diagrams save directory must be created
+    	File dir=new File(pathProject);		
+    	if(!dir.isDirectory() && !dir.mkdirs()){
+    		errorDialog("Save Directory can't be created.");
+    		return null;
+    	}
+
+	    d.setDirectory(pathProject);
+	    d.setVisible(true);
+	    
+	    if(d.getFile() == null) return null;
+
+	    System.out.println("DIR IS: "+d.getDirectory()+"\nFILE IS: "+d.getFile());
+	    return d.getDirectory()+d.getFile().toString();
+*/	    
+	    
+	    
 	}
 	
 	/** 

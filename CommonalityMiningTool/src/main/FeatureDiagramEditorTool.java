@@ -1,5 +1,7 @@
 package main;
 
+import javax.swing.JFrame;
+
 import view.ControllerProject;
 import view.EditorController;
 import view.EditorModel;
@@ -17,6 +19,10 @@ public class FeatureDiagramEditorTool {
 		editorController.setSavePath(null);
 		
 		editorModel.addObserver(editorView);
+		
+		editorView.setOnCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		System.out.println("initial DefaultCloseOperation: "+JFrame.EXIT_ON_CLOSE);
 		
 		if(!editorView.prepareUI(editorController) ){
 		  System.out.println("Controller not set. Closing...");

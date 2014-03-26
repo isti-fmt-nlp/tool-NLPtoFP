@@ -276,7 +276,7 @@ public class ViewProject implements Observer, Runnable{
 
 		menuDiagramOpen = new JMenuItem("Create Diagram");
 		menuDiagramOpen.addActionListener(controllerProject);
-		menuDiagramOpen.setEnabled(true);
+		menuDiagramOpen.setEnabled(false);
 		
 		menuDiagramRestart = new JMenuItem("Open Diagram");
 		menuDiagramRestart.addActionListener(controllerProject);
@@ -378,6 +378,7 @@ public class ViewProject implements Observer, Runnable{
 
 	    	//activating menu items
 			menuFeaturesExtractVari.setEnabled(false);
+			menuDiagramOpen.setEnabled(true);
 	    	
     		/* ***VERBOSE****/
 			if (verbose){
@@ -437,6 +438,13 @@ public class ViewProject implements Observer, Runnable{
 		}
 		else if(o.equals("Input File Deleted")){
 //			if (panelLateralProject.getAnalysisLeafTree().size())
+			menuFeaturesExtractComm.setEnabled(true);
+			menuFeaturesExtractVari.setEnabled(false);
+		}		
+		else if(o.equals("New File Loaded")){
+			//activating menu items
+			menuFeaturesExtractComm.setEnabled(true);
+			menuFeaturesExtractVari.setEnabled(false);			
 		}
 		else if(o.equals("New Analisys Folder Loaded")){
 		  //stopping throbber
@@ -448,6 +456,7 @@ public class ViewProject implements Observer, Runnable{
 
 		  //activating menu items
 		  menuFeaturesExtractComm.setEnabled(true);
+		  menuFeaturesExtractVari.setEnabled(false);
 			
 		}
 		else if(o.equals("Analisys folder can't be accepted")){
@@ -571,7 +580,6 @@ public class ViewProject implements Observer, Runnable{
 		FileDialog d = new FileDialog(new JFrame("Load File"));
 	    d.setResizable(true);
     	d.setMode(FileDialog.LOAD);
-//    	d.setFilenameFilter(new FilterFileProject());
     	
     	//checking if the diagrams save directory must be created
     	File dir=new File(pathProject);		
@@ -580,8 +588,6 @@ public class ViewProject implements Observer, Runnable{
     		return null;
     	}
 
-    	
-//	    d.setDirectory(".");
 	    d.setDirectory(pathProject);
 	    d.setVisible(true);
 	    

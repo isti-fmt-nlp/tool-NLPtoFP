@@ -485,22 +485,8 @@ public class ModelProject extends Observable implements Runnable{
 	 * @see termsColor
 	 */
 	private void buildColorStructures() {
-	  int intersectionSize;	  
 	  Iterator<Entry<String, Integer>> arityIterator=null;
 	  Entry<String, Integer> arityEntry=null;
-	  double card=0;
-	  int cardUpper=0;
-	  int[] values=null;
-	  int colorOffset=0;
-	  int[][] colors=null;
-	  double maxColorReduction=0;
-	  double colorReductionUnit=0;
-	  int maxArity=0;
-	  int[] baseColor=null;
-	  int[] termColor=null;
-	  HashMap<Integer, ArrayList<Integer>> toBeJoined=null;
-	  Iterator<Entry<String, int[]>> colorIter = null;
-	  Entry<String, int[]> colorEntry = null;
 	  
 	  //creating a global set, containing a set of terms for each sentence in all input files
 	  termsInSentencesSet=new ArrayList<ArrayList<String>>();
@@ -560,11 +546,6 @@ public class ModelProject extends Observable implements Runnable{
 	  ArrayList<Entry<String, Double>>[] tiersFileCoverage = null;
 	  double maxCoverage=0;
 	  Random gen=null;
-	  double maxColorReduction=0.5;
-	  double colorReductionUnit=0;
-	  int maxArity=0;
-	  int[] baseColor=null;
-	  int[] termColor=null;
 	  
 	  ArrayList<Entry<String, Integer>> entryList = new ArrayList<Entry<String,Integer>>();	
 	  ArrayList<Entry<String, int[]>> allTermsOccurrences = new ArrayList<Entry<String,int[]>>();
@@ -1459,6 +1440,8 @@ public class ModelProject extends Observable implements Runnable{
 		filesProject.add(new ModelFile(s, pathProject));
 		workerProject.add(new Thread(filesProject.get(filesProject.size()-1)));
 		stateProject[1] = true;
+		setChanged();
+		notifyObservers("New File Loaded");
 	}
 	
 	/** 
