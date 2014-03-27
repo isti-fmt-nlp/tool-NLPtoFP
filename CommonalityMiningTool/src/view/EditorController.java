@@ -855,8 +855,9 @@ public class EditorController implements
         
       }
 	  //popup menu command: Change Color
-      else if(e.getActionCommand().equals("Change Color")){    	  
-        Color color = JColorChooser.showDialog(null, "Choose Color", Color.white);  
+      else if(e.getActionCommand().equals("Change Color")){    
+    	Color color = ((FeaturePanel)popupElement).getBackground();
+        color = JColorChooser.showDialog(null, "Choose Color", color);  
         if (color==null) return;
         else ((FeaturePanel)popupElement).setBackground(color);        
       }
@@ -1579,7 +1580,7 @@ public class EditorController implements
 	 * @param nodesToExpand - list of feature nodes with their position in the logic grid.
 	 */
 	private void recBuildDiagram(ArrayList<Entry<FeatureNode, int[]>> nodesToExpand) {
-	  int currentNodesToExpand=0;
+//	  int currentNodesToExpand=0;
 //	  ArrayList<FeatureNode> children = null;
 	  int totalChildren=0, childrenPlaced=0;
 	  int k=0;
@@ -1632,18 +1633,18 @@ public class EditorController implements
 		  while(!correctlyPlaced){
 			  //checking if there are some location already occupied in the logic grid
 			  for(k=firstChildPosition[0]; k<firstChildPosition[0]+totalChildren; ++k){
-				  System.out.println("logicGrid[k][firstChildPosition[1]="+logicGrid[k][firstChildPosition[1]]
+				  System.out.println("logicGrid["+k+"]["+firstChildPosition[1]+"]="+logicGrid[k][firstChildPosition[1]]
 						  			+"\nk="+k+"\tfirstChildPosition[1]="+firstChildPosition[1]);
 				  if(logicGrid[k][firstChildPosition[1]]) break;			
 			  }
 
 			  //if there are occupied cells in this line, next line will be checked
-			  if(k<firstChildPosition[0]+totalChildren-1) ++firstChildPosition[1];
+			  if(k<firstChildPosition[0]+totalChildren) ++firstChildPosition[1];
 			  else correctlyPlaced=true;
 		  }
 
 		  //placing the children in the logic grid
-		  for(k=firstChildPosition[0]; k<firstChildPosition[0]+totalChildren-1; ++k)
+		  for(k=firstChildPosition[0]; k<firstChildPosition[0]+totalChildren; ++k)
 			  logicGrid[k][firstChildPosition[1]]=true;		
 
 		  //adding the children to the feature diagram
