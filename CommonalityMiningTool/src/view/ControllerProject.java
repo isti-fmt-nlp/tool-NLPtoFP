@@ -169,6 +169,7 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		  return;
 		}
 		
+  		//creating view from model
 		editorController.addStartingfeatures();
 	  }
 	  else if(ae.getActionCommand().equals("Open Diagram")){
@@ -176,15 +177,15 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		String s1=null;		
 		String diagramDataPath=null;
 		ArrayList<String> featureModelDataPaths=new ArrayList<String>();
-		String[] strArr=null;
+//		String[] strArr=null;
 		String projectName=null;
 		//getting diagrams save path
 
-		if(modelProject.getPathProject()!=null){
-		  strArr=modelProject.getPathProject().split("/");
-		  projectName=strArr[strArr.length-1];
-		}
-		else projectName = null;
+//		if(modelProject.getPathProject()!=null){
+//		  strArr=modelProject.getPathProject().split("/");
+//		  projectName=strArr[strArr.length-1];
+//		}
+//		else projectName = null;
 //		String diagramsSavePath=modelProject.getPathProject();
 //		diagramsSavePath=diagramsSavePath.substring(0, diagramsSavePath.length()-projectname.length())
 //				+diagramRelativePath+"/"+projectname;
@@ -195,11 +196,11 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 //		String loadDirectory=diagramsSavePath+"/"+saveFilesSubPath;  
 //		String loadDirectory=diagramPath; 
 //		String loadDirectory=CMTConstants.saveDiagramDir+"/"+projectName;
-		String loadDirectory=CMTConstants.saveDiagramDir;
 		
 		String s = null;
-		if((s = viewProject.loadDiagramDialog(loadDirectory)) != null) try{
+		if((s = viewProject.loadDiagramDialog(CMTConstants.saveDiagramDir)) != null) try{
 		  BufferedReader br1 = new BufferedReader(new FileReader(s));
+  		  projectName=br1.readLine();
 		  diagramDataPath=br1.readLine();
 		  while( (s1 = br1.readLine()) != null ) featureModelDataPaths.add(s1);
 		  br1.close();

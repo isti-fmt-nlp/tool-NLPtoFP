@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
@@ -1169,8 +1170,156 @@ public class EditorModel extends Observable{
 
 	  return xml;
 	}
+	
+	/**
+	 * Creates a model from an xml file in SXFM format.
+	 * 
+	 * @param pathSXFM - the path to SXFM file
+	 * @return - the created feature model
+	 */
+	public static EditorModel createModelFromSXFM(String pathSXFM) {
+	  String xml="";
+	  String s=null;
+	  SAXParser saxParser = null;
+	  InputStream stream = null;
+	  SAXParserFactory saxFactory = SAXParserFactory.newInstance();
+	  ModelXMLHandler xmlHandler = new ModelXMLHandler();
+	  StringWrapper featureTree=null;
+	  String[] strArr=null, tmpArr=null, newConstraint=null;
+	  int negations=0;
+	  BufferedReader str1 = null;
+	  String cleanedFeatureTree = null;
+
+	  EditorModel newModel=new EditorModel();
+
+	  try{
+		xml="";
+		BufferedReader br1 = new BufferedReader(new FileReader(pathSXFM));
+
+		/* ***DEBUG*** */
+		if(debug) System.out.println("**READING: "+pathSXFM);
+		/* ***DEBUG*** */
+
+		while( (s = br1.readLine()) != null ){			  
+
+		  /* ***DEBUG*** */
+		  if(debug) System.out.println("s= "+s);
+		  /* ***DEBUG*** */
+		  
+		  xml+=s+"\n";
+		}
+		br1.close();
+		stream = new ByteArrayInputStream(xml.getBytes());
+
+		/* ***DEBUG*** */
+		if(debug) System.out.println("**PARSING: "+pathSXFM);
+		/* ***DEBUG*** */
+
+//		FileInputStream fi1 = new FileInputStream(pathSXFM);
+
+		saxParser = saxFactory.newSAXParser();
+		saxParser.parse(stream, xmlHandler);
+//		saxParser.parse(fi1, xmlHandler);
+
+		/* ***DEBUG*** */
+		if(debug){
+			System.out.println("\nResulting Feature Tree from parsing:\n"+xmlHandler.featureTree);
+
+			str1 = new BufferedReader(new StringReader(xmlHandler.featureTree));
+
+			System.out.println("\nPrinting Resulting Feature Tree by lines:\n");
+
+			xml="";
+
+			while( (s = str1.readLine()) != null ){		
+			  if(s.length()==0) continue;
+				
+			  for(int i=0; i<s.length(); ++i)
+				if(s.charAt(i)=='(' && s.charAt(i-1)!=' ') s=s.substring(0, i)+" "+s.substring(i);
+
+			  xml+=s;
+
+			  System.out.println("Line: "+s);
+			}
+			str1.close();				
+		}
+		/* ***DEBUG*** */
+		
+
+		featureTree=new StringWrapper(xml);
+		
+		System.out.println("xml:\n"+xml);
+
+		newModel.recursiveFeatureTreeBuilderFromSXFM(null, 0, featureTree);
+
+	  }catch (Exception e) {
+		System.out.println("Error while loading saved model");
+		e.printStackTrace();
+		throw new RuntimeException("Error while load saved model");
+	  }
+
+		/* ***DEBUG*** */
+		if(debug){
+			System.out.println("\nResulting Constraints from parsing:\n"+xmlHandler.constraints);
+
+			str1 = new BufferedReader(new StringReader(xmlHandler.constraints));
+
+			System.out.println("\nPrinting Resulting Constraints by lines:\n");
+			try {
+				while( (s = str1.readLine()) != null ){			  				
+				  System.out.println("Line: "+s);
+				}
+				str1.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+				
+		}
+		/* ***DEBUG*** */
+
+		 
+	  //loading constraints
+	  if(xmlHandler.constraints!=null){
+		strArr=xmlHandler.constraints.split("\n");
+		
+		for(String constr: strArr){
+		  if(constr.length()==0) continue;
+		  
+		  for(int i=0; i<constr.length(); ++i)
+			if(constr.charAt(i)==':' && constr.charAt(i+1)!=' ') constr=constr.substring(0, i+1)+" "+constr.substring(i+1);
+
+		  negations=0;
+		  tmpArr=constr.split(" ");		
+		  
+		  for(int u=0; u<tmpArr.length; ++u) System.out.println("tmpArr["+u+"]="+tmpArr[u]);
+
+		  
+		  newConstraint=new String[3];
+		  newConstraint[0]=tmpArr[0].substring(0, tmpArr[0].length()-1);
+		  if(tmpArr[1].charAt(0)=='~'){ ++negations; newConstraint[1]=tmpArr[1].substring(1);}
+		  else newConstraint[1]=tmpArr[1];
+		  if(tmpArr[3].charAt(0)=='~'){ ++negations; newConstraint[2]=tmpArr[3].substring(1);}
+		  else newConstraint[2]=tmpArr[3];
+
+		  /*new stuff*/
+		  if(negations==2) newConstraint[0]=excludesConstraintNamePrefix+newConstraint[0];
+		  else newConstraint[0]=includesConstraintNamePrefix+newConstraint[0];
+		  /*new stuff*/
+
+		  newModel.constraints.add(newConstraint);
+		}
+	  }
+
+	  newModel.printModel();
+	  return newModel;
+	}
+
+
+	
 	/**
 	 * Loads a saved feature model from a list of files, each describing a feature tree.
+	 * 
 	 * @param featureModelDataPaths - the list of files describing the feature trees
 	 * @return - the saved feature model
 	 */
@@ -1187,24 +1336,41 @@ public class EditorModel extends Observable{
 	  
 	  EditorModel newModel=new EditorModel();
 	  
-	  System.out.println("EditorModel: ***PARSING ALL XML MODEL FILES***");
+	  if(debug) for(int i=0; i<featureModelDataPaths.size(); ++i)
+		System.out.println("featureModelDataPaths["+i+"]: "+featureModelDataPaths.get(i));	  
+	  if(debug) System.out.println("EditorModel: ***PARSING ALL XML MODEL FILES***");
+
 	  //building feature trees
 	  for(int i=0; i< featureModelDataPaths.size(); ++i){
 	    try{
 	      xml="";
 		  BufferedReader br1 = new BufferedReader(new FileReader(featureModelDataPaths.get(i)));
-		  System.out.println("**PARSING: "+featureModelDataPaths.get(i));
+		  
+		  /* ***DEBUG*** */
+		  if(debug) System.out.println("**READING: "+featureModelDataPaths.get(i));
+		  /* ***DEBUG*** */
+		  
 		  while( (s = br1.readLine()) != null ){			  
-			System.out.println("s= "+s);
+
+			/* ***DEBUG*** */
+			if(debug) System.out.println("s= "+s);
+			/* ***DEBUG*** */
+
 			xml+=s+"\n";
 		  }
 		  br1.close();
 		  stream = new ByteArrayInputStream(xml.getBytes());
 		  
-		  System.out.println("**PARSING: "+featureModelDataPaths.get(i));
+		  /* ***DEBUG*** */
+		  if(debug) System.out.println("**PARSING: "+featureModelDataPaths.get(i));
+		  /* ***DEBUG*** */
+
 		  saxParser = saxFactory.newSAXParser();
 		  saxParser.parse(stream, xmlHandler);
-		  System.out.println("\nResulting Feature Tree from parsing:\n"+xmlHandler.featureTree);
+
+		  /* ***DEBUG*** */
+		  /*if(debug) */System.out.println("\nResulting Feature Tree from parsing:\n"+xmlHandler.featureTree);
+		  /* ***DEBUG*** */
 
 		  featureTree=new StringWrapper(xmlHandler.featureTree);
 		  newModel.recursiveFeatureTreeBuilder(null, 0, featureTree);
@@ -1251,6 +1417,8 @@ public class EditorModel extends Observable{
 	 * @param parent - the feature to which childs must be added
 	 * @param tabs - number of tabulation characters preceding parent in featureTree
 	 * @param featureTree - contains the String representing the tree
+	 * 
+	 * @return - the number of tags preceding the first element of another subtree
 	 */
 	private int recursiveFeatureTreeBuilder(FeatureNode parent, int tabs, StringWrapper featureTree) {
 	  int nextTabs=0;
@@ -1297,6 +1465,8 @@ public class EditorModel extends Observable{
 	 * @param parent - the feature to which childs must be added
 	 * @param tabs - number of tabulation characters preceding parent in featureTree
 	 * @param featureTree - contains the String representing the tree
+	 * 
+	 * @return - the number of tags preceding the first element of another subtree
 	 */
 	private int recursiveGroupTreeBuilder(FeatureNode parent, int tabs, StringWrapper featureTree) {
 	  int nextTabs=0;
@@ -1336,7 +1506,6 @@ public class EditorModel extends Observable{
 			else nextTabs=recursiveFeatureTreeBuilder(lastChildAdded, nextTabs, featureTree);
 		  }
 		}
-
 		//next element is a child of the last feature added
 		else if(nextTabs>tabs+1){
 		  if(featureTree.string.startsWith(":g", nextTabs)) 
@@ -1359,6 +1528,7 @@ public class EditorModel extends Observable{
 	 * @param tabs - number of tabulation characters preceding the element to be created in featureTree
 	 * @param featureTree - contains the String representing the tree
 	 * 
+	 * @return - the new FeatureNode created
 	 */
 	private FeatureNode addChildToParent(FeatureNode parent, int tabs, StringWrapper featureTree) {
 	  String element=null;
@@ -1380,7 +1550,7 @@ public class EditorModel extends Observable{
 	  //cutting off current element from featureTree
 	  featureTree.string=featureTree.string.substring(i);
 		  
-	  System.out.println("The element String is:"+element+"\nfeatureTree:"+featureTree.string+"\nTabs:"+tabs);
+	  System.out.println("The element String is: "+element+"\nfeatureTree: "+featureTree.string+"\nTabs: "+tabs);
 	  elementData=element.split(" ");
 	  for(int l=0; l<elementData.length; ++l) System.out.println("elementData["+l+"]: "+elementData[l]);
 	  
@@ -1409,6 +1579,7 @@ public class EditorModel extends Observable{
 		parent.getSubFeatures().add(newFeature);
 		newFeature.setParent(parent);
 	  }
+	  else newFeature.setParent(null);
 	  featuresList.put(featureID, newFeature);
 //	  unrootedFeatures.put(featureName, newFeature);
 	  
@@ -1424,6 +1595,7 @@ public class EditorModel extends Observable{
 	 * @param tabs - number of tabulation characters preceding the element to be created in featureTree
 	 * @param featureTree - contains the String representing the tree
 	 * 
+	 * @return - the new GroupNode created
 	 */
 	private GroupNode addGroupToParent(FeatureNode parent, int tabs, StringWrapper featureTree) {
 	  String element=null;
@@ -1443,15 +1615,18 @@ public class EditorModel extends Observable{
 	  //cutting off current element from featureTree
 	  featureTree.string=featureTree.string.substring(i);
 			  
-	  System.out.println("The element String is:"+element+"\nfeatureTree:"+featureTree.string+"\nTabs:"+tabs);
+	  System.out.println("The element String is: "+element+"\nfeatureTree: "+featureTree.string+"\nTabs: "+tabs);
 	  elementData=element.split(" ");
 	  for(int l=0; l<elementData.length; ++l) System.out.println("elementData["+l+"]: "+elementData[l]);
 		  
 	  //getting cardinalities of the group
-	  for(k=1; k<elementData[2].length(); ++k) if(elementData[2].charAt(k)=='.') break;
-	  minCard=Integer.valueOf(elementData[2].substring(1, k));
-	  for(h=k+1; h<elementData[2].length(); ++h) if(elementData[2].charAt(h)==']') break;
-	  maxCard=Integer.valueOf(elementData[2].substring(k+1, h));
+	  for(k=1; k<elementData[elementData.length-1].length(); ++k) if(elementData[elementData.length-1].charAt(k)=='.') break;
+	  minCard=Integer.valueOf(elementData[elementData.length-1].substring(1, k));
+	  for(h=k+1; h<elementData[elementData.length-1].length(); ++h) if(elementData[elementData.length-1].charAt(h)==']') break;
+//	  maxCard=Integer.valueOf(elementData[2].substring(k+1, h));
+	  if(elementData[elementData.length-1].substring(k+1, h).compareTo("*")==0) maxCard=-1;
+	  else maxCard=Integer.valueOf(elementData[elementData.length-1].substring(k+1, h));
+
 
 	  //getting the name of the group	  
 	  groupName=elementData[1];
@@ -1472,6 +1647,8 @@ public class EditorModel extends Observable{
 	 * @param groupOwner - the FeatureNode owner of the parent group
 	 * @param tabs - number of tabulation characters preceding the element to be created in featureTree
 	 * @param featureTree - contains the String representing the tree
+	 * 
+	 * @return - the new FeatureNode created
 	 * 
 	 */
 	private FeatureNode addMemberToGroup(GroupNode parentGroup, FeatureNode groupOwner, int tabs, StringWrapper featureTree) {
@@ -1494,7 +1671,7 @@ public class EditorModel extends Observable{
 		  //cutting off current element from featureTree
 		  featureTree.string=featureTree.string.substring(i);
 			  
-		  System.out.println("The element String is:"+element+"\nfeatureTree:"+featureTree.string+"\nTabs:"+tabs);
+		  System.out.println("The element String is: "+element+"\nfeatureTree: "+featureTree.string+"\nTabs: "+tabs);
 		  elementData=element.split(" ");
 		  for(int l=0; l<elementData.length; ++l) System.out.println("elementData["+l+"]: "+elementData[l]);
 		  
@@ -1528,6 +1705,302 @@ public class EditorModel extends Observable{
 	}
 
 	/**
+	 * Recursevely parse the String contained in featureTree and creates the feature model tree.
+	 * It is called when the next element is a feature.
+	 * 
+	 * @param parent - the feature to which childs must be added
+	 * @param tabs - number of tabulation characters preceding parent in featureTree
+	 * @param featureTree - contains the String representing the tree
+	 * 
+	 * @return - the number of tags preceding the first element of another subtree
+	 */
+	private int recursiveFeatureTreeBuilderFromSXFM(FeatureNode parent, int tabs, StringWrapper featureTree){
+	  int nextTabs=0;
+	  FeatureNode lastFeatureAdded=null;
+	  int i=0;
+	  
+	  //building current feature element
+	  lastFeatureAdded=addChildToParentFromSXFM(parent, tabs, featureTree);
+	  
+	  //if featureTree has been consumed, return
+	  while (featureTree.string.length()>0){
+		nextTabs=0; i=0;
+		
+		//counting the tabulations preceding the next element
+		for( ;i<featureTree.string.length(); ++i){
+		  if(featureTree.string.charAt(i)=='\t') ++nextTabs;
+		  else break;
+		}
+
+		//next element is a child of parent
+		if(nextTabs==tabs){
+		  //next element is a group
+		  if(featureTree.string.substring(nextTabs, nextTabs+2).startsWith(":g"))
+			nextTabs=recursiveGroupTreeBuilderFromSXFM(parent, tabs, featureTree);
+		  //next element is a feature
+		  else lastFeatureAdded=addChildToParentFromSXFM(parent, tabs, featureTree);				
+		}
+		//next element is a child of the last feature added
+		else if(nextTabs>tabs){
+		  if(featureTree.string.startsWith(":g", nextTabs)) 
+			nextTabs=recursiveGroupTreeBuilderFromSXFM(lastFeatureAdded, nextTabs, featureTree);
+		  else nextTabs=recursiveFeatureTreeBuilderFromSXFM(lastFeatureAdded, nextTabs, featureTree);
+		}
+		//next element belongs to another sub-tree
+		else return nextTabs;		  
+	  }	  
+	  return 0;
+	}
+	
+	/**
+	 * Recursevely parse the String contained in featureTree and creates the feature model tree.<br>
+	 * It is called when the next element is a group.
+	 * 
+	 * @param parent - the feature to which childs must be added
+	 * @param tabs - number of tabulation characters preceding parent in featureTree
+	 * @param featureTree - contains the String representing the tree
+	 * 
+	 * @return - the number of tags preceding the first element of another subtree
+	 */
+	private int recursiveGroupTreeBuilderFromSXFM(FeatureNode parent, int tabs, StringWrapper featureTree){
+	  int nextTabs=0;
+	  GroupNode lastGroupAdded=null;//last group added to parent feature
+	  FeatureNode lastMemberAdded=null;//last member of added to this group
+	  FeatureNode lastChildAdded=null;//last feature added to parent feature
+	  int i=0;
+
+	  //building current feature element
+	  lastGroupAdded=addGroupToParentFromSXFM(parent, tabs, featureTree);
+
+	  //if featureTree has been consumed, return
+	  while (featureTree.string.length()>0){
+		nextTabs=0; i=0;
+
+		//counting the tabulations preceding the next element
+		for( ;i<featureTree.string.length(); ++i){
+		  if(featureTree.string.charAt(i)=='\t') ++nextTabs;
+		  else break;
+		}
+
+		//next element is a child of parent
+		if(nextTabs==tabs){
+		  //next element is a group
+		  if(featureTree.string.substring(nextTabs, nextTabs+2).startsWith(":g"))
+			nextTabs=recursiveGroupTreeBuilderFromSXFM(parent, tabs, featureTree);
+		  //next element is a feature
+		  else lastChildAdded=addChildToParentFromSXFM(parent, tabs, featureTree);
+		}
+		else if(nextTabs==tabs+1){
+		  //next element is a member of the last group added
+		  if (lastChildAdded==null) lastMemberAdded=addMemberToGroupFromSXFM(lastGroupAdded, parent, tabs+1, featureTree);
+		  //next element is a sub feature or sub group of the last child added to parent
+		  else{
+			if(featureTree.string.substring(nextTabs, nextTabs+2).startsWith(":g"))
+			  nextTabs=recursiveGroupTreeBuilderFromSXFM(lastChildAdded, nextTabs, featureTree);
+			else nextTabs=recursiveFeatureTreeBuilderFromSXFM(lastChildAdded, nextTabs, featureTree);
+		  }
+		}
+		//next element is a child of the last feature added
+		else if(nextTabs>tabs+1){
+		  if(featureTree.string.startsWith(":g", nextTabs)) 
+			  nextTabs=recursiveGroupTreeBuilderFromSXFM(lastMemberAdded, nextTabs, featureTree);
+		  else nextTabs=recursiveFeatureTreeBuilderFromSXFM(lastMemberAdded, nextTabs, featureTree);
+		}
+		//next element belongs to another sub-tree
+		else return nextTabs;		  
+	  }	  
+	  return 0;
+	}
+	
+	/**
+	 * Retrieves the current element data from the String contained in featureTree and <br>
+	 *  creates the corresponding FeatureNode, adding it to the parent feature,<br>
+	 *  or to the list unrootedFeatures if parent is null.<br>
+	 * Each call to this method will remove from featureTree the prefix String representing the current element.
+	 * 
+	 * @param parent - the parent feature
+	 * @param tabs - number of tabulation characters preceding the element to be created in featureTree
+	 * @param featureTree - contains the String representing the tree
+	 * 
+	 * @return - the new FeatureNode created
+	 */
+	private FeatureNode addChildToParentFromSXFM(FeatureNode parent, int tabs, StringWrapper featureTree){
+	  String element=null;
+	  String[] elementData=null;
+	  String featureName="";
+	  String featureID=null;
+	  FeatureNode newFeature=null;
+	  int k=0, h=0, i=0;
+	  FeatureTypes type=null;
+	  int minCard=0, maxCard=0;
+	  
+	  //splitting element prefix from the rest of featureTree String
+	  i=tabs;
+	  while(i<featureTree.string.length() && featureTree.string.charAt(i)!='\t') ++i;
+//	  for(i=tabs; i<featureTree.length(); ++i) if(featureTree.charAt(i)=='\t') break;
+
+	  element=featureTree.string.substring(tabs, i);
+	  
+	  //cutting off current element from featureTree
+	  featureTree.string=featureTree.string.substring(i);
+		  
+	  System.out.println("The element String is: "+element+"\nfeatureTree: "+featureTree.string+"\nTabs: "+tabs);
+	  elementData=element.split(" ");
+	  for(int l=0; l<elementData.length; ++l) System.out.println("elementData["+l+"]: "+elementData[l]);
+	  
+	  //getting the name of the feature
+	  featureName+=elementData[1];
+	  for(int l=2; l<elementData.length-1; ++l) featureName+=" "+elementData[l];
+	  
+	  //getting ID of the feature
+	  featureID=elementData[elementData.length-1].substring(1, elementData[elementData.length-1].length()-1);
+	  
+	  //getting cardinalities of the feature
+	  if(elementData[0].compareTo(":r")==0 || elementData[0].compareTo(":m")==0){ minCard=1; maxCard=1;}
+	  else{ minCard=0; maxCard=1;}
+	  
+	  
+//	  for(k=1; k<elementData[elementData.length-1].length(); ++k) if(elementData[elementData.length-1].charAt(k)=='.') break;
+//	  minCard=Integer.valueOf(elementData[elementData.length-1].substring(1, k));
+//	  for(h=k+1; h<elementData[elementData.length-1].length(); ++h) if(elementData[elementData.length-1].charAt(h)==']') break;
+//	  maxCard=Integer.valueOf(elementData[elementData.length-1].substring(k+1, h));
+
+	  if(minCard>0) type=FeatureTypes.COMMONALITY;
+	  else type=FeatureTypes.VARIABILITY;
+
+	  //adding new feature to the model
+	  newFeature=new FeatureNode(type, featureName, featureID, minCard, maxCard);
+	  System.out.println("***Adding child '"+newFeature.getID()+"' to parent '"
+	    +(parent==null ? "null":parent.getID())+"'");
+	  if (parent!=null){
+		parent.getSubFeatures().add(newFeature);
+		newFeature.setParent(parent);
+	  }
+	  featuresList.put(featureID, newFeature);
+//	  unrootedFeatures.put(featureName, newFeature);
+	  
+	  return newFeature;
+	}
+
+	/**
+	 * Retrieves the current element data from the String contained in featureTree and <br>
+	 *  creates the corresponding GroupNode, adding it to the parent feature.
+	 * Each call to this method will remove from featureTree the prefix String representing the current element.
+	 * 
+	 * @param parent - the parent feature
+	 * @param tabs - number of tabulation characters preceding the element to be created in featureTree
+	 * @param featureTree - contains the String representing the tree
+	 * 
+	 * @return - the new GroupNode created
+	 */
+	private GroupNode addGroupToParentFromSXFM(FeatureNode parent, int tabs, StringWrapper featureTree){
+	  String element=null;
+	  String[] elementData=null;
+	  GroupNode newGroup=null;
+	  String groupID="";
+	  int k=0, h=0, i=0;
+	  int minCard=0, maxCard=0;
+		  
+	  if(parent==null) throw new RuntimeException("A group cannot be added to a null parent");
+	  //splitting element prefix from the rest of featureTree String
+	  i=tabs;
+	  while(i<featureTree.string.length() && featureTree.string.charAt(i)!='\t') ++i;
+
+	  element=featureTree.string.substring(tabs, i);
+		  
+	  //cutting off current element from featureTree
+	  featureTree.string=featureTree.string.substring(i);
+			  
+	  System.out.println("The element String is: "+element+"\nfeatureTree: "+featureTree.string+"\nTabs: "+tabs);
+	  elementData=element.split(" ");
+	  for(int l=0; l<elementData.length; ++l) System.out.println("elementData["+l+"]: "+elementData[l]);
+		  
+	  //getting cardinalities of the group
+	  for(k=1; k<elementData[elementData.length-1].length(); ++k) if(elementData[elementData.length-1].charAt(k)==',') break;
+	  minCard=Integer.valueOf(elementData[elementData.length-1].substring(1, k));
+	  for(h=k+1; h<elementData[elementData.length-1].length(); ++h) if(elementData[elementData.length-1].charAt(h)==']') break;
+	  if(elementData[elementData.length-1].substring(k+1, h).compareTo("*")==0) maxCard=-1;
+	  else maxCard=Integer.valueOf(elementData[elementData.length-1].substring(k+1, h));
+
+	  //getting the ID of the group	  
+	  groupID=elementData[elementData.length-2].substring(1, elementData[elementData.length-2].length()-1);
+	  
+	  //adding new group to the model
+	  newGroup=new GroupNode(groupID, minCard, maxCard);
+	  parent.getSubGroups().add(newGroup);
+	  groups.put(groupID, newGroup);
+	  return newGroup;
+	}
+
+	/**
+	 * Retrieves the current element data from the String contained in featureTree and <br>
+	 *  creates the corresponding FeatureNode, adding it to the parent group.
+	 * Each call to this method will remove from featureTree the prefix String representing the current element.
+	 * 
+	 * @param parentGroup - the parent group
+	 * @param groupOwner - the FeatureNode owner of the parent group
+	 * @param tabs - number of tabulation characters preceding the element to be created in featureTree
+	 * @param featureTree - contains the String representing the tree
+	 * 
+	 * @return - the new FeatureNode created
+	 * 
+	 */
+	private FeatureNode addMemberToGroupFromSXFM(GroupNode parentGroup, FeatureNode groupOwner, int tabs, StringWrapper featureTree){
+		  String element=null;
+		  String[] elementData=null;
+		  String featureName="";
+		  String featureID=null;
+		  FeatureNode newFeature=null;
+		  int k=0, h=0, i=0;
+		  FeatureTypes type=null;
+		  int minCard=0, maxCard=0;
+		  
+		  if(parentGroup==null) throw new RuntimeException("A feature cannot be added as member to a null group");
+		  //splitting element prefix from the rest of featureTree String
+		  i=tabs;
+		  while(i<featureTree.string.length() && featureTree.string.charAt(i)!='\t') ++i;
+
+		  element=featureTree.string.substring(tabs, i);
+		  
+		  //cutting off current element from featureTree
+		  featureTree.string=featureTree.string.substring(i);
+			  
+		  System.out.println("The element String is: "+element+"\nfeatureTree: "+featureTree.string+"\nTabs: "+tabs);
+		  elementData=element.split(" ");
+		  for(int l=0; l<elementData.length; ++l) System.out.println("elementData["+l+"]: "+elementData[l]);
+		  
+		  //getting the name of the feature
+		  featureName+=elementData[1];
+		  for(int l=2; l<elementData.length-1; ++l) featureName+=" "+elementData[l];
+		  
+		  //getting ID of the feature
+		  featureID=elementData[elementData.length-1].substring(1, elementData[elementData.length-1].length()-1);
+		  
+		  //getting cardinalities of the feature
+//		  for(k=1; k<elementData[elementData.length-1].length(); ++k) if(elementData[elementData.length-1].charAt(k)=='.') break;
+//		  minCard=Integer.valueOf(elementData[elementData.length-1].substring(1, k));
+//		  for(h=k+1; h<elementData[elementData.length-1].length(); ++h) if(elementData[elementData.length-1].charAt(h)==']') break;
+//		  maxCard=Integer.valueOf(elementData[elementData.length-1].substring(k+1, h));
+
+		  minCard=1; maxCard=1;
+
+		  if(minCard>0) type=FeatureTypes.COMMONALITY;
+		  else type=FeatureTypes.VARIABILITY;
+
+		  //adding new feature to the model
+		  newFeature=new FeatureNode(type, featureName, featureID, minCard, maxCard);
+		  System.out.println("***Adding member '"+newFeature.getID()+"' to parentGroup '"
+		    +(parentGroup==null ? "null":parentGroup.getID())
+		    +"' with parent feature '"+(groupOwner==null ? "null": groupOwner.getID())+"'");
+		  parentGroup.getMembers().add(newFeature);
+		  newFeature.setParent(groupOwner);
+		  featuresList.put(featureID, newFeature);
+//		  unrootedFeatures.put(featureName, newFeature);
+		  
+		  return newFeature;
+	}	
+
+	/**
 	 * Print the feature model indenting the lower levels. <br>
 	 * Prints a tree for each feature without parent in the model.
 	 * 
@@ -1539,6 +2012,14 @@ public class EditorModel extends Observable{
       }		
       System.out.println("\n\nPRINTING CONSTRAINTS");
       for(String[] strArr : constraints) System.out.println(strArr[0]+": "+strArr[1]+" - "+strArr[2]);      
+      System.out.println("\n\nLISTING ALL FEATURES");
+      for(Map.Entry<String,FeatureNode> feature : getUnrootedFeatures().entrySet()){
+        System.out.println( "\n\nID: "+feature.getValue().getID()+
+        					"\nName: "+feature.getValue().getName()+
+        					"\nCardinality: "+feature.getValue().getCardinality()+
+        					"\nParent: "+feature.getValue().getParent());
+      }
+
 	}
 	
 	/**
@@ -1555,7 +2036,7 @@ public class EditorModel extends Observable{
 		}
 		for(GroupNode group : feature.getSubGroups()) 
 		  for(FeatureNode member : group.getMembers()){
-			if(group.getCardinality().x>0) treePrint(member, indent+"OR|"); 
+			if(group.getCardinality().y>1 || group.getCardinality().y<0) treePrint(member, indent+"OR|"); 
 			else treePrint(member, indent+"ALT|"); 
 		  }
 	}	

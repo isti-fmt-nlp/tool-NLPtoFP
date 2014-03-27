@@ -2,12 +2,9 @@ package main;
 
 import javax.swing.JFrame;
 
-import view.ControllerProject;
 import view.EditorController;
 import view.EditorModel;
 import view.EditorView;
-import view.ModelProject;
-import view.ViewProject;
 
 public class FeatureDiagramEditorTool {
 

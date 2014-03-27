@@ -5066,7 +5066,7 @@ public class EditorView extends JFrame implements Observer{
 		constraintData=constraint.split(" ");
 
 		/* ***DEBUG*** */
-		if(debug2){
+//		if(debug2){
 			System.out.println("Printing constraint strings:");
 			for (String s : constraintData) System.out.println("s: "+s);
 			System.out.println("startConstraintName="+constraintData[0].substring(10));
@@ -5074,7 +5074,7 @@ public class EditorView extends JFrame implements Observer{
 			System.out.println("endConstraintName="+constraintData[3].substring(8));
 			System.out.println("endOwnerName="+constraintData[5].substring(9));
 			System.out.println("controlName="+constraintData[6].substring(12));
-		}
+//		}
 		/* ***DEBUG*** */
 
 		//getting data of start anchor of this constraint
@@ -6418,7 +6418,7 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @param anchorPanel - the anchor to add
 	 */
-	public void directlyAddAnchorToDiagram(AnchorPanel anchorPanel) {
+	public void directlyAddAnchorToDiagram(JComponent anchorPanel) {
 		visibleOrderDraggables.addToTop(anchorPanel);
 		diagramPanel.setLayer(anchorPanel, 0);
 		diagramPanel.add(anchorPanel);

@@ -38,6 +38,7 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 
 import view.EditorModel.GroupTypes;
@@ -940,6 +941,9 @@ public class EditorController implements
   			PrintWriter pw1 = new PrintWriter(new BufferedWriter(
   					new FileWriter(CMTConstants.saveDiagramDir+"/"+s) ));
 //  				new FileWriter(diagramPath+"/"+saveFilesSubPath+"/"+s) ));
+  			
+  			//printing general save data in the file
+  			pw1.println(projectName);
   			pw1.println(diagDataPath);
   			for(String path : modelDataPaths) pw1.println(path);
   			pw1.close();  	
@@ -951,12 +955,12 @@ public class EditorController implements
   		  }
   		}    	  
       }
-	  //menuFiles command: Load Diagram    
+	  //menuFiles command: New Diagram
       else if(e.getActionCommand().equals("New Diagram")){
     	//creating model
   		editorModel= new EditorModel();
 
-  		//getting the close opearation of this frame
+  		//getting the close opearation for this frame
   		operation=editorView.getOnCloseOperation();
 
   		//creating view
@@ -976,9 +980,11 @@ public class EditorController implements
   		  System.out.println("Controller not set. Closing...");
   		  return;
   		}      	  
+
+		//disposing of old frame
   		currentView.dispose();
-      }
-      
+      }      
+	  //menuFiles command: Load Diagram
       else if(e.getActionCommand().equals("Load Diagram")){
   		String s1=null;		
   		String diagramDataPath=null;
@@ -993,6 +999,7 @@ public class EditorController implements
   		String s = null;
   		if((s = editorView.loadXMLDialog(loadDirectory)) != null) try{
   		  BufferedReader br1 = new BufferedReader(new FileReader(s));
+  		  projectName=br1.readLine();
   		  diagramDataPath=br1.readLine();
   		  while( (s1 = br1.readLine()) != null ) featureModelDataPaths.add(s1);
   		  br1.close();
@@ -1012,7 +1019,7 @@ public class EditorController implements
   		  return;
   		}
 
-  		//getting the close opearation of this frame
+  		//getting the close opearation for this frame
   		operation=editorView.getOnCloseOperation();
 
   		//creating an empty view
@@ -1041,7 +1048,51 @@ public class EditorController implements
   		  editorView.errorDialog("Error while loading diagram.");
   		  return;
   		}
+  		
+  		//disposing of old frame
   		currentView.dispose();
+      }
+	  //menuFiles command: Import from SXFM
+      else if(e.getActionCommand().equals("Import from SXFM")){
+
+  		String s = null;
+  		if((s = editorView.loadXMLDialog(CMTConstants.saveDiagramDir+"/..")) == null) return;
+    	
+    	//creating model
+    	try{
+    	  editorModel= EditorModel.createModelFromSXFM(s);
+    	}catch(Exception ex){
+    	  ex.printStackTrace();
+    	  editorView.errorDialog("Error while loading model.");
+    	  return;
+    	}
+    	
+  		//getting the close opearation for this frame
+  		operation=editorView.getOnCloseOperation();
+
+  		//creating an empty view
+  		currentView=editorView;
+  		editorView= new EditorView();
+
+  		//setting diagrams save path
+  		setSavePath(projectName);
+
+  		//adding the view as observer to the model
+  		editorModel.addObserver(editorView);
+
+		//setting default close operation for the new frame
+		editorView.setOnCloseOperation(operation);
+
+  		if( !editorView.prepareUI(this) ){
+  		  System.out.println("Controller not set. Closing...");
+  		  return;
+  		}
+
+  		//creating view from model
+  		createViewFromModel();
+
+  		//disposing of old frame
+  		currentView.dispose();    	  
       }
 	  //menuFiles command: Export as SXFM
       else if(e.getActionCommand().equals("Export as SXFM")){
@@ -1456,10 +1507,6 @@ public class EditorController implements
  		*/	
 
 		createViewFromModel();
-
-
-		editorView.getDiagramPanel().validate();
-		editorView.fitDiagram();
 	}
 
 	/**
@@ -1490,7 +1537,7 @@ public class EditorController implements
 		
 		//logic position of root feature is at the top-middle of the grid
 		featureLogicCell = new int[2];
-		featureLogicCell[0]=gridSize/2+1;
+		featureLogicCell[0]=gridSize/2;
 		featureLogicCell[1]=0;
 		
 		if(rootFeature==null){
@@ -1518,7 +1565,10 @@ public class EditorController implements
 		nodesToExpand.add(new AbstractMap.SimpleEntry<FeatureNode, int[]>(rootFeature, featureLogicCell));
 		
 		recBuildDiagram(nodesToExpand);
-		
+
+		//fitting diagram
+		editorView.getDiagramPanel().validate();
+		editorView.fitDiagram();		
 		
 	}
 
@@ -1535,7 +1585,8 @@ public class EditorController implements
 	  int k=0;
 	  FeatureNode currentNode=null;
 	  GroupPanel groupPanel=null;
-	  ConstraintPanel startConstraintPanel=null, endConstraintPanel=null, controlConstraintPanel=null;
+	  ConstraintPanel startConstraintPanel=null, endConstraintPanel=null;
+	  JLabel controlConstraintPanel=null;
 	  FeaturePanel featurePanel = null, endFeaturePanel = null;
 	  AnchorPanel endAnchorPanel=null, startAnchorPanel=null;
 	  int[] currentNodePosition=null, firstChildPosition=new int[2];
@@ -1552,10 +1603,12 @@ public class EditorController implements
 	  JLayeredPane diagramPanel=editorView.getDiagramPanel();
 	  ImageIcon groupLineLengthIcon = editorView.getGroupLineIcon();
 		
+	  //adding to the diagram the children of each node to expand
 	  while(nodesToExpand.size()>0){
-		currentNodesToExpand=nodesToExpand.size();
-		for(int i=0; i<currentNodesToExpand; ++i){//adding to the diagram the children of each node to expand
+//		currentNodesToExpand=nodesToExpand.size();
+//		for(int i=0; i<currentNodesToExpand; ++i){
 		  currentNode=nodesToExpand.get(0).getKey();
+		  System.out.println("currentNode: "+currentNode.getName()+"("+currentNode.getID()+")");
 
 		  //updating maxFeatureID
 		  try{
@@ -1578,8 +1631,9 @@ public class EditorController implements
 		  correctlyPlaced=false;
 		  while(!correctlyPlaced){
 			  //checking if there are some location already occupied in the logic grid
-			  for(k=firstChildPosition[0]; k<firstChildPosition[0]+totalChildren-1; ++k){
-				  System.out.println("logicGrid="+logicGrid+"\nk="+k+"\tfirstChildPosition[1]="+firstChildPosition[1]);
+			  for(k=firstChildPosition[0]; k<firstChildPosition[0]+totalChildren; ++k){
+				  System.out.println("logicGrid[k][firstChildPosition[1]="+logicGrid[k][firstChildPosition[1]]
+						  			+"\nk="+k+"\tfirstChildPosition[1]="+firstChildPosition[1]);
 				  if(logicGrid[k][firstChildPosition[1]]) break;			
 			  }
 
@@ -1601,7 +1655,7 @@ public class EditorController implements
 		  locationInFeature.y=featureSize.height-13;
 
 		  for(GroupNode group : currentNode.getSubGroups()){
-			  if(group.getCardinality().y>1) continue;//this is an or group
+			  if(group.getCardinality().y>1 || group.getCardinality().y<0) continue;//this is an or group
 			  else{
 
 				  //updating maxOrGroupID
@@ -1618,7 +1672,7 @@ public class EditorController implements
 				  //adding group to the feature				
 				  editorView.directlyAddGroupToFeature(groupPanel,
 						  editorView.getFeaturePanel(/*EditorView.featureNamePrefix+*/currentNode.getID()),
-						  ItemsType.OR_GROUP_START_CONNECTOR);
+						  ItemsType.ALT_GROUP_START_CONNECTOR);
 
 				  //adding group members
 				  for(FeatureNode child : group.getMembers()){
@@ -1746,7 +1800,7 @@ public class EditorController implements
 				  //adding group to the feature				
 				  editorView.directlyAddGroupToFeature(groupPanel,
 						  editorView.getFeaturePanel(/*EditorView.featureNamePrefix+*/currentNode.getID()), 
-						  ItemsType.ALT_GROUP_START_CONNECTOR);
+						  ItemsType.OR_GROUP_START_CONNECTOR);
 
 				  //adding group members
 				  for(FeatureNode child : group.getMembers()){
@@ -1803,7 +1857,7 @@ public class EditorController implements
 		  //removing current node from nodes to expand list
 //		  nodesToExpand.remove(currentNode);
 		  nodesToExpand.remove(0);
-		}
+//		}
 	  }
 
 	  //adding constraints
@@ -1874,7 +1928,7 @@ public class EditorController implements
 		else locationInFeature.x=endFeaturePanel.getX()+featureSize.width-10; 
 		locationInFeature.y=endFeaturePanel.getY()+featureSize.height/2-12;
 		 
-		controlConstraintPanel = (ConstraintPanel)editorView.buildConnectionDot(
+		controlConstraintPanel = (JLabel)editorView.buildConnectionDot(
 			ItemsType.CONSTRAINT_CONTROL_POINT, 
 			EditorView.constraintControlPointNamePrefix+editorView.getConstraintControlsCount(),
 			locationInFeature.x, locationInFeature.y); 
