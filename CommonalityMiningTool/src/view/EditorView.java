@@ -318,8 +318,8 @@ public class EditorView extends JFrame implements Observer{
 		ALT_GROUP_START_CONNECTOR, OR_GROUP_START_CONNECTOR
 	}
 	
-	/** Tells if the diagram has been modified after last save*/
-	private boolean modified=true;
+//	/** Tells if the diagram has been modified after last save*/
+//	private boolean modified=true;
 	
 	/** Tells which action should be performed when the JFrame is closed*/
 	private int onCloseOperation = JFrame.DISPOSE_ON_CLOSE;
@@ -3948,15 +3948,15 @@ public class EditorView extends JFrame implements Observer{
 	  return new ImageIcon(groupLineLengthIconURL);
 	}
 
-	/** Tells if the view has been modified since last save*/
-	public boolean getModified(){
-		return modified;
-	}
-
-	/** Sets the value of the modified field*/
-	public void setModified(boolean mod){
-		modified=mod;
-	}
+//	/** Tells if the view has been modified since last save*/
+//	public boolean getModified(){
+//		return modified;
+//	}
+//
+//	/** Sets the value of the modified field*/
+//	public void setModified(boolean mod){
+//		modified=mod;
+//	}
 	
 	/** Tells the size of a feature panel*/
 	public Dimension getFeatureSize(){
@@ -4341,12 +4341,15 @@ public class EditorView extends JFrame implements Observer{
 	}
 	
 	/** 
-	 * Loads a project file.
+	 * Prompts a file dialog and asks the user to slect a diagram file.
+	 * 
+	 * @param message - the message to be shown to the user
+	 * @param pathProject - the starting directory of the file dialog
 	 * 
 	 * @return s - the selected project file path 
 	 */
-	public String loadXMLDialog(String pathProject){
-		FileDialog d = new FileDialog(new JFrame("Load File"));
+	public String loadXMLDialog(String message, String pathProject){
+		FileDialog d = new FileDialog(new JFrame("message"));
     	d.setMode(FileDialog.LOAD);
 //    	d.setFilenameFilter(new FilterFileProject());
 	    d.setResizable(true);

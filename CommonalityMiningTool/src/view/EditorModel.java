@@ -75,8 +75,8 @@ public class EditorModel extends Observable{
 	/** enumeration used to specify a group type in the model*/
 	public static enum ConstraintTypes { INCLUDES, EXCLUDES};
 	
-	/** Tells if the model has been modified after last save*/
-	private boolean modified=true;
+//	/** Tells if the model has been modified after last save*/
+//	private boolean modified=true;
 
 	/** root feature of the feature model*/
 	private FeatureNode featureRoot = null;
@@ -908,15 +908,15 @@ public class EditorModel extends Observable{
 	  return false;	
 	}
 
-	/** Tells if the model has been modified since last save*/
-	public boolean getModified(){
-		return modified;
-	}
-
-	/** Sets the model of the modified field*/
-	public void setModified(boolean mod){
-		modified=mod;
-	}
+//	/** Tells if the model has been modified since last save*/
+//	public boolean getModified(){
+//		return modified;
+//	}
+//
+//	/** Sets the model of the modified field*/
+//	public void setModified(boolean mod){
+//		modified=mod;
+//	}
 
 	/**
 	 * Saves the elements of the feature model on file.

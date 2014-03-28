@@ -58,14 +58,14 @@ public class EditorController implements
 	private static boolean debug4=false;
 	private static boolean debug5=false;
 		
-	/** Suffix of the path where general loadable diagram files will be saved*/
-	private static String saveFilesSubPath="saved diagrams"; 
-	
-	/** Suffix of the path where SXFM exported files will be saved*/
-	private static String sxfmSubPath="_SXFM"; 
-	
-	/** Suffix of the path where SXFM exported files will be saved*/
-	private static String imagesSubPath="_IMAGES"; 
+//	/** Suffix of the path where general loadable diagram files will be saved*/
+//	private static String saveFilesSubPath="saved diagrams"; 
+//	
+//	/** Suffix of the path where SXFM exported files will be saved*/
+//	private static String sxfmSubPath="_SXFM"; 
+//	
+//	/** Suffix of the path where SXFM exported files will be saved*/
+//	private static String imagesSubPath="_IMAGES"; 
 
 	/** Path where diagram files will be saved*/
 	private String diagramPath = null;		
@@ -88,6 +88,9 @@ public class EditorController implements
 
 	/** A logic grid, used to place features in the diagram when the view is automatically created from a model*/
 	boolean[][] logicGrid=null;
+
+	/** Tells if something has been modified after last save*/
+	private boolean modified=false;
 
 	
 	/** Costruttore
@@ -223,13 +226,6 @@ public class EditorController implements
           editorView.setPopUpElement((JComponent)comp);
           popupElement=editorView.getPopUpElement();
 		  System.out.println("clicked! popupElement: "+popupElement.getName());
-
-          //        	popUpElement=getUnderlyingComponent(e.getX(), e.getY());
-
-//          if(popupElement.getName().startsWith(EditorView.startConnectorsNamePrefix)
-//        		  || popupElement.getName().startsWith(EditorView.endConnectorsNamePrefix)){
-//        	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemDelete());
-//          }
 
           //clicked on a start connector dot
           if(popupElement.getName().startsWith(EditorView.startMandatoryNamePrefix)
@@ -549,6 +545,9 @@ public class EditorController implements
 			}
 			/* ***DEBUG*** */
 
+			//updating the modified field
+			if(editorView.getActiveItem()!=activeItems.NO_ACTIVE_ITEM) modified=true;
+ 			
 			return;
 		  }
 		  tmpNode=tmpNode.getNext();
@@ -667,7 +666,8 @@ public class EditorController implements
 	    }
 
 	  //event originated from the toolbar
-	  else 
+	  else{
+		modified=true;		  
 		switch(editorView.getActiveItem()){
 	      case DRAGGING_TOOL_NEWFEATURE:
 	    	  addNewFeature(e);
@@ -705,6 +705,7 @@ public class EditorController implements
 	    	  editorView.setToolDragImage(null); break;
 	      default: break;
 		}
+	  }
 	}
 
 	@Override
@@ -834,6 +835,9 @@ public class EditorController implements
           editorView.repaintRootFrame();
         }
         editorView.setPopUpElement(null);
+        
+        //updating the modified field
+        modified=true;
       }
 	  //popup menu command: Rename Feature
       else if(e.getActionCommand().equals("Rename Feature")){
@@ -853,6 +857,8 @@ public class EditorController implements
         ((FeaturePanel)popupElement).getTextArea().setEditable(true);
         ((FeaturePanel)popupElement).getTextArea().getCaret().setVisible(true);
         
+        //updating the modified field
+        modified=true;
       }
 	  //popup menu command: Change Color
       else if(e.getActionCommand().equals("Change Color")){    
@@ -860,6 +866,9 @@ public class EditorController implements
         color = JColorChooser.showDialog(null, "Choose Color", color);  
         if (color==null) return;
         else ((FeaturePanel)popupElement).setBackground(color);        
+
+        //updating the modified field
+        modified=true;
       }
 	  //popup menu command: Search Feature
       else if(e.getActionCommand().equals("Search Feature")){    	 
@@ -888,12 +897,21 @@ public class EditorController implements
         System.out.println("Other end: "+((AnchorPanel)popupElement).getOtherEnd().getName());
     	editorView.ungroupAnchor((AnchorPanel)popupElement);
         editorView.repaintRootFrame();
+
+        //updating the modified field
+        modified=true;
       }
       else if(e.getActionCommand().equals("Show Control Point")){
     	editorView.showControlPoint((ConstraintPanel)popupElement);
+
+        //updating the modified field
+        modified=true;
       }
       else if(e.getActionCommand().equals("Hide Control Point")){
       	editorView.hideControlPoint(popupElement);    	  
+
+        //updating the modified field
+        modified=true;
       }
 	  //popup menu command: Print Model[DEBUG COMMAND]
       else if(e.getActionCommand().equals("Print Model[DEBUG COMMAND]")){
@@ -925,39 +943,15 @@ public class EditorController implements
 	  //commands from editor menu bar
 	  //menuFiles command: Save Diagram
       else if(e.getActionCommand().equals("Save Diagram")){
-  		String s = null;			
-  		if((s = editorView.assignNameDiagramDialog()) != null){
-  		  diagDataPath=editorView.saveDiagram(diagramPath, s);
-  		  modelDataPaths=editorModel.saveModel(diagramPath, s);
-  		  if(diagDataPath==null || modelDataPaths==null) 
-  			editorView.errorDialog("Error during save.");
-  		  else try{
-  			//checking if the diagrams save directory must be created
-			File dir=new File(CMTConstants.saveDiagramDir);
-//			File dir=new File(diagramPath+"/"+saveFilesSubPath);
-  			
-			if(!dir.isDirectory() && !dir.mkdirs() ) 
-  			  throw new IOException("Save Directory can't be created.");
-  				
-  			PrintWriter pw1 = new PrintWriter(new BufferedWriter(
-  					new FileWriter(CMTConstants.saveDiagramDir+"/"+s) ));
-//  				new FileWriter(diagramPath+"/"+saveFilesSubPath+"/"+s) ));
-  			
-  			//printing general save data in the file
-  			pw1.println(projectName);
-  			pw1.println(diagDataPath);
-  			for(String path : modelDataPaths) pw1.println(path);
-  			pw1.close();  	
-  			editorView.setModified(false);
-  			editorModel.setModified(false);
-  		  }catch (IOException ex){
-  			System.out.println("Exception saveDiagram: " + ex.getMessage());
-  			ex.printStackTrace();
-  		  }
-  		}    	  
+  		saveDiagram();    	  
       }
 	  //menuFiles command: New Diagram
       else if(e.getActionCommand().equals("New Diagram")){
+    	
+    	//asking the user if the current diagram must be saved
+    	if(modified) saveDiagram();
+    	modified=false;    	  
+    	  
     	//creating model
   		editorModel= new EditorModel();
 
@@ -991,14 +985,16 @@ public class EditorController implements
   		String diagramDataPath=null;
   		ArrayList<String> featureModelDataPaths=new ArrayList<String>();
   		String projectName=null;
-  		
-  		//getting diagrams save path
-  		projectName = null;
+
+  		//asking the user if the current diagram must be saved
+    	if(modified) saveDiagram();
+    	modified=false;    	  
+
   		//loading general diagram save file
   		String loadDirectory=CMTConstants.saveDiagramDir;
   		
   		String s = null;
-  		if((s = editorView.loadXMLDialog(loadDirectory)) != null) try{
+  		if((s = editorView.loadXMLDialog("Load Diagram", loadDirectory)) != null) try{
   		  BufferedReader br1 = new BufferedReader(new FileReader(s));
   		  projectName=br1.readLine();
   		  diagramDataPath=br1.readLine();
@@ -1056,8 +1052,12 @@ public class EditorController implements
 	  //menuFiles command: Import from SXFM
       else if(e.getActionCommand().equals("Import from SXFM")){
 
+    	//asking the user if the current diagram must be saved
+      	if(modified) saveDiagram();
+      	modified=false;    	  
+
   		String s = null;
-  		if((s = editorView.loadXMLDialog(CMTConstants.saveDiagramDir+"/..")) == null) return;
+  		if((s = editorView.loadXMLDialog("Import from SXFM", CMTConstants.saveDiagramDir+"/..")) == null) return;
     	
     	//creating model
     	try{
@@ -1093,7 +1093,10 @@ public class EditorController implements
   		createViewFromModel();
 
   		//disposing of old frame
-  		currentView.dispose();    	  
+  		currentView.dispose();    	
+
+        //updating the modified field
+        modified=true;
       }
 	  //menuFiles command: Export as SXFM
       else if(e.getActionCommand().equals("Export as SXFM")){
@@ -1129,36 +1132,129 @@ public class EditorController implements
       }
 	  //menuFiles command: Delete Diagram
       else if(e.getActionCommand().equals("Delete Diagram")){
-    	  
+        String s1=null;		
+        String diagramDataPath=null;
+        ArrayList<String> featureModelDataPaths=new ArrayList<String>();
+        String projectName=null;
+        File tmpFile=null;
+
+        //loading general diagram save file
+        String loadDirectory=CMTConstants.saveDiagramDir;
+
+        String s = null;
+        if((s = editorView.loadXMLDialog("Delete Diagram", loadDirectory)) != null) try{
+          BufferedReader br1 = new BufferedReader(new FileReader(s));
+          projectName=br1.readLine();
+          diagramDataPath=br1.readLine();
+          while( (s1 = br1.readLine()) != null ) featureModelDataPaths.add(s1);
+          br1.close();
+        }catch (Exception ex) {
+          editorView.errorDialog("Error while reading general save file");
+          ex.printStackTrace();
+          return;
+        }    	  
+  		else return;
+
+        //deleting diagram data file
+        tmpFile=new File(diagramDataPath);
+        if (tmpFile.exists()){
+          System.out.println("diagramDataPath="+diagramDataPath+" - file exists");
+          tmpFile.delete();
+        }        
+        
+        //deleting all feature model data files
+        for(int i=0; i< featureModelDataPaths.size(); ++i){
+          tmpFile=new File(featureModelDataPaths.get(i));
+          if (tmpFile.exists()){
+        	System.out.println("featureModelDataPaths.get(i)="+featureModelDataPaths.get(i)+" - file exists");
+        	tmpFile.delete();
+          }        	
+        }
+
+        //deleting general save file
+        tmpFile=new File(s);
+        if (tmpFile.exists()){
+          System.out.println("general save file="+tmpFile.getPath()+" - file exists");
+          tmpFile.delete();
+        }        	
+        
+        //deleting save directory if empty
+        tmpFile=new File(CMTConstants.saveDiagramDir+"/"+projectName);
+        if (tmpFile.exists() && tmpFile.isDirectory()){
+      	  System.out.println(tmpFile.getPath()+" folder exists");      	  
+      	  tmpFile.delete();//the directory will be deleted only if empty
+        }        	
+      
       }
 	  //menuFiles command: Exit
       else if(e.getActionCommand().equals("Exit")){
-    	  
+      	//asking the user if the current diagram must be saved
+      	if(modified) saveDiagram();
+
+      	editorView.dispose();
+      	editorView=null;
+      	editorModel=null;
       }
       //menuView command: View Commonality/Variability
       else if(e.getActionCommand().equals("View Commonality/Variability")){
     	if( ((JCheckBoxMenuItem)editorView.getMenuViewCommsOrVars()).isSelected() )
     	  editorView.viewCommVarsDistinction(true);
     	else editorView.viewCommVarsDistinction(false);
-
       }
-
-
+      
 	}
 
-
 	/**
-	 * Recursively print the feature model rooted in feature, indenting the lower levels.
-	 * 
-	 * @param indent - String printed before the name of root element, for the lower leves <br>
-	 * it will be printed a number of times equals to 1+depth.
+	 * Prompts a file dialog, asking the user to choose a save file, then tries to save the model and the view.
 	 */
-	private void treePrint(FeatureNode feature, String indent) {
-		System.out.println(indent+feature.getName()+"("+feature.getID()+")");
-		for(FeatureNode child : feature.getSubFeatures()) treePrint(child, indent+">");
-		for(GroupNode group : feature.getSubGroups()) 
-		  for(FeatureNode member : group.getMembers()) 
-		  treePrint(member, indent+"|"); 
+	private void saveDiagram() {
+	  String diagDataPath = null;
+	  ArrayList<String> modelDataPaths = null;
+	  String s = null;			
+	  boolean viewCommsOrVarsWasSelected=false;
+	  if((s = editorView.assignNameDiagramDialog()) != null){
+		diagDataPath=editorView.saveDiagram(diagramPath, s);
+		modelDataPaths=editorModel.saveModel(diagramPath, s);
+		if(diagDataPath==null || modelDataPaths==null) 
+		  editorView.errorDialog("Error during save.");
+		else try{
+			
+		  //temporary deactivating visual styles before save
+		  if( ((JCheckBoxMenuItem)editorView.getMenuViewCommsOrVars()).isSelected() ){
+			((JCheckBoxMenuItem)editorView.getMenuViewCommsOrVars()).setSelected(false);
+			editorView.viewCommVarsDistinction(false);
+			viewCommsOrVarsWasSelected=true;
+		  }
+			
+		  //checking if the diagrams save directory must be created
+		  File dir=new File(CMTConstants.saveDiagramDir);
+		  if(!dir.isDirectory() && !dir.mkdirs() ) 
+			throw new IOException("Save Directory can't be created.");
+
+		  PrintWriter pw1 = new PrintWriter(new BufferedWriter(
+			new FileWriter(CMTConstants.saveDiagramDir+"/"+s) ));
+
+		  //printing general save data in the file
+		  pw1.println(projectName);
+		  pw1.println(diagDataPath);
+		  for(String path : modelDataPaths) pw1.println(path);
+		  pw1.close();  
+		  
+		  //reactivating visual styles after save
+		  if(viewCommsOrVarsWasSelected){
+			((JCheckBoxMenuItem)editorView.getMenuViewCommsOrVars()).setSelected(true);
+			editorView.viewCommVarsDistinction(true);
+		  }
+
+		  //updating the modified field
+		  modified=false;
+		  //  			editorView.setModified(false);
+		  //  			editorModel.setModified(false);
+		}catch (IOException ex){
+		  System.out.println("Exception saveDiagram: " + ex.getMessage());
+		  ex.printStackTrace();
+		}
+	  }
 	}
 
 	/**
