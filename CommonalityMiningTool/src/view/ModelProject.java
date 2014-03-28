@@ -6,7 +6,9 @@
 package view;
 
 import java.awt.Color;
+
 import main.CMTConstants;
+
 import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -530,13 +532,14 @@ public class ModelProject extends Observable implements Runnable{
 	  Entry<String, Integer> arityEntry = null;
 	  Iterator<Entry<String, HashMap<String, ArrayList<int[]>>>> termsIterator = null;
 	  Entry<String, HashMap<String, ArrayList<int[]>>> termsEntry = null;
-	  ArrayList<int[]> leaderOccurrences=null, termOccurrences=null;
+	  ArrayList<int[]> /*leaderOccurrences=null,*/ termOccurrences=null;
 	  int[][] colors = null;
 	  int[][] leadersBoundaries=null;
 	  int[] tmpArr = null, leaderStartOffset=null, currentMinDistances=null;
 	  int[] tiers=null;
 	  ArrayList<String> groupLeaders=null;
 	  String termName=null, fileName=null;
+	  @SuppressWarnings("rawtypes")
 	  ArrayList[] clusters = null;
 	  int n=0, tierIndex=0, p=0;
 	  int computedDistance=0;
@@ -545,7 +548,12 @@ public class ModelProject extends Observable implements Runnable{
 	  ArrayList<Entry<String, Double>> termFileCoverage = null;
 	  ArrayList<Entry<String, Double>>[] tiersFileCoverage = null;
 	  double maxCoverage=0;
-	  Random gen=null;
+	  boolean termFound = false;
+	  int[] tiersInSentencesWithTermCount = null;
+	  boolean[] tiersInSentencesWithTermFound = null;
+	  int maxSentences=0, prevMaxSentences=0;
+	  int maxIndex=0, prevMaxIndex=0;		  
+//	  Random gen=null;
 	  
 	  ArrayList<Entry<String, Integer>> entryList = new ArrayList<Entry<String,Integer>>();	
 	  ArrayList<Entry<String, int[]>> allTermsOccurrences = new ArrayList<Entry<String,int[]>>();
@@ -756,9 +764,61 @@ public class ModelProject extends Observable implements Runnable{
 		else{//there are tier leaders
 			
 		  System.out.println("********GOT A LEADER TIE!!!!********");
+		  
+		  //first tie-breaker system		  
+		  //initializing arrays to compute in how many sentences the current term appears together with a leader:
+		  termFound = false;
+		  if(tiersInSentencesWithTermCount == null) tiersInSentencesWithTermCount = new int[groupLeaders.size()];
+		  for(int k=0; k<tiersInSentencesWithTermCount.length; ++k) tiersInSentencesWithTermCount[k]=0;
+		  if(tiersInSentencesWithTermFound == null) tiersInSentencesWithTermFound = new boolean[groupLeaders.size()];
+		  for(int k=0; k<tiersInSentencesWithTermFound.length; ++k) tiersInSentencesWithTermFound[k]=false;
 
+		  for(ArrayList<String> sentence : termsInSentencesSet){
+			for(String term : sentence){	
+//			  for(int i=0; i<groupLeaders.size(); ++i)
+			  for(int i=0; i<currentMinDistances.length && currentMinDistances[i]>=0; ++i)
+				if(term.compareTo(groupLeaders.get(currentMinDistances[i]))==0)
+				  tiersInSentencesWithTermFound[currentMinDistances[i]]=true;
+//			    if(term.compareTo(groupLeaders.get(i))==0) tiersInSentencesWithTermFound[i]=true;
+			
+			  if(term.compareTo(distEntry.getKey())==0) termFound=true;
+			}
+			
+	    	/* ***DEBUG*** */
+	    	System.out.println("Analyzed a sentence:\nTermFound="+termFound);
+	    	for(int o=0; o<tiersInSentencesWithTermFound.length; ++o)
+	    	  System.out.println("tiersInSentencesWithTermFound["+o+": ]"+tiersInSentencesWithTermFound[o]);
+	    	/* ***DEBUG*** */
+	    	
+			if(termFound) for(int k=0; k<tiersInSentencesWithTermFound.length; ++k)
+			  if(tiersInSentencesWithTermFound[k]) ++tiersInSentencesWithTermCount[k];
+			  
+		  }
+
+		  /* ***DEBUG*** */
+		  System.out.println("ALL SENTENCES ANALYZED RESPECT TO TERM "+distEntry.getKey());
+		  for(int o=0; o<tiersInSentencesWithTermCount.length; ++o)
+			System.out.println("tiersInSentencesWithTermCount["+o+": ]"+tiersInSentencesWithTermCount[o]);
+		  /* ***DEBUG*** */
+		  
+		  maxSentences=0; prevMaxSentences=0;
+		  maxIndex=0; prevMaxIndex=0;
+		  //checking which tier appears together with current term in most sentences
+		  for(int k=0; k<tiersInSentencesWithTermCount.length; ++k){
+			if(tiersInSentencesWithTermCount[k]>=maxSentences){
+			  prevMaxSentences=maxSentences; maxSentences=tiersInSentencesWithTermCount[k];
+			  prevMaxIndex=maxIndex; maxIndex=k;
+			}
+		  }
+		  
+		  if(maxSentences!=prevMaxSentences && maxSentences>0){//no more tier leaders, adding term to a cluster
+			((ArrayList<String>)clusters[maxIndex]).add(distEntry.getKey());
+			continue;//go work on next term to add to a cluster
+		  }
+		  
+		  //second tie-breaker system		  
 		  //initializing arrays to compute coverages, where the coverage of a term is:
-		  //(numer of sentences in which a term appears in a file/number of sentences in that file)			
+		  //(number of sentences in which a term appears in a file/number of sentences in that file)			
 		  if(termFileCoverage==null) termFileCoverage = new ArrayList<Entry<String,Double>>();
 		  else termFileCoverage.clear();
 		  
@@ -771,23 +831,45 @@ public class ModelProject extends Observable implements Runnable{
 	      for(ModelFile modelFile : filesProject)
 	    	if(modelFile.getTermsAriety().get(distEntry.getKey())!=null)
 	    	  termFileCoverage.add(
-	    		new AbstractMap.SimpleEntry<String, Double>( distEntry.getKey(), 
+	    		new AbstractMap.SimpleEntry<String, Double>( modelFile.readPathFileUTF8(), 
 	    		(double)modelFile.getTermsAriety().get(distEntry.getKey())/(double)modelFile.getTermsInSentencesSet().size() ) );	      
 	      
 	      //computing coverages for tier leaders for all files
 	      for(int i=0; i<tiersFileCoverage.length; ++i)
 	    	if(tiersFileCoverage[i]!=null) for(ModelFile modelFile : filesProject)
 	    	  tiersFileCoverage[i].add(
-	    		new AbstractMap.SimpleEntry<String, Double>( groupLeaders.get(i), 
+	    		new AbstractMap.SimpleEntry<String, Double>( modelFile.readPathFileUTF8(), 
 	    		(double)modelFile.getTermsAriety().get(groupLeaders.get(i))/(double)modelFile.getTermsInSentencesSet().size() ) );
-	    				
+	    	
+	    	/* ***DEBUG*** */
+	    	System.out.println("TiersFileCoverage before ordering");
+	    	for(int o=0; o<tiersFileCoverage.length; ++o) {
+	    	  ArrayList<Entry<String, Double>> tmp = tiersFileCoverage[o];
+	    	  if(tmp!=null) for (Entry<String, Double> ent : tmp)
+	    		System.out.println("leader "+o+" - file "+ent.getKey()+" - coverage="+ent.getValue());
+	    	  else System.out.println("leader "+o+" is null.");	    		
+	    	}
+	    	/* ***DEBUG*** */
+
 	      //ordering coverages by highest to lowest
 	      SortUtils.recQuickSortEntryListByDoubleVal(termFileCoverage, 0, termFileCoverage.size()-1);
-	      for(int i=0; i<tiersFileCoverage.length; ++i) if(tiersFileCoverage[i]!=null)
-	    	SortUtils.recQuickSortEntryListByDoubleVal(tiersFileCoverage[i], 0, tiersFileCoverage[i].size()-1);
+//	      for(int i=0; i<tiersFileCoverage.length; ++i) if(tiersFileCoverage[i]!=null)
+//	    	SortUtils.recQuickSortEntryListByDoubleVal(tiersFileCoverage[i], 0, tiersFileCoverage[i].size()-1);
 	      
+	    	/* ***DEBUG*** */
+	    	System.out.println("TiersFileCoverage after ordering");
+	    	for(int o=0; o<tiersFileCoverage.length; ++o) {
+	    	  ArrayList<Entry<String, Double>> tmp = tiersFileCoverage[o];
+	    	  if(tmp!=null) for (Entry<String, Double> ent : tmp)
+	    		System.out.println("leader "+o+" - file "+ent.getKey()+" - coverage="+ent.getValue());
+	    	  else System.out.println("leader "+o+" is null.");	    		
+	    	}
+	    	/* ***DEBUG*** */
+
 	      //adding term to the tier leader with the highest coverage in the same file in which term has the highest coverage
 	      tiers = new int[groupLeaders.size()];
+	      for(int l=0; l<tiers.length; ++l) tiers[l]=-1;
+
 	      for(p=0; p<termFileCoverage.size(); ++p){
 	    	fileName=termFileCoverage.get(p).getKey();
 	    	
@@ -806,8 +888,27 @@ public class ModelProject extends Observable implements Runnable{
 	    		}
 	    	}
 	    	
+	    	/* ***DEBUG*** */
+	    	System.out.println("Tiers for term '"+distEntry.getKey()+"' and file '"+fileName+"'");
+	    	for(int l=0; l<tiers.length; ++l) System.out.println("tiers["+l+"]: "+tiers[l]);
+	    	System.out.println("MaxCoverage="+maxCoverage);
+	    	System.out.println("TermFileCoverage:");
+	    	for(Entry<String, Double> tmp : termFileCoverage)
+	    	  System.out.println("File "+tmp.getKey()+" - Coverage "+tmp.getValue());
+	    	System.out.println("TiersFileCoverage:");
+	    	for(int o=0; o<tiersFileCoverage.length; ++o) {
+	    	  ArrayList<Entry<String, Double>> tmp = tiersFileCoverage[o];
+	    	  if(tmp!=null) for (Entry<String, Double> ent : tmp)
+	    		System.out.println("leader "+o+" - file "+ent.getKey()+" - coverage="+ent.getValue());
+	    	  else System.out.println("leader "+o+" is null.");	    		
+	    	}
+	    	/* ***DEBUG*** */
+	    	
+
+	    	
 			if(tiers[1]<0){//tiers[0] wins, adding term to its cluster
 			  ((ArrayList<String>)clusters[tiers[0]]).add(distEntry.getKey());
+			  System.out.println("Tie won by: "+tiers[0]+"!");
 			  break;
 			}
 			else{//there is a tie on coverages too, comparing coverages of next file for remaining tiers
@@ -819,12 +920,17 @@ public class ModelProject extends Observable implements Runnable{
 
 	      }
 	      if(p==termFileCoverage.size()){//coverages for all files checked, there is still a tie
-	    	p=0;
-	    	for(int index : tiers) if(index>=0) ++p;
-	    	gen = new Random(); tierIndex=gen.nextInt(1024)%p;
+
+//	    	//adding term to a randomly chosen cluster among remaining tiers
+//	    	p=0;
+//	    	for(int index : tiers) if(index>=0) ++p;
+//	    	gen = new Random(); tierIndex=gen.nextInt(1024)%p;
+//
+//	    	((ArrayList<String>)clusters[tiers[tierIndex]]).add(distEntry.getKey());
 	    	
-	    	//adding term to a randomly chosen cluster among remaining tiers
-	    	((ArrayList<String>)clusters[tiers[tierIndex]]).add(distEntry.getKey());
+	    	//adding term to the first tier's cluster among remaining tiers
+	    	((ArrayList<String>)clusters[tiers[0]]).add(distEntry.getKey());
+	    	
 	      }
 		}
 		
@@ -2031,11 +2137,8 @@ public class ModelProject extends Observable implements Runnable{
 			for(int i = 0; i < parserXML.readPathInput().size(); i++){	
 				modelFileTmp=new ModelFile(parserXML.readPathInput().get(i), pathProject);
 				filesProject.add(modelFileTmp);
-				modelFileTmp.filterFile();
-				
-				workerProject.add(
-						new Thread(
-								filesProject.get(i)));
+				modelFileTmp.filterFile();				
+				workerProject.add(new Thread(filesProject.get(i)));
 			}	
 			
 			commonalitiesCandidates = new ArrayList <String> ();
