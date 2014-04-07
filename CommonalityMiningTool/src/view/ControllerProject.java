@@ -63,7 +63,7 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 			if (verbose) System.out.println("apro il LateralPanel con s="+s);
 			/* ***VERBOSE****/
 
-			viewProject.loadPanelLateral(s, null);
+			viewProject.loadPanelLateral(s, null, this, true);
 		  }
 		}
 	  }	
@@ -73,8 +73,7 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 	  else if(ae.getActionCommand().equals("Load Project")){
 		String s = null;
 		if((s = viewProject.loadProjectDialog()) != null)
-			viewProject.loadPanelLateral(
-				s.substring(0, s.length() - 4), modelProject.loadProject(s));
+		  viewProject.loadPanelLateral(s.substring(0, s.length() - 4), modelProject.loadProject(s), this, false);
 	  }
 	  else if(ae.getActionCommand().equals("Save Project")){
 		  modelProject.saveProject();
@@ -125,7 +124,6 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 			viewProject.extractVariabilitiesDialog();
 	  }
 	  else if(ae.getActionCommand().equals("Select Commonalities")){
-//		  System.out.println("Son io! Select Commonalities");
 			viewProject.showFeaturesSelected(ViewPanelCentral.FeatureType.COMMONALITIES);
 	  }
 	  else if(ae.getActionCommand().equals("Select Variabilities")){

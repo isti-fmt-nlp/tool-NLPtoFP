@@ -22,7 +22,6 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
 
 public class ModelParserUTF8{
-	private static boolean verbose=false;//variable used to activate prints in the code
 
 	/* Stringa contenente il percorso del file */
 	private String pathFile = null;
@@ -218,48 +217,4 @@ public class ModelParserUTF8{
 	  return s;
 	}
 	
-	/** Pulisce il contenuto del file
-	 * 
-	 * @param s stringa da pulire
-	 * 
-	 * @return s stringa pulita
-	 */
-	private String cleanString(String s)
-	{
-		Matcher m = null;
-
-        Pattern p0 = Pattern.compile("-\\s");
-        Pattern p1 = Pattern.compile("(http|www)[a-zA-Z0-9\\-\\.\\_\\?\\!\\&\\:\\/\\%\\-\\+\\=]+");
-        Pattern p2 = Pattern.compile("http[a-zA-Z0-9\\-\\.\\_\\?\\!\\&\\:\\/\\%\\s\\-\\=]+\\s");
-        Pattern p3 = Pattern.compile("[^a-zA-Z0-9\\-\\.\\_\\-\\,\\;\\?\\!\\s\\(\\)\\:\\/\\%]");
-        Pattern p4 = Pattern.compile("(\\..)[\\.]+");
-        Pattern p5 = Pattern.compile("\\.[\\s]+");
-        Pattern p6 = Pattern.compile("\\s[\\s]+");
-        
-        /* Elimina i '-' alla fine di ogni riga */
-        m = p0.matcher(s);
-        s = m.replaceAll("");
-        /* Sostituisce i siti (www || http) con spazi bianchi */
-        m = p1.matcher(s);
-        s = m.replaceAll(" ");
-        /* Sostituisce i siti http aventi il riferimento alla pagine web con spazio bianchi */
-        m = p2.matcher(s);
-       	s = m.replaceAll(" ");
-        /* Sostituisce i caratteri speciali con spazio bianco */
-        m = p3.matcher(s);
-        s = m.replaceAll(" ");
-        /* Sostituisce la sequenza consecutiva di puntini > 3 con spazio bianco */
-        m = p4.matcher(s);
-        s = m.replaceAll(" ");
-        /* Elimina tutti i break line */
-        s = s.replaceAll("\n", " ");
-        /* Inserisce dopo i '.' i break line */
-        m = p5.matcher(s);
-        s = m.replaceAll(".\n");
-        /* Sostituisce la sequenza di spazi bianchi > 2 con un solo spazio bianco */
-        m = p6.matcher(s);
-        s = m.replaceAll(" ");
-        
-		return s;
-	}
 }

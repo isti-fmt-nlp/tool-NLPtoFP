@@ -5,35 +5,25 @@
  */
 package view;
 
-import java.awt.Color;
 
 import main.CMTConstants;
 
 import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Observable;
-import java.util.Random;
-import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -53,21 +43,21 @@ public class ModelProject extends Observable implements Runnable{
 	
 	private static boolean verbose2=false;//variable used to activate prints in the code
 
-	private static boolean verbose3=false;//variable used to activate prints in the code
+//	private static boolean verbose3=false;//variable used to activate prints in the code
 
 	private static boolean verbose4=false;//variable used to activate prints in the code
 	
 	private static boolean verbose5=true;//variable used to activate prints in the code
 	
-	private static boolean debug=false;//variable used to activate debug prints in the code
-
-	private static boolean debug2=false;//variable used to activate debug prints in the code
+//	private static boolean debug=false;//variable used to activate debug prints in the code
+//
+//	private static boolean debug2=false;//variable used to activate debug prints in the code
 	
-	private static boolean debugColors=true;//variable used to activate debug prints in the code
+	private static boolean debugColors=false;//variable used to activate debug prints in the code
 	
 	
 //	private static final String savedProjectsDir = "Usage Tries";
-	private static final String savedProjectsDir = "Usage Tries/ANALISYS";
+//	private static final String savedProjectsDir = "Usage Tries/ANALISYS";
 	
 	/** String containing the project name*/
 	private String nameProject = null;
@@ -212,7 +202,7 @@ public class ModelProject extends Observable implements Runnable{
 
 		  iterTermsVersion = filesProject.get(k).readTermRelevant().entrySet().iterator();
 		  entryTermsVersion = null;
-		  while(iterTerms.hasNext()){
+		  while(iterTermsVersion.hasNext()){
 			entryTermsVersion=iterTermsVersion.next();
 			System.out.println("\nExtracted Term: "+entryTermsVersion.getKey());
 			for(String str : entryTermsVersion.getValue()) System.out.println("Version: "+str);
@@ -357,21 +347,6 @@ public class ModelProject extends Observable implements Runnable{
 
 	  //creating global structures needed to assign colors
 	  buildColorStructures();
-
-	  
-//	  Iterator<Entry<String, HashMap<String, ArrayList<Integer>>>> iter = relevantTerms.entrySet().iterator();
-//	  Entry<String, HashMap<String, ArrayList<Integer>>> entry=null;
-//	  Iterator<Entry<String, HashMap<String, ArrayList<Integer>>>> fileIter=null;
-//	  ArrayList<Integer> tmpList=null;
-//	  String tmpTerm=null;
-//	  System.out.println("\n*****printing terms in relevantTerms: ");
-//	  while(iter.hasNext()){
-//		entry=iter.next();
-//		tmpTerm=entry.getKey();
-////		tmpList=entry.getValue();
-//		System.out.println(tmpTerm);
-////		for(int i : tmpList) System.out.println(i);
-//	  }
 	  
 	  setChanged();
 	  notifyObservers("End Extract Commonalities");
@@ -462,20 +437,9 @@ public class ModelProject extends Observable implements Runnable{
 		if(relevantTermsVersions.get(termEntry.getKey())==null)
 		  relevantTermsVersions.put(termEntry.getKey(), new HashMap<String, ArrayList<String>>());
 			
-		relevantTermsVersions.get(termEntry.getKey()).put(fileName, termEntry.getValue());
-		
-//MAYBE BETTER
-//		if(relevantTermsVersions.get(termEntry.getKey()).get(fileName)==null)
-//			  relevantTermsVersions.get(termEntry.getKey()).put(fileName, new ArrayList<String>());
-			
+		relevantTermsVersions.get(termEntry.getKey()).put(fileName, termEntry.getValue());			
 	  }
 		
-//	  for(String[] elementToAdd : list){
-//		if(relevantTermsVersions.get(elementToAdd[0])==null)
-//		  relevantTermsVersions.put(elementToAdd[0], new HashMap<String, String>());
-//		  
-//		  relevantTermsVersions.get(elementToAdd[0]).put(fileName, elementToAdd[1]);
-//	  }
 	}
 
 	/**
@@ -501,7 +465,7 @@ public class ModelProject extends Observable implements Runnable{
 	  computeSetsAndArities();
 	  
 	  //analisys phase is still to be done
-	  if(termsInSentencesSet.size()==0) return;
+	  if(termsInSentencesSet.size()==0 || relevantTerms==null) return;
 	  
 	  /* ***DEBUG*** */
 	  if(debugColors){
@@ -570,7 +534,7 @@ public class ModelProject extends Observable implements Runnable{
 	  SortUtils.recQuickSortEntryListByIntVal(entryList, 0, entryList.size()-1);
 	  
 	  /* ***VERBOSE*** */
-	  for(int i=0; i<entryList.size(); ++i)
+	  if(debugColors) for(int i=0; i<entryList.size(); ++i)
 		System.out.println(i+") "+entryList.get(i).getKey()+" - "+entryList.get(i).getValue());
 	  /* ***VERBOSE*** */
 	  
@@ -586,7 +550,7 @@ public class ModelProject extends Observable implements Runnable{
 			groupLeaders.add(comm);
 
 			/* ***VERBOSE*** */
-			if(verbose5) System.out.println((k++)+") "+entryList.get(i).getKey()+" - "+entryList.get(i).getValue());
+			if(debugColors) System.out.println((k++)+") "+entryList.get(i).getKey()+" - "+entryList.get(i).getValue());
 			/* ***VERBOSE*** */
 
 			break;
@@ -614,11 +578,15 @@ public class ModelProject extends Observable implements Runnable{
 		//ordering the list by index position, the int at index 0 of entries values
 		SortUtils.recQuickSortOccurrences(allTermsOccurrences, 0, allTermsOccurrences.size()-1); 
 
-		System.out.println("PRINTING LIST:");
-		for(int m=0; m<allTermsOccurrences.size(); ++m){
-		  System.out.println("("+m+") "+allTermsOccurrences.get(m).getKey()+" * "
-				  +allTermsOccurrences.get(m).getValue()[0]+"-"+allTermsOccurrences.get(m).getValue()[1]);
+		/* ***DEBUG*** */
+		if(debugColors){
+		  System.out.println("PRINTING LIST:");
+		  for(int m=0; m<allTermsOccurrences.size(); ++m){
+			System.out.println("("+m+") "+allTermsOccurrences.get(m).getKey()+" * "
+				+allTermsOccurrences.get(m).getValue()[0]+"-"+allTermsOccurrences.get(m).getValue()[1]);
+		  }
 		}
+		/* ***DEBUG*** */
 
 		//initializing bottom boundaries of leaders, at index 0 in leadersBoundaries
 		for(int m=0; m<leadersBoundaries.length; ++m) leadersBoundaries[m][0]=-1;
@@ -631,10 +599,14 @@ public class ModelProject extends Observable implements Runnable{
 			}
 		}
 		
-		System.out.println("PRINTING STARTING BOUNDARIES:");
-		for(int m=0; m<leadersBoundaries.length; ++m){
-		  System.out.println("leader: "+groupLeaders.get(m)+" * "+leadersBoundaries[m][0]+"-"+leadersBoundaries[m][1]);
+		/* ***DEBUG*** */
+		if(debugColors){
+		  System.out.println("PRINTING STARTING BOUNDARIES:");
+		  for(int m=0; m<leadersBoundaries.length; ++m){
+			System.out.println("leader: "+groupLeaders.get(m)+" * "+leadersBoundaries[m][0]+"-"+leadersBoundaries[m][1]);
+		  }
 		}
+		/* ***DEBUG*** */
 		
 		
 		//calculating distances
@@ -652,7 +624,9 @@ public class ModelProject extends Observable implements Runnable{
 			
 			if(n==allTermsOccurrences.size()) leadersBoundaries[m][1]=-1;//there are no further occurrences
 
-			System.out.println("("+i+")FOUND UPPER BOUNDARY: "+termName+"\tNew Boundary: "+leadersBoundaries[m][1]);
+			/* ***DEBUG*** */
+			if(debugColors) System.out.println("("+i+")FOUND UPPER BOUNDARY: "+termName+"\tNew Boundary: "+leadersBoundaries[m][1]);
+			/* ***DEBUG*** */
 
 			termName=null; break;
 		  }		  
@@ -685,8 +659,12 @@ public class ModelProject extends Observable implements Runnable{
 			  if(tmpArr[0]>=leaderStartOffset[0] && tmpArr[0]<=leaderStartOffset[1]-1)
 				computedDistance=0;
 			  
-			  System.out.println("("+i+")FOUND TERM: "+termName+"\tTo Bottom Boundary: "+computedDistance
+			  /* ***DEBUG*** */
+			  if(debugColors){
+				  System.out.println("("+i+")FOUND TERM: "+termName+"\tTo Bottom Boundary: "+computedDistance
 					  +"\nBottom["+j+"][0]: "+leadersBoundaries[j][0]);
+			  }
+			  /* ***DEBUG*** */
 			  
 			}
 			else computedDistance=-1;
@@ -702,16 +680,25 @@ public class ModelProject extends Observable implements Runnable{
 			  if(leaderStartOffset[0]>=tmpArr[0] && leaderStartOffset[0]<=tmpArr[1]-1)
 				computedDistance=0;
 			  
-			  System.out.println("("+i+")FOUND TERM: "+termName+"\tTo Upper Boundary: "+computedDistance
-					  +"\nUpper["+j+"][1]: "+leadersBoundaries[j][1]);
+			  /* ***DEBUG*** */
+			  if(debugColors){
+				System.out.println("("+i+")FOUND TERM: "+termName+"\tTo Upper Boundary: "+computedDistance
+						+"\nUpper["+j+"][1]: "+leadersBoundaries[j][1]);
+			  }
+			  /* ***DEBUG*** */
 			}
 			
 			//updating minimum distance between term and leader, if necessary
 			if(computedDistance<currentMinDistances[j] || currentMinDistances[j]==-1){
-			  System.out.println("("+i+")UPDATING MINIMUM DISTANCE: "+termName
-				  +"\tOld["+j+"]: "+currentMinDistances[j]+"\tNew["+j+"]: "+computedDistance);
+
+			  /* ***DEBUG*** */
+			  if(debugColors){
+				System.out.println("("+i+")UPDATING MINIMUM DISTANCE: "+termName
+					+"\tOld["+j+"]: "+currentMinDistances[j]+"\tNew["+j+"]: "+computedDistance);
+			  }
+			  /* ***DEBUG*** */
 				
-				currentMinDistances[j]=computedDistance;
+			  currentMinDistances[j]=computedDistance;
 			}
 		  }
 		  
@@ -763,7 +750,7 @@ public class ModelProject extends Observable implements Runnable{
 		  ((ArrayList<String>)clusters[currentMinDistances[0]]).add(distEntry.getKey());
 		else{//there are tier leaders
 			
-		  System.out.println("********GOT A LEADER TIE!!!!********");
+		  if(debugColors) System.out.println("********GOT A LEADER TIE!!!!********");
 		  
 		  //first tie-breaker system		  
 		  //initializing arrays to compute in how many sentences the current term appears together with a leader:
@@ -785,20 +772,24 @@ public class ModelProject extends Observable implements Runnable{
 			}
 			
 	    	/* ***DEBUG*** */
-	    	System.out.println("Analyzed a sentence:\nTermFound="+termFound);
-	    	for(int o=0; o<tiersInSentencesWithTermFound.length; ++o)
-	    	  System.out.println("tiersInSentencesWithTermFound["+o+": ]"+tiersInSentencesWithTermFound[o]);
-	    	/* ***DEBUG*** */
-	    	
+			if(debugColors){
+			  System.out.println("Analyzed a sentence:\nTermFound="+termFound);
+			  for(int o=0; o<tiersInSentencesWithTermFound.length; ++o)
+				System.out.println("tiersInSentencesWithTermFound["+o+": ]"+tiersInSentencesWithTermFound[o]);
+			}
+			/* ***DEBUG*** */
+			
 			if(termFound) for(int k=0; k<tiersInSentencesWithTermFound.length; ++k)
 			  if(tiersInSentencesWithTermFound[k]) ++tiersInSentencesWithTermCount[k];
-			  
+			
 		  }
 
 		  /* ***DEBUG*** */
-		  System.out.println("ALL SENTENCES ANALYZED RESPECT TO TERM "+distEntry.getKey());
-		  for(int o=0; o<tiersInSentencesWithTermCount.length; ++o)
-			System.out.println("tiersInSentencesWithTermCount["+o+": ]"+tiersInSentencesWithTermCount[o]);
+		  if(debugColors){
+			System.out.println("ALL SENTENCES ANALYZED RESPECT TO TERM "+distEntry.getKey());
+			for(int o=0; o<tiersInSentencesWithTermCount.length; ++o)
+			  System.out.println("tiersInSentencesWithTermCount["+o+": ]"+tiersInSentencesWithTermCount[o]);
+		  }
 		  /* ***DEBUG*** */
 		  
 		  maxSentences=0; prevMaxSentences=0;
@@ -842,13 +833,15 @@ public class ModelProject extends Observable implements Runnable{
 	    		(double)modelFile.getTermsAriety().get(groupLeaders.get(i))/(double)modelFile.getTermsInSentencesSet().size() ) );
 	    	
 	    	/* ***DEBUG*** */
-	    	System.out.println("TiersFileCoverage before ordering");
-	    	for(int o=0; o<tiersFileCoverage.length; ++o) {
-	    	  ArrayList<Entry<String, Double>> tmp = tiersFileCoverage[o];
-	    	  if(tmp!=null) for (Entry<String, Double> ent : tmp)
-	    		System.out.println("leader "+o+" - file "+ent.getKey()+" - coverage="+ent.getValue());
-	    	  else System.out.println("leader "+o+" is null.");	    		
-	    	}
+	        if(debugColors){
+	          System.out.println("TiersFileCoverage before ordering");
+	          for(int o=0; o<tiersFileCoverage.length; ++o) {
+	        	ArrayList<Entry<String, Double>> tmp = tiersFileCoverage[o];
+	        	if(tmp!=null) for (Entry<String, Double> ent : tmp)
+	        	  System.out.println("leader "+o+" - file "+ent.getKey()+" - coverage="+ent.getValue());
+	        	else System.out.println("leader "+o+" is null.");	    		
+	          }
+	        }
 	    	/* ***DEBUG*** */
 
 	      //ordering coverages by highest to lowest
@@ -857,13 +850,15 @@ public class ModelProject extends Observable implements Runnable{
 //	    	SortUtils.recQuickSortEntryListByDoubleVal(tiersFileCoverage[i], 0, tiersFileCoverage[i].size()-1);
 	      
 	    	/* ***DEBUG*** */
-	    	System.out.println("TiersFileCoverage after ordering");
-	    	for(int o=0; o<tiersFileCoverage.length; ++o) {
-	    	  ArrayList<Entry<String, Double>> tmp = tiersFileCoverage[o];
-	    	  if(tmp!=null) for (Entry<String, Double> ent : tmp)
-	    		System.out.println("leader "+o+" - file "+ent.getKey()+" - coverage="+ent.getValue());
-	    	  else System.out.println("leader "+o+" is null.");	    		
-	    	}
+	      	if(debugColors){
+	      	  System.out.println("TiersFileCoverage after ordering");
+	      	  for(int o=0; o<tiersFileCoverage.length; ++o) {
+	      		ArrayList<Entry<String, Double>> tmp = tiersFileCoverage[o];
+	      		if(tmp!=null) for (Entry<String, Double> ent : tmp)
+	      		  System.out.println("leader "+o+" - file "+ent.getKey()+" - coverage="+ent.getValue());
+	      		else System.out.println("leader "+o+" is null.");	    		
+	      	  }
+	      	}
 	    	/* ***DEBUG*** */
 
 	      //adding term to the tier leader with the highest coverage in the same file in which term has the highest coverage
@@ -889,18 +884,20 @@ public class ModelProject extends Observable implements Runnable{
 	    	}
 	    	
 	    	/* ***DEBUG*** */
-	    	System.out.println("Tiers for term '"+distEntry.getKey()+"' and file '"+fileName+"'");
-	    	for(int l=0; l<tiers.length; ++l) System.out.println("tiers["+l+"]: "+tiers[l]);
-	    	System.out.println("MaxCoverage="+maxCoverage);
-	    	System.out.println("TermFileCoverage:");
-	    	for(Entry<String, Double> tmp : termFileCoverage)
-	    	  System.out.println("File "+tmp.getKey()+" - Coverage "+tmp.getValue());
-	    	System.out.println("TiersFileCoverage:");
-	    	for(int o=0; o<tiersFileCoverage.length; ++o) {
-	    	  ArrayList<Entry<String, Double>> tmp = tiersFileCoverage[o];
-	    	  if(tmp!=null) for (Entry<String, Double> ent : tmp)
-	    		System.out.println("leader "+o+" - file "+ent.getKey()+" - coverage="+ent.getValue());
-	    	  else System.out.println("leader "+o+" is null.");	    		
+	    	if(debugColors){
+	    	  System.out.println("Tiers for term '"+distEntry.getKey()+"' and file '"+fileName+"'");
+	    	  for(int l=0; l<tiers.length; ++l) System.out.println("tiers["+l+"]: "+tiers[l]);
+	    	  System.out.println("MaxCoverage="+maxCoverage);
+	    	  System.out.println("TermFileCoverage:");
+	    	  for(Entry<String, Double> tmp : termFileCoverage)
+	    		  System.out.println("File "+tmp.getKey()+" - Coverage "+tmp.getValue());
+	    	  System.out.println("TiersFileCoverage:");
+	    	  for(int o=0; o<tiersFileCoverage.length; ++o) {
+	    		  ArrayList<Entry<String, Double>> tmp = tiersFileCoverage[o];
+	    		  if(tmp!=null) for (Entry<String, Double> ent : tmp)
+	    			  System.out.println("leader "+o+" - file "+ent.getKey()+" - coverage="+ent.getValue());
+	    		  else System.out.println("leader "+o+" is null.");	    		
+	    	  }
 	    	}
 	    	/* ***DEBUG*** */
 	    	
@@ -908,7 +905,11 @@ public class ModelProject extends Observable implements Runnable{
 	    	
 			if(tiers[1]<0){//tiers[0] wins, adding term to its cluster
 			  ((ArrayList<String>)clusters[tiers[0]]).add(distEntry.getKey());
-			  System.out.println("Tie won by: "+tiers[0]+"!");
+
+			  /* ***DEBUG*** */
+			  if(debugColors) System.out.println("Tie won by: "+tiers[0]+"!");
+			  /* ***DEBUG*** */
+
 			  break;
 			}
 			else{//there is a tie on coverages too, comparing coverages of next file for remaining tiers
@@ -937,7 +938,7 @@ public class ModelProject extends Observable implements Runnable{
 	  }
 	  
 	  /* ****DEBUG*** */
-	  if(debugColors) for(ArrayList arr : clusters){
+	  if(debugColors) for(@SuppressWarnings("rawtypes") ArrayList arr : clusters){
 		System.out.println("---Cluster leader: "+arr.get(0));
 		for(String term : (ArrayList<String>)arr) System.out.println("-Term: "+term);
 	  }
@@ -1002,7 +1003,8 @@ public class ModelProject extends Observable implements Runnable{
 	 * and if present they're ignored.
 	 */
 	@SuppressWarnings("unchecked")
-	private void assignColorsDistanceGraduation(int[][] colors, ArrayList[] clusters, HashMap<String, int[]> distances) {
+	private void assignColorsDistanceGraduation(int[][] colors,
+			@SuppressWarnings("rawtypes") ArrayList[] clusters, HashMap<String, int[]> distances) {
 		double maxColorReduction=0.35;
 		double colorReductionUnit=0;
 		int maxDistance=0;
@@ -1024,8 +1026,11 @@ public class ModelProject extends Observable implements Runnable{
 		  
 		  //setting base color to the cluster leader
 		  termsColor.put(((ArrayList<String>)clusters[k]).get(0), baseColor);
-		  System.out.println("***Base Color for cluster '"+((ArrayList<String>)clusters[k]).get(0)
+
+		  /* ***DEBUG*** */
+		  if(debugColors) System.out.println("***Base Color for cluster '"+((ArrayList<String>)clusters[k]).get(0)
 				  			 +"' is: ("+baseColor[0]+"."+baseColor[1]+"."+baseColor[2]+")");
+		  /* ***DEBUG*** */
 
 		  //setting terms colors
 		  for(int j=1; j<((ArrayList<String>)clusters[k]).size(); ++j){
@@ -1372,33 +1377,19 @@ public class ModelProject extends Observable implements Runnable{
 		occurrLinesListTmp.add(posLength);
 	}
 
-	/** Crea il nuovo progetto
+	/** 
+	 * Creates the new project.
 	 * 
-	 * @param s stringa contenente il nome del progetto
+	 * @param s - String containing the0 project name
 	 * 
-	 * @return true se il progetto � stato creato correttamente
-	 * @return false se si � verificato un errore
+	 * @return true if the project has been correctly created, false otherwise
 	 */
-	public boolean createProject(String s)
-	{
+	public boolean createProject(String s){
 		filesProject = new ArrayList <ModelFile> ();
 		
 		workerProject = new ArrayList <Thread> ();
 		
 		nameProject = s;
-//		pathProject = "../"+savedProjectsDir+"/" + s;
-//		pathXML = pathProject + "/" + s + ".xml"; 
-//		pathCommonalitiesCandidates = pathProject + "/CommanalitiesC.log";
-//		pathCommonalitiesSelected = pathProject + "/CommanalitiesS.log";
-//		pathCommonalitiesSelectedHTML = pathProject + "/CommanalitiesS.html";
-//
-//		pathVariabilitiesCandidates = pathProject + "/VariabilitiesC.log";
-//		pathVariabilitiesSelected = pathProject + "/VariabilitiesS.log";
-//		pathVariabilitiesSelectedHTML = pathProject + "/VariabilitiesS.html";
-//		
-//		pathRelevantTerms = pathProject + "/RelevantTerms.log";
-//		
-//		pathTermsVersions = pathProject + "/TermsVersions.log";
 		
 		pathProject = CMTConstants.saveAnalisysDir+"/" + s;
 		pathXML = CMTConstants.saveAnalisysDir + "/" + s + ".xml"; 
@@ -1419,14 +1410,9 @@ public class ModelProject extends Observable implements Runnable{
 		
 		System.out.println("pathProject: "+pathProject+"\nnameProject: "+nameProject+"\npathXML: "+pathXML);
 		
-		if(new File(pathProject).mkdirs() == false)
-			return false;		
+		if(new File(pathProject).mkdirs() == false) return false;		
 		
-		else{
-//			stateProject[0] = true;
-//			stateProject[1] = true;
-			return true;
-		}
+		else return true;
 	}
 	
 	/**
@@ -1461,23 +1447,21 @@ public class ModelProject extends Observable implements Runnable{
 	  return al;
 	}
 	
-	/** Cancella il progetto
-	 * 
+	/** 		
+	 * Deletes the project.
 	 */
-	public void deleteProject()
-	{
-		File f1 = new File(pathProject);
-		
+	public void deleteProject(){
+		File f1 = new File(pathProject);		
 		File [] f2 = f1.listFiles();
 		
-		for(int i = 0; i < f2.length; i++)
-			f2[i].delete();
+		for(int i = 0; i < f2.length; i++) f2[i].delete();		
+		f1.delete();
 		
+		f1 = new File(pathXML);
 		f1.delete();
 		
 		stateProject[0] = false;
 		stateProject[1] = false;
-
 	}
 	
 	/**
@@ -1498,10 +1482,9 @@ public class ModelProject extends Observable implements Runnable{
 	
 	/**
 	 * Extract variabilities from relevant terms in the model files
-	 * 
 	 */
 	public void extractVariabilities(){
-	  variabilitiesCandidates= new ArrayList<String>();
+	  variabilitiesCandidates = new ArrayList<String>();
 	  
 	  Thread variabilitiesExtraction = new Thread(
 	    new Runnable() {
@@ -1513,11 +1496,6 @@ public class ModelProject extends Observable implements Runnable{
 		    //extracting variabilities candidates from first input File
 			  
 			for(int i = 0; i < filesProject.size(); i++){
-//				  for(int j = 0; j < filesProject.get(i).readTermRelevant().size(); j = j + 1){
-//			    if( !commonalitiesCandidates.contains(filesProject.get(i).readTermRelevant().get(j)[0]) &&
-//			    	!variabilitiesCandidates.contains(filesProject.get(i).readTermRelevant().get(j)[0]))
-//				  variabilitiesCandidates.add(filesProject.get(i).readTermRelevant().get(j)[0]);
-//			  }
 				
 			  iterTermsVersion = filesProject.get(i).readTermRelevant().entrySet().iterator();
 			  entryTermsVersion = null;
@@ -1819,13 +1797,6 @@ public class ModelProject extends Observable implements Runnable{
 		if(green.length()==1) green="0"+green;
 		if(blue.length()==1) blue="0"+blue;
 		
-//		System.out.println("red is: "+red);
-//		System.out.println("green is: "+green);
-//		System.out.println("blue is: "+blue);
-
-//		return Integer.toHexString(color[0])
-//				   +Integer.toHexString(color[1])
-//				   +Integer.toHexString(color[2]);
 		return red+green+blue;
 	}
 
@@ -1848,10 +1819,10 @@ public class ModelProject extends Observable implements Runnable{
 	 * @return - true if s intersect the relevant terms sets of all files, false otherwise
 	 */	
 	private boolean intersectTermRelevant(String s){
-	  int j = 0;
+//	  int j = 0;
 	  boolean found=false;
 	  for(int i = 1; i < filesProject.size(); i++){
-		j=0;	
+//		j=0;	
 				
 		Iterator<Entry<String, ArrayList<String>>> iterTermsVersion =
 				filesProject.get(i).readTermRelevant().entrySet().iterator();
@@ -2097,22 +2068,7 @@ public class ModelProject extends Observable implements Runnable{
 			workerProject = new ArrayList <Thread> ();
 			
 			nameProject = s.substring(0, s.length() - 4);
-//			pathProject = "../"+savedProjectsDir+"/" + nameProject;
-//			pathXML = "../"+savedProjectsDir + "/" + s + ".xml"; 
-//			pathCommonalitiesCandidates = pathProject + "/CommanalitiesC.log";
-//			pathCommonalitiesSelected = pathProject + "/CommanalitiesS.log";
-//			pathCommonalitiesSelectedHTML = pathProject + "/CommanalitiesS.html";
-//
-//			pathVariabilitiesCandidates = pathProject + "/VariabilitiesC.log";
-//			pathVariabilitiesSelected = pathProject + "/VariabilitiesS.log";
-//			pathVariabilitiesSelectedHTML = pathProject + "/VariabilitiesS.html";
-//			
-//			pathRelevantTerms = pathProject + "/RelevantTerms.log";
-//			
-//			pathTermsVersions = pathProject + "/TermsVersions.log";
-			
-//			pathProject = CMTConstants.savedProjectsDir+"/" + s;
-//			pathXML = CMTConstants.savedProjectsDir + "/" + s + ".xml"; 
+
 			pathProject = CMTConstants.saveAnalisysDir+"/" + nameProject;
 			pathXML = CMTConstants.saveAnalisysDir + "/" + nameProject + ".xml"; 
 
@@ -2146,19 +2102,44 @@ public class ModelProject extends Observable implements Runnable{
 			variabilitiesCandidates = new ArrayList <String> ();
 			variabilitiesSelected = new ArrayList <String> ();
 			
-			loadFeaturesList(commonalitiesCandidates, pathCommonalitiesCandidates);
-			loadFeaturesList(commonalitiesSelected, pathCommonalitiesSelected);
-			loadFeaturesList(variabilitiesCandidates, pathVariabilitiesCandidates);
-			loadFeaturesList(variabilitiesSelected, pathVariabilitiesSelected);
+			try{
+			  loadFeaturesList(commonalitiesCandidates, pathCommonalitiesCandidates);
+			}catch(IOException e){ commonalitiesCandidates = null;}
+			try{
+			  loadFeaturesList(commonalitiesSelected, pathCommonalitiesSelected);
+			}catch(IOException e){ commonalitiesSelected = null;}
+			try{
+			  loadFeaturesList(variabilitiesCandidates, pathVariabilitiesCandidates);
+			}catch(IOException e){ variabilitiesCandidates = null;}
+			try{
+			  loadFeaturesList(variabilitiesSelected, pathVariabilitiesSelected);
+			}catch(IOException e){ variabilitiesSelected = null;}
 			
-			if(!loadProjectRelevantTerms()) System.out.println("Relevant terms files corrupted!");
-			loadProjectTermsVersions();
+			if(!loadProjectRelevantTerms()){
+			  relevantTerms = null;
+			  //System.out.println("Relevant terms files corrupted!");
+			}
+			
+			if(!loadProjectTermsVersions()){
+			  relevantTermsVersions = null;
+			  //System.out.println("Relevant terms files corrupted!");				
+			}
 			
 			loadProjectModelsState();
 
 			//building global structures to calculate terms colors, after load
 			buildColorStructures();
-            
+
+			//setting menus state
+			if(commonalitiesCandidates!=null && commonalitiesCandidates.size()>0){
+			  if(variabilitiesCandidates==null || variabilitiesCandidates.size()==0){
+				setChanged(); notifyObservers("Project Loaded With Commonalities");
+			  }
+			  else{
+				setChanged(); notifyObservers("Project Loaded With Commonalities And Variabilities");				  
+			  }
+			}
+			  
 			return parserXML.readNameFile();
 		} 
 		catch (ParserConfigurationException e){
@@ -2173,7 +2154,7 @@ public class ModelProject extends Observable implements Runnable{
 			System.out.println("IOException loadProject: " + e.getMessage());
 			e.printStackTrace();
 			return null;
-		} 
+		} 		
 	}
 
 	/**
@@ -2184,8 +2165,7 @@ public class ModelProject extends Observable implements Runnable{
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	private void loadFeaturesList(ArrayList<String> features, String path)
-			throws FileNotFoundException, IOException {
+	private void loadFeaturesList(ArrayList<String> features, String path) throws FileNotFoundException, IOException {
 		String s1=null;		
 		BufferedReader br1 = new BufferedReader(new FileReader(path));
 		while( (s1 = br1.readLine()) != null ) features.add(s1);
@@ -2219,7 +2199,7 @@ public class ModelProject extends Observable implements Runnable{
 		
 		try{
 		  br1 = new BufferedReader(new FileReader(pathTermsVersions));			
-		}catch(FileNotFoundException e){ return true;}
+		}catch(FileNotFoundException e){ return false;}
 
 		while( (s1 = br1.readLine()) != null ){
 		  filesVersionsMap = new HashMap<String, ArrayList<String>>();
@@ -2283,7 +2263,7 @@ public class ModelProject extends Observable implements Runnable{
 		
 		try{
 		  br1 = new BufferedReader(new FileReader(pathRelevantTerms));			
-		}catch(FileNotFoundException e){ return true;}
+		}catch(FileNotFoundException e){ return false;}
 		relevantTerms=new HashMap<String, HashMap<String,ArrayList<int[]>>>();
 		
 		while( (s1 = br1.readLine()) != null ){

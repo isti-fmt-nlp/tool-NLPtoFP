@@ -10,7 +10,6 @@ import java.util.Observable;
 import java.util.Observer;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.Rectangle;
@@ -18,17 +17,6 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
-import java.net.URL;
-
-import javax.imageio.ImageIO;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -38,14 +26,9 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
-
-import view.EditorView.EditorSplitPane;
-import view.EditorView.FilterFileProject;
-
 
 public class ViewProject implements Observer, Runnable{
 
@@ -54,8 +37,6 @@ public class ViewProject implements Observer, Runnable{
 	private static final String savedProjectsDir = "Usage Tries/ANALISYS";
 	
 	private ModelProject modelProject = null;
-	
-	private ControllerProject controllerProject = null;
 	
 	private JFrame frameProject = new JFrame("Commonality Mining Tool");
 	
@@ -80,7 +61,7 @@ public class ViewProject implements Observer, Runnable{
 					  menuFeaturesSelectComm=null, menuFeaturesSelectVari=null;
 
 	//Diagram Management Menu items	
-	private JMenuItem menuDiagramRestart=null, menuDiagramOpen=null;
+	private JMenuItem menuDiagramOpen=null, menuDiagramCreate=null;
 
 	private JPopupMenu menuTreeProject = null;
 	
@@ -183,8 +164,6 @@ public class ViewProject implements Observer, Runnable{
 	 * @param controllerProject - the controller
 	 */
 	public void addListener(ControllerProject controllerProject){
-		this.controllerProject = controllerProject;
-		
 		//creating MenuBar
 		
 		/*MenuProject*/
@@ -274,16 +253,16 @@ public class ViewProject implements Observer, Runnable{
 		menuDiagram=new JMenu("Diagram");
 		menuDiagram.setMnemonic(KeyEvent.VK_D);
 
-		menuDiagramOpen = new JMenuItem("Create Diagram");
+		menuDiagramCreate = new JMenuItem("Create Diagram");
+		menuDiagramCreate.addActionListener(controllerProject);
+		menuDiagramCreate.setEnabled(false);
+		
+		menuDiagramOpen = new JMenuItem("Open Diagram");
 		menuDiagramOpen.addActionListener(controllerProject);
-		menuDiagramOpen.setEnabled(false);
+		menuDiagramOpen.setEnabled(true);
 		
-		menuDiagramRestart = new JMenuItem("Open Diagram");
-		menuDiagramRestart.addActionListener(controllerProject);
-		menuDiagramRestart.setEnabled(true);
-		
-		menuDiagram.add(menuDiagramOpen);		
-		menuDiagram.add(menuDiagramRestart);
+		menuDiagram.add(menuDiagramCreate);		
+		menuDiagram.add(menuDiagramOpen);
 		
 		menu.add(menuDiagram);
 
@@ -329,19 +308,19 @@ public class ViewProject implements Observer, Runnable{
 	@Override
 	public void update(Observable os, Object o){
 		if(o.equals("End Extract Commonalities")){
-			//stopping throbber
-			frameProject.setEnabled(true);
-			setStateThrobber(true);
+		  //stopping throbber
+		  frameProject.setEnabled(true);
+		  setStateThrobber(true);
 			
-			//setting color Green to all input file nodes in the tree
-			panelLateralProject.setAnalysisLeafTree();	
+		  //setting color Green to all input file nodes in the tree
+		  panelLateralProject.setAnalysisLeafTree();	
 			
-	    	//activating menu items
-	    	menuFeaturesExtractComm.setEnabled(false);
-			menuFeaturesExtractVari.setEnabled(true);
+		  //activating menu items
+		  menuFeaturesExtractComm.setEnabled(false);
+		  menuFeaturesExtractVari.setEnabled(true);
 	    	
 			
-//			File f = new File("./src/DATA/Sound/analysis.wav");
+//	 		File f = new File("./src/DATA/Sound/analysis.wav");
 //		    AudioInputStream ais;
 //			try 
 //			{
@@ -373,78 +352,40 @@ public class ViewProject implements Observer, Runnable{
 //			}		    
 		}
 		else if(o.equals("End Extract Variabilities")){
-			frameProject.setEnabled(true);
-			setStateThrobber(true);
+		  frameProject.setEnabled(true);
+		  setStateThrobber(true);
 
-	    	//activating menu items
-			menuFeaturesExtractVari.setEnabled(false);
-			menuDiagramOpen.setEnabled(true);
+		  //activating menu items
+		  menuFeaturesExtractVari.setEnabled(false);
+		  menuDiagramCreate.setEnabled(true);
 	    	
-    		/* ***VERBOSE****/
-			if (verbose){
-				System.out.println("\n***\nStampo le Variabilities Candidates: ");
-				for (String tmp: modelProject.readVariabilitiesCandidates()) System.out.println("-"+tmp);
-				System.out.println("FrameProject is enabled? "+frameProject.isEnabled());
-			}
-			/* ***VERBOSE****/
-
-			
-//			File f = new File("./src/DATA/Sound/analysis.wav");
-//		    AudioInputStream ais;
-//			try 
-//			{
-//				ais = AudioSystem.getAudioInputStream(f);
-//				
-//			    DataLine.Info info = new DataLine.Info(Clip.class, ais.getFormat());
-//			    
-//			    Clip clip = (Clip) AudioSystem.getLine(info);
-//			    clip.open(ais);
-//			    clip.start();
-//			} 
-//			catch (UnsupportedAudioFileException ex) 
-//			{
-//				System.out.println("Exception update: " + ex.getMessage());
-//				ex.printStackTrace();
-//	            return;
-//			} 
-//			catch (IOException ex) 
-//			{
-//				System.out.println("Exception update: " + ex.getMessage());
-//				ex.printStackTrace();
-//	            return;
-//			} 
-//			catch (LineUnavailableException ex) 
-//			{
-//				System.out.println("Exception update: " + ex.getMessage());
-//				ex.printStackTrace();
-//	            return;
-//			}		    
+		  /* ***VERBOSE****/
+		  if (verbose){
+			System.out.println("\n***\nStampo le Variabilities Candidates: ");
+			for (String tmp: modelProject.readVariabilitiesCandidates()) System.out.println("-"+tmp);
+			System.out.println("FrameProject is enabled? "+frameProject.isEnabled());
+		  }
+		  /* ***VERBOSE****/	    
 		}
 		else if(o.equals("End Commonalities Selected")){
-			panelCentralProject.refreshTabFeaturesSelected(
-				modelProject.readPathCommonalitiesSelectedHTML(), ViewPanelCentral.FeatureType.COMMONALITIES);
-			splitterPanelMain.setRightComponent(panelCentralProject.getPanelAnalysis());
-//			splitterPanelInner.setLeftComponent(panelCentralProject.getPanelAnalysis());
-//			frameProject.remove(panelCentralProject.getPanelAnalysis());
-//			frameProject.add(panelCentralProject.getPanelAnalysis());	
+		  panelCentralProject.refreshTabFeaturesSelected(
+			modelProject.readPathCommonalitiesSelectedHTML(), ViewPanelCentral.FeatureType.COMMONALITIES);
+		  splitterPanelMain.setRightComponent(panelCentralProject.getPanelAnalysis());
 		}
 		else if(o.equals("End Variabilities Selected")){
-			panelCentralProject.refreshTabFeaturesSelected(
-				modelProject.readPathVariabilitiesSelectedHTML(), ViewPanelCentral.FeatureType.VARIABILITIES);
-			splitterPanelMain.setRightComponent(panelCentralProject.getPanelAnalysis());
-//			splitterPanelInner.setLeftComponent(panelCentralProject.getPanelAnalysis());
-//			frameProject.remove(panelCentralProject.getPanelAnalysis());
-//			frameProject.add(panelCentralProject.getPanelAnalysis());	
+		  panelCentralProject.refreshTabFeaturesSelected(
+			modelProject.readPathVariabilitiesSelectedHTML(), ViewPanelCentral.FeatureType.VARIABILITIES);
+		  splitterPanelMain.setRightComponent(panelCentralProject.getPanelAnalysis());
 		}
 		else if(o.equals("Input File Deleted")){
-//			if (panelLateralProject.getAnalysisLeafTree().size())
-			menuFeaturesExtractComm.setEnabled(true);
-			menuFeaturesExtractVari.setEnabled(false);
+		  menuFeaturesExtractComm.setEnabled(true);
+		  menuFeaturesExtractVari.setEnabled(false);
+		  menuDiagramCreate.setEnabled(false);
 		}		
 		else if(o.equals("New File Loaded")){
-			//activating menu items
-			menuFeaturesExtractComm.setEnabled(true);
-			menuFeaturesExtractVari.setEnabled(false);			
+		  menuFeaturesExtractComm.setEnabled(true);
+		  menuFeaturesExtractVari.setEnabled(false);			
+		  menuDiagramCreate.setEnabled(false);
 		}
 		else if(o.equals("New Analisys Folder Loaded")){
 		  //stopping throbber
@@ -457,28 +398,36 @@ public class ViewProject implements Observer, Runnable{
 		  //activating menu items
 		  menuFeaturesExtractComm.setEnabled(true);
 		  menuFeaturesExtractVari.setEnabled(false);
+		  menuDiagramCreate.setEnabled(false);
 			
 		}
 		else if(o.equals("Analisys folder can't be accepted")){
 		  errorDialog("Analisys folder can't be accepted");
 		}
+		else if(o.equals("Project Loaded With Commonalities")){
+	      menuFeaturesExtractComm.setEnabled(false);
+	      menuFeaturesExtractVari.setEnabled(true);			
+		}		
+		else if(o.equals("Project Loaded With Commonalities And Variabilities")){
+		  menuFeaturesExtractComm.setEnabled(false);
+		  menuFeaturesExtractVari.setEnabled(false);
+		  menuDiagramCreate.setEnabled(true);
+		}
 		
 		frameProject.repaint(); 	
 	}
 	
-	/** Assegna un nome al progetto
+	/** 
+	 * Asks the user for a project name.
 	 * 
-	 * @return s stringa contenente il nome del progetto
+	 * @return - a String containing the name of the project
 	 */
-	public String assignNameProjectDialog()
-	{				
+	public String assignNameProjectDialog(){
 			String s = null;
 			
 		 	JTextField jtf = new JTextField();
 		 	
 		    Object[] o1 = {"Name project: ", jtf};
-
-
 		    Object[] o2 = { "Cancel", "OK" };
 		    
 		    int i = JOptionPane.showOptionDialog(new JFrame("Create Project"),
@@ -486,28 +435,22 @@ public class ViewProject implements Observer, Runnable{
 		            JOptionPane.YES_NO_OPTION, JOptionPane.DEFAULT_OPTION, null,
 		            o2, o2[1]);
 		    
-		    if(i == JOptionPane.NO_OPTION)
-		    {
-		    	if((s = jtf.getText()) != null)
-		    	{
-		    		if(!s.trim().equals(""))
-		    		{
-				    	return s;
-		    		}
-		    		else
-		    		{
-		    			errorDialog("You did not put a name to the project");
-		    			return null;
-		    		}
+		    if(i == JOptionPane.NO_OPTION){
+		      if((s = jtf.getText()) != null){
+		    	if(!s.trim().equals("")){
+		    	  return s;
 		    	}
-		    	else
-		    	{
-		    		errorDialog("You did not put a name to the project");
-	    			return null;
+		    	else{
+		    	  errorDialog("You did not put a name to the project");
+		    	  return null;
 		    	}
-		    }		    		      
-		    else
+		      }
+		      else{
+		    	errorDialog("You did not put a name to the project");
 		    	return null;
+		      }
+		    }		    		      
+		    else return null;
 	}
 	
 	/** 
@@ -531,8 +474,8 @@ public class ViewProject implements Observer, Runnable{
 			panelCentralProject = new ViewPanelCentral();
 			frameProject.repaint();
 			
+			menuDiagramCreate.setEnabled(false);
 			menuDiagramOpen.setEnabled(false);
-			menuDiagramRestart.setEnabled(false);
 			
 			menuFeaturesExtractComm.setEnabled(false);
 			menuFeaturesExtractVari.setEnabled(false);
@@ -853,24 +796,20 @@ public class ViewProject implements Observer, Runnable{
 	/** 
 	 * Loads the lateral panel
 	 * 
-	 * @param s - Project name
-	 * @param al - array containing input files names, it is null if the project doesn't yet have any.
+	 * @param projectName - Project name
+	 * @param al - array containing input files names, it is null if the project doesn't yet have any
+	 * @param newProject - tells if this is a new project or it has been loaded from a save file
 	 */
-	public void loadPanelLateral(String s, ArrayList <String> al){
-
-//		frameProject.remove(panelLateralProject.getPanelTree());
-//		frameProject.remove(panelCentralProject.getPanelAnalysis());   
-		
-		panelLateralProject = new ViewPanelLateral(menuTreeProject);
-		
+	public void loadPanelLateral(String projectName, ArrayList <String> al, ControllerProject controllerProject, boolean newProject){
+		panelLateralProject = new ViewPanelLateral(menuTreeProject);				
 		panelCentralProject = new ViewPanelCentral();
 		
 		if(al == null){
-			panelLateralProject.createTree(s);
+			panelLateralProject.createTree(projectName);
 	    	panelLateralProject.getTree().addMouseListener(controllerProject);
 		}
 		else{
-			panelLateralProject.loadTree(s, al);
+			panelLateralProject.loadTree(projectName, al);
 	    	panelLateralProject.getTree().addMouseListener(controllerProject);
 	    	panelLateralProject.setAnalysisLeafTree(
 	    			modelProject.loadAnalysisFileProject());
@@ -882,17 +821,16 @@ public class ViewProject implements Observer, Runnable{
 
     	menuFilesLoad.setEnabled(true);
     	menuFilesLoadFolder.setEnabled(true);
+    	
     	if (panelLateralProject.getAnalysisLeafTree().size()>0){
     	  menuFilesDelete.setEnabled(true);
-    	  menuFeaturesExtractComm.setEnabled(true);
+    	  //if the project was loaded from a save file the load method already set menuFeatures right
+    	  if (newProject) menuFeaturesExtractComm.setEnabled(true);
     	}
     	
 		splitterPanelMain.setLeftComponent(panelLateralProject.getPanelTree());
-//		splitterPanelMain.setRightComponent(splitterPanelInner); 
-		
-//    	frameProject.add(panelLateralProject.getPanelTree());	    	
-    	frameProject.repaint();   
 
+		frameProject.repaint();   
 	}
 	
 	/** 
@@ -968,6 +906,6 @@ public class ViewProject implements Observer, Runnable{
 		public boolean accept(File dir, String name){
 //			System.out.println("loadFileDialog: "+dir.getAbsolutePath()+name);
 			return name.endsWith( ".xml" );
-	    }
+		}
 	}
 }

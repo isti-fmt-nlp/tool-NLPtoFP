@@ -142,6 +142,21 @@ public class EditorView extends JFrame implements Observer{
 	    }	    
 	}
 	
+	/** JLabel extended in order to not get mouse events */
+	static class PressThroughLabel extends JLabel {
+				
+		private static final long serialVersionUID = 1L;
+
+		public PressThroughLabel(ImageIcon toolImage) {
+		  super(toolImage);
+		}
+
+		@Override
+		public boolean contains(int x, int y){
+		  return false;
+		}    
+	}
+	
 	/** ViewFactory used by CenteredEditorKit */
     class StyledViewFactory implements ViewFactory {
         public View create(Element elem) {
@@ -277,6 +292,8 @@ public class EditorView extends JFrame implements Observer{
 	public static final String orGroupNamePrefix="---OR_GROUP---#";
 	/** name ofthe diagram panel*/
 	public static final String diagramPanelName="---DIAGRAM_PANEL---";
+	/** name ofthe diagram panel*/
+	public static final String toolsPanelname="---TOOLS_PANEL---";
 	
 	
 	/** URL of the connector starting dot icon*/
@@ -765,6 +782,7 @@ public class EditorView extends JFrame implements Observer{
 //		toolsPanel.setPreferredSize(new Dimension(140, Toolkit.getDefaultToolkit().getScreenSize().height));
 		toolsPanel.setPreferredSize(new Dimension(140, Toolkit.getDefaultToolkit().getScreenSize().height/2));
 		toolsPanel.setBackground(Color.white);
+		toolsPanel.setName(toolsPanelname);
 //		toolsPanel.setBorder(BorderFactory.createCompoundBorder(
 //				BorderFactory.createEtchedBorder(EtchedBorder.RAISED), 
 //						BorderFactory.createEtchedBorder(EtchedBorder.LOWERED)));
@@ -817,6 +835,9 @@ public class EditorView extends JFrame implements Observer{
 		iconTmpPanel.addMouseListener(editorController);
 		iconTmpPanel.addMouseMotionListener(editorController);
 		toolsPanel.add(iconTmpPanel);
+
+//		toolsPanel.addMouseListener(editorController);
+//		toolsPanel.addMouseMotionListener(editorController);
 
 		//creating diagram panel, that will be inserted in the scroller
 		diagramPanel = new ScrollLayeredPane();
@@ -929,7 +950,8 @@ public class EditorView extends JFrame implements Observer{
 		System.out.println("PAINT: isActiveItem="+isActiveItem);
 
 		if(toolDragImage!=null) 
-			g2.drawImage(toolDragImage, toolDragPosition.x+1, toolDragPosition.y+4, null);
+//			g2.drawImage(toolDragImage, toolDragPosition.x+1, toolDragPosition.y+4, null);
+			g2.drawImage(toolDragImage, toolDragPosition.x, toolDragPosition.y, null);
 		if(isActiveItem==activeItems.DRAGGING_SELECTION_RECT){
 			System.out.println("Disegno il rect");
 			g2.setColor(Color.BLUE);
@@ -1812,11 +1834,26 @@ public class EditorView extends JFrame implements Observer{
 	 * @return - the new JComponent with the icon, or null if a problem occurrs.
 	 */
 	private static JComponent getToolIcon(String name, boolean backgroundVisible) {
+//		JComponent iconPanel=null;
+//		ImageIcon toolImage = getIconImage(name);
+//		
+//		iconPanel= new JPanel();
+//		iconPanel.add(new JLabel(toolImage));
+//
+//		iconPanel.setBounds(0, 0, toolImage.getIconWidth(), toolImage.getIconHeight());
+//
+//		iconPanel.setOpaque(backgroundVisible);
+//		iconPanel.setBackground(Color.LIGHT_GRAY);
+//		iconPanel.setName(name);
+//		iconPanel.setToolTipText(name);
+//		  
 		JComponent iconPanel=null;
 		ImageIcon toolImage = getIconImage(name);
 		
-		iconPanel= new JPanel();
-		iconPanel.add(new JLabel(toolImage));
+		iconPanel = new JLabel(toolImage);
+//		iconPanel = new EditorView(). new PressThroughLabel(toolImage);
+//		iconPanel = new PressThroughLabel(toolImage);
+		
 
 		iconPanel.setBounds(0, 0, toolImage.getIconWidth(), toolImage.getIconHeight());
 
@@ -3359,22 +3396,7 @@ public class EditorView extends JFrame implements Observer{
 	private FeaturePanel buildFeaturePanel(String name, String containerName, int x, int y, Color color) {
 		StyledDocument doc = null;
 		SimpleAttributeSet attrs = null;
-		int layer=-1;
-		
-//		JTextArea textLabel=null;		
-//		textLabel=new JTextArea(name, 5, 10){
-//
-//			private static final long serialVersionUID = 1L;
-//
-//			@Override
-//			public boolean contains(int x, int y){
-//			  if(!isEditable()) return false;
-//			  else return super.contains(x, y);
-//			}
-//		};
-//
-//		textLabel.setLineWrap(true);
-//		textLabel.setWrapStyleWord(true);		
+		int layer=-1;	
 		
 		CenteredTextPane textLabel=new CenteredTextPane();
 

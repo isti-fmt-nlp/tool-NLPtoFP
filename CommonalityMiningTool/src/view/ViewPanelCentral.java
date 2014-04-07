@@ -10,7 +10,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,7 +26,6 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
@@ -48,7 +46,6 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.border.EtchedBorder;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
-import javax.swing.text.Document;
 import javax.swing.text.Highlighter;
 import javax.swing.text.Highlighter.Highlight;
 import javax.swing.text.JTextComponent;
@@ -75,7 +72,7 @@ public class ViewPanelCentral{
 	private JPanel panelFeatures = null;
 
 	/**buttons for adding commonalities and extracting selected commonalities*/
-	private JButton buttonFeaturesAdd = null, buttonSelectionEnd = null;
+	private JButton buttonFeaturesAdd = null/*, buttonSelectionEnd = null*/;
 	
 	/**buttons for navigating through commonalitie occurences in tab texts, the X...wardButtons move of x occurences, 
 	 where x is defined by occurrJumpSpan constant*/
@@ -96,8 +93,8 @@ public class ViewPanelCentral{
 	 and each file has a list of characters indexex, which are the start positions of X occorrences*/
 	private HashMap<String,HashMap<String,ArrayList<int[]>>> relevantTerms=null;
 	
-	/** Contains all project's relevant terms, in both original version and term-extraction version*/
-	private HashMap<String,HashMap<String,ArrayList<String>>> originalTermsVersions=null; 
+//	/** Contains all project's relevant terms, in both original version and term-extraction version*/
+//	private HashMap<String,HashMap<String,ArrayList<String>>> originalTermsVersions=null; 
 
 	/**current selected checkbox*/
 	private String currentSelectedCheckBox=null;
@@ -188,7 +185,7 @@ public class ViewPanelCentral{
 		if(alF == null || alFeaturesCand == null) return;
 		
 		this.relevantTerms=relevantTerms;
-		this.originalTermsVersions=relevantTermsFilesVersions;
+//		this.originalTermsVersions=relevantTermsFilesVersions;
 
 		createSearchPanel();
 
@@ -450,9 +447,9 @@ public class ViewPanelCentral{
 		try{   
 			Highlighter hilite = jtc.getHighlighter();
 		    
-			Document doc = jtc.getDocument();
-		    
-			String text = doc.getText(0, doc.getLength());
+//			Document doc = jtc.getDocument();
+//		    
+//			String text = doc.getText(0, doc.getLength());
 		    
 			
 			//adding highlights to terms occurrences

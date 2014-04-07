@@ -7,14 +7,12 @@ package view;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTree;
@@ -22,15 +20,10 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
-public class ViewPanelLateral extends JFrame
-{
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+public class ViewPanelLateral/* extends JFrame*/{
+//	private static final long serialVersionUID = 1L;
 
 	/* JPanel in cui viene inserito l'albero del progetto */
 	private JPanel panelTree = new JPanel();

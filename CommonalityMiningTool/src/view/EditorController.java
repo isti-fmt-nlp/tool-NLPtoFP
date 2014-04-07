@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JColorChooser;
@@ -40,6 +41,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import javax.swing.JPanel;
 
 import view.EditorModel.GroupTypes;
 import view.EditorModel.ConstraintTypes;
@@ -307,7 +309,8 @@ public class EditorController implements
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-	  //event originated from the diagram panel
+	  System.out.println("((Component)e.getSource()).getName(): "+((Component)e.getSource()).getName()); 
+	  //event originated from the diagram panel   
 	  if( ((Component)e.getSource()).getName().startsWith(EditorView.diagramPanelName) ){          
 
 		/* ***DEBUG*** */
@@ -577,22 +580,40 @@ public class EditorController implements
 	  else{
 		editorView.getDiagramElementsMenu().setVisible(false);
 		editorView.getDiagramElementsMenu().setEnabled(false);
+  		editorView.getDiagramElementsMenu().removeAll();
 		editorView.setLastPositionX(e.getX());
 		editorView.setLastPositionY(e.getY());
 		  
-		Component[] compList=editorView.getToolsPanel().getComponents();
+//		JComponent comp=(JComponent)e.getSource();
 		JComponent comp=(JComponent)e.getSource();
-		JComponent imageLabel=(JComponent)comp.getComponent(0);
+//		JComponent imageLabel=(JComponent)e.getSource();
+		ImageIcon imageLabel=(ImageIcon) ((JLabel)comp).getIcon();
+
+//		JComponent imageLabel=(JComponent)comp.getComponent(0);
+
+		JPanel toolsPanel=editorView.getToolsPanel();
+		JComponent splitterPanel=editorView.getSplitterPanel();
+//		JComponent comp=(JComponent)toolsPanel.getComponentAt(e.getPoint());
+//		JComponent imageLabel=(JComponent)comp.getComponent(0);
 
 		/* ***DEBUG*** */
-		if(debug4) System.out.println("e.getSource(): "+e.getSource()+"\nimageLabel: "+imageLabel);
+		/*if(debug4) */System.out.println("e.getSource(): "+e.getSource()+"\nimageLabel: "+imageLabel);
+		System.out.println("e.getSource().getClass(): "+e.getSource().getClass());
+		System.out.println("comp.getName(): "+comp.getName()+"\nimageLabel.getName(): "+imageLabel.getDescription());
+		System.out.println("comp.getClass(): "+comp.getClass());
 		/* ***DEBUG*** */
 
 		try {
-			editorView.setToolDragImage(
-			    ImageIO.read(this.getClass().getResourceAsStream(editorView.getToolIconPath(((JComponent)comp).getName()))));
-			editorView.setToolDragPosition(
-					new Point((int)imageLabel.getLocationOnScreen().getX(), (int)imageLabel.getLocationOnScreen().getY()));
+		  editorView.setToolDragImage(
+			ImageIO.read(this.getClass().getResourceAsStream(editorView.getToolIconPath(((JComponent)comp).getName()))));
+//		  editorView.setToolDragPosition(
+//				new Point((int)imageLabel.getLocationOnScreen().getX(), (int)imageLabel.getLocationOnScreen().getY()));
+		  editorView.setToolDragPosition( new Point(
+			(int)(comp.getLocationOnScreen().getX()-editorView.getLocationOnScreen().getX()
+					+comp.getWidth()/2-imageLabel.getIconWidth()/2),
+			(int)(comp.getLocationOnScreen().getY()-editorView.getLocationOnScreen().getY()
+					+comp.getHeight()/2-imageLabel.getIconHeight()/2)
+		  ));
 
 		} catch (IOException e2) {
 			System.out.println("toolDragImage is null");
@@ -618,10 +639,6 @@ public class EditorController implements
 
 		/* ***DEBUG*** */
 		if (debug) System.out.println("mousePressed on: "+editorView.getToolDragPosition());
-		/* ***DEBUG*** */
-
-		/* ***DEBUG*** */
-		if (debug3) System.out.println("mousePressed, components are "+compList.length);
 		/* ***DEBUG*** */
 
 	  }
