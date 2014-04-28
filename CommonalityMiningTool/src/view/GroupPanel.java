@@ -1,10 +1,7 @@
 package view;
 
-import java.awt.Component;
 import java.util.ArrayList;
-
 import javax.swing.JComponent;
-import javax.swing.JPanel;
 
 public class GroupPanel extends JComponent{
 	

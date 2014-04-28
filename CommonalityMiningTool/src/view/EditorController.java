@@ -1,15 +1,12 @@
 package view;
 
-import java.awt.BorderLayout;
-
 import main.CMTConstants;
+import main.FeatureNode.FeatureTypes;
 
-import java.awt.CheckboxMenuItem;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -19,21 +16,19 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import javax.imageio.ImageIO;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JColorChooser;
@@ -41,14 +36,13 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
-import javax.swing.JPanel;
-
-import view.EditorModel.GroupTypes;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import main.GroupNode.GroupTypes;
 import view.EditorModel.ConstraintTypes;
 import view.EditorView.ItemsType;
-import view.EditorView.activeItems;
+import view.EditorView.ActiveItems;
 import main.*;
-import main.FeatureNode.FeatureTypes;
 
 public class EditorController implements 
 	ActionListener, WindowListener, MouseListener, MouseMotionListener, MouseWheelListener{
@@ -89,7 +83,7 @@ public class EditorController implements
 	private String oldFeatureName=null;
 
 	/** A logic grid, used to place features in the diagram when the view is automatically created from a model*/
-	boolean[][] logicGrid=null;
+	private boolean[][] logicGrid=null;
 
 	/** Tells if something has been modified after last save*/
 	private boolean modified=false;
@@ -153,10 +147,7 @@ public class EditorController implements
 	      case DRAGGING_EXTERN_CONSTRAINT: editorView.dragAnchor(e); break;
 	      case DRAGGING_CONSTRAINT_CONTROL_POINT: editorView.dragAnchor(e); break;	      
 	      case DRAGGING_SELECTION_RECT:  editorView.dragSelectionRect(e); break;
-	      case DRAGGING_SELECTION_GROUP: 
-			  System.out.println("dragging group!");
-//			  EditorView.dragSelectionGroup(e); break;
-			  editorView.dragSelectionGroup(e); break;
+	      case DRAGGING_SELECTION_GROUP: editorView.dragSelectionGroup(e); break;
 	      default: break;
 		}		
 	  //event originated from the toolbar
@@ -217,7 +208,7 @@ public class EditorController implements
           /* ***DEBUG*** */
 
           //clicked on the diagram panel, not on an element
-          if(comp.getName()==null || comp.getName()==""|| comp.getName().startsWith(EditorView.diagramPanelName)){
+          if(comp.getName()==null || comp.getName().compareTo("")==0 || comp.getName().startsWith(EditorView.diagramPanelName)){
         	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemPrintModelDebug());
               editorView.setDiagramElementsMenuPosX(e.getX());
               editorView.setDiagramElementsMenuPosY(e.getY());
@@ -309,6 +300,7 @@ public class EditorController implements
 
 	@Override
 	public void mousePressed(MouseEvent e) {
+	  Point loc=null;
 	  System.out.println("((Component)e.getSource()).getName(): "+((Component)e.getSource()).getName()); 
 	  //event originated from the diagram panel   
 	  if( ((Component)e.getSource()).getName().startsWith(EditorView.diagramPanelName) ){          
@@ -373,7 +365,7 @@ public class EditorController implements
 		        editorView.setDiagramElementsMenuPosX(e.getX());
 		        editorView.setDiagramElementsMenuPosY(e.getY());
 		        editorView.showDiagramElementsMenu();
-		        editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+		        editorView.setActiveItem(ActiveItems.NO_ACTIVE_ITEM);
 //		        System.out.println("clicked! popupElement: "+((JComponent)tmpNode.getElement()).getName());
 		        return;
 			  }
@@ -382,12 +374,12 @@ public class EditorController implements
 			  if(debug) System.out.println("Mouse Pressed on a selection group element!");
 			  /* ***DEBUG*** */
 
-			  editorView.setActiveItem(activeItems.DRAGGING_SELECTION_GROUP);	
+			  editorView.setActiveItem(ActiveItems.DRAGGING_SELECTION_GROUP);	
 			  editorView.moveSelectionGroupToTop();					
 			  return;
 			}
 			else{//mouse pressed out of an element of the group selection			
-			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+			  editorView.setActiveItem(ActiveItems.NO_ACTIVE_ITEM);
 			  if (editorView.getSelectionGroup().size()>0) editorView.getSelectionGroup().clear();	
 			}
 			
@@ -411,7 +403,7 @@ public class EditorController implements
 					anchorPanelName.startsWith(EditorView.startOptionalNamePrefix)  ||
 					anchorPanelName.startsWith(EditorView.endOptionalNamePrefix) )   ){
 
-				editorView.setActiveItem(activeItems.DRAGGING_EXTERN_ANCHOR);
+				editorView.setActiveItem(ActiveItems.DRAGGING_EXTERN_ANCHOR);
 				editorView.setLastAnchorFocused(anchorPanel);
 				editorView.setLastFeatureFocused(featurePanel);
 				
@@ -447,7 +439,7 @@ public class EditorController implements
 					  ( anchorPanelName.startsWith(EditorView.altGroupNamePrefix) ||
 						anchorPanelName.startsWith(EditorView.orGroupNamePrefix) ) ){
 
-				editorView.setActiveItem(activeItems.DRAGGING_EXTERN_GROUP);
+				editorView.setActiveItem(ActiveItems.DRAGGING_EXTERN_GROUP);
 				editorView.setLastAnchorFocused(anchorPanel);
 				editorView.setLastFeatureFocused(featurePanel);
 				
@@ -466,7 +458,7 @@ public class EditorController implements
 				otherEnd=((ConstraintPanel)anchorPanel).getOtherEnd();
 				otherEndFeaturePanel=(JComponent)otherEnd.getParent();
 				  
-				editorView.setActiveItem(activeItems.DRAGGING_EXTERN_CONSTRAINT);
+				editorView.setActiveItem(ActiveItems.DRAGGING_EXTERN_CONSTRAINT);
 				editorView.setLastAnchorFocused(anchorPanel);
 				editorView.setLastFeatureFocused(featurePanel);
 				//the other end of the constraint is attached to a feature panel
@@ -497,7 +489,7 @@ public class EditorController implements
 			  }
 			  //mouse directly pressed on a feature panel, not on an inner element
 			  else{
-				editorView.setActiveItem(activeItems.DRAGGING_FEATURE);
+				editorView.setActiveItem(ActiveItems.DRAGGING_FEATURE);
 				editorView.setLastFeatureFocused((FeaturePanel)tmpNode.getElement());  
 				editorView.moveComponentToTop(editorView.getLastFeatureFocused());
 			  }
@@ -508,7 +500,7 @@ public class EditorController implements
 					((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.endMandatoryNamePrefix)  ||
 					((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.startOptionalNamePrefix)  ||
 					((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.endOptionalNamePrefix) ) ){
-			  editorView.setActiveItem(activeItems.DRAGGING_EXTERN_ANCHOR);
+			  editorView.setActiveItem(ActiveItems.DRAGGING_EXTERN_ANCHOR);
 			  editorView.setLastAnchorFocused((AnchorPanel)tmpNode.getElement());
 			  editorView.moveComponentToTop(editorView.getLastAnchorFocused());
 			}
@@ -516,7 +508,7 @@ public class EditorController implements
 			else if(/*tmpNode.getElement().getClass().equals(GroupPanel.class) &&*/
 					((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.altGroupNamePrefix) ||
 					((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.orGroupNamePrefix) ){
-			  editorView.setActiveItem(activeItems.DRAGGING_EXTERN_GROUP);
+			  editorView.setActiveItem(ActiveItems.DRAGGING_EXTERN_GROUP);
 			  editorView.setLastAnchorFocused((GroupPanel)tmpNode.getElement());
 			  editorView.moveComponentToTop(editorView.getLastAnchorFocused());
 			}
@@ -525,13 +517,13 @@ public class EditorController implements
 					 ((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.startIncludesNamePrefix)  ||
 					 ((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.endExcludesNamePrefix) ||
 					((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.endIncludesNamePrefix)){
-			  editorView.setActiveItem(activeItems.DRAGGING_EXTERN_CONSTRAINT);
+			  editorView.setActiveItem(ActiveItems.DRAGGING_EXTERN_CONSTRAINT);
 			  editorView.setLastAnchorFocused((ConstraintPanel)tmpNode.getElement());
 			  editorView.moveComponentToTop(editorView.getLastAnchorFocused());
 			}
 			//mouse directly pressed on a constraint control point in the diagram panel
 			else if(((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.constraintControlPointNamePrefix)){
-			  editorView.setActiveItem(activeItems.DRAGGING_CONSTRAINT_CONTROL_POINT);
+			  editorView.setActiveItem(ActiveItems.DRAGGING_CONSTRAINT_CONTROL_POINT);
 			  editorView.setLastAnchorFocused((JComponent)tmpNode.getElement());
 			  editorView.moveComponentToTop(editorView.getLastAnchorFocused());
 			}
@@ -549,7 +541,7 @@ public class EditorController implements
 			/* ***DEBUG*** */
 
 			//updating the modified field
-			if(editorView.getActiveItem()!=activeItems.NO_ACTIVE_ITEM) modified=true;
+			if(editorView.getActiveItem()!=ActiveItems.NO_ACTIVE_ITEM) modified=true;
  			
 			return;
 		  }
@@ -561,15 +553,16 @@ public class EditorController implements
 
 		/* ***DEBUG*** */
 		if(debug) System.out.println("editorView.getSelectionGroup().size(): "+editorView.getSelectionGroup().size());
-		/* ***DEBUG*** */
+		/* ***DEBUG*** */	  
+		
+		loc = new Point();		
+		loc.x=(int)(e.getLocationOnScreen().getX()-editorView.getLocationOnScreen().getX());
+		loc.y=(int)(e.getLocationOnScreen().getY()-editorView.getLocationOnScreen().getY());
 
-		editorView.setStartSelectionRect(e.getLocationOnScreen().getLocation());
-//		editorView.setEndSelectionRect(e.getLocationOnScreen().getLocation());
-
-		editorView.getSelectionRect().setFrameFromDiagonal(e.getLocationOnScreen().getLocation(),
-				e.getLocationOnScreen().getLocation());  	  
-
-		editorView.setActiveItem(activeItems.DRAGGING_SELECTION_RECT);
+		editorView.setStartSelectionRect(loc);
+		editorView.getSelectionRect().setFrameFromDiagonal(loc, loc); 
+		
+		editorView.setActiveItem(ActiveItems.DRAGGING_SELECTION_RECT);
 
 		/* ***DEBUG*** */
 		if(debug2) System.out.println("Mouse pressed on: "+((Component)e.getSource()).getName());
@@ -584,20 +577,11 @@ public class EditorController implements
 		editorView.setLastPositionX(e.getX());
 		editorView.setLastPositionY(e.getY());
 		  
-//		JComponent comp=(JComponent)e.getSource();
 		JComponent comp=(JComponent)e.getSource();
-//		JComponent imageLabel=(JComponent)e.getSource();
 		ImageIcon imageLabel=(ImageIcon) ((JLabel)comp).getIcon();
 
-//		JComponent imageLabel=(JComponent)comp.getComponent(0);
-
-		JPanel toolsPanel=editorView.getToolsPanel();
-		JComponent splitterPanel=editorView.getSplitterPanel();
-//		JComponent comp=(JComponent)toolsPanel.getComponentAt(e.getPoint());
-//		JComponent imageLabel=(JComponent)comp.getComponent(0);
-
 		/* ***DEBUG*** */
-		/*if(debug4) */System.out.println("e.getSource(): "+e.getSource()+"\nimageLabel: "+imageLabel);
+		if(debug4) System.out.println("e.getSource(): "+e.getSource()+"\nimageLabel: "+imageLabel);
 		System.out.println("e.getSource().getClass(): "+e.getSource().getClass());
 		System.out.println("comp.getName(): "+comp.getName()+"\nimageLabel.getName(): "+imageLabel.getDescription());
 		System.out.println("comp.getClass(): "+comp.getClass());
@@ -606,8 +590,6 @@ public class EditorController implements
 		try {
 		  editorView.setToolDragImage(
 			ImageIO.read(this.getClass().getResourceAsStream(editorView.getToolIconPath(((JComponent)comp).getName()))));
-//		  editorView.setToolDragPosition(
-//				new Point((int)imageLabel.getLocationOnScreen().getX(), (int)imageLabel.getLocationOnScreen().getY()));
 		  editorView.setToolDragPosition( new Point(
 			(int)(comp.getLocationOnScreen().getX()-editorView.getLocationOnScreen().getX()
 					+comp.getWidth()/2-imageLabel.getIconWidth()/2),
@@ -621,19 +603,19 @@ public class EditorController implements
 			return;
 		}
 		if (((JComponent)comp).getName()=="New Feature")
-			editorView.setActiveItem(activeItems.DRAGGING_TOOL_NEWFEATURE);
+			editorView.setActiveItem(ActiveItems.DRAGGING_TOOL_NEWFEATURE);
 		else if ( ((JComponent)comp).getName()=="Mandatory Link")
-			editorView.setActiveItem(activeItems.DRAGGING_TOOL_MANDATORY_LINK);				
+			editorView.setActiveItem(ActiveItems.DRAGGING_TOOL_MANDATORY_LINK);				
 		else if ( ((JComponent)comp).getName()=="Optional Link" )
-			editorView.setActiveItem(activeItems.DRAGGING_TOOL_OPTIONAL_LINK);
+			editorView.setActiveItem(ActiveItems.DRAGGING_TOOL_OPTIONAL_LINK);
 		else if (((JComponent)comp).getName()=="Alternative Group")
-			editorView.setActiveItem(activeItems.DRAGGING_TOOL_ALT_GROUP);
+			editorView.setActiveItem(ActiveItems.DRAGGING_TOOL_ALT_GROUP);
 		else if (((JComponent)comp).getName()=="Or Group")
-			editorView.setActiveItem(activeItems.DRAGGING_TOOL_OR_GROUP);
+			editorView.setActiveItem(ActiveItems.DRAGGING_TOOL_OR_GROUP);
 		else if (((JComponent)comp).getName()=="Includes")
-			editorView.setActiveItem(activeItems.DRAGGING_TOOL_INCLUDES);
+			editorView.setActiveItem(ActiveItems.DRAGGING_TOOL_INCLUDES);
 		else if (((JComponent)comp).getName()=="Excludes")
-			editorView.setActiveItem(activeItems.DRAGGING_TOOL_EXCLUDES);
+			editorView.setActiveItem(ActiveItems.DRAGGING_TOOL_EXCLUDES);
 
 		editorView.repaintRootFrame();
 
@@ -652,30 +634,29 @@ public class EditorController implements
       if( ((Component)e.getSource()).getName().startsWith(EditorView.diagramPanelName) )
 		switch(editorView.getActiveItem()){
 		  case DRAGGING_FEATURE:
-			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+			  editorView.setActiveItem(ActiveItems.NO_ACTIVE_ITEM);
 			  editorView.setLastFeatureFocused(null); break;
 		  case DRAGGING_EXTERN_ANCHOR:
 			  dropAnchor(e);
-			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+			  editorView.setActiveItem(ActiveItems.NO_ACTIVE_ITEM);
 			  editorView.setLastAnchorFocused(null); break;
 		  case DRAGGING_EXTERN_GROUP:
 			  dropGroup(e);
-			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+			  editorView.setActiveItem(ActiveItems.NO_ACTIVE_ITEM);
 			  editorView.setLastAnchorFocused(null); break;
 		  case DRAGGING_EXTERN_CONSTRAINT:
 			  dropConstraint(e);
-			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+			  editorView.setActiveItem(ActiveItems.NO_ACTIVE_ITEM);
 			  editorView.setLastAnchorFocused(null); break;
 		  case DRAGGING_CONSTRAINT_CONTROL_POINT:
-			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+			  editorView.setActiveItem(ActiveItems.NO_ACTIVE_ITEM);
 			  editorView.setLastAnchorFocused(null); break;
 		  case DRAGGING_SELECTION_RECT:
 			  dropSelectionRectangle(e);
-			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+			  editorView.setActiveItem(ActiveItems.NO_ACTIVE_ITEM);
 			  break;
 		  case DRAGGING_SELECTION_GROUP:
-			  System.out.println("released group drag!");
-			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+			  editorView.setActiveItem(ActiveItems.NO_ACTIVE_ITEM);
 			  if(editorView.getSelectionGroup().size()>0) editorView.getSelectionGroup().clear();
 			  editorView.repaintRootFrame();
 			  break;
@@ -688,37 +669,37 @@ public class EditorController implements
 		switch(editorView.getActiveItem()){
 	      case DRAGGING_TOOL_NEWFEATURE:
 	    	  addNewFeature(e);
-			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+			  editorView.setActiveItem(ActiveItems.NO_ACTIVE_ITEM);
 	    	  editorView.setToolDragImage(null); break;
 	      case DRAGGING_TOOL_MANDATORY_LINK:
 //	    	  EditorView.addConnectorToDiagram(e);
 	    	  editorView.addConnectorToDiagram(e);
-			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+			  editorView.setActiveItem(ActiveItems.NO_ACTIVE_ITEM);
 	    	  editorView.setToolDragImage(null); break;
 	      case DRAGGING_TOOL_OPTIONAL_LINK:
 //	    	  EditorView.addConnectorToDiagram(e);
 	    	  editorView.addConnectorToDiagram(e);
-			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+			  editorView.setActiveItem(ActiveItems.NO_ACTIVE_ITEM);
 	    	  editorView.setToolDragImage(null); break;
 	      case DRAGGING_TOOL_INCLUDES:
 //	    	  EditorView.addConnectorToDiagram(e);
 	    	  editorView.addConstraintToDiagram(e);
-			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+			  editorView.setActiveItem(ActiveItems.NO_ACTIVE_ITEM);
 	    	  editorView.setToolDragImage(null); break;
 	      case DRAGGING_TOOL_EXCLUDES:
 //	    	  EditorView.addConnectorToDiagram(e);
 	    	  editorView.addConstraintToDiagram(e);
-			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+			  editorView.setActiveItem(ActiveItems.NO_ACTIVE_ITEM);
 	    	  editorView.setToolDragImage(null); break;
 	      case DRAGGING_TOOL_ALT_GROUP:
 //	    	  EditorView.addAltGroupToDiagram(e);
 	    	  editorView.addAltGroupToDiagram(e);
-			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+			  editorView.setActiveItem(ActiveItems.NO_ACTIVE_ITEM);
 	    	  editorView.setToolDragImage(null); break;
 	      case DRAGGING_TOOL_OR_GROUP:
 //	    	  EditorView.addOrGroupToDiagram(e);
 	    	  editorView.addOrGroupToDiagram(e);
-			  editorView.setActiveItem(activeItems.NO_ACTIVE_ITEM);
+			  editorView.setActiveItem(ActiveItems.NO_ACTIVE_ITEM);
 	    	  editorView.setToolDragImage(null); break;
 	      default: break;
 		}
@@ -728,70 +709,36 @@ public class EditorController implements
 	@Override
 	public void mouseEntered(MouseEvent e) {}
 
-	/**
-	 * Checks if the rectangle of comp contains the point location
-	 * @param comp - JComponent that can contains location
-	 * @param location - Point that can be contained in comp
-	 * @return
-	 */
-	private boolean containsPoint(JComponent comp, Point location) {		
-	  System.out.println("Clicked on position: "+location
-		  +"\ncomp.getVisibleRect()"+comp.getVisibleRect());
-	  if (comp.getVisibleRect().contains(location)) return true;
-	  else return false;
-	}
+	@Override
+	public void mouseExited(MouseEvent e) {}
 
 	@Override
-	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void windowOpened(WindowEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void windowOpened(WindowEvent e) {}
 
 	@Override
 	public void windowClosing(WindowEvent e) {
-		// TODO Auto-generated method stub
-		
+      if(modified && editorView.confirmSaveDiagramDialog()==1) saveDiagram();
+      modified=false;    	  
 	}
 
 	@Override
-	public void windowClosed(WindowEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void windowClosed(WindowEvent e) {}
 
 	@Override
-	public void windowIconified(WindowEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void windowIconified(WindowEvent e) {}
 
 	@Override
-	public void windowDeiconified(WindowEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void windowDeiconified(WindowEvent e) {}
 
 	@Override
-	public void windowActivated(WindowEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void windowActivated(WindowEvent e) {}
 
 	@Override
-	public void windowDeactivated(WindowEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void windowDeactivated(WindowEvent e) {}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-	  String diagDataPath=null;
+//	  String diagDataPath=null;
 	  ArrayList<String> modelDataPaths=null;
 	  boolean done=false;
 	  int operation=0;
@@ -910,8 +857,6 @@ public class EditorController implements
       }     
 	  //popup menu command: Ungroup Element
       else if(e.getActionCommand().equals("Ungroup")){
-        System.out.println("Ungrouping: "+popupElement.getName());
-        System.out.println("Other end: "+((AnchorPanel)popupElement).getOtherEnd().getName());
     	editorView.ungroupAnchor((AnchorPanel)popupElement);
         editorView.repaintRootFrame();
 
@@ -966,7 +911,7 @@ public class EditorController implements
       else if(e.getActionCommand().equals("New Diagram")){
     	
     	//asking the user if the current diagram must be saved
-    	if(modified) saveDiagram();
+    	if(modified && editorView.confirmSaveDiagramDialog()==1) saveDiagram();
     	modified=false;    	  
     	  
     	//creating model
@@ -998,79 +943,13 @@ public class EditorController implements
       }      
 	  //menuFiles command: Load Diagram
       else if(e.getActionCommand().equals("Load Diagram")){
-  		String s1=null;		
-  		String diagramDataPath=null;
-  		ArrayList<String> featureModelDataPaths=new ArrayList<String>();
-  		String projectName=null;
-
-  		//asking the user if the current diagram must be saved
-    	if(modified) saveDiagram();
-    	modified=false;    	  
-
-  		//loading general diagram save file
-  		String loadDirectory=CMTConstants.saveDiagramDir;
-  		
-  		String s = null;
-  		if((s = editorView.loadXMLDialog("Load Diagram", loadDirectory)) != null) try{
-  		  BufferedReader br1 = new BufferedReader(new FileReader(s));
-  		  projectName=br1.readLine();
-  		  diagramDataPath=br1.readLine();
-  		  while( (s1 = br1.readLine()) != null ) featureModelDataPaths.add(s1);
-  		  br1.close();
-  		}catch (Exception ex) {
-  		  editorView.errorDialog("Error while reading general save file");
-  		  ex.printStackTrace();
-  		  return;
-  		}
-  		else return;
-  		  
-  		//creating model
-  		try{
-  		  editorModel= EditorModel.loadSavedModel(featureModelDataPaths);
-  		}catch(Exception ex){
-  		  ex.printStackTrace();
-  		  editorView.errorDialog("Error while loading model.");
-  		  return;
-  		}
-
-  		//getting the close opearation for this frame
-  		operation=editorView.getOnCloseOperation();
-
-  		//creating an empty view
-  		currentView=editorView;
-  		editorView= new EditorView();
-
-  		//setting diagrams save path
-  		setSavePath(projectName);
-
-  		//adding the view as observer to the model
-  		editorModel.addObserver(editorView);
-
-		//setting default close operation for the new frame
-		editorView.setOnCloseOperation(operation);
-
-  		if( !editorView.prepareUI(this) ){
-  		  System.out.println("Controller not set. Closing...");
-  		  return;
-  		}
-
-  		//loading saved view data
-  		try{
-  		  editorView.loadSavedDiagram(diagramDataPath);
-  		}catch(Exception ex){
-  		  ex.printStackTrace();
-  		  editorView.errorDialog("Error while loading diagram.");
-  		  return;
-  		}
-  		
-  		//disposing of old frame
-  		currentView.dispose();
+    	loadDiagram();
       }
 	  //menuFiles command: Import from SXFM
       else if(e.getActionCommand().equals("Import from SXFM")){
 
     	//asking the user if the current diagram must be saved
-      	if(modified) saveDiagram();
+      	if(modified && editorView.confirmSaveDiagramDialog()==1) saveDiagram();
       	modified=false;    	  
 
   		String s = null;
@@ -1107,7 +986,7 @@ public class EditorController implements
   		}
 
   		//creating view from model
-  		createViewFromModel();
+  		createDiagramFromModel();
 
   		//disposing of old frame
   		currentView.dispose();    	
@@ -1123,14 +1002,12 @@ public class EditorController implements
     	  if(modelDataPaths==null) editorView.errorDialog("Error during save.");
     	  else try{
     		//checking if the SXFM files save directory must be created
-      		File dir=new File(CMTConstants.saveDiagramDir);		
-//    		File dir=new File(sxfmPath+"/"+saveFilesSubPath);		
+      		File dir=new File(CMTConstants.saveDiagramDir);			
     		if(!dir.isDirectory() && !dir.mkdirs() ) 
     		  throw new IOException("Save Directory can't be created.");
 
     		PrintWriter pw1 = new PrintWriter(new BufferedWriter(
   					new FileWriter(CMTConstants.saveDiagramDir+"/"+s) ));
-//    				new FileWriter(sxfmPath+"/"+saveFilesSubPath+"/"+s) ));
     		for(String path : modelDataPaths) pw1.println(path);
     		pw1.close();  	
     	  }catch (IOException ex){
@@ -1141,84 +1018,116 @@ public class EditorController implements
       }
 	  //menuFiles command: Export as PNG
       else if(e.getActionCommand().equals("Export as PNG")){
-    	editorView.exportAsImageFile(imagesPath, "PNG");
+    	editorView.exportAsImageFile(imagesPath, "png");
       }
 	  //menuFiles command: Export as GIF
       else if(e.getActionCommand().equals("Export as GIF")){
-    	editorView.exportAsImageFile(imagesPath, "GIF");
+    	editorView.exportAsImageFile(imagesPath, "gif");
       }
 	  //menuFiles command: Delete Diagram
       else if(e.getActionCommand().equals("Delete Diagram")){
-        String s1=null;		
-        String diagramDataPath=null;
-        ArrayList<String> featureModelDataPaths=new ArrayList<String>();
-        String projectName=null;
         File tmpFile=null;
-
-        //loading general diagram save file
-        String loadDirectory=CMTConstants.saveDiagramDir;
-
         String s = null;
-        if((s = editorView.loadXMLDialog("Delete Diagram", loadDirectory)) != null) try{
-          BufferedReader br1 = new BufferedReader(new FileReader(s));
-          projectName=br1.readLine();
-          diagramDataPath=br1.readLine();
-          while( (s1 = br1.readLine()) != null ) featureModelDataPaths.add(s1);
-          br1.close();
-        }catch (Exception ex) {
-          editorView.errorDialog("Error while reading general save file");
-          ex.printStackTrace();
-          return;
-        }    	  
-  		else return;
-
-        //deleting diagram data file
-        tmpFile=new File(diagramDataPath);
-        if (tmpFile.exists()){
-          System.out.println("diagramDataPath="+diagramDataPath+" - file exists");
-          tmpFile.delete();
-        }        
         
-        //deleting all feature model data files
-        for(int i=0; i< featureModelDataPaths.size(); ++i){
-          tmpFile=new File(featureModelDataPaths.get(i));
+        if((s = editorView.loadXMLDialog("Delete Diagram", CMTConstants.saveDiagramDir)) != null){
+          //deleting general save file
+          tmpFile=new File(s);
           if (tmpFile.exists()){
-        	System.out.println("featureModelDataPaths.get(i)="+featureModelDataPaths.get(i)+" - file exists");
+        	System.out.println("general save file="+tmpFile.getPath()+" - file exists");
         	tmpFile.delete();
-          }        	
+          }  
         }
-
-        //deleting general save file
-        tmpFile=new File(s);
-        if (tmpFile.exists()){
-          System.out.println("general save file="+tmpFile.getPath()+" - file exists");
-          tmpFile.delete();
-        }        	
-        
-        //deleting save directory if empty
-        tmpFile=new File(CMTConstants.saveDiagramDir+"/"+projectName);
-        if (tmpFile.exists() && tmpFile.isDirectory()){
-      	  System.out.println(tmpFile.getPath()+" folder exists");      	  
-      	  tmpFile.delete();//the directory will be deleted only if empty
-        }        	
-      
       }
 	  //menuFiles command: Exit
       else if(e.getActionCommand().equals("Exit")){
       	//asking the user if the current diagram must be saved
-      	if(modified) saveDiagram();
+      	if(modified && editorView.confirmSaveDiagramDialog()==1) saveDiagram();
 
-      	editorView.dispose();
-      	editorView=null;
-      	editorModel=null;
+      	if(editorView.getOnCloseOperation()==JFrame.DISPOSE_ON_CLOSE){
+      	  editorView.dispose();
+      	  editorView=null;
+      	  editorModel=null;
+      	}
+      	else System.exit(0);
       }
       //menuView command: View Commonality/Variability
       else if(e.getActionCommand().equals("View Commonality/Variability")){
     	if( ((JCheckBoxMenuItem)editorView.getMenuViewCommsOrVars()).isSelected() )
     	  editorView.viewCommVarsDistinction(true);
     	else editorView.viewCommVarsDistinction(false);
-      }
-      
+      }      
+	}
+	
+	private void loadDiagram() {
+		int operation;
+		EditorView currentView;
+  		String projectName=null;
+
+  		SAXParser saxParser = null;
+  		InputStream stream = null;
+  		SAXParserFactory saxFactory = SAXParserFactory.newInstance();
+  		FDEXMLHandler xmlHandler = new FDEXMLHandler();  		
+  		
+  		//asking the user if the current diagram must be saved
+    	if(modified && editorView.confirmSaveDiagramDialog()==1) saveDiagram();
+    	modified=false;    	  
+
+  		//loading diagram save file
+  		String loadDirectory=CMTConstants.saveDiagramDir;
+  		
+  		String s = null;
+  		if((s = editorView.loadXMLDialog("Load Diagram", loadDirectory)) != null) try{
+  		  stream=new FileInputStream(s);
+  		  saxParser = saxFactory.newSAXParser();
+  		  saxParser.parse(stream, xmlHandler);  			  			
+  		}catch (Exception ex) {
+  		  editorView.errorDialog("Error while reading save file");
+  		  ex.printStackTrace();
+  		  return;
+  		}
+  		else return;
+  		  
+  		//creating model
+  		try{
+  		  editorModel= EditorModel.loadSavedModel2(xmlHandler);
+  		}catch(Exception ex){
+  		  ex.printStackTrace();
+  		  editorView.errorDialog("Error while loading model.");
+  		  return;
+  		}
+
+  		//getting the close opearation for this frame
+  		operation=editorView.getOnCloseOperation();
+
+  		//creating an empty view
+  		currentView=editorView;
+  		editorView= new EditorView();
+
+  		//setting diagrams save path
+  		setSavePath(projectName);
+
+  		//adding the view as observer to the model
+  		editorModel.addObserver(editorView);
+
+		//setting default close operation for the new frame
+		editorView.setOnCloseOperation(operation);
+
+  		if( !editorView.prepareUI(this) ){
+  		  System.out.println("Controller not set. Closing...");
+  		  return;
+  		}
+
+  		//loading saved view data
+  		try{
+  		  editorView.loadSavedDiagram2(xmlHandler);
+  		}catch(Exception ex){
+  		  ex.printStackTrace();
+  		  editorView.errorDialog("Error while loading diagram.");
+  		  return;
+  		}
+  		
+  		//disposing of old frame
+  		currentView.dispose();
 	}
 
 	/**
@@ -1227,14 +1136,26 @@ public class EditorController implements
 	private void saveDiagram() {
 	  String diagDataPath = null;
 	  ArrayList<String> modelDataPaths = null;
-	  String s = null;			
+//	  String s = null;	
+	  File s = null;	
+	  String xml="<?xml version=\"1.0\" encoding=\"UTF-8\"?><DiagramData>";
 	  boolean viewCommsOrVarsWasSelected=false;
-	  if((s = editorView.assignNameDiagramDialog()) != null){
-		diagDataPath=editorView.saveDiagram(diagramPath, s);
-		modelDataPaths=editorModel.saveModel(diagramPath, s);
-		if(diagDataPath==null || modelDataPaths==null) 
-		  editorView.errorDialog("Error during save.");
+		
+	  //checking if the diagrams save directory must be created
+	  File dir=new File(diagramPath);
+	  if(!dir.isDirectory() && !dir.mkdirs() ){
+		editorView.errorDialog("Save Directory can't be created.");
+		return;
+	  }
+	  
+	  if((s = editorView.assignNameDiagramDialog(diagramPath)) != null){
+		diagDataPath=editorView.saveDiagram2(/*diagramPath, */s);
+		modelDataPaths=editorModel.saveModel2(/*diagramPath, */s);
+		if(diagDataPath==null || modelDataPaths==null) editorView.errorDialog("Error during save.");
 		else try{
+		  for(String featureModel : modelDataPaths) xml+=featureModel;
+		  xml+=diagDataPath;
+		  xml+="</DiagramData>";
 			
 		  //temporary deactivating visual styles before save
 		  if( ((JCheckBoxMenuItem)editorView.getMenuViewCommsOrVars()).isSelected() ){
@@ -1242,19 +1163,14 @@ public class EditorController implements
 			editorView.viewCommVarsDistinction(false);
 			viewCommsOrVarsWasSelected=true;
 		  }
-			
-		  //checking if the diagrams save directory must be created
-		  File dir=new File(CMTConstants.saveDiagramDir);
-		  if(!dir.isDirectory() && !dir.mkdirs() ) 
-			throw new IOException("Save Directory can't be created.");
 
-		  PrintWriter pw1 = new PrintWriter(new BufferedWriter(
-			new FileWriter(CMTConstants.saveDiagramDir+"/"+s) ));
+//		  PrintWriter pw1 = new PrintWriter(new BufferedWriter(
+//			new FileWriter(CMTConstants.saveDiagramDir+"/"+s) ));
+
+		  PrintWriter pw1 = new PrintWriter(new BufferedWriter(new FileWriter(s)));
 
 		  //printing general save data in the file
-		  pw1.println(projectName);
-		  pw1.println(diagDataPath);
-		  for(String path : modelDataPaths) pw1.println(path);
+		  pw1.println(xml);
 		  pw1.close();  
 		  
 		  //reactivating visual styles after save
@@ -1265,8 +1181,7 @@ public class EditorController implements
 
 		  //updating the modified field
 		  modified=false;
-		  //  			editorView.setModified(false);
-		  //  			editorModel.setModified(false);
+		  
 		}catch (IOException ex){
 		  System.out.println("Exception saveDiagram: " + ex.getMessage());
 		  ex.printStackTrace();
@@ -1312,19 +1227,23 @@ public class EditorController implements
 		if (comp==null) return;
 		//anchor directly dropped on a feature inside the diagram panel
 		else if (comp.getName().startsWith(EditorView.featureNamePrefix)){
-		  System.out.println("anchor.getName()= "+anchor.getName()
+		  /* ***DEBUG*** */
+		  if(debug) System.out.println("anchor.getName()= "+anchor.getName()
 				  			+"\notherEnd.getParent().getName(): "+otherEnd.getParent().getName());
+		  /* ***DEBUG*** */
 			
 		  if( anchor.getName().startsWith(EditorView.endMandatoryNamePrefix)||
 			  anchor.getName().startsWith(EditorView.endOptionalNamePrefix) ){
-			System.out.println("otherEnd.getName(): "+otherEnd.getName());
-			System.out.println("otherEnd.getParent().getName(): "+otherEnd.getParent().getName());
+
+			/* ***DEBUG*** */
+			if(debug) System.out.println("otherEnd.getName(): "+otherEnd.getName()
+				+"\notherEnd.getParent().getName(): "+otherEnd.getParent().getName());			
+			/* ***DEBUG*** */
+
 			if( ( otherEnd.getName().startsWith(EditorView.startMandatoryNamePrefix)
 				 || otherEnd.getName().startsWith(EditorView.startOptionalNamePrefix) ) 
 				&& otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix) ){
 		      //about to link 2 features by a connector
-			  System.out.println("about to link 2 features by a connector_R");
-//			  editorModel.addMandatoryLink( (otherEnd.getParent().getName(), comp.getName() );
 			  if(anchor.getName().startsWith(EditorView.endMandatoryNamePrefix))
 				editorModel.addMandatoryLink( ((FeaturePanel)otherEnd.getParent()).getID(), 
 					((FeaturePanel)comp).getID() );
@@ -1336,7 +1255,6 @@ public class EditorController implements
 			else if( otherEnd.getName().startsWith(EditorView.orGroupNamePrefix)
 					 || otherEnd.getName().startsWith(EditorView.altGroupNamePrefix) ){
 			  //about to add a feature to a group
-			  System.out.println("about to add a feature to a group");
 			  if(otherEnd.getName().startsWith(EditorView.orGroupNamePrefix)) 
 				type=GroupTypes.OR_GROUP;
 			  else 
@@ -1352,10 +1270,8 @@ public class EditorController implements
 		  }
 		  if ( (anchor.getName().startsWith(EditorView.startMandatoryNamePrefix)
 				|| anchor.getName().startsWith(EditorView.startOptionalNamePrefix) )
-			  && otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix)){
+			  && otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix)){			  
 			//about to link 2 features by a connector
-			System.out.println("about to link 2 features by a connector");
-
 			if(anchor.getName().startsWith(EditorView.startMandatoryNamePrefix))				
 				editorModel.addMandatoryLink( ((FeaturePanel)comp).getID(),
 						((FeaturePanel)otherEnd.getParent()).getID() );
@@ -1367,8 +1283,6 @@ public class EditorController implements
 		  }
 		  //the other end of the connector is not anchored to anything
 		  if (otherEnd.getParent().getName().startsWith(EditorView.diagramPanelName) ){
-			System.out.println("about to add an anchor to a feature");
-//			EditorView.addAnchorToFeature(); return;
 			editorView.addAnchorToFeature(); return;
 		  }
 		}
@@ -1376,21 +1290,15 @@ public class EditorController implements
 		else if (comp.getName().startsWith(EditorView.altGroupNamePrefix)
 				 || comp.getName().startsWith(EditorView.orGroupNamePrefix)){
 		  //about to merge a connector with a group
-		  System.out.println("about to merge a connector with a group");
-		  if(otherEnd.getName().startsWith(EditorView.orGroupNamePrefix)) 
-			type=GroupTypes.OR_GROUP;
-		  else 
-			type=GroupTypes.ALT_GROUP;
+		  if(otherEnd.getName().startsWith(EditorView.orGroupNamePrefix))  type=GroupTypes.OR_GROUP;
+		  else  type=GroupTypes.ALT_GROUP;
 		  
 		  //group is not owned by any feature
 		  if(comp.getParent().getName()==null || comp.getParent().getName().startsWith(EditorView.diagramPanelName)){
 			if(otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix))
 			  editorModel.mergeConnectorWithGroup( null, ((FeaturePanel)otherEnd.getParent()).getID(), 
 					  							   comp.getName(), type);
-			else 
-			  editorModel.mergeConnectorWithGroup(null, null, comp.getName(), type);				
-//			  editorModel.mergeConnectorWithGroup( null, otherEnd.getParent().getName(), comp.getName());
-//			  else editorModel.mergeConnectorWithGroup( comp.getParent().getName(), otherEnd.getParent().getName(), comp.getName());
+			else  editorModel.mergeConnectorWithGroup(null, null, comp.getName(), type);
 		  }
 		  //group is owned by a feature
 		  else{
@@ -1419,19 +1327,17 @@ public class EditorController implements
 	  
 	  //group dropped directly on the diagram panel
 	  if (comp==null) return;
+	  
 	  //group dropped on a feature inside the diagram panel
 	  else if (comp.getName().startsWith(EditorView.featureNamePrefix)){
-		  
-		//the group has no members
-		if (group.getMembers().size()==0 ){
-		  editorView.addAnchorToFeature(); return;
-		}
-		else{
-		  //about to add group to the feature comp
-		  System.out.println("about to add a group to a feature");
-		  editorModel.addGroupToFeature( ((FeaturePanel)comp).getID(), group.getName() );
+		
+		if (group.getMembers().size()==0 ){//the group has no members
+		  editorView.addAnchorToFeature(); 
 		  return;
-			
+		}
+		else{//about to add group to the feature comp
+		  editorModel.addGroupToFeature( ((FeaturePanel)comp).getID(), group.getName() );
+		  return;			
 		}
 	  }
 	}
@@ -1504,33 +1410,33 @@ public class EditorController implements
 	    editorView.createSelectionGroup(e);
 	}
 
-	/**
-	 * Detach an anchor or group from the feature featurePanel, attaching it to the diagram.
-	 * 
-	 * @param feature - the feature from wich the anchor must be detached
-	 * @param anchor - the anchor to detach
-	 */
-	private void detachAnchor(FeaturePanel feature, JComponent anchor) {
-		JComponent anchorFocused;
-		int anchorPanelOnScreenX;
-		int anchorPanelOnScreenY;
-		anchorFocused=(JComponent)anchor;
-		editorView.setLastAnchorFocused(anchorFocused);
-
-		anchorPanelOnScreenX=(int)anchorFocused.getLocationOnScreen().getX();
-		anchorPanelOnScreenY=(int)anchorFocused.getLocationOnScreen().getY();
-		feature.remove(anchorFocused);
-		feature.validate();
-		
-		editorView.getLastAnchorFocused().setLocation(
-		  (int)(anchorPanelOnScreenX-editorView.getDiagramPanel().getLocationOnScreen().getX()),
-		  (int)(anchorPanelOnScreenY-editorView.getDiagramPanel().getLocationOnScreen().getY()));
-		editorView.getDiagramPanel().setLayer(editorView.getLastAnchorFocused(), 0);
-		editorView.getDiagramPanel().add(editorView.getLastAnchorFocused());
-		editorView.getDiagramPanel().setComponentZOrder(editorView.getLastAnchorFocused(), 0);
-//		EditorView.moveComponentToTop(editorView.getLastAnchorFocused());
-		editorView.moveComponentToTop(editorView.getLastAnchorFocused());
-	}
+//	/**
+//	 * Detach an anchor or group from the feature featurePanel, attaching it to the diagram.
+//	 * 
+//	 * @param feature - the feature from wich the anchor must be detached
+//	 * @param anchor - the anchor to detach
+//	 */
+//	private void detachAnchor(FeaturePanel feature, JComponent anchor) {
+//		JComponent anchorFocused;
+//		int anchorPanelOnScreenX;
+//		int anchorPanelOnScreenY;
+//		anchorFocused=(JComponent)anchor;
+//		editorView.setLastAnchorFocused(anchorFocused);
+//
+//		anchorPanelOnScreenX=(int)anchorFocused.getLocationOnScreen().getX();
+//		anchorPanelOnScreenY=(int)anchorFocused.getLocationOnScreen().getY();
+//		feature.remove(anchorFocused);
+//		feature.validate();
+//		
+//		editorView.getLastAnchorFocused().setLocation(
+//		  (int)(anchorPanelOnScreenX-editorView.getDiagramPanel().getLocationOnScreen().getX()),
+//		  (int)(anchorPanelOnScreenY-editorView.getDiagramPanel().getLocationOnScreen().getY()));
+//		editorView.getDiagramPanel().setLayer(editorView.getLastAnchorFocused(), 0);
+//		editorView.getDiagramPanel().add(editorView.getLastAnchorFocused());
+//		editorView.getDiagramPanel().setComponentZOrder(editorView.getLastAnchorFocused(), 0);
+////		EditorView.moveComponentToTop(editorView.getLastAnchorFocused());
+//		editorView.moveComponentToTop(editorView.getLastAnchorFocused());
+//	}
 
 	/**
 	 * Sets the paths used for saving the project and for exported SXFM and images files.
@@ -1538,7 +1444,7 @@ public class EditorController implements
 	 * @param projectName - the name of analisys project, used for saving the project. 
 	 * If null, a default directory will be used.
 	 */
-	public void setSavePath(/*String pathProject, */String projectName){		
+	public void setSavePath(String projectName){		
 		if(projectName!=null){
 		  this.diagramPath=CMTConstants.saveDiagramDir+"/"+projectName;
 		  this.projectName=projectName;
@@ -1548,11 +1454,7 @@ public class EditorController implements
 		  this.projectName=CMTConstants.customSaveDiagramDir;
 		}
 		this.sxfmPath=diagramPath+CMTConstants.sxfmSubPath;
-		this.imagesPath=diagramPath+CMTConstants.imagesSubPath;		
-//		this.diagramPath=pathProject;		
-//		this.sxfmPath=pathProject+sxfmSubPath;
-//		this.imagesPath=pathProject+imagesSubPath;
-//		this.projectName=diagramPath;
+		this.imagesPath=diagramPath+CMTConstants.imagesSubPath;	
 		System.out.println("setSavePath(): diagramPath="+diagramPath+"\nprojectName="
 							+projectName+"\nthis.projectName="+this.projectName);
 	}
@@ -1563,22 +1465,19 @@ public class EditorController implements
 	public void addStartingfeatures() {
 		ArrayList<String> startingCommonalities=editorView.getStartingCommonalities();			
 		ArrayList<String> startingVariabilities=editorView.getStartingVariabilities();
-		JLayeredPane diagramPanel=editorView.getDiagramPanel();
-		Point position=new Point();
 		int i=0;
 		String[] strArr=projectName.split("/");
 		String rootName = strArr[strArr.length-1];
 		//adding root feature
 		System.out.println("Adding root: "+rootName);
-		editorModel.addUnrootedFeatureNoNotify(rootName, ""+0, FeatureTypes.COMMONALITY);
+		editorModel.addUnrootedFeatureNoNotify(rootName, ""+0, /*1*/FeatureTypes.COMMONALITY);
 		++i;
 //		editorView.incrFeaturesCount();
 
 		//adding starting commonalities
-
 		for(String name : startingCommonalities){
 		  System.out.println("Adding commonality: "+name);
-		  editorModel.addSubFeatureNoNotify(name, ""+0, ""+i, FeatureTypes.COMMONALITY);
+		  editorModel.addSubFeatureNoNotify(name, ""+0, ""+i, /*1*/FeatureTypes.COMMONALITY);
 		  ++i;
 //		  editorView.incrFeaturesCount();			
 		}
@@ -1601,7 +1500,7 @@ public class EditorController implements
 		//adding starting variabilities
 		for(String name : startingVariabilities){
 		  System.out.println("Adding variability: "+name);
-		  editorModel.addSubFeatureNoNotify(name, ""+0, ""+i, FeatureTypes.VARIABILITY);
+		  editorModel.addSubFeatureNoNotify(name, ""+0, ""+i, /*0*/FeatureTypes.VARIABILITY);
 		  ++i;
 //		  editorView.incrFeaturesCount();			
 		}
@@ -1620,14 +1519,14 @@ public class EditorController implements
 		}
  		*/	
 
-		createViewFromModel();
+		createDiagramFromModel();
 	}
 
 	/**
 	 * Creates a feature diagram from a feature model. The model must represent a single feature tree,
 	 *  with only 1 feature without parent(the root feature).
 	 */
-	private void createViewFromModel() {
+	private void createDiagramFromModel() {
 		int[] featureLogicCell=null;//coordinates of a cell in the logic grid
 		int gridSize=0;
 		ArrayList<Entry<FeatureNode, int[]>> nodesToExpand = null;//next feature nodes to elaborate
@@ -1671,7 +1570,7 @@ public class EditorController implements
 
 		editorView.directlyAddFeatureToDiagram(
 				rootFeature.getName(), EditorView.featureNamePrefix+rootFeature.getID(), 
-				rootLocationOnDiagram.x, rootLocationOnDiagram.y, featureSize.width, featureSize.height);
+				rootLocationOnDiagram.x, rootLocationOnDiagram.y, featureSize.width, featureSize.height, null);
 		
 		editorView.incrFeaturesCount();			
 		
@@ -1734,7 +1633,7 @@ public class EditorController implements
 
 		  //calculating total number of children
 		  totalChildren=currentNode.getSubFeatures().size();
-		  for(GroupNode group : currentNode.getSubGroups()) totalChildren+=group.getMembers().size();
+		  for(GroupNode group : currentNode.getSubGroups()) totalChildren+=group.getSubFeatures().size();
 
 		  //calulating first child position in the logic grid
 		  if(totalChildren%2==0) firstChildPosition[0]=currentNodePosition[0]-totalChildren/2+1;
@@ -1769,7 +1668,8 @@ public class EditorController implements
 		  locationInFeature.y=featureSize.height-13;
 
 		  for(GroupNode group : currentNode.getSubGroups()){
-			  if(group.getCardinality().y>1 || group.getCardinality().y<0) continue;//this is an or group
+//			  if(group.getCardinality().y>1 || group.getCardinality().y<0) continue;//this is an or group
+			  if(group.getDecompositionType()!=GroupTypes.ALT_GROUP) continue;//this is not an alternative group
 			  else{
 
 				  //updating maxOrGroupID
@@ -1789,7 +1689,7 @@ public class EditorController implements
 						  ItemsType.ALT_GROUP_START_CONNECTOR);
 
 				  //adding group members
-				  for(FeatureNode child : group.getMembers()){
+				  for(FeatureNode child : group.getSubFeatures()){
 					  childLocationOnDiagram.x =(firstChildPosition[0]+childrenPlaced)*(featureSize.width+10);
 					  childLocationOnDiagram.y=firstChildPosition[1]*(featureSize.height+30);
 					  childLocationOnDiagram.x+=(int)diagramPanel.getLocationOnScreen().getX();
@@ -1798,7 +1698,7 @@ public class EditorController implements
 					  //adding child feature to the diagram
 					  featurePanel = editorView.directlyAddFeatureToDiagram(
 							  child.getName(), EditorView.featureNamePrefix+child.getID(), 
-							  childLocationOnDiagram.x, childLocationOnDiagram.y, featureSize.width, featureSize.height);
+							  childLocationOnDiagram.x, childLocationOnDiagram.y, featureSize.width, featureSize.height, null);
 
 					  //connecting child with the group
 					  endAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
@@ -1855,7 +1755,7 @@ public class EditorController implements
 			  //adding sub feature to the diagram
 			  featurePanel = editorView.directlyAddFeatureToDiagram(
 					  subFeature.getName(), EditorView.featureNamePrefix+subFeature.getID(), 
-					  childLocationOnDiagram.x, childLocationOnDiagram.y, featureSize.width, featureSize.height);
+					  childLocationOnDiagram.x, childLocationOnDiagram.y, featureSize.width, featureSize.height, null);
 
 			  //getting start anchor panel
 			  if(subFeature.getCardinality().x>0) startAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(
@@ -1897,7 +1797,8 @@ public class EditorController implements
 		  locationInFeature.x=featureSize.width/2+7; 
 		  locationInFeature.y=featureSize.height-13;		  
 		  for(GroupNode group : currentNode.getSubGroups()){
-			  if(group.getCardinality().y==1) continue;//this is an alternative group
+//			  if(group.getCardinality().y==1) continue;//this is an alternative group
+			  if(group.getDecompositionType()!=GroupTypes.OR_GROUP) continue;//this is not an or group
 			  else{
 
 				  //updating maxAltGroupID
@@ -1917,7 +1818,7 @@ public class EditorController implements
 						  ItemsType.OR_GROUP_START_CONNECTOR);
 
 				  //adding group members
-				  for(FeatureNode child : group.getMembers()){
+				  for(FeatureNode child : group.getSubFeatures()){
 					  childLocationOnDiagram.x =(firstChildPosition[0]+childrenPlaced)*(featureSize.width+10);
 					  childLocationOnDiagram.y=firstChildPosition[1]*(featureSize.height+30);
 					  childLocationOnDiagram.x+=(int)diagramPanel.getLocationOnScreen().getX();
@@ -1926,7 +1827,7 @@ public class EditorController implements
 					  //adding child feature to the diagram
 					  featurePanel = editorView.directlyAddFeatureToDiagram(
 							  child.getName(), EditorView.featureNamePrefix+child.getID(), 
-							  childLocationOnDiagram.x, childLocationOnDiagram.y, featureSize.width, featureSize.height);
+							  childLocationOnDiagram.x, childLocationOnDiagram.y, featureSize.width, featureSize.height, null);
 
 					  //connecting child with the group
 					  endAnchorPanel=(AnchorPanel)editorView.buildConnectionDot(

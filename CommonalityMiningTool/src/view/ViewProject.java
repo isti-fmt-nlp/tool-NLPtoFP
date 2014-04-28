@@ -14,9 +14,13 @@ import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.net.URL;
+
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -29,8 +33,15 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
+import javax.swing.Timer;
 
-public class ViewProject implements Observer, Runnable{
+import main.OSUtils;
+import main.OSUtils.ToolNames;
+
+public class ViewProject implements Observer/*, Runnable*/{
+
+	/** URL of the Feature Diagram Editor Tool tray icon*/
+	private static final URL trayIconURL = ViewProject.class.getResource("/Tray/Tray Icon CMT_2.png");    
 
 	private static boolean verbose=false;//variable used to activate prints in the code
 	
@@ -67,9 +78,11 @@ public class ViewProject implements Observer, Runnable{
 	
 	private JMenuItem menuTree = null;
 	
-	private Thread throbber=null;
+//	private Thread throbber=null;
+	private Timer timer=null;
+	private JFrame waitFrame = null;
 	
-	private boolean stateThrobber = false;
+//	private boolean stateThrobber = false;
 
 	private JButton lastButtonSelectionEnd = null;//the last selection button loaded into the central panel 
 	
@@ -82,7 +95,7 @@ public class ViewProject implements Observer, Runnable{
 	private ViewPanelCentral panelCentralProject = null;
 	
 	private JSplitPane splitterPanelMain = null;
-	
+
 //	private JSplitPane splitterPanelInner = null;
 	
 	/** 
@@ -96,8 +109,8 @@ public class ViewProject implements Observer, Runnable{
 		/* Initializing JFrame */
 		frameProject.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frameProject.setLayout(new BorderLayout());				
-		frameProject.setSize(Toolkit.getDefaultToolkit().getScreenSize());
-		frameProject.setPreferredSize(Toolkit.getDefaultToolkit().getScreenSize());
+//		frameProject.setSize(Toolkit.getDefaultToolkit().getScreenSize());
+//		frameProject.setPreferredSize(Toolkit.getDefaultToolkit().getScreenSize());
 
 		frameProject.setJMenuBar(menu);
 		
@@ -119,44 +132,50 @@ public class ViewProject implements Observer, Runnable{
 
 	}
 	
-	/** 
-	 * Thread: Manages the throbber.
-	 */
-	@Override
-	public void run(){
-		JLabel jl1 = new JLabel("Analysing input files...");
-		jl1.setBounds(new Rectangle(20,10,250,30));
-		
-		System.out.println("getClass().getResource(/Throbber/\"throbber.gif\"): "+getClass().getResource("/Throbber/throbber.gif"));
-		System.out.println("getClass(): "+getClass());
-		ImageIcon i = new ImageIcon(getClass().getResource("/Throbber/throbber.gif"));
-
-		JLabel jl2  = new JLabel();
-		jl2.setBounds(new Rectangle(270,10,35,35));
-		jl2.setIcon(i);		
-		
-		JFrame jf = new JFrame("Loading...");
-		jf.setLayout(null);
-		jf.setBackground(Color.WHITE);
-		jf.setBounds(375, 375, 350, 80);
-		jf.add(jl1);
-		jf.add(jl2);
-		jf.setVisible(true);
-		
-		while(!stateThrobber){ jf.repaint(); /*System.out.println("throbbing...");*/}
-		
-		jf.setVisible(false);
-		jf.dispose();
-	}
+//	/** 
+//	 * Thread: Manages the throbber.
+//	 */
+//	@Override
+//	public void run(){
+//		JLabel jl1 = new JLabel("Analysing input files...");
+//		jl1.setBounds(new Rectangle(20,10,250,30));
+//		
+//		ImageIcon throbberIcon = new ImageIcon(getClass().getResource("/Throbber/throbber.gif"));
+//
+//		JLabel jl2  = new JLabel();
+//		jl2.setBounds(new Rectangle(270,10,35,35));
+//		jl2.setIcon(throbberIcon);		
+//		
+//		waitFrame = new JFrame("Loading...");
+//		waitFrame.setLayout(null);
+//		waitFrame.setBackground(Color.WHITE);
+//		waitFrame.setBounds(375, 375, 350, 80);
+//		waitFrame.add(jl1);
+//		waitFrame.add(jl2);
+//		waitFrame.setVisible(true);
+//		
+//		timer = new Timer(100, new ActionListener() {
+//		    @Override
+//		    public void actionPerformed(ActionEvent ae) {
+//		        waitFrame.repaint();
+//		    }
+//		});
+//		
+//		/*if(!stateThrobber)*/ timer.start();
+////		while(!stateThrobber) jf.repaint(); 
+//		
+////		waitFrame.setVisible(false);
+////		waitFrame.dispose();
+//	}
 	
-	/** 
-	 * Sets the throbber's state.
-	 * 
-	 * @param b - boolean indicating throbber state to be set
-	 */
-	private void setStateThrobber(boolean b){
-		stateThrobber = b; 
-	}
+//	/** 
+//	 * Sets the throbber's state.
+//	 * 
+//	 * @param b - boolean indicating throbber state to be set
+//	 */
+//	private void setStateThrobber(boolean b){
+//		stateThrobber = b; 
+//	}
 	
 	/** 
 	 * Creates ed initializes the GUI structures, adding the controller to each component that needs it.
@@ -293,10 +312,18 @@ public class ViewProject implements Observer, Runnable{
 		panelCentralProject = new ViewPanelCentral();
 		
 		frameProject.addWindowListener(controllerProject);
-		frameProject.setVisible(true);
+		
 		frameProject.setLocation(0, 0);
+		frameProject.setMinimumSize(new Dimension(500, 500));
 		frameProject.setExtendedState(frameProject.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+		frameProject.setVisible(true);
+		frameProject.setPreferredSize(frameProject.getSize());
 		frameProject.validate();
+		
+		System.out.println(trayIconURL);
+		
+		OSUtils.createAndShowGUI(trayIconURL, ToolNames.CMT, controllerProject, "Exit");
+
 	}
 	
 	/** 
@@ -310,7 +337,8 @@ public class ViewProject implements Observer, Runnable{
 		if(o.equals("End Extract Commonalities")){
 		  //stopping throbber
 		  frameProject.setEnabled(true);
-		  setStateThrobber(true);
+//		  setStateThrobber(true);
+		  stopThrobber();
 			
 		  //setting color Green to all input file nodes in the tree
 		  panelLateralProject.setAnalysisLeafTree();	
@@ -352,8 +380,11 @@ public class ViewProject implements Observer, Runnable{
 //			}		    
 		}
 		else if(o.equals("End Extract Variabilities")){
+		  //stopping throbber
 		  frameProject.setEnabled(true);
-		  setStateThrobber(true);
+		  System.out.println("End Extract Variabilities!!!");
+//		  setStateThrobber(true);
+		  stopThrobber();
 
 		  //activating menu items
 		  menuFeaturesExtractVari.setEnabled(false);
@@ -390,7 +421,8 @@ public class ViewProject implements Observer, Runnable{
 		else if(o.equals("New Analisys Folder Loaded")){
 		  //stopping throbber
 		  frameProject.setEnabled(true);
-		  setStateThrobber(true);
+//		  setStateThrobber(true);
+		  stopThrobber();
 
 		  //setting color Green to all input file nodes in the tree
 		  panelLateralProject.setAnalysisLeafTree();	
@@ -398,12 +430,17 @@ public class ViewProject implements Observer, Runnable{
 		  //activating menu items
 		  menuFeaturesExtractComm.setEnabled(true);
 		  menuFeaturesExtractVari.setEnabled(false);
+		  menuFilesDelete.setEnabled(true);
 		  menuDiagramCreate.setEnabled(false);
 			
 		}
 		else if(o.equals("Analisys folder can't be accepted")){
 		  errorDialog("Analisys folder can't be accepted");
 		}
+		else if(o.equals("Project Loaded Without Commonalities")){
+		  menuFeaturesExtractComm.setEnabled(true);
+		  menuFeaturesExtractVari.setEnabled(false);			
+		}		
 		else if(o.equals("Project Loaded With Commonalities")){
 	      menuFeaturesExtractComm.setEnabled(false);
 	      menuFeaturesExtractVari.setEnabled(true);			
@@ -454,50 +491,60 @@ public class ViewProject implements Observer, Runnable{
 	}
 	
 	/** 
-	 * Deletes the project.
+	 * Asks user confirmation for deleting this project.
+	 * 
+	 * @return - 1 if the user confirmed, 0 otherwise
 	 */
-	public void deleteProjectDialog(){
+	public int deleteProjectDialog(){
 		JFrame f = new JFrame("Delete Project");
 		
     	Object[] options = {"No","Yes"};			
 		
-		int i = JOptionPane.showOptionDialog(
-				f, "Do you want delete the project?", "Delete Project", JOptionPane.OK_OPTION, JOptionPane.NO_OPTION, null, options, options[1]);
+    	return JOptionPane.showOptionDialog(
+			f, "Do you want delete the project?", "Delete Project",
+			JOptionPane.OK_OPTION, JOptionPane.NO_OPTION, null, options, options[1]);
+//		int i = JOptionPane.showOptionDialog(
+//				f, "Do you want delete the project?", "Delete Project", JOptionPane.OK_OPTION, JOptionPane.NO_OPTION, null, options, options[1]);
 		
-		if(i == 1){
-			modelProject.deleteProject();
-//			splitterPanelInner.removeAll();
-			splitterPanelMain.removeAll();
-//			frameProject.remove(panelLateralProject.getPanelTree());
-//			frameProject.remove(panelCentralProject.getPanelAnalysis());
-			panelLateralProject = new ViewPanelLateral(menuTreeProject);
-			panelCentralProject = new ViewPanelCentral();
-			frameProject.repaint();
-			
-			menuDiagramCreate.setEnabled(false);
-			menuDiagramOpen.setEnabled(false);
-			
-			menuFeaturesExtractComm.setEnabled(false);
-			menuFeaturesExtractVari.setEnabled(false);
-			menuFeaturesSelectComm.setEnabled(false);
-			menuFeaturesSelectVari.setEnabled(false);
-			
-			menuFilesLoad.setEnabled(false);
-			menuFilesDelete.setEnabled(false);
-			
-			menuProjectSave.setEnabled(false);
-			menuProjectDelete.setEnabled(false);
-		}
-		
+//		if(i == 1){
+//			modelProject.deleteProject();
+//
+//			resetView();
+//		}
+//		
+//		frameProject.repaint();
+	}
+
+	/**
+	 * Reset view panels and menu items, making them as they are after program start.
+	 */
+	protected void resetView() {
+		splitterPanelMain.removeAll();
+		panelLateralProject = new ViewPanelLateral(menuTreeProject);
+		panelCentralProject = new ViewPanelCentral();
 		frameProject.repaint();
+		
+		menuDiagramCreate.setEnabled(false);
+		menuDiagramOpen.setEnabled(false);
+		
+		menuFeaturesExtractComm.setEnabled(false);
+		menuFeaturesExtractVari.setEnabled(false);
+		menuFeaturesSelectComm.setEnabled(false);
+		menuFeaturesSelectVari.setEnabled(false);
+		
+		menuFilesLoad.setEnabled(false);
+		menuFilesDelete.setEnabled(false);
+		
+		menuProjectSave.setEnabled(false);
+		menuProjectDelete.setEnabled(false);
 	}
 	
-	/** Carica un progetto
+	/** 
+	 * Loads a project file.
 	 * 
-	 * @return s path del file contenente il progetto da caricare
+	 * @return s - the selected project file path 
 	 */
-	public String loadProjectDialog()
-	{
+	public String loadProjectDialog(){
 		FileDialog d = new FileDialog(new JFrame("Load File"));
     	d.setMode(FileDialog.LOAD);
     	d.setFilenameFilter(new FilterFileProject());
@@ -505,11 +552,6 @@ public class ViewProject implements Observer, Runnable{
 	    d.setVisible(true);
 	    
 	    if(d.getFile() == null) return null;
-//	    System.out.println("File: "+d.getFile());
-//	    System.out.println("Dir: "+d.getDirectory());
-	    
-	//	    if(!buttonProjectEC.isEnabled())
-	//    		buttonProjectEC.setEnabled(true);
 
 	    return d.getFile().toString();
 	}
@@ -540,13 +582,12 @@ public class ViewProject implements Observer, Runnable{
 	    return d.getDirectory()+d.getFile().toString();
 	}
 	
-	/** Salva il progetto
+	/** 
+	 * Asks user confirmation for saving this project.
 	 * 
-	 *  @return 1 se l'utente vuole salvare il progetto
-	 *  @return 0 altrimenti
+	 * @return - 1 if the user confirmed, 0 otherwise
 	 */
-	public int saveProjectDialog()
-	{
+	public int saveProjectDialog(){
 		JFrame f = new JFrame("Save Project");
 		
     	Object[] options = {"No","Yes"};			
@@ -554,11 +595,8 @@ public class ViewProject implements Observer, Runnable{
 		int i = JOptionPane.showOptionDialog(
 				f, "Do you want save the project?", "Save Project", JOptionPane.OK_OPTION, JOptionPane.NO_OPTION, null, options, options[1]);
 		
-		if(i == 1)
-			return 1;
-		
-		else
-			return 0;
+		if(i == 1) return 1;		
+		else return 0;
 	}
 	
 	/** 
@@ -580,15 +618,14 @@ public class ViewProject implements Observer, Runnable{
 	    s[0] = d.getFile().toString();
     	s[1] = d.getDirectory() + d.getFile().toString();    	
     	
-    	//activating menu items
-    	menuFilesDelete.setEnabled(true);
-    	menuFeaturesExtractComm.setEnabled(true);
-    	
-    	
     	if((panelLateralProject.addNodeInput(s[0])) == false){
     		errorDialog("The file" + s[0] + " has already been inserted");
     		return null;
     	}
+
+    	//activating menu items
+    	menuFilesDelete.setEnabled(true);
+    	menuFeaturesExtractComm.setEnabled(true);
     	
     	frameProject.repaint();
       
@@ -605,7 +642,7 @@ public class ViewProject implements Observer, Runnable{
 		String [] analisysFiles = new String[4];
 	    JFileChooser chooser = new JFileChooser();
 	    File analisysDir=null;
-	    //used to check if 1 and only one of such files exist inside selected folder
+	    //booleans used to check if 1 and only one of such files exist inside selected folder
 	    boolean txtFound=false;
 	    boolean termTmpFound=false;
 	    boolean posFound=false;
@@ -667,11 +704,7 @@ public class ViewProject implements Observer, Runnable{
     	}
 
     	//activating throbber
-	    frameProject.setEnabled(false);
-	    setStateThrobber(false);
-	    throbber = new Thread(this);
-	    throbber.start();
-	    frameProject.repaint();
+    	startThrobber();
 
 	    return analisysFiles;
 	}
@@ -738,48 +771,93 @@ public class ViewProject implements Observer, Runnable{
 		else return -1;
 	}
 	
-	/** 
-	 * Extracts the commonalities from input files.
+	/**.
+	 * Asks user confirmation to extract the commonalities from input files.
+	 * 
+	 * @return - 1 if the user confirmed, 0 otherwise
 	 */
-	public void extractCommonalitiesDialog(){
+	public int extractCommonalitiesDialog(){
 		JFrame f = new JFrame("Extract Commonalities");
-		
     	Object[] options = {"No","Yes"};			
 		
-		int i = JOptionPane.showOptionDialog(f, "Do you want extract commonalities from the file?",
+		return JOptionPane.showOptionDialog(f, "Do you want extract commonalities from the file?",
 			"Extract Commonalities", JOptionPane.OK_OPTION, JOptionPane.NO_OPTION, null, options, options[1]);
-		
-		if(i == 1){
-			frameProject.setEnabled(false);
-			modelProject.analyzesFileProject();
-			setStateThrobber(false);
-			throbber = new Thread(this);
-			throbber.start();
-			frameProject.repaint();
-		}
 	}
 	
 	/** 
-	 * Extract variabilities from input files.
+	 * Asks user confirmation to extract the variabilities from input files.
+	 * 
+	 * @return - 1 if the user confirmed, 0 otherwise
 	 */
-	public void extractVariabilitiesDialog(){
+	public int extractVariabilitiesDialog(){
 		JFrame f = new JFrame("Extract Variabilities");
 		
     	Object[] options = {"No","Yes"};			
 		
-		int i = JOptionPane.showOptionDialog(f, "Do you want extract variabilities from the file?",
-			"Extract Variabilities", JOptionPane.OK_OPTION, JOptionPane.NO_OPTION, null, options, options[1]);
-		
-		if(i == 1){
-			frameProject.setEnabled(false);
-			modelProject.extractVariabilities();
-			setStateThrobber(false);
-			throbber = new Thread(this);
-			throbber.start();
-			frameProject.repaint();
-		}
+		return JOptionPane.showOptionDialog(f, "Do you want extract variabilities from the file?",
+			"Extract Variabilities", JOptionPane.OK_OPTION, JOptionPane.NO_OPTION, null, options, options[1]);		
 	}
 	
+	/**
+	 * Starts the throbber and blocks the user interface.
+	 */
+	protected void startThrobber() {
+		frameProject.setEnabled(false);
+		
+		JLabel jl1 = new JLabel("Analysing input files...");
+		jl1.setBounds(new Rectangle(10,10,250,30));
+		
+		ImageIcon throbberIcon = new ImageIcon(getClass().getResource("/Throbber/throbber.gif"));
+//		ImageIcon throbberIcon = new ImageIcon(getClass().getResource("/Throbber/throbber2.gif"));		
+
+		JLabel jl2  = new JLabel();
+		jl2.setBounds(new Rectangle(270,0,50,50));
+		jl2.setIcon(throbberIcon);		
+		
+		waitFrame = new JFrame("Loading...");
+		waitFrame.setLayout(null);
+		waitFrame.setBackground(Color.WHITE);
+//		waitFrame.setBounds(375, 275, 800, 500);
+		waitFrame.setBounds(375, 375, 320, 100);
+		waitFrame.add(jl1);
+		waitFrame.add(jl2);
+		waitFrame.setVisible(true);
+		
+		timer = new Timer(50, new ActionListener() {
+		    @Override
+		    public void actionPerformed(ActionEvent ae) {
+		        waitFrame.repaint();
+		    }
+		});
+		
+		/*if(!stateThrobber)*/ timer.start();
+//		while(!stateThrobber) jf.repaint(); 
+		
+//		waitFrame.setVisible(false);
+//		waitFrame.dispose();
+		
+		
+		
+		
+		
+		
+//		setStateThrobber(false);
+//		throbber = new Thread(this);
+//		throbber.start();
+		frameProject.repaint();
+	}
+
+	/**
+	 * Stops the throbber.
+	 */
+	protected void stopThrobber() {
+		timer.stop();
+		waitFrame.setVisible(false);
+		waitFrame.dispose();
+//		setStateThrobber(true);
+		frameProject.repaint();
+	}
+
 	/** 
 	 * Shows a frame with text, to display the user error
 	 * 

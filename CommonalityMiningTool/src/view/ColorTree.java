@@ -9,10 +9,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.SystemColor;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
-
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JTree;

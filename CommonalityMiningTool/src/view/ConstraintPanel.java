@@ -1,7 +1,5 @@
 package view;
 
-import java.awt.geom.Point2D;
-
 import javax.swing.JComponent;
 
 public class ConstraintPanel extends AnchorPanel {

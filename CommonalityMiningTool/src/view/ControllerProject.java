@@ -1,4 +1,3 @@
-
 /**
  * 
  * @author Daniele Cicciarella
@@ -12,36 +11,31 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
-
 import javax.swing.JFrame;
-
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import main.CMTConstants;
+import main.FDEXMLHandler;
 
 public class ControllerProject implements ActionListener, WindowListener, MouseListener{
 	
-	private static boolean verbose=false;//variabile usata per attivare stampe nel codice
-	
-//	/** path used to save diagrams and feature models xml files*/
-//	private static String diagramPath="../Usage Tries/DIAGRAMS";
-//	private static String diagramRelativePath="../DIAGRAMS";
-//	
-//	/** Path where general loadable diagram files will be saved*/
-//	private static String saveFilesSubPath="saved diagrams"; 
+	/** variable used to activate prints in the code*/
+	private static boolean verbose=false;
 
 	private ViewProject viewProject = null;
 	
 	private ModelProject modelProject = null;
 	
-	/** Costruttore
+	/** 
+	 * Constructor
 	 * 
-	 * @param viewProject
-	 * @param modelProject
+	 * @param viewProject - the view of this project
+	 * @param modelProject - the model of this project 
 	 */
-	public ControllerProject(ViewProject viewProject, ModelProject modelProject) 
-	{
+	public ControllerProject(ViewProject viewProject, ModelProject modelProject){
 		this.viewProject = viewProject;
 		this.modelProject = modelProject;
 	}
@@ -51,7 +45,7 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 	 * 
 	 */
 	@Override
-	public void actionPerformed(ActionEvent ae) {
+	public void actionPerformed(ActionEvent ae){
 	  if(ae.getActionCommand().equals("Create Project")){
 		String s = null;			
 		if((s = viewProject.assignNameProjectDialog()) != null){
@@ -68,12 +62,20 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		}
 	  }	
 	  else if(ae.getActionCommand().equals("Delete Project")){
-		viewProject.deleteProjectDialog();
+		if(viewProject.deleteProjectDialog() == 1){
+			modelProject.deleteProject();
+			viewProject.resetView();
+		}
 	  }
 	  else if(ae.getActionCommand().equals("Load Project")){
 		String s = null;
-		if((s = viewProject.loadProjectDialog()) != null)
-		  viewProject.loadPanelLateral(s.substring(0, s.length() - 4), modelProject.loadProject(s), this, false);
+		ArrayList<String> al = null;
+		
+		if((s = viewProject.loadProjectDialog()) != null){
+			al=modelProject.loadProject(s);
+			if(al==null){ viewProject.errorDialog("Error during load"); return;}		
+			else viewProject.loadPanelLateral(s.substring(0, s.length() - 4), al, this, false);	
+		}
 	  }
 	  else if(ae.getActionCommand().equals("Save Project")){
 		  modelProject.saveProject();
@@ -111,17 +113,22 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 
 				/* ***VERBOSE *** */
 				if(verbose) System.out.println("Ho ricevuto i="+i);
-
 				/* ***VERBOSE *** */
 
 				modelProject.removeFileProject(i);
 			}
 	  }
 	  else if(ae.getActionCommand().equals("Extract Commonalities")){
-			viewProject.extractCommonalitiesDialog();
+		  if(viewProject.extractCommonalitiesDialog() == 1){
+			  viewProject.startThrobber();
+			  modelProject.analyzesFileProject();
+		  }
 	  }
 	  else if(ae.getActionCommand().equals("Extract Variabilities")){
-			viewProject.extractVariabilitiesDialog();
+		  if(viewProject.extractVariabilitiesDialog() == 1){
+			  viewProject.startThrobber();
+			  modelProject.extractVariabilities();
+		  }
 	  }
 	  else if(ae.getActionCommand().equals("Select Commonalities")){
 			viewProject.showFeaturesSelected(ViewPanelCentral.FeatureType.COMMONALITIES);
@@ -172,38 +179,20 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 	  }
 	  else if(ae.getActionCommand().equals("Open Diagram")){
 		EditorModel editorModel=null;
-		String s1=null;		
-		String diagramDataPath=null;
-		ArrayList<String> featureModelDataPaths=new ArrayList<String>();
-//		String[] strArr=null;
-		String projectName=null;
-		//getting diagrams save path
+		String projectName=null;		
+  		SAXParser saxParser = null;
+  		InputStream stream = null;
+  		SAXParserFactory saxFactory = SAXParserFactory.newInstance();
+  		FDEXMLHandler xmlHandler = new FDEXMLHandler();  		
 
-//		if(modelProject.getPathProject()!=null){
-//		  strArr=modelProject.getPathProject().split("/");
-//		  projectName=strArr[strArr.length-1];
-//		}
-//		else projectName = null;
-//		String diagramsSavePath=modelProject.getPathProject();
-//		diagramsSavePath=diagramsSavePath.substring(0, diagramsSavePath.length()-projectname.length())
-//				+diagramRelativePath+"/"+projectname;
-
-		//loading general diagram save file
-//		String loadDirectory=modelProject.getPathProject()+diagramPath+"/"+saveFilesSubPath;  
-
-//		String loadDirectory=diagramsSavePath+"/"+saveFilesSubPath;  
-//		String loadDirectory=diagramPath; 
-//		String loadDirectory=CMTConstants.saveDiagramDir+"/"+projectName;
-		
+  		//loading diagram save file
 		String s = null;
 		if((s = viewProject.loadDiagramDialog(CMTConstants.saveDiagramDir)) != null) try{
-		  BufferedReader br1 = new BufferedReader(new FileReader(s));
-  		  projectName=br1.readLine();
-		  diagramDataPath=br1.readLine();
-		  while( (s1 = br1.readLine()) != null ) featureModelDataPaths.add(s1);
-		  br1.close();
+		  stream=new FileInputStream(s);
+		  saxParser = saxFactory.newSAXParser();
+		  saxParser.parse(stream, xmlHandler);  			  			
 		}catch (Exception e) {
-		  viewProject.errorDialog("Error while reading general save file");
+		  viewProject.errorDialog("Error while reading save file");
 		  e.printStackTrace();
 		  return;
 		}
@@ -211,7 +200,7 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		  
 		//creating model
 		try{
-		  editorModel= EditorModel.loadSavedModel(featureModelDataPaths);
+	  	  editorModel= EditorModel.loadSavedModel2(xmlHandler);
 		}catch(Exception e){
 		  e.printStackTrace();
 		  viewProject.errorDialog("Error while loading model.");
@@ -224,17 +213,7 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		//creating controller
 		EditorController editorController =new EditorController(editorView, editorModel);
 
-
 		//setting diagrams save path
-		//editorController.setSavePath(modelProject.getPathProject()+diagramPath);		  
-
-		//editorController.setSavePath(diagramsSavePath);
-//		/*String[]*/ strArr=s.split("/");
-//		s=s.substring(0, s.length()-strArr[strArr.length-2].length()-1-strArr[strArr.length-1].length()-1);
-
-		//strArr=modelProject.getPathProject().split("/");
-
-		//editorController.setSavePath(s);
 		editorController.setSavePath(projectName);
 
 		//adding the view as observer to the model
@@ -250,7 +229,7 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 
 		//loading saved view data
 		try{
-		  editorView.loadSavedDiagram(diagramDataPath);
+	  	  editorView.loadSavedDiagram2(xmlHandler);
 		}catch(Exception e){
 		  e.printStackTrace();
 		  viewProject.errorDialog("Error while loading diagram.");
@@ -279,21 +258,17 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 			viewProject.loadPanelCentral();
 	}
 
-	/** Gestisce gli eventi generati dalla chiusura del JFrame
-	 * 
+	/** 
+	 * Asks the use if the project must be saved before closing the application.
 	 */
 	@Override
-	public void windowClosing(WindowEvent we) 
-	{
-		if(modelProject.readStateProject()[1])
-		{
-			if(viewProject.saveProjectDialog() == 0)
-			{
-				if(modelProject.readStateProject()[0])
-					modelProject.deleteProject();
+	public void windowClosing(WindowEvent we){
+		if(modelProject.readStateProject()[1]){
+			if(viewProject.saveProjectDialog() == 0){
+			  if(modelProject.readStateProject()[0])
+				modelProject.deleteProject();
 			}
-			else
-				modelProject.saveProject();
+			else modelProject.saveProject();
 		}
 		viewProject.closeProject();
 	}

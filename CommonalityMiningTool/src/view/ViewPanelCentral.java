@@ -61,6 +61,7 @@ public class ViewPanelCentral{
 
 	private JPanel panelAnalysis = null;
 	
+	/**the panel used to view analisys result files*/
 	private JTabbedPane tabFile = null;
 	
 	/**the root central panel used for feature selection*/

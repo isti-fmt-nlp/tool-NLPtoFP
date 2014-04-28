@@ -5,13 +5,11 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -21,17 +19,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Observable;
 
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.bouncycastle.crypto.RuntimeCryptoException;
-import org.xml.sax.SAXException;
-
+import main.FDEXMLHandler;
 import main.FeatureNode;
-import main.ModelXMLHandler;
-import main.OrderedListNode;
 import main.FeatureNode.FeatureTypes;
+import main.GroupNode.GroupTypes;
+import main.ModelXMLHandler;
 import main.GroupNode;
 
 /**
@@ -70,16 +65,13 @@ public class EditorModel extends Observable{
 	private static boolean debug = true;
 
 	/** enumeration used to specify a group type in the model*/
-	public static enum GroupTypes { ALT_GROUP, OR_GROUP, N_M_GROUP};
-
-	/** enumeration used to specify a group type in the model*/
 	public static enum ConstraintTypes { INCLUDES, EXCLUDES};
 	
 //	/** Tells if the model has been modified after last save*/
 //	private boolean modified=true;
 
-	/** root feature of the feature model*/
-	private FeatureNode featureRoot = null;
+//	/** root feature of the feature model*/
+//	private FeatureNode featureRoot = null;
 	
 //	/** feature nodes that are descendant of root */
 //	private HashMap<String, FeatureNode> rootLinkedFeatures = new HashMap<String, FeatureNode>();
@@ -141,8 +133,11 @@ public class EditorModel extends Observable{
 	 * @param id - String containing the ID of the new feature
 	 */
 	public void addUnrootedCommonality(String name, String id){
-		System.out.println("Creating new commonality: "+name);
-		addUnrootedFeature(name, id, FeatureTypes.COMMONALITY);
+		/* ***DEBUG*** */
+		if(debug) System.out.println("Creating new commonality: "+name);
+		/* ***DEBUG*** */
+
+		addUnrootedFeature(name, id, /*1*/FeatureTypes.COMMONALITY);
 	}
 
 	/**
@@ -151,9 +146,12 @@ public class EditorModel extends Observable{
 	 * @param name - String containing the name of the new feature
 	 * @param id - String containing the ID of the new feature
 	 */
-	public void addUnrootedVariabilities(String name, String id){
-		System.out.println("Creating new variability: "+name);
-		addUnrootedFeature(name, id, FeatureTypes.VARIABILITY);
+	public void addUnrootedVariability(String name, String id){
+		/* ***DEBUG*** */
+		if(debug) System.out.println("Creating new variability: "+name);
+		/* ***DEBUG*** */
+
+		addUnrootedFeature(name, id, /*0*/FeatureTypes.VARIABILITY);
 	}
 
 	/**
@@ -163,11 +161,8 @@ public class EditorModel extends Observable{
 	 * @param id - String containing the ID of the new feature
 	 * @param type - type of the feature to create, a value from the FeatureTypes enum type
 	 */
-	private void addUnrootedFeature(String name, String id, FeatureTypes type) {
-//		FeatureNode newFeature = null;
-		FeatureNode newFeature = new FeatureNode(type, name, id, (type == FeatureTypes.COMMONALITY)? 1 : 0, 1);
-//		if(type == FeatureTypes.COMMONALITY) newFeature = new FeatureNode(type, name, id, 1, 1);
-//		else newFeature = new FeatureNode(type, name, id, 0, 1);
+	private void addUnrootedFeature(String name, String id, FeatureTypes type/*int minCard*/) {
+		FeatureNode newFeature = new FeatureNode(type, name, id, /*minCard*/(type == FeatureTypes.COMMONALITY)? 1 : 0, 1);
 		featuresList.put(id, newFeature);
 		setChanged();
 		notifyObservers("New Feature Correctly Added");
@@ -181,11 +176,8 @@ public class EditorModel extends Observable{
 	 * @param id - String containing the ID of the new feature
 	 * @param type - type of the feature to create, a value from the FeatureTypes enum type
 	 */
-	public void addUnrootedFeatureNoNotify(String featureName, String id, FeatureTypes type) {
-//		FeatureNode newFeature = null;
-		FeatureNode newFeature = new FeatureNode(type, featureName, id, (type == FeatureTypes.COMMONALITY)? 1 : 0, 1);
-//		if (type == FeatureTypes.COMMONALITY) newFeature = new FeatureNode(type, featureName, id, 1, 1);
-//		else newFeature = new FeatureNode(type, featureName, id, 0, 1);
+	public void addUnrootedFeatureNoNotify(String featureName, String id, /*int minCard*/FeatureTypes type) {
+		FeatureNode newFeature = new FeatureNode(type, featureName, id, /*minCard*/(type == FeatureTypes.COMMONALITY)? 1 : 0, 1);
 		System.out.println("adding: unrooted feature: "+id);
 		featuresList.put(id, newFeature);
 	}
@@ -199,11 +191,8 @@ public class EditorModel extends Observable{
 	 * @param id - String containing the ID of the new feature
 	 * @param type - type of the new child feature, a value from the FeatureTypes enum type
 	 */
-	public void addSubFeatureNoNotify(String newFeatureName, String parentNameID, String id, FeatureTypes type) {
-//		FeatureNode child = null;
-		FeatureNode child = new FeatureNode(type, newFeatureName, id, (type==FeatureTypes.COMMONALITY)? 1: 0, 1);
-//		if(type == FeatureTypes.COMMONALITY) child = new FeatureNode(type, newFeatureName, id, 1, 1);
-//		else child = new FeatureNode(type, newFeatureName, id, 0, 1);
+	public void addSubFeatureNoNotify(String newFeatureName, String parentNameID, String id, /*int minCard*/FeatureTypes type) {
+		FeatureNode child = new FeatureNode(type, newFeatureName, id, (type==FeatureTypes.COMMONALITY)? 1: 0/*minCard*/, 1);
 		featuresList.put(id, child);
 		
 		FeatureNode parent= searchFeature(parentNameID);
@@ -271,7 +260,6 @@ public class EditorModel extends Observable{
 		  
 	  //if the candidate member is not found, operation is aborted
 	  if (sub==null){ 
-//		  if (sub==null || sub.getParent()!=null){ 
 		setChanged();
 		notifyObservers("Not Grouped a Feature");
 		return;
@@ -299,8 +287,8 @@ public class EditorModel extends Observable{
 	  }
 	  
 	  //adding the feature to the group
-	  group.getMembers().add(sub);
-	  if ( parent!=null) sub.setParent(parent);
+	  group.getSubFeatures().add(sub);
+	  if (parent!=null) sub.setParent(parent);
 	  setChanged();
 	  notifyObservers("Grouped a Feature");		
 	}
@@ -357,7 +345,7 @@ public class EditorModel extends Observable{
 	  }
 	  
 	  //adding the feature to the group
-	  group.getMembers().add(sub);
+	  group.getSubFeatures().add(sub);
 	  if(parent!=null) sub.setParent(parent);
 	  setChanged();
 	  notifyObservers("Merged a Connector");
@@ -595,7 +583,7 @@ public class EditorModel extends Observable{
 	  };
 	  //if the operation would induce a cycle in the diagram, it is aborted
 	  if (groupNode!=null){
-		for(FeatureNode member : groupNode.getMembers())
+		for(FeatureNode member : groupNode.getSubFeatures())
 		  if (member==featureNode || isDescendantOf(featureNode, member) || isDescendantOf(member, featureNode)){
 			setChanged();
 			notifyObservers("Group Not Added To Feature");			
@@ -603,7 +591,7 @@ public class EditorModel extends Observable{
 		  };
 		
 		featureNode.getSubGroups().add(groupNode);
-		for(FeatureNode member : groupNode.getMembers()) member.setParent(featureNode);
+		for(FeatureNode member : groupNode.getSubFeatures()) member.setParent(featureNode);
 		setChanged();
 		notifyObservers("Group Added To Feature");			
 	  }
@@ -632,7 +620,7 @@ public class EditorModel extends Observable{
 		};
 		
 		featureNode.getSubGroups().remove(groupNode);
-		for(FeatureNode member : groupNode.getMembers()) member.setParent(null);
+		for(FeatureNode member : groupNode.getSubFeatures()) member.setParent(null);
 		setChanged();
 		notifyObservers("Group Removed From Feature");			
 	  }
@@ -690,11 +678,11 @@ public class EditorModel extends Observable{
 		for(GroupNode featureGroup : parent.getSubGroups()){
 		  System.out.println("featureGroup.getName()="+featureGroup.getID());
 		  if(featureGroup.getID().equals(groupName) )
-			if (featureGroup.getMembers().contains(sub)){
-			  featureGroup.getMembers().remove(sub);
+			if (featureGroup.getSubFeatures().contains(sub)){
+			  featureGroup.getSubFeatures().remove(sub);
 			  sub.setParent(null);
 			  //if the group size is 0, it gets removed form the model
-			  if(featureGroup.getMembers().size()==0){
+			  if(featureGroup.getSubFeatures().size()==0){
 				groups.remove(groupName);
 				parent.getSubGroups().remove(featureGroup);
 			  }
@@ -716,11 +704,11 @@ public class EditorModel extends Observable{
 	  }
 	  //the group was not owned by any feature
 	  else{
-		if (group.getMembers().contains(sub)){
-		  group.getMembers().remove(sub);
+		if (group.getSubFeatures().contains(sub)){
+		  group.getSubFeatures().remove(sub);
 //		  sub.setHasParent(false);
 		  //if the group size is 0, it gets removed form the model
-		  if(group.getMembers().size()==0) groups.remove(groupName);
+		  if(group.getSubFeatures().size()==0) groups.remove(groupName);
 		  setChanged();
 		  notifyObservers("Direct Link Destroyed");
 		  return;
@@ -740,22 +728,14 @@ public class EditorModel extends Observable{
 	 * @param name - the name of the feature to be deleted
 	 */
 	public void deleteFeature(String name) {
-//	  FeatureNode parentFeature=null;
-//	  GroupNode parentGroup=null;	  
 	  FeatureNode featurefound=featuresList.get(name);
-//	  if (featurefound==null) featurefound=rootLinkedFeatures.get(name);
 	  if (featurefound==null){
 		setChanged();
 		notifyObservers("Feature Not Deleted");
 		return;
 	  }
 	  //removing the feature from the parent, if any
-	  if(featurefound.getParent()!=null){//NO, parent is always a FeatureNode, or null....
-//		if(featurefound.getParent().getClass().equals(FeatureNode.class)) 
-//		  parentFeature=(FeatureNode)featurefound.getParent();
-//		if(featurefound.getParent().getClass().equals(GroupNode.class)) 
-//		  parentGroup=(GroupNode)featurefound.getParent();
-//	  }
+	  if(featurefound.getParent()!=null){
 		//the parent feature is directly linked
 	    if(((FeatureNode)featurefound.getParent()).getSubFeatures().contains(featurefound)){
 		  System.out.println("The feature: "+featurefound+" has a direct parent feature: "+
@@ -765,17 +745,17 @@ public class EditorModel extends Observable{
 		//the parent feature is linked through a group
 	    else{
 	      for(GroupNode group : ((FeatureNode)featurefound.getParent()).getSubGroups())
-	    	if(group.getMembers().contains(featurefound)){
+	    	if(group.getSubFeatures().contains(featurefound)){
 	  		  System.out.println("The feature: "+featurefound.getID()+" has a parent feature: "+
 					  ((FeatureNode)featurefound.getParent()).getID()+" through the group: "+group.getID());
-	    	  group.getMembers().remove(featurefound);
+	    	  group.getSubFeatures().remove(featurefound);
 	    	}	      
 	    }
 	  }
 
 	  //setting parent attribute of this feature childs to null
 	  for(GroupNode group : featurefound.getSubGroups())
-	    for(FeatureNode member : group.getMembers()) member.setParent(null);
+	    for(FeatureNode member : group.getSubFeatures()) member.setParent(null);
 	  for(FeatureNode child : featurefound.getSubFeatures()) child.setParent(null);
 
 	  //removing constraints related to this feature
@@ -799,7 +779,7 @@ public class EditorModel extends Observable{
 	 */
 	public void deleteUnattachedGroup(String name) {
 	  GroupNode group = searchGroup(name);
-	  if (group!=null) for(FeatureNode member : group.getMembers()) member.setParent(null);
+	  if (group!=null) for(FeatureNode member : group.getSubFeatures()) member.setParent(null);
 	  setChanged();
 	  notifyObservers("Group Deleted");		  
 	}
@@ -899,7 +879,7 @@ public class EditorModel extends Observable{
 	  }
 	  for(GroupNode group : ancestor.getSubGroups()){
 		System.out.println("group .getName()="+group.getID());
-		for(FeatureNode child : group.getMembers() ){
+		for(FeatureNode child : group.getSubFeatures() ){
 		  System.out.println("child.getName()="+child.getID());
 		  if (child.getID().equals(descendant.getID())
 			|| isDescendantOf(child, descendant)) return true;
@@ -907,16 +887,6 @@ public class EditorModel extends Observable{
 	  }
 	  return false;	
 	}
-
-//	/** Tells if the model has been modified since last save*/
-//	public boolean getModified(){
-//		return modified;
-//	}
-//
-//	/** Sets the model of the modified field*/
-//	public void setModified(boolean mod){
-//		modified=mod;
-//	}
 
 	/**
 	 * Saves the elements of the feature model on file.
@@ -996,6 +966,55 @@ public class EditorModel extends Observable{
 		  return null;
 		}		  
 
+	  }
+	  return modelPaths;
+	}
+
+	/**
+	 * Saves the elements of the feature model on  an XML String.
+	 * @param pathProject - the directory path where to save the model
+	 * @param s - the name of the file in which to save the model
+	 * 
+	 * @return - the XML String produced
+	 */
+	public ArrayList<String> saveModel2(/*String pathProject, final */  /*String*/File s) {
+	  String xml = null;
+	  String date=null;
+	  ArrayList<String> modelPaths=new ArrayList<String>();
+	  
+	  //calculating save time in a 'yyyyy-mm-dd hh:mm' format
+	  Calendar cal= Calendar.getInstance();
+	  date=cal.get(Calendar.YEAR)+"-"+cal.get(Calendar.MONTH+1)
+			  +"-"+cal.get(Calendar.DAY_OF_MONTH)+" "+cal.get(Calendar.HOUR_OF_DAY)+":"+cal.get(Calendar.MINUTE);
+
+	  for(Map.Entry<String,FeatureNode> feature : featuresList.entrySet()){
+	    //skipping features that have a parent feature
+		if(feature.getValue().getParent()!=null) continue;
+		
+		xml = "<feature_model name=\""+s.getName()+"_"+feature.getValue().getID()+"\">"
+				+"<meta>"
+			    +"<data name=\"date\">"+date+"</data>"
+				+"</meta>"
+				+"<feature_tree>";
+		
+		xml+=":r "+feature.getValue().getName()+" ("+feature.getValue().getID()+") ["
+				+feature.getValue().getMinCardinality()+"."+feature.getValue().getMaxCardinality()+"]"
+				+recursiveXMLTreeBuilder(feature.getValue(), 1);
+
+		xml+=	 "</feature_tree>"
+				+"<modelConstraints>";
+
+		for(String[] strArr: constraints){
+		  if(strArr[0].startsWith(includesConstraintNamePrefix))
+			xml+=strArr[0].substring(includesConstraintNamePrefix.length())+": ~"+strArr[1]+" or "+strArr[2]+"\n";
+		  else 
+			xml+=strArr[0].substring(excludesConstraintNamePrefix.length())+": ~"+strArr[1]+" or ~"+strArr[2]+"\n";
+		}
+
+		xml+=	 "</modelConstraints>"
+				+"</feature_model>";
+		
+		modelPaths.add(xml);
 	  }
 	  return modelPaths;
 	}
@@ -1127,7 +1146,7 @@ public class EditorModel extends Observable{
 	  for(GroupNode group : featureRoot.getSubGroups()){
 		for(int i=0; i<depth; ++i) xml+="\t";
 		xml+=":g "+group.getID()+" ["+group.getMinCardinality()+"."+group.getMaxCardinality()+"]";
-		for(FeatureNode member : group.getMembers()){
+		for(FeatureNode member : group.getSubFeatures()){
 			for(int i=0; i<depth+1; ++i) xml+="\t";
 			xml+= ": "+member.getName()+" ("+member.getID()+") ["
 			   +member.getMinCardinality()+"."+member.getMaxCardinality()+"]"
@@ -1160,7 +1179,7 @@ public class EditorModel extends Observable{
 	  for(GroupNode group : featureRoot.getSubGroups()){
 		for(int i=0; i<depth; ++i) xml+="\t";
 		xml+=":g ["+group.getMinCardinality()+"."+group.getMaxCardinality()+"]";
-		for(FeatureNode member : group.getMembers()){
+		for(FeatureNode member : group.getSubFeatures()){
 			for(int i=0; i<depth+1; ++i) xml+="\t";
 			xml+= ": "+member.getName()+" ("+member.getID()+")"
 			   +recursiveSXFMTreeBuilder(member, depth+2);			
@@ -1188,7 +1207,7 @@ public class EditorModel extends Observable{
 	  String[] strArr=null, tmpArr=null, newConstraint=null;
 	  int negations=0;
 	  BufferedReader str1 = null;
-	  String cleanedFeatureTree = null;
+//	  String cleanedFeatureTree = null;
 
 	  EditorModel newModel=new EditorModel();
 
@@ -1271,7 +1290,6 @@ public class EditorModel extends Observable{
 				}
 				str1.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 				
@@ -1314,8 +1332,6 @@ public class EditorModel extends Observable{
 	  newModel.printModel();
 	  return newModel;
 	}
-
-
 	
 	/**
 	 * Loads a saved feature model from a list of files, each describing a feature tree.
@@ -1386,6 +1402,63 @@ public class EditorModel extends Observable{
 	  //loading constraints
 	  if(xmlHandler.constraints!=null){
 		strArr=xmlHandler.constraints.split("\n");
+	  
+		for(String constr: strArr){
+		  negations=0;
+		  tmpArr=constr.split(" ");		
+		  newConstraint=new String[3];
+		  newConstraint[0]=tmpArr[0].substring(0, tmpArr[0].length()-1);
+		  if(tmpArr[1].charAt(0)=='~'){ ++negations; newConstraint[1]=tmpArr[1].substring(1);}
+		  else newConstraint[1]=tmpArr[1];
+		  if(tmpArr[3].charAt(0)=='~'){ ++negations; newConstraint[2]=tmpArr[3].substring(1);}
+		  else newConstraint[2]=tmpArr[3];
+		  
+		  /*new stuff*/
+		  if(negations==2) newConstraint[0]=excludesConstraintNamePrefix+newConstraint[0];
+		  else newConstraint[0]=includesConstraintNamePrefix+newConstraint[0];
+		  /*new stuff*/
+
+		  newModel.constraints.add(newConstraint);
+		}
+	  }
+	  
+	  newModel.printModel();
+	  return newModel;
+	}
+
+	/**
+	 * Loads a saved feature model from a list of files, each describing a feature tree.
+	 * 
+	 * @param featureModelDataPaths - the list of files describing the feature trees
+	 * @return - the saved feature model
+	 */
+	public static EditorModel loadSavedModel2(FDEXMLHandler xmlHandler) {
+	  StringWrapper featureTree=null;
+	  String[] strArr=null, tmpArr=null, newConstraint=null;
+	  int negations=0;
+	  
+	  EditorModel newModel=new EditorModel();
+
+	  //building feature trees
+	  for(int i=0; i< xmlHandler.featureModels.size(); ++i){
+	    try{
+
+		  featureTree=new StringWrapper(xmlHandler.featureModels.get(i)[0]);
+		  newModel.recursiveFeatureTreeBuilder(null, 0, featureTree);
+		  xmlHandler.featureTree="";
+		  
+	    }catch (Exception e) {
+	      System.out.println("Error while loading saved model");
+	      e.printStackTrace();
+	      throw new RuntimeException("Error while load saved model");
+	    }
+	  }
+
+	  //loading constraints
+	  if(xmlHandler.featureModels.get(xmlHandler.featureModels.size()-1)[1]!=null &&
+		 xmlHandler.featureModels.get(xmlHandler.featureModels.size()-1)[1].length()>0){
+		  
+		strArr=xmlHandler.featureModels.get(xmlHandler.featureModels.size()-1)[1].split("\n");
 	  
 		for(String constr: strArr){
 		  negations=0;
@@ -1543,7 +1616,6 @@ public class EditorModel extends Observable{
 	  //splitting element prefix from the rest of featureTree String
 	  i=tabs;
 	  while(i<featureTree.string.length() && featureTree.string.charAt(i)!='\t') ++i;
-//	  for(i=tabs; i<featureTree.length(); ++i) if(featureTree.charAt(i)=='\t') break;
 
 	  element=featureTree.string.substring(tabs, i);
 	  
@@ -1559,7 +1631,6 @@ public class EditorModel extends Observable{
 	  for(int l=2; l<elementData.length-2; ++l) featureName+=" "+elementData[l];
 	  
 	  //getting ID of the feature
-//	  featureID=elementData[elementData.length-2];
 	  featureID=elementData[elementData.length-2].substring(1, elementData[elementData.length-2].length()-1);
 	  
 	  //getting cardinalities of the feature
@@ -1696,7 +1767,7 @@ public class EditorModel extends Observable{
 		  System.out.println("***Adding member '"+newFeature.getID()+"' to parentGroup '"
 		    +(parentGroup==null ? "null":parentGroup.getID())
 		    +"' with parent feature '"+(groupOwner==null ? "null": groupOwner.getID())+"'");
-		  parentGroup.getMembers().add(newFeature);
+		  parentGroup.getSubFeatures().add(newFeature);
 		  newFeature.setParent(groupOwner);
 		  featuresList.put(featureID, newFeature);
 //		  unrootedFeatures.put(featureName, newFeature);
@@ -1830,14 +1901,13 @@ public class EditorModel extends Observable{
 	  String featureName="";
 	  String featureID=null;
 	  FeatureNode newFeature=null;
-	  int k=0, h=0, i=0;
+	  int i=0;
 	  FeatureTypes type=null;
 	  int minCard=0, maxCard=0;
 	  
 	  //splitting element prefix from the rest of featureTree String
 	  i=tabs;
 	  while(i<featureTree.string.length() && featureTree.string.charAt(i)!='\t') ++i;
-//	  for(i=tabs; i<featureTree.length(); ++i) if(featureTree.charAt(i)=='\t') break;
 
 	  element=featureTree.string.substring(tabs, i);
 	  
@@ -1951,7 +2021,7 @@ public class EditorModel extends Observable{
 		  String featureName="";
 		  String featureID=null;
 		  FeatureNode newFeature=null;
-		  int k=0, h=0, i=0;
+		  int i=0;
 		  FeatureTypes type=null;
 		  int minCard=0, maxCard=0;
 		  
@@ -1992,7 +2062,7 @@ public class EditorModel extends Observable{
 		  System.out.println("***Adding member '"+newFeature.getID()+"' to parentGroup '"
 		    +(parentGroup==null ? "null":parentGroup.getID())
 		    +"' with parent feature '"+(groupOwner==null ? "null": groupOwner.getID())+"'");
-		  parentGroup.getMembers().add(newFeature);
+		  parentGroup.getSubFeatures().add(newFeature);
 		  newFeature.setParent(groupOwner);
 		  featuresList.put(featureID, newFeature);
 //		  unrootedFeatures.put(featureName, newFeature);
@@ -2035,13 +2105,8 @@ public class EditorModel extends Observable{
 		  else treePrint(child, indent+"OPT>");
 		}
 		for(GroupNode group : feature.getSubGroups()) 
-		  for(FeatureNode member : group.getMembers()){
-			if(group.getCardinality().y>1 || group.getCardinality().y<0) treePrint(member, indent+"OR|"); 
-			else treePrint(member, indent+"ALT|"); 
+		  for(FeatureNode member : group.getSubFeatures()){
+			treePrint(member, indent+group.getDecompositionType()+"|"); 
 		  }
 	}	
-	
-	
-	
-	
 }

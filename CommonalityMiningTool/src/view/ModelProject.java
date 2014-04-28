@@ -8,7 +8,6 @@ package view;
 
 import main.CMTConstants;
 
-import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -139,7 +138,7 @@ public class ModelProject extends Observable implements Runnable{
 	/** Minimum intersection size required to join two sets of terms into one, used to assign colors to terms */
 	private static int minimumIntersectionSize=3;
 	
-	/** Maximum number of clusters to form to assign colors to terms, values hogher than the number of colors(14) are ignored */
+	/** Maximum number of clusters to form to assign colors to terms, values higher than the number of colors(14) are ignored */
 	private static int maxClusterLimit=10;
 	
 	
@@ -516,7 +515,7 @@ public class ModelProject extends Observable implements Runnable{
 	  int[] tiersInSentencesWithTermCount = null;
 	  boolean[] tiersInSentencesWithTermFound = null;
 	  int maxSentences=0, prevMaxSentences=0;
-	  int maxIndex=0, prevMaxIndex=0;		  
+	  int maxIndex=0/*, prevMaxIndex=0*/;
 //	  Random gen=null;
 	  
 	  ArrayList<Entry<String, Integer>> entryList = new ArrayList<Entry<String,Integer>>();	
@@ -547,10 +546,10 @@ public class ModelProject extends Observable implements Runnable{
 	  for(int i=0, k=1; i<entryList.size(); ++i){
 		for(String comm : commonalitiesCandidates)
 		  if(comm.compareTo(entryList.get(i).getKey())==0){
-			groupLeaders.add(comm);
+			groupLeaders.add(comm); ++k;
 
 			/* ***VERBOSE*** */
-			if(debugColors) System.out.println((k++)+") "+entryList.get(i).getKey()+" - "+entryList.get(i).getValue());
+			if(debugColors) System.out.println((k)+") "+entryList.get(i).getKey()+" - "+entryList.get(i).getValue());
 			/* ***VERBOSE*** */
 
 			break;
@@ -558,6 +557,7 @@ public class ModelProject extends Observable implements Runnable{
 		if(k>maxClusterLimit || k>=colors.length) break;		  
 	  }
 	  
+	  System.out.println("groupLeaders.size(): "+groupLeaders.size());
 	  //creating the array that will hold bottom and upper boundary occurrences of leaders
 	  leadersBoundaries= new int[groupLeaders.size()][2];
 	  
@@ -793,12 +793,12 @@ public class ModelProject extends Observable implements Runnable{
 		  /* ***DEBUG*** */
 		  
 		  maxSentences=0; prevMaxSentences=0;
-		  maxIndex=0; prevMaxIndex=0;
+		  maxIndex=0; /*prevMaxIndex=0;*/
 		  //checking which tier appears together with current term in most sentences
 		  for(int k=0; k<tiersInSentencesWithTermCount.length; ++k){
 			if(tiersInSentencesWithTermCount[k]>=maxSentences){
 			  prevMaxSentences=maxSentences; maxSentences=tiersInSentencesWithTermCount[k];
-			  prevMaxIndex=maxIndex; maxIndex=k;
+			  /*prevMaxIndex=maxIndex;*/ maxIndex=k;
 			}
 		  }
 		  
@@ -947,9 +947,11 @@ public class ModelProject extends Observable implements Runnable{
 	  //assigning colors to terms, with saturation based on arities
 //	  assignColorsArityGraduation(colors, clusters);
 	  
-	  //assigning colors to terms, with saturation based on terms distances from leaders
-	  assignColorsDistanceGraduation(colors, clusters, distances);
+//	  //assigning colors to terms, with saturation based on terms distances from leaders
+//	  assignColorsDistanceGraduation(colors, clusters, distances);
 
+	  //assigning base colors to terms, each term will have the same color of its cluster leader
+	  assignColorsClusterBasic(colors, clusters);
 	}
 
 	/**
@@ -959,6 +961,7 @@ public class ModelProject extends Observable implements Runnable{
 	 * @param colors - int[][] containing colors in the form of a 3-position int[] containing RGB values
 	 * @param clusters - terms clusters with same size of colors, the actual type must be an array of ArrayList<String>
 	 */
+	@SuppressWarnings("unchecked")
 	private void assignColorsArityGraduation(int[][] colors, ArrayList[] clusters) {
 		double maxColorReduction=0.35;
 		double colorReductionUnit=0;
@@ -1063,11 +1066,12 @@ public class ModelProject extends Observable implements Runnable{
 	 * and if present they're ignored.
 	 */
 	@SuppressWarnings("unchecked")
-	private void assignColorsClusterBasic(int[][] colors, ArrayList[] clusters) {
+	private void assignColorsClusterBasic(int[][] colors, @SuppressWarnings("rawtypes") ArrayList[] clusters) {
 		int[] baseColor=null;
 		int[] termColor=null;
 		String termName=null;
 
+		System.out.println("clusters.length: "+clusters.length);
 		for(int k=0; k<clusters.length; ++k){
 		  //assigning colors
 		  baseColor=colors[k];
@@ -1225,18 +1229,6 @@ public class ModelProject extends Observable implements Runnable{
 		  }
 	}
 	
-	private void recursiveSetJoin(HashMap<Integer, ArrayList<Integer>> toBeJoined) {
-
-	  for(int k=0; k<termsInSentencesSet.size(); ++k){
-		for(int l=k+1; l<termsInSentencesSet.size(); ++l){  
-			
-		}
-	  }
-
-
-		
-	}
-
 	/**
 	 * Join two sets into the first. After a call to this method,<br>
 	 * array1 will be the union of the two arrays, array2 will remain unchanged
@@ -1533,9 +1525,40 @@ public class ModelProject extends Observable implements Runnable{
 	 * 
 	 * @param s - analisys folder path 
 	 */
-	public void addAnalisysFolderProject(String[] files){
-		ArrayList<Point> sentencesBoundaries=null;
+	public void addAnalisysFolderProject(final String[] files){
 		
+		Thread thread = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				//creating model
+				ModelFile newModel=new ModelFile(files[0], pathProject);
+				newModel.setIsAnalisysDir(true);
+				filesProject.add(newModel);
+				workerProject.add(new Thread(newModel));
+				stateProject[1] = true;
+
+				//creating model UTF8 input file
+				newModel.setPathFileHTML(new ArrayList<String>());
+				if(newModel.filterFile()==null){
+				  setChanged();
+				  notifyObservers("Analisys folder can't be accepted");
+				  return;
+				};         
+		        
+		        //creating result html pages as project files
+				newModel.createResultFileInputText(files[0]);
+				newModel.createResultFilePostTagging(files[2]);
+				//post tagging HTML file is needed to build term extractor HTML file
+				newModel.createResultFileTermExtractor(files[1], files[3]);
+
+				setChanged();
+				notifyObservers("New Analisys Folder Loaded");
+			}
+		});
+		
+		thread.start();
+/*		
 		//creating model
 		ModelFile newModel=new ModelFile(files[0], pathProject);
 		newModel.setIsAnalisysDir(true);
@@ -1553,28 +1576,13 @@ public class ModelProject extends Observable implements Runnable{
         
         //creating result html pages as project files
 		newModel.createResultFileInputText(files[0]);
-		sentencesBoundaries=newModel.createResultFilePostTagging(files[2]);
+		newModel.createResultFilePostTagging(files[2]);
 		//post tagging HTML file is needed to build term extractor HTML file
-		newModel.createResultFileTermExtractor(files[1], files[3]/*, sentencesBoundaries*/);
+		newModel.createResultFileTermExtractor(files[1], files[3]);
 
 		setChanged();
 		notifyObservers("New Analisys Folder Loaded");
-		
-//		frameProject.setEnabled(false);
-//		modelProject.analyzesFileProject();
-//		setStateThrobber(false);
-//		throbber = new Thread(this);
-//		throbber.start();
-//		frameProject.repaint();
-
-//		frameProject.setEnabled(false);
-//		modelProject.analyzesFileProject();
-//		setStateThrobber(false);
-//		throbber = new Thread(this);
-//		throbber.start();
-//		frameProject.repaint();
-		        
-
+*/
 	}
 
 	/**
@@ -1583,10 +1591,15 @@ public class ModelProject extends Observable implements Runnable{
 	 * @param i - index of the file
 	 */
 	public void removeFileProject(int i){
-	  File termLogFile =null;
+	  String filePath = null;
+	  File tmpFile =null;
+	  
+//	  HashMap<String, ArrayList<String>> filePathTermsVersions = filesProject.get(i).readTermRelevant();
+	  
 	  //deleting UTF8 version of input file
-	  if(filesProject.get(i).readPathFileUTF8() != null)
-		  new File(filesProject.get(i).readPathFileUTF8()).delete();
+	  if((filePath=filesProject.get(i).readPathFileUTF8()) != null)
+		  new File(filePath).delete();
+	  else return;
 		
 	  //deleting html analisys files
 	  if(filesProject.get(i).readPathFileHTML() != null)
@@ -1594,14 +1607,61 @@ public class ModelProject extends Observable implements Runnable{
 			  new File(filesProject.get(i).readPathFileHTML().get(j)).delete();
 
 	  //deleting relevant terms file
-	  termLogFile=new File(
-		(filesProject.get(i).readPathFileUTF8().substring(0, filesProject.get(i).readPathFileUTF8().length()-4)) + ".log");
-	  
-	  if(termLogFile.exists()) termLogFile.delete();
+	  tmpFile=new File(
+		(filePath.substring(0, filePath.length()-4)) + CMTConstants.TERMSsuffix);
+	  if(tmpFile.exists()) tmpFile.delete();
+
+	  //deleting sentences sets file
+	  tmpFile=new File(
+		(filePath.substring(0, filePath.length()-4)) + CMTConstants.SETSsuffix);
+	  if(tmpFile.exists()) tmpFile.delete();
+
+	  //deleting terms arities file
+	  tmpFile=new File(
+		(filePath.substring(0, filePath.length()-4)) + CMTConstants.ARITYsuffix);
+	  if(tmpFile.exists()) tmpFile.delete();
 
 	  filesProject.remove(i);
 	  workerProject.remove(i);
-//	  stateProject[1] = false;
+	  
+	  // rebuilding file path index
+	  try{
+		saveFilePathIndex();
+	  }catch(IOException e){
+		System.out.println("Exception saveProject: " + e.getMessage());
+		e.printStackTrace();
+		return;
+	  }	  
+	  
+	  //resetting global structures as they are before commonalities extraction
+	  relevantTerms = null;
+	  relevantTermsVersions = null;
+	  
+	  commonalitiesCandidates = null;
+	  commonalitiesSelected = null;
+	  variabilitiesCandidates = null;
+	  variabilitiesSelected = null;
+
+	  //saving empty selected feature lists on html tables	
+	  saveFeaturesSelected(commonalitiesSelected, FeatureType.COMMONALITIES);
+	  saveFeaturesSelected(variabilitiesSelected, FeatureType.VARIABILITIES);
+
+//	  //removing file from global structures
+//	  Iterator<Entry<String, ArrayList<String>>> termsIterator = filePathTermsVersions.entrySet().iterator();
+//	  Entry<String, ArrayList<String>> termsEntry = null;
+//	  
+//	  while(termsIterator.hasNext()){
+//		termsEntry=termsIterator.next();
+//		
+//		//removing file terms from relevant terms occurrences
+//		relevantTerms.get(termsEntry.getKey()).remove(filePath);
+//		if(relevantTerms.get(termsEntry.getKey()).size()==0) relevantTerms.remove(termsEntry.getKey());
+//		
+//		//removing file terms versions from relevant terms versions
+//		relevantTermsVersions.get(termsEntry.getKey()).remove(filePath);
+//		if(relevantTermsVersions.get(termsEntry.getKey()).size()==0) relevantTermsVersions.remove(termsEntry.getKey());
+//	  }
+	  
 	  stateProject[1] = true;
 	}
 	
@@ -1885,6 +1945,52 @@ public class ModelProject extends Observable implements Runnable{
 	 * @return - an xml file containing the saved project informations
 	 */
 	public File saveProject(){		
+		
+	  //saving file path index
+	  try{
+		saveFilePathIndex();
+	  }catch(IOException e){
+		System.out.println("Exception saveProject: " + e.getMessage());
+		e.printStackTrace();
+		return null;
+	  }
+			
+	  try{
+		//saving feature lists on files
+		saveFeaturesList(commonalitiesCandidates, pathCommonalitiesCandidates);
+		saveFeaturesList(commonalitiesSelected, pathCommonalitiesSelected);
+		saveFeaturesList(variabilitiesCandidates, pathVariabilitiesCandidates);
+		saveFeaturesList(variabilitiesSelected, pathVariabilitiesSelected);
+		//saving selected feature lists on html tables	
+		saveFeaturesSelected(commonalitiesSelected, FeatureType.COMMONALITIES);
+		saveFeaturesSelected(variabilitiesSelected, FeatureType.VARIABILITIES);
+
+		//			saveSelectedFeaturesHTML(commonalitiesSelected, pathCommonalitiesSelectedHTML, "Commonalities Selected");
+		//			saveSelectedFeaturesHTML(variabilitiesSelected, pathVariabilitiesSelectedHTML, "Variabilities Selected");			
+
+		//saving occurrences of relevant terms
+		saveProjectRelevantTerms();
+		saveRelevantTermsVersions();
+		//saving models state
+		saveProjectModelsState();
+
+		stateProject[0] = false;
+		stateProject[1] = false;
+	  } 
+	  catch (IOException e){
+		System.out.println("Exception saveProject: " + e.getMessage());
+		e.printStackTrace();
+		return null;
+	  }
+	  return new File(pathXML);
+	}
+
+	/**
+	 * Saves references to input files on an index file.
+	 * 
+	 * @throws IOException
+	 */
+	private void saveFilePathIndex() throws IOException {
 		String s ="<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>" + nameProject + "<node>Input";
 		
 		for(int i = 0; i < filesProject.size(); i++)
@@ -1894,38 +2000,9 @@ public class ModelProject extends Observable implements Runnable{
 		
 		s += "</node><node>Commonalities</node></root>";
 		
-		try{
-			PrintWriter pw1 = new PrintWriter(new BufferedWriter(new FileWriter(pathXML)));
-			pw1.print(s);
-			pw1.close();
-			
-			//saving feature lists on files
-			saveFeaturesList(commonalitiesCandidates, pathCommonalitiesCandidates);
-			saveFeaturesList(commonalitiesSelected, pathCommonalitiesSelected);
-			saveFeaturesList(variabilitiesCandidates, pathVariabilitiesCandidates);
-			saveFeaturesList(variabilitiesSelected, pathVariabilitiesSelected);
-			//saving selected feature lists on html tables	
-			saveFeaturesSelected(commonalitiesSelected, FeatureType.COMMONALITIES);
-			saveFeaturesSelected(variabilitiesSelected, FeatureType.VARIABILITIES);
-			
-//			saveSelectedFeaturesHTML(commonalitiesSelected, pathCommonalitiesSelectedHTML, "Commonalities Selected");
-//			saveSelectedFeaturesHTML(variabilitiesSelected, pathVariabilitiesSelectedHTML, "Variabilities Selected");			
-
-			//saving occurrences of relevant terms
-			saveProjectRelevantTerms();
-			saveRelevantTermsVersions();
-			//saving models state
-			saveProjectModelsState();
-
-			stateProject[0] = false;
-			stateProject[1] = false;
-		} 
-		catch (IOException e){
-			System.out.println("Exception saveProject: " + e.getMessage());
-			e.printStackTrace();
-			return null;
-		}
-		return new File(pathXML);
+		PrintWriter pw1 = new PrintWriter(new BufferedWriter(new FileWriter(pathXML)));
+		pw1.print(s);
+		pw1.close();
 	}
 	
 	/**
@@ -2036,7 +2113,6 @@ public class ModelProject extends Observable implements Runnable{
 		
 		if(features != null){
 			s = "<table border=\"2\" align=\"center\">";
-//			s = "<table border=" + String.valueOf('"') + String.valueOf('2') + String.valueOf('"') + "align=" + String.valueOf('"') + "center" + String.valueOf('"') + ">";
 			s += "<tr><th>n.</th><th>"+tableHeader+"</th></tr>";
 			
 			for(int i = 0; i < features.size(); i++)
@@ -2048,11 +2124,12 @@ public class ModelProject extends Observable implements Runnable{
 		}
 	}
 	
-	/** Carica il progetto
+	/** 
+	 * Loads a saved project.
 	 * 
-	 * @param s stringa contenente la path del progetto da caricare
+	 * @param s - the path of project's general save file
 	 * 
-	 * @return al ArrayList contenenti i nomi dei file del progetto
+	 * @return - an ArrayList containing the project files paths 
 	 */
 	public ArrayList<String> loadProject(String s){
 		ModelFile modelFileTmp=null;
@@ -2138,6 +2215,9 @@ public class ModelProject extends Observable implements Runnable{
 			  else{
 				setChanged(); notifyObservers("Project Loaded With Commonalities And Variabilities");				  
 			  }
+			}
+			else{
+				setChanged(); notifyObservers("Project Loaded Without Commonalities");				  
 			}
 			  
 			return parserXML.readNameFile();

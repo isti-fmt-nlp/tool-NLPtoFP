@@ -1,6 +1,5 @@
 package main;
 
-import java.awt.Point;
 import java.util.ArrayList;
 
 /**
@@ -8,7 +7,7 @@ import java.util.ArrayList;
  * @author natan
  *
  */
-public class FeatureNode {
+public class FeatureNode extends FeatureTreeNode{
 	/** FeatureTypes describes the possible types for a feature*/
 	public static enum FeatureTypes{COMMONALITY, VARIABILITY};
 	
@@ -16,20 +15,10 @@ public class FeatureNode {
 	private FeatureTypes type=FeatureTypes.COMMONALITY;
 	/** The feature name*/
 	private String name="";
-	/** The feature ID*/
-	private String id="";
-	/** The feature minimum cardinality*/
-	private int minCardinality=1;
-	/** The feature maximum cardinality*/
-	private int maxCardinality=1;
-	/** The list of features directly linked to this feature*/
-	private ArrayList<FeatureNode> subFeatures= new ArrayList<FeatureNode>();
 	/** The list of feature groups linked to this feature*/
 	private ArrayList<GroupNode> subGroups= new ArrayList<GroupNode>();
-	/** Tells if this feature is a top-level feature(false) or it is a sub-feature or a member of a group(true)*/
+	/** Parent of this feature. If this feature has no parent, it is null*/
 	private Object parent = null;
-//	/** Parent of this feature. If this feature has no parent, it is null*/
-//	private Object parent = null;
 	
 	
 	/**
@@ -56,46 +45,6 @@ public class FeatureNode {
 		this.maxCardinality=maxCardinality;
 	}
 	
-
-	/**
-	 * Returns the cardinality of this feature in the form of a Point object, <br>
-	 * where the x coordinate represents the minimum cardinality and the y coordinate represents the maximum cardinality.
-	 * 
-	 * @return a Point object representing the cardinality of this feature.
-	 */
-	public Point getCardinality(){
-		return new Point(minCardinality, maxCardinality);
-	}	
-
-	/**
-	 * Returns the minimum cardinality of this feature .
-	 * 
-	 * @return - an int value representing the minimum cardinality of this feature
-	 */
-	public int getMinCardinality(){
-		return minCardinality;
-	}	
-
-	/**
-	 * Returns the maximum cardinality of this feature .
-	 * 
-	 * @return - an int value representing the maximum cardinality of this feature
-	 */
-	public int getMaxCardinality(){
-		return maxCardinality;
-	}
-	
-	/**
-	 * Changes the cardinality of this feature with the one given in the parameters.
-	 * 
-	 * @param min - feature's new minimum cardinality
-	 * @param max - feature's new maximum cardinality
-	 */
-	public void setCardinality(int min, int max){
-		this.minCardinality=min;
-		this.maxCardinality=max;
-	}
-	
 	/**
 	 * Sets the name of this feature node.
 	 * 
@@ -115,21 +64,12 @@ public class FeatureNode {
 	}
 
 	/**
-	 * Returns the ID of this feature node.
+	 * Returns the type of this feature node.
 	 * 
-	 * @return - a String containing the ID.
+	 * @return - a FeatureTypes value that tells the type of this feature.
 	 */
-	public String getID(){
-		return id;
-	}
-	
-	/**
-	 * Returns the sub features of this features.
-	 * 
-	 * @return - an ArrayList\<FeatureNode\> object containing the sub features of this feature
-	 */
-	public ArrayList<FeatureNode> getSubFeatures(){
-		return subFeatures;
+	public FeatureTypes getFeatureType(){
+		return type;
 	}
 	
 	/**

@@ -17,7 +17,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -25,14 +24,12 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.imageio.IIOException;
+import main.CMTConstants;
 
 public class ModelAnalysis extends ModelParserUTF8{
 	private static boolean debug=false;//variable used to activate prints in the code
@@ -92,14 +89,11 @@ public class ModelAnalysis extends ModelParserUTF8{
       String s=null;
       String[]splitted=null;
         
-//      termRelevant = new ArrayList <String[]> ();		
       termRelevant = new HashMap<String, ArrayList<String>>();
       pathPageHTML = new ArrayList <String> ();
-		
-      
+		      
 //		//this model represents an analisys directory, analisys is already done
 //		if (isAnalisysDir){ result=true; return;}
-
       
       // inserting html path 
       for(int i = 0; i < 4; i++)
@@ -108,13 +102,10 @@ public class ModelAnalysis extends ModelParserUTF8{
       //loading relevant terms
       try{
     	BufferedReader br = 
-    	  new BufferedReader(new FileReader(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + ".log"));
+    	  new BufferedReader(new FileReader(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.TERMSsuffix/*".log"*/));
 
-//    	while( (s = br.readLine()) != null )
-//      	  if(!s.equals("") && !s.equals("\n") && !s.equals(" ")) termRelevant.add(s);
     	while( (s = br.readLine()) != null )
           if(!s.equals("") && !s.equals("\n") && !s.equals(" ")){        	  
-//          	termRelevant.add(s.split("\t"));    	
         	splitted=s.split("\t");
         	  
         	//initializing termRelevant, if necessary
@@ -133,7 +124,6 @@ public class ModelAnalysis extends ModelParserUTF8{
     	return false;
       }        
       
-//      Collections.sort(termRelevant);	
       return true;
 	}
 	
@@ -203,7 +193,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 
 		br.close();
 
-		if(s2==""){ huc.disconnect(); return false;}
+		if(s2.compareTo("")==0){ huc.disconnect(); return false;}
 		
 //		System.out.println("checkAnalysis(s2)="+checkAnalysis(s2));
 //		if(!checkAnalysis(s2)){
@@ -261,7 +251,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 	 * @return - a String representing the path to the file containing the relevant terms sets
 	 */
 	public String readPathFileSets(){
-		return readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + "SETS.log";
+		return readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.SETSsuffix/*"SETS.log"*/;
 	}
 	
 	/**
@@ -270,7 +260,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 	 * @return - a String representing the path to the file containing the relevant terms arities
 	 */
 	public String readPathFileArities(){
-		return readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + "ARITY.log";
+		return readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.ARITYsuffix/*"ARITY.log"*/;
 	}
 	
 	/**
@@ -319,7 +309,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 	private String connectAnalysis(){
 		String s1 = " ", s2 = null, jid = null;
 
-        ArrayList <String> al = new ArrayList<String>();
+//        ArrayList <String> al = new ArrayList<String>();
 
         try{
             String query = /*"input_text=" +*/ "tt_text="+URLEncoder.encode(readTextUTF8(), "UTF-8");
@@ -394,7 +384,6 @@ public class ModelAnalysis extends ModelParserUTF8{
             System.out.println("Exception ConnectionAnalysis_3: " + ex.getMessage());
             ex.printStackTrace(); return null;
         }
-
 	}
 	
 	/** Restituisce il jid assegnatoci dal sito URL_ANALYSIS
@@ -461,28 +450,19 @@ public class ModelAnalysis extends ModelParserUTF8{
 	 * @return - the cleaned html as a String, or null if an error occurred
 	 */
 	private String cleanAnalysisTextHTML(String s){
-		int i1, i2, i3, i4;
-		char c=0;
+		int i1, i2, i3;
         if(s == null){
             System.out.println("Error not find page html");
             return null;
         }
 
-        i1 = s.indexOf("<table");
-        
+        i1 = s.indexOf("<table");        
         i2 = s.indexOf("<textarea")+9;
-        while((c=s.charAt(i2))!='>') ++i2;
+        while(s.charAt(i2)!='>') ++i2;
         ++i2;
         
         i3 = s.indexOf("</textarea>");
         
-//        i2 = s.indexOf("<center>");
-//        i3 = s.indexOf("</center>") + 9;
-        i4 = s.indexOf("</p>");
-        
-        System.out.println("Indici della clean:\ni1="+i1+"\ti2="+i2+"\ti3="+i3+"\ti4="+i4);
-        
-//        return s.substring(0, i1) + s.substring(i2, i3) + s.substring(i4, s.length());
         return s.substring(0, i1) + s.substring(i2, i3) + "</body></html>";
 	}
 	
@@ -492,8 +472,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 	 * @param s - String containing the html page 
 	 * @return - the cleaned html as a String, or null if an error occurred
 	 */
-	private String cleanSentenceSplitterHTML(String s)
-	{
+	private String cleanSentenceSplitterHTML(String s){
 		int headBeforeMetaAttr, styleStartIndex;
 		int i1, i2, i3;
         if(s == null){
@@ -797,21 +776,15 @@ public class ModelAnalysis extends ModelParserUTF8{
 	  PrintWriter printer=null;
 	  BufferedReader reader=null;		
 	  String line=null;
-	  String inputTextContent=""/*, sentenceBoundaries=""*/;
       String pathPrefix = readPathFileUTF8().substring(0, readPathFileUTF8().length()-4);
       int sentencesCount=0;
-      int inputTextIndex=0;
       String[] elementData=null;
       String currentToken=null, previousToken=null;
       ArrayList<String> arStr=new ArrayList<String>();
       ArrayList<Point> sentencesBounds=new ArrayList<Point>();
-      Point tempPoint=null;
-	  
-//	  //reading input text file content, it will be used to compute sentences boundaries      
-////      inputTextContent=cleanTextContent(readTextUTF8());
-//      inputTextContent=readTextUTF8();
     		  
-	  arStr.add(
+      
+      arStr.add(
 		"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\""
 		+"\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"
 		+"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"it\" lang=\"it\">"
@@ -834,8 +807,6 @@ public class ModelAnalysis extends ModelParserUTF8{
 	  
 	  try {
 		reader=new BufferedReader(new FileReader(tmp));
-//		tempPoint=new Point(0, 0);
-//		sentenceBoundaries+="0\t0";//da guardare se il file è vuoto, non deve scrivere la prima riga(errata poi...)
 		while((line=reader.readLine())!=null){
 		  if(line.length()>0){//new token found
 			//building html content of the result file
@@ -849,22 +820,11 @@ public class ModelAnalysis extends ModelParserUTF8{
 			+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[5]+"</td>"
 					 +"</tr>");
 			
-//			if(currentToken==null && sentencesCount>0){//this is the first token found after the end of last sentence
-////			  sentenceBoundaries+=sentencesCount+"\t"+inputTextContent.indexOf(elementData[1], inputTextIndex);
-//			  tempPoint=new Point(inputTextContent.indexOf(elementData[1], inputTextIndex), 0);
-//			}
-			
 			//moving in input text to reach current token index
 			previousToken=currentToken; currentToken=elementData[1];
-//			inputTextIndex=inputTextContent.indexOf(currentToken, inputTextIndex);
-//			if(inputTextIndex<0) System.out.println("Got index <0! Term was: "+currentToken+"\tPrevious: "+previousToken);
-//			inputTextIndex+=currentToken.length();
 		  }
 		  else{//found a newLine, calculating sentence boundaries
 			if(sentencesCount%100==0)System.out.println("Found newLine! #"+sentencesCount);
-////			sentenceBoundaries+="\t"+(inputTextIndex-1)+"\n";
-//			tempPoint.y=(inputTextIndex-1);
-//			sentencesBounds.add(tempPoint);
 			++sentencesCount;
 			previousToken=currentToken; currentToken=null;
 		  }
@@ -872,13 +832,6 @@ public class ModelAnalysis extends ModelParserUTF8{
 
 		//adding last part to result file html content
 		arStr.add("</table></body></html>");
-		
-//		//adding last end boundary to sentenceBoundaries
-//		if(currentToken!=null){
-////		  sentenceBoundaries+="\t"+(inputTextIndex/*+currentToken.length()*/-1)+"\n";
-//		  tempPoint.y=(inputTextIndex/*+currentToken.length()*/-1);
-//		  sentencesBounds.add(tempPoint);		  
-//		}
 	  
 		reader.close();
 	  } catch (IOException e1) {
@@ -887,31 +840,19 @@ public class ModelAnalysis extends ModelParserUTF8{
 		e1.printStackTrace(); return null;
 	  }
 	  
-//	  for(Point p : sentencesBounds) System.out.println(p.x+"-"+p.y);
-	  
 	  //printing files
 	  try {
 		//printing html result file
 		tmp=new File(pathPrefix+1+".html");
 		printer = new PrintWriter(tmp);
 		for(String a: arStr) printer.print(a);
-		printer.close();			
-//		//printing sentences boundaries file
-//		tmp=new File(pathPrefix+"SENTENCES_BOUNDS.log");
-//		printer = new PrintWriter(tmp);
-//		for(Point p : sentencesBounds) printer.println(p.x+" - "+p.y);
-//		printer.close();	
-	  } catch (IOException e1) {
+		printer.close();	
+	  } catch (Exception e1) {
 		System.out.println("createResultFileInputText(): File Write Problem!");
 		if(printer!=null) printer.close();	
 		e1.printStackTrace(); return null;
 	  }
 
-	  
-//	  inputTextIndex=inputTextContent.indexOf(";");
-//	  System.out.println("Index of ';' - "+inputTextIndex);
-//	  while ( (inputTextIndex=inputTextContent.indexOf(";", inputTextIndex+1))!=-1)
-//		  System.out.println("Index of ';' - "+inputTextIndex);
 
 	  pathPageHTML.add(pathPrefix+1+".html");
 
@@ -1151,94 +1092,6 @@ public class ModelAnalysis extends ModelParserUTF8{
       }	  
 	  
 	  
-/*	  
-	  //reading input text file content
-      inputTextContent=readTextUTF8();
-      
-	  //saving the positions in input file of relevant terms occurences 
-	  relevantTerms=new HashMap<String, ArrayList<Integer>>();
-	  try {
-//		reader = new BufferedReader(new StringReader(cleanTextContent(inputTextContent)));
-		reader = new BufferedReader(new StringReader(inputTextContent));
-		charcount=0;
-		while((line = reader.readLine()) != null){//for each line
-		  for(int h=0; h<termRelevant.size(); h++){//for each relevant term
-			index=0;
-//			currentTerm=cleanTermRelevant(termRelevant.get(h));
-			currentTerm=termRelevant.get(h);
-			  
-			while(index<line.length()){//for each occurrence
-			  //get next occurrence
-			  index = line.toUpperCase().indexOf(currentTerm.toUpperCase(), index);			  
-			  if (index == -1) break;//start checking next relevant term occurrences in this line
-			  //add occurrence to relevantTerms, if it is valid
-			  if (ModelProject.isValidOccurrence(currentTerm, line, index))
-				addIndexToOccursList(relevantTerms, charcount+index, h);
-			  else System.out.println("Not Valid Occurrence!\nterm: "+currentTerm+"\nline: "+line);
-			  //incrementing index to search for next occurrence
-			  index+=termRelevant.get(h).length();
-			}
-		  }
-		  charcount+=line.length()+1;
-		}
-		
-		reader.close();
-	  } catch (IOException e) {
-		try{ reader.close();}catch(Exception e2){}
-		e.printStackTrace();
-	  }
-	  
-	  
-
-	  
-
-	  Iterator<Entry<String, ArrayList<Integer>>> iter = relevantTerms.entrySet().iterator();
-	  Entry<String, ArrayList<Integer>> entry=null;
-	  ArrayList<Integer> tmpList=null;
-	  String tmpTerm=null;
-	  System.out.println("\n*****printing terms in relevantTerms: ");
-	  while(iter.hasNext()){
-		entry=iter.next();
-		tmpTerm=entry.getKey();
-		tmpList=entry.getValue();
-		System.out.println(tmpTerm);
-//		for(int i : tmpList) System.out.println(i);
-	  }
-
-	  System.out.println("\n*****printing terms in termRelevant: ");
-	  for(String term: termRelevant) System.out.println(term);
-	  
-	  //calculating sentences sets and terms arities
-	  termsInSentencesSet = new ArrayList<ArrayList<String>>();
-	  for(int i=0; i<sentencesBoundaries.size(); ++i) termsInSentencesSet.add(new ArrayList<String>());
-	  termsArity= new HashMap<String, Integer>();
-	  
-	  termsIter = relevantTerms.entrySet().iterator();
-	  termsEntry=null;
-	  ArrayList<Integer> occurrsList=null;
-	  String termName=null;
-	  while(termsIter.hasNext()){//for each relevant term
-		termsEntry=termsIter.next();
-		termName=termsEntry.getKey();
-		occurrsList=termsEntry.getValue();
-//		System.out.println("\n***Term: "+termName);
-		for(int i=0, l=0; i<sentencesBoundaries.size() && l<occurrsList.size(); ){
-//		  for(int occurrence : occurrsList){//for each occurrence//for each sentence
-		  if(occurrsList.get(l)>=sentencesBoundaries.get(i).x && occurrsList.get(l)<=sentencesBoundaries.get(i).y){
-			termsInSentencesSet.get(i).add(termName);
-			if(termsArity.get(termName)==null) termsArity.put(termName, 1);
-			else termsArity.put(termName, termsArity.get(termName)+1);
-			++i; ++l;
-		  }
-		  else if(occurrsList.get(l)<sentencesBoundaries.get(i).x) ++l;
-		  else if(occurrsList.get(l)>sentencesBoundaries.get(i).y) ++i;
-			
-		}
-	  }
-*/
-	  
-	  
-	  
 	  pathPageHTML.add(pathPrefix+2+".html");
 	  
 	  if (SAVE_RELEVANT_TERMS_IMMEDIATELY) try {
@@ -1309,7 +1162,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 	private void saveRelevantTerms() throws IOException {
 	  String line=null;
 	  if(termRelevant==null){//just creating an empty file
-		File emptyFile=new File(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + ".log");
+		File emptyFile=new File(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.TERMSsuffix/*".log"*/);
 		emptyFile.getParentFile().mkdirs(); emptyFile.createNewFile();
 		return;
 	  }
@@ -1317,12 +1170,12 @@ public class ModelAnalysis extends ModelParserUTF8{
 	  PrintWriter writer =
 		new PrintWriter(
 		  new BufferedWriter(
-				  new FileWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + ".log")));
+				  new FileWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.TERMSsuffix/*".log"*/)));
 
 	  Iterator<Entry<String, ArrayList<String>>> termIter = termRelevant.entrySet().iterator();
 	  Entry<String, ArrayList<String>> termEntry=null;
 	  while(termIter.hasNext()){
-		termEntry=termIter.next();
+		termEntry=termIter.next();/**/
 		line=termEntry.getKey();
 		for(String version : termEntry.getValue()) line+="\t"+version;
 		writer.println(line);				
@@ -1339,7 +1192,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 	private void saveRelevantTermsSets() throws IOException {
 	  PrintWriter writer=null;
 	  if(termsInSentencesSet==null){//just creating an empty file
-		File emptyFile=new File(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + "SETS.log");
+		File emptyFile=new File(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.SETSsuffix/*"SETS.log"*/);
 		emptyFile.getParentFile().mkdirs(); emptyFile.createNewFile();
 		return;
 	  }
@@ -1347,7 +1200,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 	  writer =
 		new PrintWriter(
 		  new BufferedWriter(
-			new FileWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + "SETS.log")));
+			new FileWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.SETSsuffix/*"SETS.log"*/)));
 
 	  for(int j = 0; j< termsInSentencesSet.size(); j++){
 		writer.print(SENTENCE_PREFIX+j+SENTENCE_SUFFIX);
@@ -1363,14 +1216,14 @@ public class ModelAnalysis extends ModelParserUTF8{
 	private void saveRelevantTermsArities() throws IOException {
 	  PrintWriter writer=null;
 	  if(termsArity==null){//just creating an empty file
-		File emptyFile=new File(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + "ARITY.log");
+		File emptyFile=new File(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.ARITYsuffix/*"ARITY.log"*/);
 		emptyFile.getParentFile().mkdirs(); emptyFile.createNewFile();
 		return;
 	  }
 	  writer =
 		new PrintWriter(
 		  new BufferedWriter(
-			new FileWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + "ARITY.log")));
+			new FileWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.ARITYsuffix/*"ARITY.log"*/)));
 
 	  Iterator<Entry<String, Integer>> iter = termsArity.entrySet().iterator();
 	  Entry<String, Integer> entry=null;

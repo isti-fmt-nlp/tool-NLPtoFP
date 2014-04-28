@@ -21,8 +21,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Arc2D;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.QuadCurve2D;
 import java.awt.image.BufferedImage;
@@ -41,17 +41,13 @@ import java.io.StringReader;
 import java.net.URL;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Observable;
 import java.util.Observer;
 
 import javax.imageio.ImageIO;
-import javax.jws.Oneway;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -59,6 +55,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
@@ -78,13 +75,13 @@ import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 import javax.swing.border.EtchedBorder;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.BoxView;
 import javax.swing.text.ComponentView;
 import javax.swing.text.DefaultHighlighter;
-import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.swing.text.Highlighter;
 import javax.swing.text.IconView;
@@ -103,10 +100,14 @@ import javax.xml.parsers.SAXParserFactory;
 
 import com.ibm.icu.impl.InvalidFormatException;
 
+import main.FDEXMLHandler;
+import main.GroupAnimationTimer;
+import main.OSUtils;
 import main.OrderedList;
 import main.OrderedListNode;
 import main.SortUtils;
 import main.ViewXMLHandler;
+import main.OSUtils.ToolNames;
 
 
 public class EditorView extends JFrame implements Observer{
@@ -268,6 +269,8 @@ public class EditorView extends JFrame implements Observer{
 	public static final String featureNamePrefix="---FEATURE---#";
 	/** prefix of any text area owned by feature panels*/
 	public static final String textAreaNamePrefix="---TEXTAREA---";
+	/** prefix of any ImageIcon owned by anchor panels*/
+	public static final String connectorImageNamePrefix="---IMAGEICON---";
 	/** prefix of any connector starting dot name*/
 	public static final String startMandatoryNamePrefix="---START_MANDATORY---#";
 	/** prefix of any connector ending dot name*/
@@ -295,7 +298,8 @@ public class EditorView extends JFrame implements Observer{
 	/** name ofthe diagram panel*/
 	public static final String toolsPanelname="---TOOLS_PANEL---";
 	
-	
+	/** URL of the Feature Diagram Editor Tool tray icon*/
+	private static final URL trayIconURL = EditorView.class.getResource("/Tray/Tray Icon FDET_2.png");    
 	/** URL of the connector starting dot icon*/
 	private static final URL connectorStartDotIconURL=EditorView.class.getResource("/Connector Start Dot.png");
 	/** URL of the new group starting dot icon*/
@@ -321,7 +325,7 @@ public class EditorView extends JFrame implements Observer{
 	private static int featureBorderSize=20;
 
 	/** enumeration of items that can become active, for instance in a drag motion*/
-	public static enum activeItems {
+	public static enum ActiveItems {
 		NO_ACTIVE_ITEM, DRAGGING_FEATURE, DRAGGING_EXTERN_ANCHOR, DRAGGING_EXTERN_GROUP, DRAGGING_EXTERN_CONSTRAINT,
 		DRAGGING_CONSTRAINT_CONTROL_POINT, DRAGGING_SELECTION_RECT, DRAGGING_SELECTION_GROUP, 
 		DRAGGING_TOOL_NEWFEATURE, DRAGGING_TOOL_MANDATORY_LINK, DRAGGING_TOOL_OPTIONAL_LINK, 
@@ -334,9 +338,6 @@ public class EditorView extends JFrame implements Observer{
 		START_INCLUDES_DOT, END_INCLUDES_DOT, START_EXCLUDES_DOT, END_EXCLUDES_DOT, CONSTRAINT_CONTROL_POINT,
 		ALT_GROUP_START_CONNECTOR, OR_GROUP_START_CONNECTOR
 	}
-	
-//	/** Tells if the diagram has been modified after last save*/
-//	private boolean modified=true;
 	
 	/** Tells which action should be performed when the JFrame is closed*/
 	private int onCloseOperation = JFrame.DISPOSE_ON_CLOSE;
@@ -406,6 +407,8 @@ public class EditorView extends JFrame implements Observer{
 	private int orGroupsCount=0;
 	/** Number of features created*/
 	private int featuresCount=0;
+	/** Current number of timers*/
+//	private int timersCount=0;
 	
 	/** List of all connector starting dots*/
 	private ArrayList<JComponent> startConnectorDots=null;
@@ -416,7 +419,14 @@ public class EditorView extends JFrame implements Observer{
 	/** List of Alternative Groups*/
 	private ArrayList<GroupPanel> altGroupPanels=null;	
 	/** List of Or Groups*/
-	private ArrayList<GroupPanel> orGroupPanels=null;
+	private ArrayList<GroupPanel> orGroupPanels=null;	
+	/** The group opener Timer*/
+	private GroupAnimationTimer openerTimer=null;
+	/** List of group closer Timers*/
+	private ArrayList<GroupAnimationTimer> closerTimers=new ArrayList<GroupAnimationTimer>();
+	
+	/** Timer used to animate opening and closing group circles*/
+	private Timer timer=null;
 	
 	/** List of starting commonalities selected by the user */
 	private ArrayList<String> startingCommonalities=new ArrayList<String>();
@@ -502,23 +512,8 @@ public class EditorView extends JFrame implements Observer{
 	/**current selected checkbox*/
 	private String currentSelectedFeatureName=null;
 	
-//	private static int[] PCcol={160, 160, 0};
-//	private static int[] PVcol={0, 160, 160};
-//	private static int[] ACcol={255, 255, 0};
-//	private static int[] AVcol={0, 255, 255};
-//	private static int[] NEcol={160, 0, 0};
-
 	/** RGB values of the colors used in the search for feature occurrences*/
 	private static int[] PCcol={160, 160, 0}, PVcol={0, 160, 160}, ACcol={255, 255, 0}, AVcol={0, 255, 255}, NEcol={160, 0, 0};
-
-//	private static Highlighter.HighlightPainter passiveCommHighlightPainter =
-//			new DefaultHighlighter.DefaultHighlightPainter(getNewColor(PCcol));
-//	private static Highlighter.HighlightPainter passiveVarsHighlightPainter= 
-//			new DefaultHighlighter.DefaultHighlightPainter(getNewColor(PVcol));
-//	private static Highlighter.HighlightPainter activeCommHighlightPainter = 
-//			new DefaultHighlighter.DefaultHighlightPainter(getNewColor(ACcol));
-//	private static Highlighter.HighlightPainter activeVarsHighlightPainter = 
-//			new DefaultHighlighter.DefaultHighlightPainter(getNewColor(AVcol));
 
 	/** HighlightPainter objects used to apply the colors in the search for feature occurrences*/
 	private static Highlighter.HighlightPainter passiveCommHighlightPainter = 
@@ -539,10 +534,9 @@ public class EditorView extends JFrame implements Observer{
 	
 	/** The component on which a drop is about to be done*/
 	private JComponent underlyingComponent=null;
-//	private static boolean isDraggingFeature=false;
 
 	/** Tells what item is interested in the current action*/
-	private activeItems isActiveItem=activeItems.NO_ACTIVE_ITEM;
+	private ActiveItems isActiveItem=ActiveItems.NO_ACTIVE_ITEM;
 
 	/** Variable used to draw lines on the diagram */
 	private Point lineStart=new Point(), lineEnd=new Point();
@@ -631,7 +625,6 @@ public class EditorView extends JFrame implements Observer{
 	 */
 	public boolean prepareUI(EditorController editorController){
 		if(editorController==null) return false;
-//		this.editorController=editorController;
 		
 		/* initializing JMenuBar */		
 		menuFiles = new JMenu("Files");
@@ -684,10 +677,7 @@ public class EditorView extends JFrame implements Observer{
 		menuFiles.add(menuFilesDelete);
 		menuFiles.add(menuFilesExit);
 
-		/*Menu View items*/
-//		menuViewColored = new JCheckBoxMenuItem("Colour 'near' Features", false);
-//		menuViewColored.addActionListener(editorController);
-		
+		/*Menu View items*/		
 		menuViewCommsOrVars = new JCheckBoxMenuItem("View Commonality/Variability");
 		menuViewCommsOrVars.addActionListener(editorController);
 		
@@ -695,19 +685,14 @@ public class EditorView extends JFrame implements Observer{
 		menuViewExtrOrInsert.addActionListener(editorController);
 		menuViewExtrOrInsert.setEnabled(false);
 
-		
 		menuViewFields = new JMenuItem("View Feature's Fields");
 		menuViewFields.addActionListener(editorController);
 		menuViewFields.setEnabled(false);
 		
-//		menuViewVisibleConstraints = new JMenuItem("View Diagram Constraints");
-//		menuViewVisibleConstraints.addActionListener(editorController);
 		
-//		menuView.add(menuViewColored);
 		menuView.add(menuViewCommsOrVars);
 		menuView.add(menuViewExtrOrInsert);
 		menuView.add(menuViewFields);
-//		menuView.add(menuViewVisibleConstraints);
 
 		/*Menu Modify items*/
 		menuModifyBasicFM = new JRadioButtonMenuItem("Basic Feature Model");
@@ -718,9 +703,12 @@ public class EditorView extends JFrame implements Observer{
 		menuModifyAdvancedFM.addActionListener(editorController);	
 		menuModifyAdvancedFM.setEnabled(false);
 		
+		
 		menuModify.add(menuModifyBasicFM);
 		menuModify.add(menuModifyAdvancedFM);
 		
+		
+		//adding JMenus to JMenuBar
 		menu.add(menuFiles);
 		menu.add(menuView);
 		menu.add(menuModify);
@@ -760,10 +748,6 @@ public class EditorView extends JFrame implements Observer{
 		startConnectorDots = new ArrayList<JComponent>();
 		startIncludesDots = new ArrayList<JComponent>();
 		startExcludesDots = new ArrayList<JComponent>();
-//		endConnectorDots = new ArrayList<JComponent>();
-//		prevStartConnectorDotsLocation = new ArrayList<Point>();
-//		prevEndConnectorDotsLocation = new ArrayList<Point>();
-//		connectorDotsToRedraw = new ArrayList<Boolean>();
 		altGroupPanels = new ArrayList<GroupPanel>();
 		orGroupPanels = new ArrayList<GroupPanel>();
 
@@ -774,6 +758,7 @@ public class EditorView extends JFrame implements Observer{
 		frameRoot=this;
 		setLayout(new BorderLayout());		
 		setDefaultCloseOperation(onCloseOperation);
+		addWindowListener(editorController);
 		System.out.println("current DefaultCloseOperation: "+onCloseOperation);
 
 		//creating tools panel
@@ -886,14 +871,9 @@ public class EditorView extends JFrame implements Observer{
 		treePanel.setBackground(Color.RED);
 		treePanel.add(new JLabel("Caio!"));
 
-//		controllerPanel.add(toolsPanel, BorderLayout.SOUTH);		
-//		controllerPanel.add(treePanel, BorderLayout.NORTH);		
 		controllerPanel.add(toolsPanel, BorderLayout.NORTH);		
 		controllerPanel.add(treePanel, BorderLayout.SOUTH);
-//		controllerPanel.add(toolsPanel);		
-//		controllerPanel.add(treePanel);
 		
-//		splitterPanel.add(toolsPanel);
 		splitterPanel.add(controllerPanel);
 		splitterPanel.add(diagramScroller);
 		
@@ -906,11 +886,20 @@ public class EditorView extends JFrame implements Observer{
 //		diagramPanel.addMouseWheelListener(editorController);
 		
 
-		setSize(Toolkit.getDefaultToolkit().getScreenSize());
-		setVisible(true);
+//		setSize(Toolkit.getDefaultToolkit().getScreenSize());
+//		setUndecorated(true);
 		setLocation(0, 0);
+		setMinimumSize(new Dimension(500, 500));
 		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
+		setVisible(true);
+		setPreferredSize(getSize());
 		validate();
+		
+		System.out.println(trayIconURL);
+
+		OSUtils.createAndShowGUI(trayIconURL, ToolNames.FDET, editorController, "Exit");
+
+		
 /*		
 		//adding starting commonalities and variabilities
 		int i=10, j=10;
@@ -939,38 +928,64 @@ public class EditorView extends JFrame implements Observer{
 
 	@Override
 	public void paint(java.awt.Graphics g) {
+		double radius=0.;
+		Ellipse2D ellipse=null;
+		double ellipseX=0.;
+		double ellipseY=0.;
+		
 		super.paint(g);
 
 		Graphics2D g2 = (Graphics2D)g.create();
 		
 		/* ***DEBUG*** */
-		if(debug3) System.out.println("Mi han chiamato, son la paint()");
+		if(debug3) System.out.println("PAINT: isActiveItem="+isActiveItem);
 		/* ***DEBUG*** */
 		
-		System.out.println("PAINT: isActiveItem="+isActiveItem);
-
 		if(toolDragImage!=null) 
-//			g2.drawImage(toolDragImage, toolDragPosition.x+1, toolDragPosition.y+4, null);
-			g2.drawImage(toolDragImage, toolDragPosition.x, toolDragPosition.y, null);
-		if(isActiveItem==activeItems.DRAGGING_SELECTION_RECT){
-			System.out.println("Disegno il rect");
-			g2.setColor(Color.BLUE);
-			g2.draw(selectionRect);			
+		  g2.drawImage(toolDragImage, toolDragPosition.x, toolDragPosition.y, null);
+		if(isActiveItem==ActiveItems.DRAGGING_SELECTION_RECT){
+		  g2.setColor(Color.BLUE);
+		  g2.draw(selectionRect);			
 		}
 		if(selectionGroupFocused.size()>0){
 		  g2.setColor(Color.BLUE);
 		  Rectangle elementSelectionFrame=new Rectangle();
 		  for(Object selectedElement : selectionGroupFocused.toArray()){
-			  System.out.println("selected element: "+((JComponent)selectedElement).getName()
+			/* ***DEBUG*** */
+			if(debug3) System.out.println("selectionGroup element: "+((JComponent)selectedElement).getName()
 					  +"coords: "+((JComponent)selectedElement).getLocationOnScreen());
-			/*elementSelectionframe=*/((JComponent)selectedElement).getBounds(elementSelectionFrame);
+			/* ***DEBUG*** */
+				
 			elementSelectionFrame.setLocation(
-					(int)(elementSelectionFrame.getX()+diagramPanel.getLocationOnScreen().getX()-2 ),
-					(int)(elementSelectionFrame.getY()+diagramPanel.getLocationOnScreen().getY() ));
+			  (int)(((JComponent)selectedElement).getLocationOnScreen().getX()-this.getLocationOnScreen().getX()-3 ),
+			  (int)(((JComponent)selectedElement).getLocationOnScreen().getY()-this.getLocationOnScreen().getY()-3 ));
 			elementSelectionFrame.setSize(
-					(int)elementSelectionFrame.getWidth()+6,
-					(int)elementSelectionFrame.getHeight()+6);
+			  (int)((JComponent)selectedElement).getWidth()+6,
+			  (int)((JComponent)selectedElement).getHeight()+6);
+
 			g2.draw(elementSelectionFrame);
+		  }
+		}
+		if(openerTimer!=null && openerTimer.isRunning()){
+		  g2.setColor(Color.BLUE);
+		  radius=openerTimer.getRadius();
+		  if(radius>=1.){
+			for(GroupPanel group : orGroupPanels){
+		      ellipseX=(group.getLocationOnScreen().getX()-this.getLocationOnScreen().getX())-group.getWidth()/2;
+		      ellipseY=(group.getLocationOnScreen().getY()-this.getLocationOnScreen().getY()+3)-group.getWidth()/2;
+		      
+			  ellipse = new Ellipse2D.Double(ellipseX, ellipseY, group.getWidth()*2, group.getWidth()*2);
+
+			  g2.draw(ellipse);
+			}
+			for(GroupPanel group : altGroupPanels){
+			  ellipseX=(group.getLocationOnScreen().getX()-this.getLocationOnScreen().getX())-group.getWidth()/2;
+			  ellipseY=(group.getLocationOnScreen().getY()-this.getLocationOnScreen().getY()+3)-group.getWidth()/2;
+
+			  ellipse = new Ellipse2D.Double(ellipseX, ellipseY, group.getWidth()*2, group.getWidth()*2);
+
+			  g2.draw(ellipse);					
+			}
 		  }
 		}
 	}
@@ -988,7 +1003,6 @@ public class EditorView extends JFrame implements Observer{
 		//drawing connectors
 		for (int i=0; i< startConnectorDots.size(); ++i){
 		  drawConnectionLine(g2, startConnectorDots.get(i), ((AnchorPanel)startConnectorDots.get(i)).getOtherEnd());
-
 		}
 
 		//drawing Alternative Groups
@@ -1077,8 +1091,8 @@ public class EditorView extends JFrame implements Observer{
 	    int y1Points[]=null;
 	    Point2D intersectionPoint=null;
 	    GeneralPath polygon=null;
-	    Line2D.Double endLine=null;
-	    Rectangle camera=null;
+//	    Line2D.Double endLine=null;
+//	    Rectangle camera=null;
 	    
 	    //creating the QuadCurve2D.Float
 	    QuadCurve2D quadcurve = new QuadCurve2D.Float();
@@ -1086,8 +1100,8 @@ public class EditorView extends JFrame implements Observer{
 	    //setting coordinates
 	    quadcurve.setCurve(start.getX(), start.getY(), control.getX(), control.getY(), end.getX(), end.getY());
 
-	    camera=new Rectangle((int)end.getX()-20, (int)end.getY()-20, 40, 40);
-	    endLine=new Line2D.Double(control, end);
+//	    camera=new Rectangle((int)end.getX()-20, (int)end.getY()-20, 40, 40);
+//	    endLine=new Line2D.Double(control, end);
 	    
 	    //getting intersection point between camera and endLine
 
@@ -1182,8 +1196,8 @@ public class EditorView extends JFrame implements Observer{
 //	    g2d.fillArc((int)control.x-5, (int)control.y-5, 10, 10, 0, 360);
 	    
 	    //this is an excludes constraint, the starting triangle will be drawn also
-	    camera=new Rectangle((int)start.getX()-20, (int)start.getY()-20, 40, 40);
-	    endLine=new Line2D.Double(control, start);
+//	    camera=new Rectangle((int)start.getX()-20, (int)start.getY()-20, 40, 40);
+//	    endLine=new Line2D.Double(control, start);
 
 	    
 	    lineLength=
@@ -1233,91 +1247,91 @@ public class EditorView extends JFrame implements Observer{
 	    g2d.setColor(Color.BLACK);
 	}
 
-	/**
-	 * Finds the intersection point between the Rectangle camera and the Line2d.Double endLine,
-	 *  starting at the point control.
-	 * 
-	 * @param control - the starting point of endLine
-	 * @param camera - the Rectangle used to calculate the intersection point
-	 * @param endLine - the Line2d.Double used to calculate the intersection point
-	 * @return
-	 */
-	private Point2D getTriangleTipPoint(Point control, Rectangle camera, Line2D.Double endLine) {
-		Line2D intersectionSide;
-		Point2D intersectionPoint=null;
-	    if(control.x>=camera.x && control.x<=camera.x+camera.width){
-	      if(control.y<=camera.y){//control point is directly over the camera
-	    	intersectionSide=
-	    	  new Line2D.Double(camera.x, camera.y, camera.x+camera.width, camera.y);
-	    	intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);
-	      }
-	      else if(control.y>=camera.y){//control point is directly below the camera
-	      	intersectionSide=
-	      	  new Line2D.Double(camera.x, camera.y+camera.height, camera.x+camera.width, camera.y+camera.height);
-	      	intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);    	  
-	      }
-	    }
-	    else if(control.y>=camera.y && control.y<=camera.y+camera.height){
-	      if(control.x<=camera.x){//control point is directly at left of the camera
-	        intersectionSide=
-	        	new Line2D.Double(camera.x, camera.y, camera.x, camera.y+camera.height);
-	        intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);
-	      }
-	      else if(control.x>=camera.x){//control point is directly at right of the camera
-	        intersectionSide=
-	        	new Line2D.Double(camera.x+camera.width, camera.y, camera.x+camera.width, camera.y+camera.height);
-	        intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);    	  
-	      }    	
-	    }
-	    else if(control.x<camera.x){
-	      if(control.y<camera.y){//control point is in a top-left position respect to the camera
-	        intersectionSide=//trying the top side
-	        	new Line2D.Double(camera.x, camera.y, camera.x+camera.width, camera.y);
-	        intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);   
-	        if(intersectionPoint==null){//trying the left side
-	          intersectionSide=
-	        	new Line2D.Double(camera.x, camera.y, camera.x, camera.y+camera.height);
-	          intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);           	
-	        }    	  
-	      }
-	      else if(control.y>camera.y+camera.height){//control point is in a bottom-left position respect to the camera
-	    	intersectionSide=//trying the bottom side
-	    	    new Line2D.Double(camera.x, camera.y+camera.height, camera.x+camera.width, camera.y+camera.height);
-	    	intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);   
-	    	if(intersectionPoint==null){//trying the left side
-	    	  intersectionSide=
-	    		new Line2D.Double(camera.x, camera.y, camera.x, camera.y+camera.height);
-	    	  intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);           	
-	    	}    	      	  
-	      }
-	    }
-	    else if(control.x>camera.x){
-	      if(control.y<camera.y){//control point is in a top-right position respect to the camera
-	      	intersectionSide=//trying the top side
-	            new Line2D.Double(camera.x, camera.y, camera.x+camera.width, camera.y);
-	      	intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);   
-	      	if(intersectionPoint==null){//trying the right side
-	          intersectionSide=
-	        	new Line2D.Double(camera.x+camera.width, camera.y, camera.x+camera.width, camera.y+camera.height);
-	          intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);           	
-	      	}    	      	        	  
-	      }
-	      else if(control.y>camera.y+camera.height){//control point is in a bottom-right position respect to the camera
-	      	intersectionSide=//trying the bottom side
-	      		new Line2D.Double(camera.x, camera.y+camera.height, camera.x+camera.width, camera.y+camera.height);
-	      	intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);   
-	      	if(intersectionPoint==null){//trying the right side
-	      	  intersectionSide=
-	            new Line2D.Double(camera.x+camera.width, camera.y, camera.x+camera.width, camera.y+camera.height);
-	      	  intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);
-	      	}    	      	      	  
-	      }
-	    }
-	    else{//control is inside of camera, the intersection point is arbitrary
-	   	  intersectionPoint=new Point2D.Double(camera.x, camera.y+camera.height/2);    	
-	    }
-		return intersectionPoint;
-	}	
+//	/**
+//	 * Finds the intersection point between the Rectangle camera and the Line2d.Double endLine,
+//	 *  starting at the point control.
+//	 * 
+//	 * @param control - the starting point of endLine
+//	 * @param camera - the Rectangle used to calculate the intersection point
+//	 * @param endLine - the Line2d.Double used to calculate the intersection point
+//	 * @return
+//	 */
+//	private Point2D getTriangleTipPoint(Point control, Rectangle camera, Line2D.Double endLine) {
+//		Line2D intersectionSide;
+//		Point2D intersectionPoint=null;
+//	    if(control.x>=camera.x && control.x<=camera.x+camera.width){
+//	      if(control.y<=camera.y){//control point is directly over the camera
+//	    	intersectionSide=
+//	    	  new Line2D.Double(camera.x, camera.y, camera.x+camera.width, camera.y);
+//	    	intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);
+//	      }
+//	      else if(control.y>=camera.y){//control point is directly below the camera
+//	      	intersectionSide=
+//	      	  new Line2D.Double(camera.x, camera.y+camera.height, camera.x+camera.width, camera.y+camera.height);
+//	      	intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);    	  
+//	      }
+//	    }
+//	    else if(control.y>=camera.y && control.y<=camera.y+camera.height){
+//	      if(control.x<=camera.x){//control point is directly at left of the camera
+//	        intersectionSide=
+//	        	new Line2D.Double(camera.x, camera.y, camera.x, camera.y+camera.height);
+//	        intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);
+//	      }
+//	      else if(control.x>=camera.x){//control point is directly at right of the camera
+//	        intersectionSide=
+//	        	new Line2D.Double(camera.x+camera.width, camera.y, camera.x+camera.width, camera.y+camera.height);
+//	        intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);    	  
+//	      }    	
+//	    }
+//	    else if(control.x<camera.x){
+//	      if(control.y<camera.y){//control point is in a top-left position respect to the camera
+//	        intersectionSide=//trying the top side
+//	        	new Line2D.Double(camera.x, camera.y, camera.x+camera.width, camera.y);
+//	        intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);   
+//	        if(intersectionPoint==null){//trying the left side
+//	          intersectionSide=
+//	        	new Line2D.Double(camera.x, camera.y, camera.x, camera.y+camera.height);
+//	          intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);           	
+//	        }    	  
+//	      }
+//	      else if(control.y>camera.y+camera.height){//control point is in a bottom-left position respect to the camera
+//	    	intersectionSide=//trying the bottom side
+//	    	    new Line2D.Double(camera.x, camera.y+camera.height, camera.x+camera.width, camera.y+camera.height);
+//	    	intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);   
+//	    	if(intersectionPoint==null){//trying the left side
+//	    	  intersectionSide=
+//	    		new Line2D.Double(camera.x, camera.y, camera.x, camera.y+camera.height);
+//	    	  intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);           	
+//	    	}    	      	  
+//	      }
+//	    }
+//	    else if(control.x>camera.x){
+//	      if(control.y<camera.y){//control point is in a top-right position respect to the camera
+//	      	intersectionSide=//trying the top side
+//	            new Line2D.Double(camera.x, camera.y, camera.x+camera.width, camera.y);
+//	      	intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);   
+//	      	if(intersectionPoint==null){//trying the right side
+//	          intersectionSide=
+//	        	new Line2D.Double(camera.x+camera.width, camera.y, camera.x+camera.width, camera.y+camera.height);
+//	          intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);           	
+//	      	}    	      	        	  
+//	      }
+//	      else if(control.y>camera.y+camera.height){//control point is in a bottom-right position respect to the camera
+//	      	intersectionSide=//trying the bottom side
+//	      		new Line2D.Double(camera.x, camera.y+camera.height, camera.x+camera.width, camera.y+camera.height);
+//	      	intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);   
+//	      	if(intersectionPoint==null){//trying the right side
+//	      	  intersectionSide=
+//	            new Line2D.Double(camera.x+camera.width, camera.y, camera.x+camera.width, camera.y+camera.height);
+//	      	  intersectionPoint=getIntersectionPoint3(endLine, intersectionSide);
+//	      	}    	      	      	  
+//	      }
+//	    }
+//	    else{//control is inside of camera, the intersection point is arbitrary
+//	   	  intersectionPoint=new Point2D.Double(camera.x, camera.y+camera.height/2);    	
+//	    }
+//		return intersectionPoint;
+//	}	
 	
 	/**
 	 * Returns the point at startAngle degrees, given a circle centered in center with radius radius.
@@ -1429,202 +1443,182 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @return - the corresponding angle, in degree metric
 	 */
-	public static int getDegreeAngle(double centreX, double centreY, double pointX, double pointY, double radius) {
+	private static int getDegreeAngle(double centreX, double centreY, double pointX, double pointY, double radius) {
 		double cosin=(pointX-centreX)/radius;
 		double sin=(pointY-centreY)/radius;
 		double acos = Math.acos(cosin);
 		double asin = Math.asin(sin);
 
-//		//using acos and asin calculated values to get actual angle in degree
-//		if(asin==0) return 0;
-//		if(asin>0) return (int)Math.toDegrees(acos);
-//		else{
-//		  if(acos<Math.PI/2) return (int)Math.toDegrees(Math.PI+asin);
-//		  else return (int)Math.toDegrees(Math.PI/2-asin);
-//		}
-
 		asin*=-1;
 		//using acos and asin calculated values to get actual angle in degree
-//		if(asin==0) return 0;
 		if(asin>0) return (int)Math.toDegrees(acos);
 		else{
 		  if(acos<Math.PI/2) return (int)Math.toDegrees(2*Math.PI+asin);
 		  else return (int)Math.toDegrees(Math.PI-asin);
-		}
-	
-	
+		}	
 	}
 
-	/**
-	 * Draws the group arc from leftMost to rightMost anchors
-	 * 
-	 * @param g2 - the Graphics2D object used for drawing
-	 * @param startComp - start anchor of the group
-	 * @param leftMost - left-most anchor of the group
-	 * @param rightMost - right-most anchor of the group
-	 * @param filled - if true, the group arc is drawm as a filled shape, otherwise only the boundary line is drawn  
-	 */
-	private void drawGroupArc(Graphics2D g2, JComponent startComp, JComponent leftMost, JComponent rightMost, boolean filled) {
-	  double lineFraction=2.5;
-	  double leftX=0, rightX=0, leftY=0, rightY=0;
-	  int leftHeight=0, rightHeight=0, leftWidth=0, rightWidth=0, leftLength=0, rightLength=0;
-	  int rectangleWidth=0, rectangleHeight=0;
-	  Line2D intersectingLine=null;
-	  Line2D leftLine=null, rightLine=null;
-	  Point2D startCenter=null, leftCenter=null, rightCenter=null;
-	  Point2D leftLineIntersectPoint=null, rightLineIntersectPoint=null;
-	  List<Point2D> intersectionPoints=null;
-	  Arc2D groupArc = null;
-	  
-	  /* ***DEBUG*** */
-	  if (debug3) System.out.println(""
-			  +"\nstart: "+startComp
-			  +"\nleftMost: "+leftMost
-			  +"\nrightMost: "+rightMost
-		);
-	  /* ***DEBUG*** */
-	  
-	  if(!startComp.isVisible()) return;
-
-	  Graphics2D tempGraphics = (Graphics2D)g2.create();
-	  
-	  //getting actual visible center points of components
-	  startCenter=getVisibleStartAnchorCenter(startComp);
-	  leftCenter=getVisibleStartAnchorCenter(leftMost);
-	  rightCenter=getVisibleStartAnchorCenter(rightMost);
-	  
-	  //getting the lenghts of the two lines
-	  leftHeight=(int)(leftCenter.getY()-startCenter.getY());
-	  leftWidth=(int)(leftCenter.getX()-startCenter.getX());
-	  leftLength=(int)Math.sqrt(leftWidth*leftWidth+leftHeight*leftHeight);
-	  rightHeight=(int)(rightCenter.getY()-startCenter.getY());
-	  rightWidth=(int)(rightCenter.getX()-startCenter.getX());
-	  rightLength=(int)Math.sqrt(rightWidth*rightWidth+rightHeight*rightHeight);
-
-	  //getting the coordinates of the two points at 1/lineFraction line length for the two lines
-	  leftX=startCenter.getX()+leftWidth/lineFraction;
-	  leftY=startCenter.getY()+leftHeight/lineFraction;
-	  rightX=startCenter.getX()+rightWidth/lineFraction;
-	  rightY=startCenter.getY()+rightHeight/lineFraction;
-
-	  //creating the lines to calculate the two actual points of the arc
-	  leftLine= new Line2D.Double(startCenter, leftCenter);
-	  rightLine= new Line2D.Double(startCenter, rightCenter);
-	  if(leftHeight<0) leftHeight*=-1;
-	  if(rightHeight<0) rightHeight*=-1;
-	  //intersecting line depends on the shortest line
-	  if(leftLength<rightLength) intersectingLine= new Line2D.Double(-3000000, leftY, +3000000, leftY);
-//	  if(leftHeight<rightHeight) intersectingLine= new Line2D.Double(-3000000, leftY, +3000000, leftY);
-	  else intersectingLine= new Line2D.Double(-3000000, rightY, +3000000, rightY);
-	  
-	  //calculating groupArc radius
-	  double groupArcRadius = (leftLength<rightLength)? leftLength/lineFraction:rightLength/lineFraction;
-
-	  //calculating actual intersection point of the arc with leftLine
-	  intersectionPoints=getCircleLineIntersectionPoints(startCenter, leftCenter, startCenter, groupArcRadius);
-	  if(leftLine.ptSegDist(intersectionPoints.get(0))==0) leftLineIntersectPoint=intersectionPoints.get(0);
-	  else leftLineIntersectPoint=intersectionPoints.get(1);
-
-	  //calculating actual intersection point of the arc with rightLine
-	  intersectionPoints=getCircleLineIntersectionPoints(startCenter, rightCenter, startCenter, groupArcRadius);
-	  if(rightLine.ptSegDist(intersectionPoints.get(0))==0) rightLineIntersectPoint=intersectionPoints.get(0);
-	  else rightLineIntersectPoint=intersectionPoints.get(1);
-
-	  //calculating the two actual points of the arc
-//	  leftIntersectionPoint=getIntersectionPoint(leftLine, intersectingLine);
-//	  rightIntersectionPoint=getIntersectionPoint(rightLine, intersectingLine);
-
-	  
-	  /* ***DEBUG*** */
-	  if (debug3) System.out.println(""
-			  +"\nleftIntersectionPoint: "+leftLineIntersectPoint
-			  +"\nrightIntersectionPoint: "+rightLineIntersectPoint
-		);
-	  /* ***DEBUG*** */
-	  
-	  if(leftLineIntersectPoint==null || rightLineIntersectPoint==null) return;
-	  //calculating width and height to draw the arc
-	  rectangleWidth=(int)(rightLineIntersectPoint.getX()-leftLineIntersectPoint.getX());
-	  rectangleHeight=(int)(leftLineIntersectPoint.getY()-startCenter.getY());
-//	  rectangleHeight=(leftHeight>rightHeight)? leftHeight:rightHeight;
-	  if (rectangleHeight<0)rectangleHeight*=-1;
-//	  Rectangle2D rect2D= new Rectangle2D.Double(			  
+//	/**
+//	 * Draws the group arc from leftMost to rightMost anchors
+//	 * 
+//	 * @param g2 - the Graphics2D object used for drawing
+//	 * @param startComp - start anchor of the group
+//	 * @param leftMost - left-most anchor of the group
+//	 * @param rightMost - right-most anchor of the group
+//	 * @param filled - if true, the group arc is drawm as a filled shape, otherwise only the boundary line is drawn  
+//	 */
+//	private void drawGroupArc(Graphics2D g2, JComponent startComp, JComponent leftMost, JComponent rightMost, boolean filled) {
+//	  double lineFraction=2.5;
+//	  double leftX=0, rightX=0, leftY=0, rightY=0;
+//	  int leftHeight=0, rightHeight=0, leftWidth=0, rightWidth=0, leftLength=0, rightLength=0;
+//	  int rectangleWidth=0, rectangleHeight=0;
+//	  Line2D intersectingLine=null;
+//	  Line2D leftLine=null, rightLine=null;
+//	  Point2D startCenter=null, leftCenter=null, rightCenter=null;
+//	  Point2D leftLineIntersectPoint=null, rightLineIntersectPoint=null;
+//	  List<Point2D> intersectionPoints=null;
+//	  Arc2D groupArc = null;
+//	  
+//	  /* ***DEBUG*** */
+//	  if (debug3) System.out.println(""
+//			  +"\nstart: "+startComp
+//			  +"\nleftMost: "+leftMost
+//			  +"\nrightMost: "+rightMost
+//		);
+//	  /* ***DEBUG*** */
+//	  
+//	  if(!startComp.isVisible()) return;
+//
+//	  Graphics2D tempGraphics = (Graphics2D)g2.create();
+//	  
+//	  //getting actual visible center points of components
+//	  startCenter=getVisibleStartAnchorCenter(startComp);
+//	  leftCenter=getVisibleStartAnchorCenter(leftMost);
+//	  rightCenter=getVisibleStartAnchorCenter(rightMost);
+//	  
+//	  //getting the lenghts of the two lines
+//	  leftHeight=(int)(leftCenter.getY()-startCenter.getY());
+//	  leftWidth=(int)(leftCenter.getX()-startCenter.getX());
+//	  leftLength=(int)Math.sqrt(leftWidth*leftWidth+leftHeight*leftHeight);
+//	  rightHeight=(int)(rightCenter.getY()-startCenter.getY());
+//	  rightWidth=(int)(rightCenter.getX()-startCenter.getX());
+//	  rightLength=(int)Math.sqrt(rightWidth*rightWidth+rightHeight*rightHeight);
+//
+//	  //getting the coordinates of the two points at 1/lineFraction line length for the two lines
+//	  leftX=startCenter.getX()+leftWidth/lineFraction;
+//	  leftY=startCenter.getY()+leftHeight/lineFraction;
+//	  rightX=startCenter.getX()+rightWidth/lineFraction;
+//	  rightY=startCenter.getY()+rightHeight/lineFraction;
+//
+//	  //creating the lines to calculate the two actual points of the arc
+//	  leftLine= new Line2D.Double(startCenter, leftCenter);
+//	  rightLine= new Line2D.Double(startCenter, rightCenter);
+//	  if(leftHeight<0) leftHeight*=-1;
+//	  if(rightHeight<0) rightHeight*=-1;
+//	  //intersecting line depends on the shortest line
+//	  if(leftLength<rightLength) intersectingLine= new Line2D.Double(-3000000, leftY, +3000000, leftY);
+////	  if(leftHeight<rightHeight) intersectingLine= new Line2D.Double(-3000000, leftY, +3000000, leftY);
+//	  else intersectingLine= new Line2D.Double(-3000000, rightY, +3000000, rightY);
+//	  
+//	  //calculating groupArc radius
+//	  double groupArcRadius = (leftLength<rightLength)? leftLength/lineFraction:rightLength/lineFraction;
+//
+//	  //calculating actual intersection point of the arc with leftLine
+//	  intersectionPoints=getCircleLineIntersectionPoints(startCenter, leftCenter, startCenter, groupArcRadius);
+//	  if(leftLine.ptSegDist(intersectionPoints.get(0))==0) leftLineIntersectPoint=intersectionPoints.get(0);
+//	  else leftLineIntersectPoint=intersectionPoints.get(1);
+//
+//	  //calculating actual intersection point of the arc with rightLine
+//	  intersectionPoints=getCircleLineIntersectionPoints(startCenter, rightCenter, startCenter, groupArcRadius);
+//	  if(rightLine.ptSegDist(intersectionPoints.get(0))==0) rightLineIntersectPoint=intersectionPoints.get(0);
+//	  else rightLineIntersectPoint=intersectionPoints.get(1);
+//
+//	  //calculating the two actual points of the arc
+////	  leftIntersectionPoint=getIntersectionPoint(leftLine, intersectingLine);
+////	  rightIntersectionPoint=getIntersectionPoint(rightLine, intersectingLine);
+//
+//	  
+//	  /* ***DEBUG*** */
+//	  if (debug3) System.out.println(""
+//			  +"\nleftIntersectionPoint: "+leftLineIntersectPoint
+//			  +"\nrightIntersectionPoint: "+rightLineIntersectPoint
+//		);
+//	  /* ***DEBUG*** */
+//	  
+//	  if(leftLineIntersectPoint==null || rightLineIntersectPoint==null) return;
+//	  //calculating width and height to draw the arc
+//	  rectangleWidth=(int)(rightLineIntersectPoint.getX()-leftLineIntersectPoint.getX());
+//	  rectangleHeight=(int)(leftLineIntersectPoint.getY()-startCenter.getY());
+////	  rectangleHeight=(leftHeight>rightHeight)? leftHeight:rightHeight;
+//	  if (rectangleHeight<0)rectangleHeight*=-1;
+////	  Rectangle2D rect2D= new Rectangle2D.Double(			  
+////			  (startCenter.getX()-groupArcRadius),
+////			  (startCenter.getY()-groupArcRadius),
+////			  groupArcRadius*2, groupArcRadius*2);
+//	  if(!filled) groupArc = new Arc2D.Double(			  
 //			  (startCenter.getX()-groupArcRadius),
 //			  (startCenter.getY()-groupArcRadius),
-//			  groupArcRadius*2, groupArcRadius*2);
-	  if(!filled) groupArc = new Arc2D.Double(			  
-			  (startCenter.getX()-groupArcRadius),
-			  (startCenter.getY()-groupArcRadius),
-			  groupArcRadius*2, groupArcRadius*2, 0, 360, Arc2D.Double.OPEN);
-	  else groupArc = new Arc2D.Double(			  
-			  (startCenter.getX()-groupArcRadius),
-			  (startCenter.getY()-groupArcRadius),
-			  groupArcRadius*2, groupArcRadius*2, 0, 360, Arc2D.Double.PIE);
-//	  Arc2D groupArc = new Arc2D.Double(			  
-//			  (startCenter.getX()-rectangleHeight),
-//			  (startCenter.getY()-rectangleHeight),
-//			  rectangleHeight*2, rectangleHeight*2, 0, 360, Arc2D.Double.OPEN);
-//	  if(rightLineIntersectPoint.getX()<leftLineIntersectPoint.getX())
-//		  groupArc.setAngles(
-//				  rightLineIntersectPoint.getX(), rightLineIntersectPoint.getY(), 
-//				  leftLineIntersectPoint.getX(), leftLineIntersectPoint.getY());
-//	  else groupArc.setAngles(
-//				  leftLineIntersectPoint.getX(), leftLineIntersectPoint.getY(),
-//				  rightLineIntersectPoint.getX(), rightLineIntersectPoint.getY());
-
-	  groupArc.setAngles(
-		  leftLineIntersectPoint.getX(), leftLineIntersectPoint.getY(),
-		  rightLineIntersectPoint.getX(), rightLineIntersectPoint.getY());
-
-	  if(groupArc.getAngleExtent()>180) groupArc.setAngles(
-		  rightLineIntersectPoint.getX(), rightLineIntersectPoint.getY(), 
-		  leftLineIntersectPoint.getX(), leftLineIntersectPoint.getY());
-	  
-	  if(!filled) tempGraphics.draw(groupArc);
-	  else  tempGraphics.fill(groupArc);
-
-//	  tempGraphics.draw(rect2D);
-//	  tempGraphics.fill(arco);
-//	  tempGraphics.drawArc(
-//			  (int)(startPoint.getLocationOnScreen().getX()-splitterPanel.getLocationOnScreen().getX()-rectangleHeight),
-//			  (int)(startPoint.getLocationOnScreen().getY()-splitterPanel.getLocationOnScreen().getY()-rectangleHeight),
-//			  rectangleHeight*2, rectangleHeight*2, 0, 360);
-//	  tempGraphics.setClip(
-//			  (int)(leftPoint.getX()-splitterPanel.getLocationOnScreen().getX())-1,
-//			  (int)(leftPoint.getY()-splitterPanel.getLocationOnScreen().getY())-1,
-//			  rectangleWidth+6, rectangleHeight);
-//	  tempGraphics.drawArc(
-//			  (int)(leftPoint.getX()-splitterPanel.getLocationOnScreen().getX()),
-//			  (int)(leftPoint.getY()-splitterPanel.getLocationOnScreen().getY()-rectangleHeight),
-//			  rectangleWidth, rectangleHeight*2, 0, 360);
-////	  tempGraphics.drawRect(25, 25, 240, 120);
-//	  tempGraphics.setColor(Color.RED);
-//	  tempGraphics.fillOval((int)leftPoint.getX()-2, (int)leftPoint.getY()-2, 7, 7);
-//	  tempGraphics.fillOval((int)rightPoint.getX()-2, (int)rightPoint.getY()-2, 7, 7);
-	}
+//			  groupArcRadius*2, groupArcRadius*2, 0, 360, Arc2D.Double.OPEN);
+//	  else groupArc = new Arc2D.Double(			  
+//			  (startCenter.getX()-groupArcRadius),
+//			  (startCenter.getY()-groupArcRadius),
+//			  groupArcRadius*2, groupArcRadius*2, 0, 360, Arc2D.Double.PIE);
+////	  Arc2D groupArc = new Arc2D.Double(			  
+////			  (startCenter.getX()-rectangleHeight),
+////			  (startCenter.getY()-rectangleHeight),
+////			  rectangleHeight*2, rectangleHeight*2, 0, 360, Arc2D.Double.OPEN);
+////	  if(rightLineIntersectPoint.getX()<leftLineIntersectPoint.getX())
+////		  groupArc.setAngles(
+////				  rightLineIntersectPoint.getX(), rightLineIntersectPoint.getY(), 
+////				  leftLineIntersectPoint.getX(), leftLineIntersectPoint.getY());
+////	  else groupArc.setAngles(
+////				  leftLineIntersectPoint.getX(), leftLineIntersectPoint.getY(),
+////				  rightLineIntersectPoint.getX(), rightLineIntersectPoint.getY());
+//
+//	  groupArc.setAngles(
+//		  leftLineIntersectPoint.getX(), leftLineIntersectPoint.getY(),
+//		  rightLineIntersectPoint.getX(), rightLineIntersectPoint.getY());
+//
+//	  if(groupArc.getAngleExtent()>180) groupArc.setAngles(
+//		  rightLineIntersectPoint.getX(), rightLineIntersectPoint.getY(), 
+//		  leftLineIntersectPoint.getX(), leftLineIntersectPoint.getY());
+//	  
+//	  if(!filled) tempGraphics.draw(groupArc);
+//	  else  tempGraphics.fill(groupArc);
+//
+////	  tempGraphics.draw(rect2D);
+////	  tempGraphics.fill(arco);
+////	  tempGraphics.drawArc(
+////			  (int)(startPoint.getLocationOnScreen().getX()-splitterPanel.getLocationOnScreen().getX()-rectangleHeight),
+////			  (int)(startPoint.getLocationOnScreen().getY()-splitterPanel.getLocationOnScreen().getY()-rectangleHeight),
+////			  rectangleHeight*2, rectangleHeight*2, 0, 360);
+////	  tempGraphics.setClip(
+////			  (int)(leftPoint.getX()-splitterPanel.getLocationOnScreen().getX())-1,
+////			  (int)(leftPoint.getY()-splitterPanel.getLocationOnScreen().getY())-1,
+////			  rectangleWidth+6, rectangleHeight);
+////	  tempGraphics.drawArc(
+////			  (int)(leftPoint.getX()-splitterPanel.getLocationOnScreen().getX()),
+////			  (int)(leftPoint.getY()-splitterPanel.getLocationOnScreen().getY()-rectangleHeight),
+////			  rectangleWidth, rectangleHeight*2, 0, 360);
+//////	  tempGraphics.drawRect(25, 25, 240, 120);
+////	  tempGraphics.setColor(Color.RED);
+////	  tempGraphics.fillOval((int)leftPoint.getX()-2, (int)leftPoint.getY()-2, 7, 7);
+////	  tempGraphics.fillOval((int)rightPoint.getX()-2, (int)rightPoint.getY()-2, 7, 7);
+//	}
 
 	private void drawConnectionLine(Graphics2D g2, JComponent startPanel, JComponent endPanel) {
 		lineStart.setLocation(getVisibleStartAnchorCenter(startPanel));
 		lineEnd.setLocation(getVisibleStartAnchorCenter(endPanel));
-//		start.setLocation(startPanel.getLocationOnScreen());
-//		end.setLocation(endPanel.getLocationOnScreen());
-		g2.drawLine(
-//				  (int)(start.getX()-splitterPanel.getLocationOnScreen().getX()+startPanel.getWidth()/2),
-//				  (int)(start.getY()-splitterPanel.getLocationOnScreen().getY()+startPanel.getHeight()/2+3),
-//				  (int)(end.getX()-splitterPanel.getLocationOnScreen().getX()+endPanel.getHeight()/2),
-//				  (int)(end.getY()-splitterPanel.getLocationOnScreen().getY()+endPanel.getHeight()/2+3) );
-		  (int)lineStart.getX(), (int)lineStart.getY(), (int)lineEnd.getX(), (int)lineEnd.getY() );
-//		  (int)(end.getX()-splitterPanel.getLocationOnScreen().getX()+endPanel.getHeight()/2-3),
-//		  (int)(end.getY()-splitterPanel.getLocationOnScreen().getY()+endPanel.getHeight()/2+2) );
+		g2.drawLine((int)lineStart.getX(), (int)lineStart.getY(), (int)lineEnd.getX(), (int)lineEnd.getY() );
 	};
 	
 	/**
-     * Returns a Point2D representing the visible center of a starting anchor image on the splitterPanel coordinates system.
+     * Returns a Point2D representing the visible center of a starting anchor image on the diagram panel coordinates system.
      * 
      * @param anchor - the JComponent representing a visible starting anchor
      * @return the visible center point of the anchor
      */
-    public Point2D getVisibleStartAnchorCenter(JComponent anchor) {
+    private Point2D getVisibleStartAnchorCenter(JComponent anchor) {
     	double x=(anchor.getLocationOnScreen().getX()-diagramPanel.getLocationOnScreen().getX()+anchor.getWidth()/2);
     	double y=(anchor.getLocationOnScreen().getY()-diagramPanel.getLocationOnScreen().getY()+anchor.getHeight()/2+3);
     	
@@ -1644,186 +1638,185 @@ public class EditorView extends JFrame implements Observer{
 //    	return new Point2D.Double(x, y);
 //    }
 	
-    /**
-     * 
-     * @param pointA
-     * @param pointB
-     * @param center
-     * @param radius
-     * @return
-     */
-    public static List<Point2D> getCircleLineIntersectionPoints(Point2D pointA, Point2D pointB, Point2D center, double radius) {
-        double baX = pointB.getX() - pointA.getX();
-        double baY = pointB.getY() - pointA.getY();
-        double caX = center.getX() - pointA.getX();
-        double caY = center.getY() - pointA.getY();
-
-        double a = baX * baX + baY * baY;
-        double bBy2 = baX * caX + baY * caY;
-        double c = caX * caX + caY * caY - radius * radius;
-
-        double pBy2 = bBy2 / a;
-        double q = c / a;
-
-        double disc = pBy2 * pBy2 - q;
-        if (disc < 0) {
-            return Collections.emptyList();
-        }
-        // if disc == 0 ... dealt with later
-        double tmpSqrt = Math.sqrt(disc);
-        double abScalingFactor1 = -pBy2 + tmpSqrt;
-        double abScalingFactor2 = -pBy2 - tmpSqrt;
-
-        Point2D p1 = new Point2D.Double(pointA.getX() - baX * abScalingFactor1, pointA.getY()
-                - baY * abScalingFactor1);
-        if (disc == 0) { // abScalingFactor1 == abScalingFactor2
-            return Collections.singletonList(p1);
-        }
-        Point2D p2 = new Point2D.Double(pointA.getX() - baX * abScalingFactor2, pointA.getY()
-                - baY * abScalingFactor2);
-        return Arrays.asList(p1, p2);
-    }
+//    /**
+//     * 
+//     * @param pointA
+//     * @param pointB
+//     * @param center
+//     * @param radius
+//     * @return
+//     */
+//    private static List<Point2D> getCircleLineIntersectionPoints(Point2D pointA, Point2D pointB, Point2D center, double radius) {
+//        double baX = pointB.getX() - pointA.getX();
+//        double baY = pointB.getY() - pointA.getY();
+//        double caX = center.getX() - pointA.getX();
+//        double caY = center.getY() - pointA.getY();
+//
+//        double a = baX * baX + baY * baY;
+//        double bBy2 = baX * caX + baY * caY;
+//        double c = caX * caX + caY * caY - radius * radius;
+//
+//        double pBy2 = bBy2 / a;
+//        double q = c / a;
+//
+//        double disc = pBy2 * pBy2 - q;
+//        if (disc < 0) {
+//            return Collections.emptyList();
+//        }
+//        // if disc == 0 ... dealt with later
+//        double tmpSqrt = Math.sqrt(disc);
+//        double abScalingFactor1 = -pBy2 + tmpSqrt;
+//        double abScalingFactor2 = -pBy2 - tmpSqrt;
+//
+//        Point2D p1 = new Point2D.Double(pointA.getX() - baX * abScalingFactor1, pointA.getY()
+//                - baY * abScalingFactor1);
+//        if (disc == 0) { // abScalingFactor1 == abScalingFactor2
+//            return Collections.singletonList(p1);
+//        }
+//        Point2D p2 = new Point2D.Double(pointA.getX() - baX * abScalingFactor2, pointA.getY()
+//                - baY * abScalingFactor2);
+//        return Arrays.asList(p1, p2);
+//    }
     
-    /**
-     * Returns a Point2D representing the intersection point of lineA and lineB, or null if they're parallel to each other.
-     * @param lineA - line A
-     * @param lineB - line B
-     * @return the intersection point of lineA and lineB, if any, null otherwise
-     */
-    public Point getIntersectionPoint3(Line2D lineA, Line2D lineB){
-        double x1 = lineA.getX1();
-        double y1 = lineA.getY1();
-        double x2 = lineA.getX2();
-        double y2 = lineA.getY2();
-
-        double x3 = lineB.getX1();
-        double y3 = lineB.getY1();
-        double x4 = lineB.getX2();
-        double y4 = lineB.getY2();		  
-    		  
-    	double d = (x1-x2)*(y3-y4) - (y1-y2)*(x3-x4);
-    	if (d == 0.){
-    	  System.out.println("d==0");
-    	  return null;
-    	}
-
-    	int xi = (int)(((x3-x4)*(x1*y2-y1*x2)-(x1-x2)*(x3*y4-y3*x4))/d);
-    	int yi = (int)(((y3-y4)*(x1*y2-y1*x2)-(y1-y2)*(x3*y4-y3*x4))/d);
-
-    	Point p = new Point(xi,yi);
-    	if (xi < Math.min(x1,x2) || xi > Math.max(x1,x2)) return null;
-    	if (xi < Math.min(x3,x4) || xi > Math.max(x3,x4)) return null;
-
-    	return p;
-      }
+//    /**
+//     * Returns a Point2D representing the intersection point of lineA and lineB, or null if they're parallel to each other.
+//     * @param lineA - line A
+//     * @param lineB - line B
+//     * @return the intersection point of lineA and lineB, if any, null otherwise
+//     */
+//    private Point getIntersectionPoint3(Line2D lineA, Line2D lineB){
+//        double x1 = lineA.getX1();
+//        double y1 = lineA.getY1();
+//        double x2 = lineA.getX2();
+//        double y2 = lineA.getY2();
+//
+//        double x3 = lineB.getX1();
+//        double y3 = lineB.getY1();
+//        double x4 = lineB.getX2();
+//        double y4 = lineB.getY2();		  
+//    		  
+//    	double d = (x1-x2)*(y3-y4) - (y1-y2)*(x3-x4);
+//    	if (d == 0.){
+//    	  System.out.println("d==0");
+//    	  return null;
+//    	}
+//
+//    	int xi = (int)(((x3-x4)*(x1*y2-y1*x2)-(x1-x2)*(x3*y4-y3*x4))/d);
+//    	int yi = (int)(((y3-y4)*(x1*y2-y1*x2)-(y1-y2)*(x3*y4-y3*x4))/d);
+//
+//    	Point p = new Point(xi,yi);
+//    	if (xi < Math.min(x1,x2) || xi > Math.max(x1,x2)) return null;
+//    	if (xi < Math.min(x3,x4) || xi > Math.max(x3,x4)) return null;
+//
+//    	return p;
+//      }
     
-    //if they're parallel to each other and they're not horizontal or vertical.
-    /**
-     * Returns a Point2D representing the intersection point of segments lineA and lineB,
-     * or null if there is no intersection.<br>
-     * If the two segments overlap, the intersection point is considered to be the end point of lineB<br>
-     * owned by both lines. If one of the segment is a sub-segment of the other, one of the two end point of<br>
-     * lineB is returned, without any assumption. 
-     * 
-     * @param lineA - line A
-     * @param lineB - line B
-     * @return the intersection point of lineA and lineB, if any, null otherwise
-     */
-    public Point getIntersectionPoint4(Line2D lineA, Line2D lineB){
-    	double t=0, u=0;
-    	Point p=null;
-    	
-        double x1 = lineA.getX1();
-        double y1 = lineA.getY1();
-        double x2 = lineA.getX2();
-        double y2 = lineA.getY2();
-
-        double x3 = lineB.getX1();
-        double y3 = lineB.getY1();
-        double x4 = lineB.getX2();
-        double y4 = lineB.getY2();		  
-    		  
-        //using 2 variables(t and u) to calculate intersection based on line vectors
-        double tmpY4MinusY3=(y4-y3);
-        double tmpX4MinusX3=(x4-x3);
-        double tmpX1MinusX2=(x1-x2);
-        double tmpY2MinusY1=(y2-y1);
-        double tmpY3MinusY1=(y3-y1);
-    	double numerator=tmpY3MinusY1*tmpX4MinusX3+(x1-x3)*tmpY4MinusY3;
-    	double denominator =tmpY2MinusY1*tmpX4MinusX3+tmpX1MinusX2*tmpY4MinusY3; 
-    	
-    	if (denominator == 0.){//the two lines are parallel or overlapping
-    	  System.out.println("d=0");
-    	  //checking if the lines are vertical or horizontal
-    	  if(x1==x2){//lines are vertical
-    		if(y3<=y4){
-    		  if( (y1<y3 && y2<y3) || (y1>y4 && y2>y4)) return null;
-    		  if(y1<y3 || y2<y3) return new Point((int)x3, (int)y3);
-    		  else return new Point((int)x4, (int)y4);
-    		}
-    		else{
-    		  if( (y1<y4 && y2<y4) || (y1>y3 && y2>y3)) return null;
-    		  if(y1<y4 || y2<y4) return new Point((int)x4, (int)y4);
-    		  else  return new Point((int)x3, (int)y3);
-    		}
-    	  }
-    	  if(y1==y2){//lines are horizontal
-      		if(x3<=x4){
-      		  if( (x1<x3 && x2<x3) || (x1>x4 && x2>x4)) return null;
-    		  if(x1<x3 || x2<x3) return new Point((int)x3, (int)y3);
-    		  else return new Point((int)x4, (int)y4);      		  
-      		}
-      		else{
-      		  if( (x1<x4 && x2<x4) || (x1>x3 && x2>x3)) return null;
-    		  if(x1<x4 || x2<x4) return new Point((int)x4, (int)y4);
-    		  else return new Point((int)x3, (int)y3);      			
-      		}    		  
-    	  }
-    	  else{//lines are not horizontal nor vertical, checking the X-axis projections
-        	if(x3<=x4){
-              if( (x1<x3 && x2<x3) || (x1>x4 && x2>x4)) return null;
-              if(x1<x3 || x2<x3) return new Point((int)x3, (int)y3);
-              else return new Point((int)x4, (int)y4);      		  
-        	}
-        	else{
-        	  if( (x1<x4 && x2<x4) || (x1>x3 && x2>x3)) return null;
-        	  if(x1<x4 || x2<x4) return new Point((int)x4, (int)y4);
-        	  else return new Point((int)x3, (int)y3);      			
-        	}     		  
-    	  }
-    	}
-
-    	t=numerator/denominator;
-    	if(t<0. || t>1.) return null;//no intersection
-    	
-    	if(tmpY4MinusY3==0.){//lineB is horizontal, but lines are not parallel
-    		if( (int)(y1+t*tmpY2MinusY1)==(int)y4){
-              if(x3<=x4){
-            	if((int)(x1+t*(-tmpX1MinusX2))>=(int)x3 || (int)(x1+t*(-tmpX1MinusX2))<= (int)x4)
-            	  return new Point((int)(x1+t*(-tmpX1MinusX2)), (int)(y1+t*tmpY2MinusY1));
-              }
-              else{
-              	if((int)(x1+t*(-tmpX1MinusX2))>=(int)x4 || (int)(x1+t*(-tmpX1MinusX2))<= (int)x3)
-              	  return new Point((int)(x1+t*(-tmpX1MinusX2)), (int)(y1+t*tmpY2MinusY1));            	  
-              }
-    		}
-    		else return null;//no intersection
-    	}
-    	
-    	u=(-tmpY3MinusY1/tmpY4MinusY3)+t*tmpY2MinusY1/tmpY4MinusY3;
-    	
-    	if(u<0. || u>1.) return null;//no intersection
-    			
-    	int xi = (int)(x1+t*(-tmpX1MinusX2));
-    	int yi = (int)(y1+t*tmpY2MinusY1);
-    	
-    	p = new Point(xi,yi);
-    	System.out.println("t="+t+"\tu="+u
-    			+"\n-tmpY3MinusY1="+(-tmpY3MinusY1)+"\ttmpY4MinusY3="+tmpY4MinusY3
-    			+"\ntmpY2MinusY1="+(tmpY2MinusY1)+"\ttmpY4MinusY3="+tmpY4MinusY3
-    			+"\nPoint="+p);
-    	return p;
-      }
+//    /**
+//     * Returns a Point2D representing the intersection point of segments lineA and lineB,
+//     * or null if there is no intersection.<br>
+//     * If the two segments overlap, the intersection point is considered to be the end point of lineB<br>
+//     * owned by both lines. If one of the segment is a sub-segment of the other, one of the two end point of<br>
+//     * lineB is returned, without any assumption. 
+//     * 
+//     * @param lineA - line A
+//     * @param lineB - line B
+//     * @return the intersection point of lineA and lineB, if any, null otherwise
+//     */
+//    private Point getIntersectionPoint4(Line2D lineA, Line2D lineB){
+//    	double t=0, u=0;
+//    	Point p=null;
+//    	
+//        double x1 = lineA.getX1();
+//        double y1 = lineA.getY1();
+//        double x2 = lineA.getX2();
+//        double y2 = lineA.getY2();
+//
+//        double x3 = lineB.getX1();
+//        double y3 = lineB.getY1();
+//        double x4 = lineB.getX2();
+//        double y4 = lineB.getY2();		  
+//    		  
+//        //using 2 variables(t and u) to calculate intersection based on line vectors
+//        double tmpY4MinusY3=(y4-y3);
+//        double tmpX4MinusX3=(x4-x3);
+//        double tmpX1MinusX2=(x1-x2);
+//        double tmpY2MinusY1=(y2-y1);
+//        double tmpY3MinusY1=(y3-y1);
+//    	double numerator=tmpY3MinusY1*tmpX4MinusX3+(x1-x3)*tmpY4MinusY3;
+//    	double denominator =tmpY2MinusY1*tmpX4MinusX3+tmpX1MinusX2*tmpY4MinusY3; 
+//    	
+//    	if (denominator == 0.){//the two lines are parallel or overlapping
+//    	  System.out.println("d=0");
+//    	  //checking if the lines are vertical or horizontal
+//    	  if(x1==x2){//lines are vertical
+//    		if(y3<=y4){
+//    		  if( (y1<y3 && y2<y3) || (y1>y4 && y2>y4)) return null;
+//    		  if(y1<y3 || y2<y3) return new Point((int)x3, (int)y3);
+//    		  else return new Point((int)x4, (int)y4);
+//    		}
+//    		else{
+//    		  if( (y1<y4 && y2<y4) || (y1>y3 && y2>y3)) return null;
+//    		  if(y1<y4 || y2<y4) return new Point((int)x4, (int)y4);
+//    		  else  return new Point((int)x3, (int)y3);
+//    		}
+//    	  }
+//    	  if(y1==y2){//lines are horizontal
+//      		if(x3<=x4){
+//      		  if( (x1<x3 && x2<x3) || (x1>x4 && x2>x4)) return null;
+//    		  if(x1<x3 || x2<x3) return new Point((int)x3, (int)y3);
+//    		  else return new Point((int)x4, (int)y4);      		  
+//      		}
+//      		else{
+//      		  if( (x1<x4 && x2<x4) || (x1>x3 && x2>x3)) return null;
+//    		  if(x1<x4 || x2<x4) return new Point((int)x4, (int)y4);
+//    		  else return new Point((int)x3, (int)y3);      			
+//      		}    		  
+//    	  }
+//    	  else{//lines are not horizontal nor vertical, checking the X-axis projections
+//        	if(x3<=x4){
+//              if( (x1<x3 && x2<x3) || (x1>x4 && x2>x4)) return null;
+//              if(x1<x3 || x2<x3) return new Point((int)x3, (int)y3);
+//              else return new Point((int)x4, (int)y4);      		  
+//        	}
+//        	else{
+//        	  if( (x1<x4 && x2<x4) || (x1>x3 && x2>x3)) return null;
+//        	  if(x1<x4 || x2<x4) return new Point((int)x4, (int)y4);
+//        	  else return new Point((int)x3, (int)y3);      			
+//        	}     		  
+//    	  }
+//    	}
+//
+//    	t=numerator/denominator;
+//    	if(t<0. || t>1.) return null;//no intersection
+//    	
+//    	if(tmpY4MinusY3==0.){//lineB is horizontal, but lines are not parallel
+//    		if( (int)(y1+t*tmpY2MinusY1)==(int)y4){
+//              if(x3<=x4){
+//            	if((int)(x1+t*(-tmpX1MinusX2))>=(int)x3 || (int)(x1+t*(-tmpX1MinusX2))<= (int)x4)
+//            	  return new Point((int)(x1+t*(-tmpX1MinusX2)), (int)(y1+t*tmpY2MinusY1));
+//              }
+//              else{
+//              	if((int)(x1+t*(-tmpX1MinusX2))>=(int)x4 || (int)(x1+t*(-tmpX1MinusX2))<= (int)x3)
+//              	  return new Point((int)(x1+t*(-tmpX1MinusX2)), (int)(y1+t*tmpY2MinusY1));            	  
+//              }
+//    		}
+//    		else return null;//no intersection
+//    	}
+//    	
+//    	u=(-tmpY3MinusY1/tmpY4MinusY3)+t*tmpY2MinusY1/tmpY4MinusY3;
+//    	
+//    	if(u<0. || u>1.) return null;//no intersection
+//    			
+//    	int xi = (int)(x1+t*(-tmpX1MinusX2));
+//    	int yi = (int)(y1+t*tmpY2MinusY1);
+//    	
+//    	p = new Point(xi,yi);
+//    	System.out.println("t="+t+"\tu="+u
+//    			+"\n-tmpY3MinusY1="+(-tmpY3MinusY1)+"\ttmpY4MinusY3="+tmpY4MinusY3
+//    			+"\ntmpY2MinusY1="+(tmpY2MinusY1)+"\ttmpY4MinusY3="+tmpY4MinusY3
+//    			+"\nPoint="+p);
+//    	return p;
+//      }
 	
 	/**
 	 * Returns a JComponent named name and containing the corresponding icon image, <br>
@@ -1834,29 +1827,12 @@ public class EditorView extends JFrame implements Observer{
 	 * @return - the new JComponent with the icon, or null if a problem occurrs.
 	 */
 	private static JComponent getToolIcon(String name, boolean backgroundVisible) {
-//		JComponent iconPanel=null;
-//		ImageIcon toolImage = getIconImage(name);
-//		
-//		iconPanel= new JPanel();
-//		iconPanel.add(new JLabel(toolImage));
-//
-//		iconPanel.setBounds(0, 0, toolImage.getIconWidth(), toolImage.getIconHeight());
-//
-//		iconPanel.setOpaque(backgroundVisible);
-//		iconPanel.setBackground(Color.LIGHT_GRAY);
-//		iconPanel.setName(name);
-//		iconPanel.setToolTipText(name);
-//		  
 		JComponent iconPanel=null;
 		ImageIcon toolImage = getIconImage(name);
 		
 		iconPanel = new JLabel(toolImage);
-//		iconPanel = new EditorView(). new PressThroughLabel(toolImage);
-//		iconPanel = new PressThroughLabel(toolImage);
 		
-
 		iconPanel.setBounds(0, 0, toolImage.getIconWidth(), toolImage.getIconHeight());
-
 		iconPanel.setOpaque(backgroundVisible);
 		iconPanel.setBackground(Color.LIGHT_GRAY);
 		iconPanel.setName(name);
@@ -1912,7 +1888,6 @@ public class EditorView extends JFrame implements Observer{
 
 			diagramPanel.setComponentZOrder(comp, 0);
 			visibleOrderDraggables.moveToTop(comp);
-//			diagramPanel.repaint();
 			frameRoot.repaint();
 		  }
 	}
@@ -1933,7 +1908,6 @@ public class EditorView extends JFrame implements Observer{
 	public void dragAnchor(MouseEvent e) {
 	  if(lastAnchorFocused==null) return;
 	  dragDiagramElement(lastAnchorFocused, e);
-//		  diagramPanel.repaint();
 	  frameRoot.repaint();	
 	}
 
@@ -1945,7 +1919,6 @@ public class EditorView extends JFrame implements Observer{
 	public void dragFeature(MouseEvent e) {
 	  if(lastFeatureFocused==null) return;
 	  dragDiagramElement(lastFeatureFocused, e);
-//	  diagramPanel.repaint();
 	  frameRoot.repaint();
 	}
 
@@ -1955,11 +1928,12 @@ public class EditorView extends JFrame implements Observer{
 	 * @param e - the current MouseEvent
 	 */
 	public void dragSelectionRect(MouseEvent e) {
-	  System.out.println("start: "+startSelectionRect+"\tend: "+e.getLocationOnScreen().getLocation());
-//	  endSelectionRect=e.getLocationOnScreen().getLocation();
-
-
-	  selectionRect.setFrameFromDiagonal(startSelectionRect, e.getLocationOnScreen().getLocation());  	  
+	  Point loc = new Point();
+	  
+	  loc.x=(int)(e.getLocationOnScreen().getX()-this.getLocationOnScreen().getX());
+	  loc.y=(int)(e.getLocationOnScreen().getY()-this.getLocationOnScreen().getY());
+	  
+	  selectionRect.setFrameFromDiagonal(startSelectionRect, loc);  	  
 	  
 	  frameRoot.repaint();	
 	}
@@ -1981,6 +1955,7 @@ public class EditorView extends JFrame implements Observer{
 	  JComponent nearestElementX=null, nearestElementY=null;
 	  Point location=null;
 	  Dimension diagramSize=null;
+	  ConstraintPanel otherEnd = null;
 	  
 	  //calculating move
 	  moveX = e.getX()-lastPositionX;
@@ -2020,11 +1995,6 @@ public class EditorView extends JFrame implements Observer{
 		//resizing diagram and moving out-of-selection components
 		if(newLocationX<-10 && moveX<=lastMoveX){
 		  mustResizeX=true; mustShiftX=true;
-//		  Dimension diagramSize= diagramPanel.getPreferredSize();
-//		  diagramSize.width+=20;
-//		  diagramPanel.setPreferredSize(diagramSize);
-//		  diagramPanel.revalidate();
-//		  shiftAllDraggablesButGroupHorizontal(20, selectionGroupFocused);
 		}
 		adjustedMoveX=-nearestElementX.getX();
 		lastPositionX=lastPositionX+adjustedMoveX;
@@ -2040,12 +2010,6 @@ public class EditorView extends JFrame implements Observer{
 		//resizing diagram and setting scrollbar to max
 		if(newLocationX+nearestElementX.getWidth()>diagramPanel.getWidth()+10 && moveX>=lastMoveX){
 		  mustResizeX=true; mustScrollX=true;
-//		  Dimension diagramSize= diagramPanel.getPreferredSize();
-//		  diagramSize.width+=20;
-//		  diagramPanel.setPreferredSize(diagramSize);
-//		  diagramPanel.revalidate();
-//		  diagramScroller.getHorizontalScrollBar().setValue(
-//				  diagramScroller.getHorizontalScrollBar().getMaximum());				
 		}
 		adjustedMoveX=diagramPanel.getWidth()-(nearestElementX.getX()+nearestElementX.getWidth());
 		lastPositionX=lastPositionX+adjustedMoveX;
@@ -2060,11 +2024,6 @@ public class EditorView extends JFrame implements Observer{
 		//resizing diagram and moving out-of-selection components
 		if(newLocationY<-10 && moveY<=lastMoveY){
 		  mustResizeY=true; mustShiftY=true;
-//		  Dimension diagramSize= diagramPanel.getPreferredSize();
-//		  diagramSize.height+=20;
-//		  diagramPanel.setPreferredSize(diagramSize);
-//		  diagramPanel.revalidate();
-//		  shiftAllDraggablesButGroupVertical(20, selectionGroupFocused);
 		}
 		adjustedMoveY=-nearestElementY.getY();
 		lastPositionY=lastPositionY+adjustedMoveY;
@@ -2080,12 +2039,6 @@ public class EditorView extends JFrame implements Observer{
 		//resizing diagram and setting scrollbar to max
 		if(newLocationY+nearestElementY.getHeight()>diagramPanel.getHeight()+10 && moveY>=lastMoveY){
 		  mustResizeY=true; mustScrollY=true;
-//		  Dimension diagramSize= diagramPanel.getPreferredSize();
-//		  diagramSize.height+=20;
-//		  diagramPanel.setPreferredSize(diagramSize);
-//		  diagramPanel.revalidate();
-//		  diagramScroller.getVerticalScrollBar().setValue(
-//				  diagramScroller.getVerticalScrollBar().getMaximum());				
 		}
 		adjustedMoveY=diagramPanel.getHeight()-(nearestElementY.getY()+nearestElementY.getHeight());
 		lastPositionY=lastPositionY+adjustedMoveY;
@@ -2101,7 +2054,7 @@ public class EditorView extends JFrame implements Observer{
 	  }
 	  //shifting out-of-selection components if necessary
 	  if(mustShiftX || mustShiftY)
-		shiftAllDraggablesButGroupBothDirections(mustResizeX? 20:0, mustResizeY? 20:0, selectionGroupFocused);
+		shiftAllDraggablesButGroupBothDirections(mustResizeX? 20:0, mustResizeY? 20:0, selectionGroupFocused, false);
 	  //setting scrollbars to max if necessary
 	  if(mustScrollX)
 		diagramScroller.getHorizontalScrollBar().setValue(diagramScroller.getHorizontalScrollBar().getMaximum());
@@ -2122,51 +2075,51 @@ public class EditorView extends JFrame implements Observer{
 		location=element.getLocation();
 		location.x+=adjustedMoveX;
 		location.y+=adjustedMoveY;
-		element.setLocation(location);		  
+		element.setLocation(location);		
+		
+		//moving constraint control points, if both ends are being dragged
+		if(  element.getName().startsWith(startExcludesNamePrefix) || element.getName().startsWith(endExcludesNamePrefix)
+		  || element.getName().startsWith(startIncludesNamePrefix) || element.getName().startsWith(endIncludesNamePrefix) ){
+		  otherEnd=(ConstraintPanel)((ConstraintPanel)element).getOtherEnd();
+		  if(!selectionGroupFocused.contains(otherEnd.getControlPoint()) &&
+			  (selectionGroupFocused.contains(otherEnd) || selectionGroupFocused.contains(otherEnd.getParent())) ){
+			//moving control point if it's not alrady been moved
+			if(((ConstraintControlPointPanel)otherEnd.getControlPoint()).isAlreadyShifted())
+			  ((ConstraintControlPointPanel)otherEnd.getControlPoint()).setAlreadyShifted(false);			
+			else{
+			  location=otherEnd.getControlPoint().getLocation();
+			  
+			  location.x+=adjustedMoveX;
+			  location.y+=adjustedMoveY;
+
+			  otherEnd.getControlPoint().setLocation(location);	
+			  ((ConstraintControlPointPanel)otherEnd.getControlPoint()).setAlreadyShifted(true);		
+			}
+		  }
+		}
+		else for(Component comp : element.getComponents()){
+		  if(  comp.getName().startsWith(startExcludesNamePrefix) || comp.getName().startsWith(endExcludesNamePrefix)
+		    || comp.getName().startsWith(startIncludesNamePrefix) || comp.getName().startsWith(endIncludesNamePrefix) ){
+			otherEnd=(ConstraintPanel)((ConstraintPanel)comp).getOtherEnd();			  
+			if(!selectionGroupFocused.contains(otherEnd.getControlPoint()) &&
+			    (selectionGroupFocused.contains(otherEnd) || selectionGroupFocused.contains(otherEnd.getParent())) ){
+			  //moving control point if it's not alrady been moved
+			  if(((ConstraintControlPointPanel)otherEnd.getControlPoint()).isAlreadyShifted())
+				((ConstraintControlPointPanel)otherEnd.getControlPoint()).setAlreadyShifted(false);			
+			  else{
+				location=otherEnd.getControlPoint().getLocation();
+
+				location.x+=adjustedMoveX;
+				location.y+=adjustedMoveY;
+
+				otherEnd.getControlPoint().setLocation(location);	
+				((ConstraintControlPointPanel)otherEnd.getControlPoint()).setAlreadyShifted(true);		
+			  }
+			}
+		  }
+		}
+
 	  }
-			  
-			  
-//		for(JComponent element : selectionGroupFocused){		  
-//		  newLocationX=element.getX()+moveX;
-//		  newLocationY=element.getY()+moveY;
-//		  
-//		  //the feature must not be dragged beyond the borders of the diagram panel
-//		  
-//		  //checking horizontal borders
-//		  if( newLocationX<0 ){
-//			newLocationX=1;
-//			leftCollision=false;
-//			adjustedMoveX=newLocationX-element.getX();
-//		  }
-//		  if( diagramPanel.getWidth()<=newLocationX+element.getWidth() ){
-//			newLocationX=diagramPanel.getWidth()-element.getWidth()-1;
-//			leftCollision=false;
-//			adjustedMoveX=newLocationX-element.getX();
-//		  }
-//		  
-//		  //checking vertical borders
-//		  if( newLocationY<0 ){
-//			newLocationY=1;
-//			upperCollision=false;
-//			adjustedMoveY=newLocationY-element.getY();
-//		  }
-//		  if( diagramPanel.getHeight()<=newLocationY+element.getHeight() ){
-//			newLocationY=diagramPanel.getHeight()-element.getHeight()-1;
-//			upperCollision=false;
-//			adjustedMoveY=newLocationY-element.getY();
-//		  }
-//
-//		  //adjusting last drag position depending on eventual border collisions
-//		  if(leftCollision) lastPositionX=e.getX();
-//		  else lastPositionX=lastPositionX+adjustedMoveX;
-//
-//		  if(upperCollision) lastPositionY=e.getY();
-//		  else lastPositionY=lastPositionY+adjustedMoveY;
-//
-//		  if(!leftCollision&&!upperCollision) break;
-//		  element.setLocation(newLocationX, newLocationY);
-//		}
-//		
 
 	  if(!leftCollision && !rightCollision) lastPositionX=e.getX();
 	  if(!upperCollision && !bottomCollision) lastPositionY=e.getY();
@@ -2304,27 +2257,27 @@ public class EditorView extends JFrame implements Observer{
 	  }
 	}
 
-	/**
-	 * Shifts horizontally the position of all draggables in the diagram panel.<br>
-	 * If group is not null, its elements are not shifted.
-	 * 
-	 * @param enlargeX - the amount of horizontal shift
-	 * @param group - the ArrayList<JComponent> of elements that must not be shifted. If null, all components will be shifted
-	 */
-	private void shiftAllDraggablesButGroupHorizontal(int enlargeX, ArrayList<JComponent> group) {
-	  OrderedListNode tmp= visibleOrderDraggables.getFirst();
-	  Point location=null;
-	  if(group==null) group = new ArrayList<JComponent>();
-	  while (tmp!=null){
-		if( !group.contains((JComponent)tmp.getElement()) 
-			&& ((JComponent)tmp.getElement()).getParent().getName().startsWith(EditorView.diagramPanelName)){
-		  location=((JComponent)tmp.getElement()).getLocation();
-		  location.x+=enlargeX;
-		  ((JComponent)tmp.getElement()).setLocation(location);
-		}
-		tmp=tmp.getNext();
-	  }	
-	}
+//	/**
+//	 * Shifts horizontally the position of all draggables in the diagram panel.<br>
+//	 * If group is not null, its elements are not shifted.
+//	 * 
+//	 * @param enlargeX - the amount of horizontal shift
+//	 * @param group - the ArrayList<JComponent> of elements that must not be shifted. If null, all components will be shifted
+//	 */
+//	private void shiftAllDraggablesButGroupHorizontal(int enlargeX, ArrayList<JComponent> group) {
+//	  OrderedListNode tmp= visibleOrderDraggables.getFirst();
+//	  Point location=null;
+//	  if(group==null) group = new ArrayList<JComponent>();
+//	  while (tmp!=null){
+//		if( !group.contains((JComponent)tmp.getElement()) 
+//			&& ((JComponent)tmp.getElement()).getParent().getName().startsWith(EditorView.diagramPanelName)){
+//		  location=((JComponent)tmp.getElement()).getLocation();
+//		  location.x+=enlargeX;
+//		  ((JComponent)tmp.getElement()).setLocation(location);
+//		}
+//		tmp=tmp.getNext();
+//	  }	
+//	}
 
 	/**
 	 * Shifts vertically the position of all draggables in the diagram panel,
@@ -2363,27 +2316,27 @@ public class EditorView extends JFrame implements Observer{
 	  }
 	}
 
-	/**
-	 * Shifts vertically the position of all draggables in the diagram panel.<br>
-	 * If group is not null, its elements are not shifted.
-	 * 
-	 * @param enlargeY - the amount of vertical shift
-	 * @param group - the ArrayList<JComponent> of elements that must not be shifted. If null, all components will be shifted
-	 */
-	private void shiftAllDraggablesButGroupVertical(int enlargeY, ArrayList<JComponent> group) {
-	  OrderedListNode tmp= visibleOrderDraggables.getFirst();
-	  Point location=null;
-	  if(group==null) group = new ArrayList<JComponent>();
-	  while (tmp!=null){
-		if( !group.contains((JComponent)tmp.getElement()) 
-			&& ((JComponent)tmp.getElement()).getParent().getName().startsWith(EditorView.diagramPanelName)){
-		  location=((JComponent)tmp.getElement()).getLocation();
-		  location.y+=enlargeY;
-		  ((JComponent)tmp.getElement()).setLocation(location);
-		}
-		tmp=tmp.getNext();
-	  }	
-	}
+//	/**
+//	 * Shifts vertically the position of all draggables in the diagram panel.<br>
+//	 * If group is not null, its elements are not shifted.
+//	 * 
+//	 * @param enlargeY - the amount of vertical shift
+//	 * @param group - the ArrayList<JComponent> of elements that must not be shifted. If null, all components will be shifted
+//	 */
+//	private void shiftAllDraggablesButGroupVertical(int enlargeY, ArrayList<JComponent> group) {
+//	  OrderedListNode tmp= visibleOrderDraggables.getFirst();
+//	  Point location=null;
+//	  if(group==null) group = new ArrayList<JComponent>();
+//	  while (tmp!=null){
+//		if( !group.contains((JComponent)tmp.getElement()) 
+//			&& ((JComponent)tmp.getElement()).getParent().getName().startsWith(EditorView.diagramPanelName)){
+//		  location=((JComponent)tmp.getElement()).getLocation();
+//		  location.y+=enlargeY;
+//		  ((JComponent)tmp.getElement()).setLocation(location);
+//		}
+//		tmp=tmp.getNext();
+//	  }	
+//	}
 
 	/**
 	 * Shifts in both direction the position of all draggables in the diagram panel.<br>
@@ -2392,13 +2345,16 @@ public class EditorView extends JFrame implements Observer{
 	 * @param enlargeY - the amount of vertical shift
 	 * @param enlargeY - the amount of horizontal shift
 	 * @param group - the ArrayList<JComponent> of elements that must not be shifted. If null, all components will be shifted
+	 * @param onFit - if treu this call is needed to refit the diagram, otherwise is needed by a drag operation
 	 */
-	private void shiftAllDraggablesButGroupBothDirections(int enlargeX, int enlargeY, ArrayList<JComponent> group) {
+	private void shiftAllDraggablesButGroupBothDirections(int enlargeX, int enlargeY, ArrayList<JComponent> group, boolean onFit) {
+	  JComponent controlPanel = null;
 	  OrderedListNode tmp= visibleOrderDraggables.getFirst();
 	  Point location=null;
 	  if(group==null) group = new ArrayList<JComponent>();
 	  while (tmp!=null){
 		if( !group.contains((JComponent)tmp.getElement()) 
+			&& (!((JComponent)tmp.getElement()).getName().startsWith(constraintControlPointNamePrefix) || onFit)
 			&& ((JComponent)tmp.getElement()).getParent().getName().startsWith(EditorView.diagramPanelName)){
 		  location=((JComponent)tmp.getElement()).getLocation();
 		  location.x+=enlargeX;
@@ -2406,7 +2362,34 @@ public class EditorView extends JFrame implements Observer{
 		  ((JComponent)tmp.getElement()).setLocation(location);
 		}
 		tmp=tmp.getNext();
-	  }			
+	  }		
+	  for(JComponent constraint : startIncludesDots){
+		controlPanel=((ConstraintPanel)constraint).getControlPoint();
+		System.out.println("*****\ncontrolPanel.getName(): "+controlPanel.getName()+"\nisVisibe(): "+controlPanel.isVisible());
+		if(controlPanel.isVisible()) continue;
+		if( ( group.contains(constraint) || group.contains(constraint.getParent()) ) &&
+			( group.contains(((ConstraintPanel)constraint).getOtherEnd()) 
+			  || group.contains(((ConstraintPanel)constraint).getOtherEnd().getParent()) ) ) continue;
+		
+//		if(group.contains(controlPanel)) continue;
+		location=controlPanel.getLocation();
+		location.x+=enlargeX;
+		location.y+=enlargeY;
+		controlPanel.setLocation(location);
+	  }
+	  for(JComponent constraint : startExcludesDots){
+		controlPanel=((ConstraintPanel)constraint).getControlPoint();
+		System.out.println("*****\ncontrolPanel.getName(): "+controlPanel.getName()+"\nisVisibe(): "+controlPanel.isVisible());
+		if(controlPanel.isVisible()) continue;
+		if( ( group.contains(constraint) || group.contains(constraint.getParent()) ) &&
+			( group.contains(((ConstraintPanel)constraint).getOtherEnd()) 
+			  || group.contains(((ConstraintPanel)constraint).getOtherEnd().getParent()) ) ) continue;
+//		if(group.contains(controlPanel)) continue;
+		location=controlPanel.getLocation();
+		location.x+=enlargeX;
+		location.y+=enlargeY;
+		controlPanel.setLocation(location);
+	  }
 	}
 
 	/**
@@ -2641,6 +2624,15 @@ public class EditorView extends JFrame implements Observer{
 		int anchorPanelOnScreenX;
 		int anchorPanelOnScreenY;
 		
+		if( ( lastAnchorFocused.getName().startsWith(startMandatoryNamePrefix)
+			|| lastAnchorFocused.getName().startsWith(startOptionalNamePrefix) ) ){
+			
+		  if(openerTimer!=null && openerTimer.isRunning()){
+		    openerTimer.stop(); openerTimer.clearRadius();
+		  }
+		  if(timer!=null && timer.isRunning() && closerTimers.size()==0) timer.stop();
+		}
+		
 //		if(lastAnchorFocused.getParent()==null || !lastAnchorFocused.isDisplayable()) return false;
 		
 		moveComponentToTop(underlyingComponent);
@@ -2679,10 +2671,18 @@ public class EditorView extends JFrame implements Observer{
 	  Component comp=null;
 	  OrderedListNode tmpNode=visibleOrderDraggables.getFirst();
 	  Point locOnScreen=null;
+//	  ConstraintPanel otherEnd = null;
+	  
 	  while(tmpNode!=null){
-		locOnScreen=((Component)tmpNode.getElement()).getLocationOnScreen();
+//		locOnScreen=((Component)tmpNode.getElement()).getLocationOnScreen();
+//		if(selectionRect.contains(locOnScreen)){
+				
+//		locOnScreen=((Component)tmpNode.getElement()).getLocation();
+		locOnScreen=new Point();
+		locOnScreen.x=(int)(((Component)tmpNode.getElement()).getLocationOnScreen().getX()-this.getLocationOnScreen().getX());
+		locOnScreen.y=(int)(((Component)tmpNode.getElement()).getLocationOnScreen().getY()-this.getLocationOnScreen().getY());
 		if(selectionRect.contains(locOnScreen)){
-			
+					
 		  /* ***DEBUG*** */
 		  if(debug)System.out.println("Checking: "+((Component)tmpNode.getElement()).getName());
 		  /* ***DEBUG*** */
@@ -2690,12 +2690,14 @@ public class EditorView extends JFrame implements Observer{
 		  //if it's not a feature panel, we check that it's not anchored to a feature panel
 		  if (!((Component)tmpNode.getElement()).getName().startsWith(featureNamePrefix)){
 
-			comp = (JComponent) diagramPanel.getComponentAt(				
-					(int)(locOnScreen.getX()-diagramPanel.getLocationOnScreen().getX()), 
-					(int)(locOnScreen.getY()-diagramPanel.getLocationOnScreen().getY()) );
-
+//			comp = (JComponent) diagramPanel.getComponentAt(				
+//					(int)(locOnScreen.getX()-diagramPanel.getLocationOnScreen().getX()), 
+//					(int)(locOnScreen.getY()-diagramPanel.getLocationOnScreen().getY()) );
+			  
+			comp=((Component)tmpNode.getElement()).getParent();
+			  
 			System.out.println("Underlying comp: "+comp.getName());
-			if(comp!=null && comp.getName().startsWith(featureNamePrefix)){
+			if(comp==null || comp.getName().startsWith(featureNamePrefix)){
 			  tmpNode=tmpNode.getNext(); continue;
 			}
 		  }
@@ -2707,7 +2709,28 @@ public class EditorView extends JFrame implements Observer{
 		tmpNode=tmpNode.getNext();						
 	  }
 	  System.out.println("Selected Group Elements:\n");
-	  for(JComponent elem : selectionGroupFocused) System.out.println(elem.getName());
+	  for(JComponent element : selectionGroupFocused){
+		System.out.println(element.getName());
+//		//adding constraint control points, if both ends are being dragged
+//		if(  element.getName().startsWith(startExcludesNamePrefix) || element.getName().startsWith(endExcludesNamePrefix)
+//		  || element.getName().startsWith(startIncludesNamePrefix) || element.getName().startsWith(endIncludesNamePrefix) ){
+//		  otherEnd=(ConstraintPanel)((ConstraintPanel)element).getOtherEnd();
+//		  if(selectionGroupFocused.contains(otherEnd) || selectionGroupFocused.contains(otherEnd.getParent())){
+//			if(!selectionGroupFocused.contains(otherEnd.getControlPoint())) 
+//			  selectionGroupFocused.add(otherEnd.getControlPoint());
+//		  }
+//		}
+//		else for(Component comp2 : element.getComponents()){	 
+//		  if(  comp2.getName().startsWith(startExcludesNamePrefix) || comp2.getName().startsWith(endExcludesNamePrefix)
+//			|| comp2.getName().startsWith(startIncludesNamePrefix) || comp2.getName().startsWith(endIncludesNamePrefix) ){
+//			otherEnd=(ConstraintPanel)((ConstraintPanel)comp2).getOtherEnd();			  
+//			if(selectionGroupFocused.contains(otherEnd) || selectionGroupFocused.contains(otherEnd.getParent())){
+//			  if(!selectionGroupFocused.contains(otherEnd.getControlPoint())) 
+//			    selectionGroupFocused.add(otherEnd.getControlPoint());
+//			}
+//		  }
+//		}
+	  }
 	  frameRoot.repaint();
 	}
 
@@ -2715,8 +2738,22 @@ public class EditorView extends JFrame implements Observer{
 	 * Removes a starting connector anchor from the diagram panel and attach it to a group.
 	 */
 	private void addStartAnchorToGroup() {
-		((GroupPanel)underlyingComponent).getMembers().add((AnchorPanel)((AnchorPanel)lastAnchorFocused).getOtherEnd());
-		((AnchorPanel)((AnchorPanel)lastAnchorFocused).getOtherEnd()).setOtherEnd(underlyingComponent);
+		AnchorPanel otherEnd = (AnchorPanel)((AnchorPanel)lastAnchorFocused).getOtherEnd();
+
+		//changing the connector icon to the one requiered for and ending group connector
+		for( Component comp : otherEnd.getComponents())
+		  if(comp.getName().compareTo(connectorImageNamePrefix)==0){
+			otherEnd.remove(comp);
+			break;
+		  }
+		ImageIcon connectorIcon = new ImageIcon(mandatoryConnectorEndDotIconURL);
+		ConstraintControlPointPanel imageLabel = new ConstraintControlPointPanel(connectorIcon);
+		imageLabel.setBounds(0,  +2, connectorIcon.getIconWidth(), connectorIcon.getIconHeight()+5);
+		imageLabel.setName(connectorImageNamePrefix);		
+		otherEnd.add(imageLabel);
+		
+		((GroupPanel)underlyingComponent).getMembers().add(otherEnd);
+		otherEnd.setOtherEnd(underlyingComponent);
 		diagramPanel.remove(lastAnchorFocused);
 		diagramPanel.validate();
 		visibleOrderDraggables.remove(lastAnchorFocused);
@@ -2728,14 +2765,14 @@ public class EditorView extends JFrame implements Observer{
 	/**
 	 * Adds a new feature to the diagram panel, incrementing featuresCount.
 	 */
-	public void addNewFeatureToDiagram() {
+	private void addNewFeatureToDiagram() {
 		addFeatureToDiagram(null);
 	}
 	
 	/**
 	 * Adds a new named feature to the diagram panel, incrementing featuresCount.
 	 */
-	public void addNamedFeatureToDiagram() {		
+	private void addNamedFeatureToDiagram() {		
 		addFeatureToDiagram(featureToAddName);
 	}
 
@@ -2837,12 +2874,12 @@ public class EditorView extends JFrame implements Observer{
 			featurePanel=(FeaturePanel)underlyingPanel;
 
 
-			if(isActiveItem==activeItems.DRAGGING_TOOL_MANDATORY_LINK)
+			if(isActiveItem==ActiveItems.DRAGGING_TOOL_MANDATORY_LINK)
 				newConnectorStartDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.START_MANDATORY_CONNECTOR, 
 				toolDragPosition.x-(int)featurePanel.getLocationOnScreen().getX(),
 				toolDragPosition.y-(int)featurePanel.getLocationOnScreen().getY()-5);			
 
-			else if(isActiveItem==activeItems.DRAGGING_TOOL_OPTIONAL_LINK)
+			else if(isActiveItem==ActiveItems.DRAGGING_TOOL_OPTIONAL_LINK)
 				newConnectorStartDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.START_OPTIONAL_CONNECTOR, 
 				toolDragPosition.x-(int)featurePanel.getLocationOnScreen().getX(),
 				toolDragPosition.y-(int)featurePanel.getLocationOnScreen().getY()-5);			
@@ -2870,11 +2907,11 @@ public class EditorView extends JFrame implements Observer{
 		}
 		
 		if(!startDotInsertedInPanel){
-		  if(isActiveItem==activeItems.DRAGGING_TOOL_MANDATORY_LINK)
+		  if(isActiveItem==ActiveItems.DRAGGING_TOOL_MANDATORY_LINK)
 			newConnectorStartDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.START_MANDATORY_CONNECTOR,
 								  actualPositionX, actualPositionY-5);			
 					
-		  else if(isActiveItem==activeItems.DRAGGING_TOOL_OPTIONAL_LINK)
+		  else if(isActiveItem==ActiveItems.DRAGGING_TOOL_OPTIONAL_LINK)
 			newConnectorStartDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.START_OPTIONAL_CONNECTOR,
 								  actualPositionX, actualPositionY-5);								
 		}
@@ -2882,12 +2919,12 @@ public class EditorView extends JFrame implements Observer{
 		ImageIcon lineLengthIcon = new ImageIcon(connectorLineLengthIconURL);
 		ImageIcon startConnectorIcon = new ImageIcon(connectorStartDotIconURL);
 
-		if(isActiveItem==activeItems.DRAGGING_TOOL_MANDATORY_LINK)
+		if(isActiveItem==ActiveItems.DRAGGING_TOOL_MANDATORY_LINK)
 			  newConnectorEndDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.END_MANDATORY_CONNECTOR,
 				  actualPositionX+lineLengthIcon.getIconWidth()+startConnectorIcon.getIconWidth(),
 				  actualPositionY-5+lineLengthIcon.getIconHeight()+startConnectorIcon.getIconHeight());
 
-		else if(isActiveItem==activeItems.DRAGGING_TOOL_OPTIONAL_LINK)
+		else if(isActiveItem==ActiveItems.DRAGGING_TOOL_OPTIONAL_LINK)
 			  newConnectorEndDot=(AnchorPanel)getDraggableConnectionDot(ItemsType.END_OPTIONAL_CONNECTOR,
 				  actualPositionX+lineLengthIcon.getIconWidth()+startConnectorIcon.getIconWidth(),
 				  actualPositionY-5+lineLengthIcon.getIconHeight()+startConnectorIcon.getIconHeight());
@@ -2975,7 +3012,7 @@ public class EditorView extends JFrame implements Observer{
 			featurePanel=(FeaturePanel)underlyingPanel;
 
 			newConstraintStartDot=(ConstraintPanel)getDraggableConnectionDot(
-			  (isActiveItem==activeItems.DRAGGING_TOOL_INCLUDES) ?
+			  (isActiveItem==ActiveItems.DRAGGING_TOOL_INCLUDES) ?
 				ItemsType.START_INCLUDES_DOT : ItemsType.START_EXCLUDES_DOT,
 			  toolDragPosition.x-(int)featurePanel.getLocationOnScreen().getX(),
 			  toolDragPosition.y-(int)featurePanel.getLocationOnScreen().getY()-5);			
@@ -3004,7 +3041,7 @@ public class EditorView extends JFrame implements Observer{
 		
 		if(!startDotInsertedInPanel) 
 		  newConstraintStartDot=(ConstraintPanel)getDraggableConnectionDot(
-			(isActiveItem==activeItems.DRAGGING_TOOL_INCLUDES) ?
+			(isActiveItem==ActiveItems.DRAGGING_TOOL_INCLUDES) ?
 			  ItemsType.START_INCLUDES_DOT : ItemsType.START_EXCLUDES_DOT,
 			actualPositionX, actualPositionY-5);			
 		
@@ -3012,7 +3049,7 @@ public class EditorView extends JFrame implements Observer{
 		ImageIcon startConnectorIcon = new ImageIcon(connectorStartDotIconURL);
 
 		newConstraintEndDot=(ConstraintPanel)getDraggableConnectionDot(
-		    (isActiveItem==activeItems.DRAGGING_TOOL_INCLUDES) ?
+		    (isActiveItem==ActiveItems.DRAGGING_TOOL_INCLUDES) ?
 		      ItemsType.END_INCLUDES_DOT : ItemsType.END_EXCLUDES_DOT,
 		    actualPositionX+lineLengthIcon.getIconWidth()+startConnectorIcon.getIconWidth(),
 		    actualPositionY-5+lineLengthIcon.getIconHeight()+startConnectorIcon.getIconHeight());
@@ -3057,7 +3094,7 @@ public class EditorView extends JFrame implements Observer{
 		++constraintsCount;
 		
 		addConstraintToDrawLists( newConstraintStartDot, 
-		  (isActiveItem==activeItems.DRAGGING_TOOL_INCLUDES) ?
+		  (isActiveItem==ActiveItems.DRAGGING_TOOL_INCLUDES) ?
 			ItemsType.START_INCLUDES_DOT : ItemsType.START_EXCLUDES_DOT);
 		
 		cancelToolDrag();		
@@ -3285,7 +3322,6 @@ public class EditorView extends JFrame implements Observer{
 			if(name!=null) imagePanel.setName(name);
 			else{
 			  imagePanel.setName(startIncludesNamePrefix+constraintsCount);
-//			  ++constraintsCount;
 			}
 			connectorIcon = new ImageIcon(constraintDotIconURL);
 			break;
@@ -3294,7 +3330,6 @@ public class EditorView extends JFrame implements Observer{
 			if(name!=null) imagePanel.setName(name);
 			else{
 			  imagePanel.setName(endIncludesNamePrefix+constraintsCount);
-//			  ++constraintsCount;
 			}
 			connectorIcon = new ImageIcon(constraintDotIconURL);
 			break;		
@@ -3303,7 +3338,6 @@ public class EditorView extends JFrame implements Observer{
 			if(name!=null) imagePanel.setName(name);
 			else{
 			  imagePanel.setName(startExcludesNamePrefix+constraintsCount);
-//			  ++constraintsCount;
 			}
 			connectorIcon = new ImageIcon(constraintDotIconURL);
 			break;
@@ -3312,14 +3346,13 @@ public class EditorView extends JFrame implements Observer{
 			if(name!=null) imagePanel.setName(name);
 			else{
 			  imagePanel.setName(endExcludesNamePrefix+constraintsCount);
-//			  ++constraintsCount;
 			}
 			connectorIcon = new ImageIcon(constraintDotIconURL);
 			break;
 		  case CONSTRAINT_CONTROL_POINT:
 			//returning the JLabel directly
 			connectorIcon = new ImageIcon(constraintControlPointDotIconURL);
-			imagePanel = new JLabel(connectorIcon);
+			imagePanel = new ConstraintControlPointPanel(connectorIcon);
 			if(name!=null) imagePanel.setName(name);
 			else{
 			  imagePanel.setName(constraintControlPointNamePrefix+constraintControlsCount);
@@ -3356,6 +3389,7 @@ public class EditorView extends JFrame implements Observer{
 		}
 		
 		imageLabel = new JLabel(connectorIcon);
+		imageLabel.setName(connectorImageNamePrefix);
 		imageLabel.setBounds(0,  +2, connectorIcon.getIconWidth(), connectorIcon.getIconHeight()+5);
 		imagePanel.setBounds(x,  y, connectorIcon.getIconWidth(), connectorIcon.getIconHeight()+5);
 		imagePanel.setLayout(null);
@@ -3451,7 +3485,8 @@ public class EditorView extends JFrame implements Observer{
 		int diagramMaxY=0;
 		OrderedListNode tmp=null;
 
-		Dimension screenDim=Toolkit.getDefaultToolkit().getScreenSize();
+//		Dimension baseDim=Toolkit.getDefaultToolkit().getScreenSize();
+		Dimension baseDim=diagramScroller.getSize();
 		
 		tmp=visibleOrderDraggables.getFirst();
 		while(tmp!=null){
@@ -3478,13 +3513,14 @@ public class EditorView extends JFrame implements Observer{
 		  tmp=tmp.getNext();
 		}
 		//moving components and resizing diagram
-		shiftAllDraggablesButGroupBothDirections(-diagramMinX, -diagramMinY, null);
+		shiftAllDraggablesButGroupBothDirections(-diagramMinX, -diagramMinY, null, true);
 		Dimension diagramSize = diagramPanel.getPreferredSize();
-		diagramSize.width=(diagramMaxX-diagramMinX>screenDim.width)? diagramMaxX-diagramMinX : screenDim.width;
-		diagramSize.height=(diagramMaxY-diagramMinY>screenDim.height)? diagramMaxY-diagramMinY : screenDim.height;
-//		diagramSize.width=diagramMaxX-diagramMinX;
-//		diagramSize.height=diagramMaxY-diagramMinY;
+		diagramSize.width=(diagramMaxX-diagramMinX>baseDim.width)? diagramMaxX-diagramMinX : baseDim.width;
+		diagramSize.height=(diagramMaxY-diagramMinY>baseDim.height)? diagramMaxY-diagramMinY : baseDim.height;
+//		diagramSize.setSize( (diagramMaxX-diagramMinX>baseDim.width)? diagramMaxX-diagramMinX : baseDim.width,
+//							 (diagramMaxY-diagramMinY>baseDim.height)? diagramMaxY-diagramMinY : baseDim.height );
 		diagramPanel.setPreferredSize(diagramSize);
+		diagramPanel.setSize(diagramSize);
 		diagramPanel.revalidate();
 		frameRoot.repaint();
 	}
@@ -3579,7 +3615,7 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @param feature - the feature to delete
 	 */
-	public void deleteFeature(JComponent feature) {
+	private void deleteFeature(JComponent feature) {
 	  //attaching all feature anchors to the diagram
   	  for(Component comp : feature.getComponents())
   		if(comp.getName()!=null 
@@ -3622,7 +3658,6 @@ public class EditorView extends JFrame implements Observer{
 	  int startDotlocationX=0;
 	  int startDotlocationY=0;
 	  GroupPanel group = (GroupPanel)anchor.getOtherEnd();
-	  System.out.println("Group size: "+group.getMembers().size());
 	  if(group.getMembers().size()<=2){
 		System.out.println("Ungroup is not possible, this group is already minimal.");
 		return;
@@ -3679,6 +3714,21 @@ public class EditorView extends JFrame implements Observer{
 		diagramPanel.add(anchor);
 		diagramPanel.setComponentZOrder(anchor, 0);
 		moveComponentToTop(anchor);
+		
+		if (  !( anchor.getName().startsWith(startMandatoryNamePrefix)
+			|| anchor.getName().startsWith(startOptionalNamePrefix)) ) return;
+		
+		if(openerTimer==null) openerTimer = new GroupAnimationTimer(0., 0.05);
+		openerTimer.start();
+		
+		if(timer==null) timer = new Timer(50, new ActionListener() {
+		    @Override
+		    public void actionPerformed(ActionEvent ae) {
+		       repaintRootFrame();
+		    }
+		});
+
+		if(!timer.isRunning()) timer.start();
 	}
 	
 	/**
@@ -3848,12 +3898,12 @@ public class EditorView extends JFrame implements Observer{
 	};
 	
 	/** Returns the last active item type*/
-	public activeItems getActiveItem(){
+	public ActiveItems getActiveItem(){
 		return isActiveItem;
 	};
 	
 	/** Sets the last active item type*/
-	public void setActiveItem(activeItems item){
+	public void setActiveItem(ActiveItems item){
 		isActiveItem=item;
 	};
 	
@@ -3861,7 +3911,7 @@ public class EditorView extends JFrame implements Observer{
 	 * Resets the static variables used during drag operations.
 	 */
 	private void resetActiveItems(){
-		isActiveItem=activeItems.NO_ACTIVE_ITEM;
+		isActiveItem=ActiveItems.NO_ACTIVE_ITEM;
 		lastAnchorFocused=null;
 		lastFeatureFocused=null;
 	}
@@ -3969,16 +4019,6 @@ public class EditorView extends JFrame implements Observer{
 	public ImageIcon getGroupLineIcon(){
 	  return new ImageIcon(groupLineLengthIconURL);
 	}
-
-//	/** Tells if the view has been modified since last save*/
-//	public boolean getModified(){
-//		return modified;
-//	}
-//
-//	/** Sets the value of the modified field*/
-//	public void setModified(boolean mod){
-//		modified=mod;
-//	}
 	
 	/** Tells the size of a feature panel*/
 	public Dimension getFeatureSize(){
@@ -4301,7 +4341,6 @@ public class EditorView extends JFrame implements Observer{
 				|| arg.equals("Direct Link Not Destroyed") ){
 			resetActiveItems();
 		}
-//		else if(arg.equals("Direct Link Not Destroyed") ) resetActiveItems();
 	}
 	
 	/** 
@@ -4309,9 +4348,27 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @return s - String representing the diagram name, or null if dialog has been aborted
 	 */
-	public String assignNameDiagramDialog(){				
-	  return assignNameDialog("Diagram name: ");	  
+	public File assignNameDiagramDialog(String diagramPath){		
+	  JFileChooser saveChooser= new JFileChooser(diagramPath);
+	  String fileName=null;
+	  File chosenFile=null;
+	  saveChooser.setDialogTitle("Save Diagram");
+
+      if (saveChooser.showSaveDialog(new JFrame()) == JFileChooser.APPROVE_OPTION){
+    	chosenFile = saveChooser.getSelectedFile();
+    	fileName = chosenFile.getAbsolutePath();
+    	if(!fileName.endsWith(".xml")){
+    	  fileName = fileName+".xml";
+    	  chosenFile = new File(fileName);
+    	}    	
+    	return chosenFile;
+      }
+      else return null;	  
 	}
+
+//	public String assignNameDiagramDialog(){		
+//	  return assignNameDialog("Diagram name: ");	  
+//	}
 	
 	/** 
 	 * Assigns a name to the SXFM file to be created as result of model exportation.
@@ -4327,8 +4384,23 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @return s - String representing the SXFM name, or null if dialog has been aborted
 	 */
-	public String assignNameImageDialog(){				
-	  return assignNameDialog("Image filename: ");	  
+	public File assignNameImageDialog(String imagesPath, String type){				
+//	  return assignNameDialog("Image filename: ");	  
+	  JFileChooser saveChooser= new JFileChooser(imagesPath);
+	  String fileName=null;
+	  File chosenFile=null;
+	  saveChooser.setDialogTitle("Export as PNG");
+
+      if (saveChooser.showSaveDialog(new JFrame()) == JFileChooser.APPROVE_OPTION){
+    	chosenFile = saveChooser.getSelectedFile();
+    	fileName = chosenFile.getAbsolutePath();
+    	if(!fileName.endsWith("."+type)){
+    	  fileName = fileName+"."+type;
+    	  chosenFile = new File(fileName);
+    	}    	
+    	return chosenFile;
+      }
+      else return null;	  
 	}
 
 	/** 
@@ -4337,29 +4409,23 @@ public class EditorView extends JFrame implements Observer{
 	 * @return s - String representing the name, or null if dialog has been aborted
 	 */
 	private String assignNameDialog(String message) {
-		String s = null;			
-		  JTextField jtf = new JTextField();
+	  String s = null;			
+	  JTextField jtf = new JTextField();
 			 	
-		  Object[] o1 = {message, jtf};
-		  Object[] o2 = { "Cancel", "OK" };
-			    
-		  int i = JOptionPane.showOptionDialog(new JFrame("Save Diagram"), o1, "",
-				  JOptionPane.YES_NO_OPTION, JOptionPane.DEFAULT_OPTION, null, o2, o2[1]);
-			    
-		  if(i == JOptionPane.NO_OPTION){
-			if((s = jtf.getText()) != null){
-			  if(!s.trim().equals("")) return s;
-			  else{
-				errorDialog("Invalid name");
-				return null;
-			  }
-			}
-			else{
-			  errorDialog("Invalid name");
-			  return null;
-			}
-		  }		    		      
-		  else return null;
+	  Object[] o1 = {message, jtf};
+	  Object[] o2 = { "Cancel", "OK" };
+
+	  int i = JOptionPane.showOptionDialog(new JFrame("Save Diagram"), o1, "",
+		JOptionPane.YES_NO_OPTION, JOptionPane.DEFAULT_OPTION, null, o2, o2[1]);
+
+	  if(i == JOptionPane.NO_OPTION){
+		if((s = jtf.getText()) != null && !s.trim().equals("")) return s;
+		else{
+		  errorDialog("Invalid name");
+		  return null;
+		}
+	  }		    		      
+	  else return null;
 	}
 	
 	/** 
@@ -4373,7 +4439,6 @@ public class EditorView extends JFrame implements Observer{
 	public String loadXMLDialog(String message, String pathProject){
 		FileDialog d = new FileDialog(new JFrame("message"));
     	d.setMode(FileDialog.LOAD);
-//    	d.setFilenameFilter(new FilterFileProject());
 	    d.setResizable(true);
     	
     	//checking if the diagrams save directory must be created
@@ -4389,29 +4454,6 @@ public class EditorView extends JFrame implements Observer{
 	    System.out.println("DIR IS: "+d.getDirectory()+"\nFILE IS: "+d.getFile());
 	    if(d.getFile() == null) return null;
 	    return d.getDirectory()+d.getFile().toString();
-	    
-/*
-		FileDialog d = new FileDialog(new JFrame("Load File"));
-	    d.setResizable(true);
-    	d.setMode(FileDialog.LOAD);
-    	
-    	//checking if the diagrams save directory must be created
-    	File dir=new File(pathProject);		
-    	if(!dir.isDirectory() && !dir.mkdirs()){
-    		errorDialog("Save Directory can't be created.");
-    		return null;
-    	}
-
-	    d.setDirectory(pathProject);
-	    d.setVisible(true);
-	    
-	    if(d.getFile() == null) return null;
-
-	    System.out.println("DIR IS: "+d.getDirectory()+"\nFILE IS: "+d.getFile());
-	    return d.getDirectory()+d.getFile().toString();
-*/	    
-	    
-	    
 	}
 	
 	/** 
@@ -4428,49 +4470,62 @@ public class EditorView extends JFrame implements Observer{
 	}
 	
 	/** 
-	 * Export the content of the diagram panel as a PNG file.
+	 * Asks user confirmation for saving this diagram.
+	 * 
+	 * @return - 1 if the user confirmed, 0 otherwise
 	 */
-	public void exportAsImageFile(String imagesPath, String type){
-	  String fileName=assignNameImageDialog();
+	public int confirmSaveDiagramDialog(){
+		JFrame f = new JFrame("Save Diagram");
+		
+    	Object[] options = {"No","Yes"};			
+		
+		int i = JOptionPane.showOptionDialog(
+				f, "Do you want save the diagram?", "Save Diagram",
+				JOptionPane.OK_OPTION, JOptionPane.NO_OPTION, null, options, options[1]);
+		
+		if(i == 1) return 1;		
+		else return 0;
+	}
+
+	/**
+	 * Export the content of the diagram panel as a PNG file.
+	 * 
+	 * @param imagesPath - standard path where diagram images will be saved
+	 * @param type - the type of image to export, valid values are PNG and GIF
+	 */
+	public void exportAsImageFile(String imagesPath, String type){				
+	  if(type.compareTo("png")!=0 && type.compareTo("gif")!=0){
+		errorDialog("Invalid format type: "+type);
+		return;		  
+	  }		
+		
+	  //checking if the diagrams save directory must be created
+	  File dir=new File(imagesPath);
+	  if(!dir.isDirectory() && !dir.mkdirs() ){
+		errorDialog("Images Save Directory can't be created.");
+		return;
+	  }
+
+	  File fileName=assignNameImageDialog(imagesPath, type);
+	  if(fileName==null) return;
+
 	  //saving xml string on file
-	  try{
-		//checking if the diagrams save directory must be created
-		File dir=new File(imagesPath);		
-		if(!dir.isDirectory() && !dir.mkdirs() ) throw new IOException("Save Directory can't be created.");
-	  }catch(IOException e){
-		System.out.println("Can't create PNG save directory");
-		e.printStackTrace();
-	  }	  
-	  
 	  BufferedImage bi = new BufferedImage(diagramPanel.getSize().width,
 			diagramPanel.getSize().height, BufferedImage.TYPE_INT_ARGB); 
 	  Graphics g = bi.createGraphics();
-	  diagramPanel.paint(g);  //this == JComponent
+	  diagramPanel.paint(g);
 	  g.dispose();	  
 	  
 	  try{
-		if(type.compareTo("PNG")==0) ImageIO.write(bi,"png", new File(imagesPath+"/"+fileName+".png"));
-		else if(type.compareTo("GIF")==0){
-//		  ImageIO.write(bi,"BMP", new File(imagesPath+"/"+fileName+".BMP"));
-//		  ImageIO.write(bi,"bmp", new File(imagesPath+"/"+fileName+".bmp"));
-//		  ImageIO.write(bi,"jpg", new File(imagesPath+"/"+fileName+".jpg"));
-//		  ImageIO.write(bi,"JPG", new File(imagesPath+"/"+fileName+".JPG"));
-//		  ImageIO.write(bi,"jpeg", new File(imagesPath+"/"+fileName+".jpeg"));
-//		  ImageIO.write(bi,"wbmp", new File(imagesPath+"/"+fileName+".wbmp"));
-//		  ImageIO.write(bi,"PNG", new File(imagesPath+"/"+fileName+".PNG"));
-//		  ImageIO.write(bi,"JPEG", new File(imagesPath+"/"+fileName+".JPEG"));
-//		  ImageIO.write(bi,"WBMP", new File(imagesPath+"/"+fileName+".WBMP"));
-//		  ImageIO.write(bi,"GIF", new File(imagesPath+"/"+fileName+".GIF"));
-		  ImageIO.write(bi,"gif", new File(imagesPath+"/"+fileName+".gif"));
-		}
+		ImageIO.write(bi, type, fileName);
 	  }catch(Exception e) {
-		System.out.println("Error while exporting to "+type+" format");
+		errorDialog("Error while exporting to "+type+" format");
 		e.printStackTrace();
 	  }
 	}	
 
 	/**
-	 * Saves the visual elements of the digram and the diagram state on file.
+	 * Saves the visual elements of the diagram and the diagram state on file.
 	 * @param pathProject - the directory path where to save the diagram
 	 * @param s - the name of the file in which to save the diagram
 	 */
@@ -4502,10 +4557,8 @@ public class EditorView extends JFrame implements Observer{
 		Iterator<Entry<String, ArrayList<String>>> fileVersionIter = null;
 		Entry<String, ArrayList<String>> fileVersionEntry = null;
 		
-		ArrayList<String> arrStr = null;
-		
 		String tmpLine=null;
-
+		
 		
 		//saving diagram graphic elements data
 		String savePath = pathProject + "/" + s + "_DiagView.xml"; 
@@ -4727,6 +4780,238 @@ public class EditorView extends JFrame implements Observer{
 	}
 
 	/**
+	 * Saves the visual elements of the diagram and the diagram state as XML String.
+	 * @param pathProject - the directory path where to save the diagram
+	 * @param s - the name of the file in which to save the diagram
+	 * 
+	 * @return - the XML String produced
+	 */
+	public String saveDiagram2(/*String pathProject,*/ /*String*/File s) {
+		OrderedListNode tmp = null;
+		String xml = null;
+		FeaturePanel featTmp=null;
+		AnchorPanel anchTmp=null;
+		AnchorPanel endTmp=null;
+		ConstraintPanel constrTmp=null;
+		ConstraintPanel endConstrTmp=null;
+		JComponent constControlPoint=null;
+		String startOwner=null;
+		String endOwner=null;
+		Iterator<Entry<String, int[]>> colorIter = null;
+		Entry<String, int[]> colorEntry=null;
+		int[] color=null;
+		Color featColor=null;
+
+		Iterator<Entry<String, HashMap<String, ArrayList<int[]>>>> termIter = null;
+		Entry<String, HashMap<String, ArrayList<int[]>>> termEntry = null;
+
+		Iterator<Entry<String, ArrayList<int[]>>> fileIter = null;
+		Entry<String, ArrayList<int[]>> fileEntry = null;
+		
+		Iterator<Entry<String, HashMap<String, ArrayList<String>>>> termVersionIter = null;
+		Entry<String, HashMap<String, ArrayList<String>>> termVersionEntry = null;
+
+		Iterator<Entry<String, ArrayList<String>>> fileVersionIter = null;
+		Entry<String, ArrayList<String>> fileVersionEntry = null;
+		
+		String tmpLine=null;
+		
+		
+		//saving diagram graphic elements data
+		xml = "<Diagram name=\"" + s.getName() + "\">"
+				+"<features>";
+
+		//saving features
+		tmp = visibleOrderDraggables.getLast();
+		while(tmp!=null){
+		  if(((JComponent)tmp.getElement()).getName().startsWith(featureNamePrefix)){
+			featTmp = (FeaturePanel)tmp.getElement();
+			featColor = featTmp.getBackground();
+
+			xml+="Name="+featTmp.getLabelName()
+			   +" ContName="+featTmp.getID()
+			   +" Color="+featColor.getRed()+"-"+featColor.getGreen()+"-"+featColor.getBlue()
+			   +" Loc="+featTmp.getX()+"."+featTmp.getY()
+			   +" Size="+featTmp.getWidth()+"."+featTmp.getHeight()+"\n";
+		  }
+		  tmp=tmp.getPrev();
+		}
+
+		xml+=	 "</features>"
+			    +"<connectors>";
+		
+		//saving connectors
+		for(JComponent anchor : startConnectorDots){
+		  anchTmp=(AnchorPanel)anchor;
+		  endTmp=(AnchorPanel)anchTmp.getOtherEnd();
+		  if(anchTmp.getParent().getName().startsWith(featureNamePrefix)) 
+			startOwner=anchTmp.getParent().getName();
+		  else startOwner="";
+		  if(endTmp.getParent().getName().startsWith(featureNamePrefix))
+			endOwner=endTmp.getParent().getName()+"\n";
+		  else endOwner="\n";
+		  
+		  xml+="StartName="+anchTmp.getName()+" Loc="+anchTmp.getX()+"."+anchTmp.getY()+" StartOwner="+startOwner
+		      +" EndName="+endTmp.getName()+" Loc="+endTmp.getX()+"."+endTmp.getY()+" EndOwner="+endOwner;		  
+		}
+
+		xml+=	 "</connectors>"
+			    +"<groups>";
+
+		//saving groups
+		System.out.println("saving groups: altGroupPanels.size()= "+altGroupPanels.size());
+		System.out.println("saving groups: orGroupPanels.size()= "+orGroupPanels.size());
+		for(GroupPanel group : altGroupPanels){
+		  if(group.getParent().getName().startsWith(featureNamePrefix)) 
+			startOwner=group.getParent().getName();
+		  else startOwner="";
+			  
+		  xml+="GroupName="+group.getName()+" type=ALT"+" Loc="+group.getX()+"."+group.getY()+" StartOwner="+startOwner;
+
+		  for(AnchorPanel member : group.getMembers()){
+			if(member.getParent().getName().startsWith(featureNamePrefix)) 
+			  endOwner=member.getParent().getName();
+			else endOwner="";
+			  
+			xml+=" MemberName="+member.getName()+" Loc="+member.getX()+"."+member.getY()+" EndOwner="+endOwner;		  
+		  }
+		  xml+="\n";
+		}
+
+		for(GroupPanel group : orGroupPanels){
+		  if(group.getParent().getName().startsWith(featureNamePrefix)) 
+			startOwner=group.getParent().getName();
+		  else startOwner="";
+			  
+		  xml+="GroupName="+group.getName()+" type=OR"+" Loc="+group.getX()+"."+group.getY()+" StartOwner="+startOwner;
+
+		  for(AnchorPanel member : group.getMembers()){
+			if(member.getParent().getName().startsWith(featureNamePrefix)) 
+			  endOwner=member.getParent().getName();
+			else endOwner="";
+			  
+			xml+=" MemberName="+member.getName()+" Loc="+member.getX()+"."+member.getY()+" EndOwner="+endOwner;		  
+		  }
+		  xml+="\n";
+		  
+		}
+
+		xml+=	 "</groups>"
+			    +"<constraints>";
+
+		//saving constraints
+		for(JComponent constraint : startIncludesDots){
+		  constrTmp=(ConstraintPanel)constraint;
+		  endConstrTmp=(ConstraintPanel)constrTmp.getOtherEnd();
+		  constControlPoint=constrTmp.getControlPoint();
+		  if(constrTmp.getParent().getName().startsWith(featureNamePrefix)) 
+			startOwner=constrTmp.getParent().getName();
+		  else startOwner="";
+		  if(endConstrTmp.getParent().getName().startsWith(featureNamePrefix))
+			endOwner=endConstrTmp.getParent().getName();
+		  else endOwner="";
+		  
+		  xml+="StartName="+constrTmp.getName()+" Loc="+constrTmp.getX()+"."+constrTmp.getY()+" StartOwner="+startOwner
+			 +" EndName="+endConstrTmp.getName()+" Loc="+endConstrTmp.getX()+"."+endConstrTmp.getY()+" EndOwner="+endOwner
+			 +" ControlName="+constControlPoint.getName()+" Loc="+constControlPoint.getX()+"."+constControlPoint.getY()+"\n";		  
+		}		
+		
+		for(JComponent constraint : startExcludesDots){
+		  constrTmp=(ConstraintPanel)constraint;
+		  endConstrTmp=(ConstraintPanel)constrTmp.getOtherEnd();
+		  constControlPoint=constrTmp.getControlPoint();
+		  if(constrTmp.getParent().getName().startsWith(featureNamePrefix)) 
+			startOwner=constrTmp.getParent().getName();
+		  else startOwner="";
+		  if(endConstrTmp.getParent().getName().startsWith(featureNamePrefix))
+			endOwner=endConstrTmp.getParent().getName();
+		  else endOwner="";
+			  
+		  xml+="StartName="+constrTmp.getName()+" Loc="+constrTmp.getX()+"."+constrTmp.getY()+" StartOwner="+startOwner
+			 +" EndName="+endConstrTmp.getName()+" Loc="+endConstrTmp.getX()+"."+endConstrTmp.getY()+" EndOwner="+endOwner
+			 +" ControlName="+constControlPoint.getName()+" Loc="+constControlPoint.getX()+"."+constControlPoint.getY()+"\n";		  
+		}		
+		
+		//saving miscellaneous data, mainly counters
+		xml+=	 "</constraints>"
+			    +"<misc>"
+				+"connectorsCount="+connectorsCount+" includesCount="+constraintsCount+" excludesCount="+constraintsCount
+				+" constraintControlsCount="+constraintControlsCount+" altGroupsCount="+altGroupsCount
+				+" orGroupsCount="+orGroupsCount+" featuresCount="+featuresCount
+			    +"</misc>"
+			    +"<startingCommonalities>";
+		
+		//saving starting commonalities
+		for(String name : startingCommonalities){
+		  xml+=name+"\t";
+		}
+
+		xml+=	 "</startingCommonalities>"
+			    +"<startingVariabilities>";
+		
+		//saving starting variabilities
+		for(String name : startingVariabilities){
+		  xml+=name+"\t";
+		}		
+
+		xml+=	 "</startingVariabilities>"
+				+"<featureColors>";
+
+		//saving color associations
+		colorIter = termsColor.entrySet().iterator();
+		while(colorIter.hasNext()){
+		  colorEntry=colorIter.next();
+		  color=colorEntry.getValue();
+		  xml+=colorEntry.getKey()+"\t"+color[0]+"-"+color[1]+"-"+color[2]+"\n";
+		}
+		
+		xml+=	 "</featureColors>"
+				+"<featureOccurrences>";
+		
+		//saving feature occurrences in files
+		termIter=relevantTerms.entrySet().iterator();
+		tmpLine=null;
+		while(termIter.hasNext()){
+		  termEntry=termIter.next();
+				
+		  tmpLine=termEntry.getKey()+"\t";
+		  fileIter=termEntry.getValue().entrySet().iterator();
+		  while(fileIter.hasNext()){
+			fileEntry=fileIter.next();
+				  
+			tmpLine+="f: "+fileEntry.getKey()+" i: ";
+			for(int[] index : fileEntry.getValue()) tmpLine+=index[0]+"-"+index[1]+" ";		
+		  }
+		  xml+=tmpLine+"\n";			
+		}
+		
+		xml+=	 "</featureOccurrences>"
+				+"<featureVersions>";
+		
+		//saving feature versions
+		termVersionIter = relevantTermsVersions.entrySet().iterator();
+		tmpLine=null;
+		while(termVersionIter.hasNext()){
+		  termVersionEntry=termVersionIter.next();
+		  tmpLine=termVersionEntry.getKey();
+			  
+		  fileVersionIter=termVersionEntry.getValue().entrySet().iterator();
+		  while(fileVersionIter.hasNext()){
+			fileVersionEntry=fileVersionIter.next();
+			
+			tmpLine+="\tf:\t"+fileVersionEntry.getKey();
+			for(String version : fileVersionEntry.getValue()) tmpLine+="\t"+version;
+		  }
+		  xml+=tmpLine+"\n";			
+		}	  
+
+		xml+=	 "</featureVersions>"
+				+"</Diagram>";
+		
+		return xml;
+	}
+
+	/**
 	 * Loads a saved feature diagram from a file describing the graphic elements.
 	 * 
 	 * @param diagramDataPath - the file to load from
@@ -4736,7 +5021,6 @@ public class EditorView extends JFrame implements Observer{
 	  InputStream stream = null;
 	  SAXParserFactory saxFactory = SAXParserFactory.newInstance();
 	  ViewXMLHandler xmlHandler = new ViewXMLHandler();
-	  OrderedListNode tmp=null;
 	  try {
 		stream=new FileInputStream(diagramDataPath);
 
@@ -4793,6 +5077,54 @@ public class EditorView extends JFrame implements Observer{
 	}
 
 	/**
+	 * Loads a saved feature diagram from a file describing the graphic elements.
+	 * 
+	 * @param diagramDataPath - the file to load from
+	 */
+	public void loadSavedDiagram2(FDEXMLHandler xmlHandler) {
+	  try {
+
+		/* ***DEBUG*** */
+		if(debug2) System.out.println("\n(loadSavedDiagram2)Result of parsing:\n"
+				+"Features:\n"+xmlHandler.featuresList
+				+"\nConnectors:\n"+xmlHandler.connectorsList
+				+"\nGroups:\n"+xmlHandler.groupsList
+				+"\nConstraintsList:\n"+xmlHandler.constraintsList
+				+"\nMisc:\n"+xmlHandler.misc
+				+"\nStarting Commonalities:\n"+xmlHandler.startingComm
+				+"\nStarting Variabilities:\n"+xmlHandler.startingVars
+				+"\nFeatures Colors:\n"+xmlHandler.featureColors
+				+"\nFeatures Occurrences:\n"+xmlHandler.featureOccurrences
+				+"\nFeatures Versions:\n"+xmlHandler.featureVersions
+				+"\n");
+		/* ***DEBUG*** */
+
+		if(xmlHandler.featureColors!=null) loadStartingTermsColor(xmlHandler.featureColors);
+		if(xmlHandler.featureOccurrences!=null) loadStartingTermsOccurrences(xmlHandler.featureOccurrences);
+		if(xmlHandler.featureVersions!=null) loadStartingTermsVersions(xmlHandler.featureVersions);
+		if(xmlHandler.featuresList!=null) loadFeatures(xmlHandler.featuresList);
+		if(xmlHandler.connectorsList!=null) loadConnectors(xmlHandler.connectorsList);
+		if(xmlHandler.groupsList!=null) loadGroups(xmlHandler.groupsList);
+		if(xmlHandler.constraintsList!=null) loadConstraints(xmlHandler.constraintsList);
+		if(xmlHandler.misc!=null) loadMiscellaneous(xmlHandler.misc);
+		if(xmlHandler.startingComm!=null) loadStartingCommonalities(xmlHandler.startingComm);
+		if(xmlHandler.startingVars!=null) loadStartingVariabilities(xmlHandler.startingVars);
+
+		//resizing diagram to fit all components
+		fitDiagram();		
+		//hiding control points after fitting
+		for(JComponent constr : startIncludesDots) hideControlPoint(constr);
+		for(JComponent constr : startExcludesDots) hideControlPoint(constr);
+		frameRoot.repaint();		  
+		
+	  } catch (Exception e) {
+		e.printStackTrace(); 
+		throw new RuntimeException("Error while loading saved diagram");
+	  }
+	  return;
+	}
+
+	/**
 	 * Adds to the diagram panel all the saved features described in the list.
 	 * 
 	 * @param featuresList - String describing the features to load, one per line
@@ -4840,7 +5172,7 @@ public class EditorView extends JFrame implements Observer{
 		height=Integer.valueOf(featureData[featureData.length-1].substring(i+1));
 		
 		//building feature panel
-		directlyAddFeatureToDiagram(featureName, featureNamePrefix+containerName, x, y, width, height);
+		directlyAddFeatureToDiagram(featureName, featureNamePrefix+containerName, x, y, width, height, featureColor);
 	  }
 	}
 
@@ -4998,7 +5330,7 @@ public class EditorView extends JFrame implements Observer{
 
 		//adding group
 		group=(GroupPanel)buildConnectionDot(groupType, groupConnectorName, groupX, groupY);
-		if(groupOwnerName==""){//adding connector to the diagram panel directly
+		if(groupOwnerName.compareTo("")==0){//adding connector to the diagram panel directly
 		  visibleOrderDraggables.addToTop(group);
 		  diagramPanel.setLayer(group, 0);
 		  diagramPanel.add(group);
@@ -5031,7 +5363,7 @@ public class EditorView extends JFrame implements Observer{
 
 		  //adding member
 		  member=(AnchorPanel)buildConnectionDot(ItemsType.END_MANDATORY_CONNECTOR, memberName, memberX, memberY);
-		  if(memberOwnerName==""){//adding member to the diagram panel directly
+		  if(memberOwnerName.compareTo("")==0){//adding member to the diagram panel directly
 			visibleOrderDraggables.addToTop(member);
 			diagramPanel.setLayer(member, 0);
 			diagramPanel.add(member);
@@ -5709,6 +6041,7 @@ public class EditorView extends JFrame implements Observer{
 		//adding buttons panel for term occurences navigation
 		buttonPanel = new JPanel();
 		buttonPanel.setPreferredSize(new Dimension(occursTabbedPane.getPreferredSize().width, 40));
+		buttonPanel.setLayout(null);
 		
 		//initializing utility maps
 		textTabs = new HashMap<String, JTextArea>();
@@ -5812,21 +6145,22 @@ public class EditorView extends JFrame implements Observer{
 		  }
 
 		  //adding occurences navigation controls
-		  buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
-		  buttonPanel.setBorder(BorderFactory.createEmptyBorder(3, 5, 6, 5));
-		  
-		  buttonPanel.add(Box.createHorizontalGlue());
-		  buttonPanel.add(XBackwardOccurrButton);
-		  buttonPanel.add(Box.createHorizontalGlue());
-		  buttonPanel.add(prevOccurrButton);
-		  buttonPanel.add(Box.createHorizontalGlue());
-		  buttonPanel.add(occurrsLabelPanel);
-		  buttonPanel.add(Box.createHorizontalGlue());
-		  buttonPanel.add(nextOccurrButton);
-		  buttonPanel.add(Box.createHorizontalGlue());
-		  buttonPanel.add(XForwardOccurrButton);
-		  buttonPanel.add(Box.createHorizontalGlue());
+		  if(buttonPanel.getLayout()==null){
+		    buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
+		    buttonPanel.setBorder(BorderFactory.createEmptyBorder(3, 5, 6, 5));
 
+		    buttonPanel.add(Box.createHorizontalGlue());
+		    buttonPanel.add(XBackwardOccurrButton);
+		    buttonPanel.add(Box.createHorizontalGlue());
+		    buttonPanel.add(prevOccurrButton);
+		    buttonPanel.add(Box.createHorizontalGlue());
+		    buttonPanel.add(occurrsLabelPanel);
+		    buttonPanel.add(Box.createHorizontalGlue());
+		    buttonPanel.add(nextOccurrButton);
+		    buttonPanel.add(Box.createHorizontalGlue());
+		    buttonPanel.add(XForwardOccurrButton);
+		    buttonPanel.add(Box.createHorizontalGlue());
+		  }
 //		  searchPanel.add(nextOccurrButton);
 //		  nextOccurrButton.setVisible(true);
 //		  searchPanel.add(prevOccurrButton);
@@ -5891,9 +6225,9 @@ public class EditorView extends JFrame implements Observer{
 		  ArrayList<Highlight> tagToRemoveReplacements=null;//replacements to last removed tags
 		  ArrayList<Entry<Highlight,ArrayList<Highlight>>> lastRemovedTags=null;//last removed or modified highlight tags
 		  Highlight tagToRestore=null;//last removed tag, to be restored
-		  
-		  
+		  File tabFile = null;
 
+		  
 		  String fileName=((JScrollPane)occursTabbedPane.getSelectedComponent()).getName();
 		  JTextArea jta= textTabs.get(fileName);
 		  currentIndex= textIndexes.get(currentSelectedFeatureName).get(fileName);
@@ -5948,6 +6282,12 @@ public class EditorView extends JFrame implements Observer{
 			e.printStackTrace();
 		  }
 
+		  tabFile = new File(fileName);
+		  if (!tabFile.exists()){//input file was moved or deleted
+			occurrsLabel.setText("0/0[Index: missing]");
+			return;	
+		  }
+		  
 		  //checking what highlighted tags already are in next occurrence text interval
 		  tagsToRemove = new ArrayList<Entry<Highlight, ArrayList<Highlight>>>();
 		  for (Highlight tmp: hilite.getHighlights()){
@@ -6069,10 +6409,10 @@ public class EditorView extends JFrame implements Observer{
 		    return getRegisteredTabTextString(term, file, s, commonalitiesToHighlight, variabilitiesToHighlight);
 
 		}catch(FileNotFoundException e){
-			System.out.println("Exception tabTextFile: " + e.getMessage());
+			System.out.println("Exception getRegisteredTabTextFile(): " + e.getMessage());
 			return null;
 		}catch (IOException e) {
-			System.out.println("Exception tabTextFile: " + e.getMessage());
+			System.out.println("Exception getRegisteredTabTextFile(): " + e.getMessage());
 			return null;
 		}
 	}
@@ -6134,7 +6474,7 @@ public class EditorView extends JFrame implements Observer{
 		}
 		if (!textIndexes.get(term).containsKey(file)) textIndexes.get(term).put(file, 0);		
 
-		if (commonalitiesToHighlight!=null || variabilitiesToHighlight!=null)
+		if (fileContent!=null && (commonalitiesToHighlight!=null || variabilitiesToHighlight!=null) )
 			jta=(JTextArea)setHighlightText(jta, commonalitiesToHighlight, variabilitiesToHighlight, file);
 		
 		JScrollPane jscr = new JScrollPane(jta);
@@ -6150,6 +6490,7 @@ public class EditorView extends JFrame implements Observer{
 	 * @return - a new JTextArea containing s
 	 */
 	private JTextArea getTextAreaString(String name, String s) {
+		if(s==null) s="INPUT FILE CANNOT BE RETRIEVED!";
 		JTextArea jta = new JTextArea(s);
 		jta.setName(name);
 		jta.setLineWrap(true);
@@ -6168,16 +6509,11 @@ public class EditorView extends JFrame implements Observer{
 	 */
 	private JTextComponent setHighlightText(JTextComponent jtc,
 			ArrayList<String> commonalitiesToHighlight, ArrayList<String> variabilitiesToHighlight, String file){
-		String originalVersionFeaturename=null;
 		ArrayList<int[]> occurrences = null;
 		
 		if(commonalitiesToHighlight==null && variabilitiesToHighlight==null) return jtc;
 		try{   
 			Highlighter hilite = jtc.getHighlighter();
-		    
-			Document doc = jtc.getDocument();
-		    
-			String text = doc.getText(0, doc.getLength());
 		    
 			//adding highlights to commonalities occurrences
 			for(int i = 0; i < commonalitiesToHighlight.size(); i++){
@@ -6214,8 +6550,7 @@ public class EditorView extends JFrame implements Observer{
 		  ArrayList<Highlight> tagToRemoveReplacements=null;//replacements to last removed tags
 		  ArrayList<Entry<Highlight,ArrayList<Highlight>>> lastRemovedTags=null;//last removed or modified highlight tags
 		  Highlight tagToRestore=null;//last removed tag, to be restored
-
-			
+		  File tabFile = null;
 		  JTextArea jta= textTabs.get(file);
 		  
 		  int currentIndex= textIndexes.get(currentSelectedFeatureName).get(file);
@@ -6260,6 +6595,12 @@ public class EditorView extends JFrame implements Observer{
 			System.out.println("BadLocationException\nTerm: "+currentSelectedFeatureName+" - occurrence: "+occurrence);
 			e.printStackTrace();
 		  }
+		  
+		  tabFile = new File(file);
+		  if (!tabFile.exists()){//input file was moved or deleted
+			occurrsLabel.setText("0/0[Index: missing]");
+			return;	
+		  }		  		  
 		  
 		  //checking what highlighted tags already are in next occurrence text interval
 		  tagsToRemove = new ArrayList<Entry<Highlight, ArrayList<Highlight>>>();
@@ -6373,14 +6714,16 @@ public class EditorView extends JFrame implements Observer{
 	 * @param featureColor - color of the new feature panel
 	 * @return - the new feature panel added to the diagram
 	 */
-	public FeaturePanel directlyAddFeatureToDiagram(String featureName, String featureID, int x, int y, int width, int height) {
-		Color featureColor = null;
+	public FeaturePanel directlyAddFeatureToDiagram(String featureName, String featureID, 
+													int x, int y, int width, int height, Color featureColor) {
+//		Color featureColor = null;
 		
 		if (featureName==null){
 		  featureName=featureNamePrefix+featuresCount;
 		  featureColor=Color.BLACK;
 		}
-		else featureColor = getNewColor(termsColor.get(featureName));		
+		else if(featureColor==null) featureColor = getNewColor(termsColor.get(featureName));	
+		
 
 		
 		FeaturePanel newFeature=buildFeaturePanel(featureName, featureID, x, y, featureColor);
@@ -6432,9 +6775,9 @@ public class EditorView extends JFrame implements Observer{
 		owner.add(group);
 		owner.setComponentZOrder(group, 0);
 
-		//adding group to draw list
-		if(groupType==ItemsType.ALT_GROUP_START_CONNECTOR) altGroupPanels.add(group);
-		else orGroupPanels.add(group);
+//		//adding group to draw list
+//		if(groupType==ItemsType.ALT_GROUP_START_CONNECTOR) altGroupPanels.add(group);
+//		else orGroupPanels.add(group);
 	}
 
 	/**
