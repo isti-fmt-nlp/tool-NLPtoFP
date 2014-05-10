@@ -66,6 +66,9 @@ public class FeatureDiagramEditorTool {
 		  System.out.println("Controller not set. Closing...");
 		  return;
 		}
+		
+		TrayUtils.createAndShowFDETray(editorController);
+
 
 //		editorView.setVisible(true);
 		

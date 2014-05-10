@@ -19,7 +19,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FilenameFilter;
-import java.net.URL;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -35,20 +34,16 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.Timer;
 
-import main.OSUtils;
-import main.OSUtils.ToolNames;
+import main.CMTConstants;
+//import main.OSUtils;
 
-public class ViewProject implements Observer/*, Runnable*/{
-
-	/** URL of the Feature Diagram Editor Tool tray icon*/
-	private static final URL trayIconURL = ViewProject.class.getResource("/Tray/Tray Icon CMT_2.png");    
+public class ViewProject implements Observer/*, Runnable*/{ 
 
 	private static boolean verbose=false;//variable used to activate prints in the code
 	
-	private static final String savedProjectsDir = "Usage Tries/ANALISYS";
-	
 	private ModelProject modelProject = null;
 	
+	/** the root Frame*/
 	private JFrame frameProject = new JFrame("Commonality Mining Tool");
 	
 	private JMenuBar menu = new JMenuBar();
@@ -68,8 +63,8 @@ public class ViewProject implements Observer/*, Runnable*/{
 
 
 	//Features Management Menu items
-	private JMenuItem menuFeaturesExtractComm=null, menuFeaturesExtractVari=null, 
-					  menuFeaturesSelectComm=null, menuFeaturesSelectVari=null;
+	private JMenuItem menuFeaturesExtractComm=null, menuFeaturesExtractVari=null/*, 
+					  menuFeaturesSelectComm=null, menuFeaturesSelectVari=null*/;
 
 	//Diagram Management Menu items	
 	private JMenuItem menuDiagramOpen=null, menuDiagramCreate=null;
@@ -252,19 +247,19 @@ public class ViewProject implements Observer/*, Runnable*/{
 
 		menuFeatures.addSeparator();
 		
-		menuFeaturesSelectComm = new JMenuItem("Select Commonalities");
-		menuFeaturesSelectComm.addActionListener(controllerProject);
-		menuFeaturesSelectComm.setEnabled(false);
-		
-		menuFeaturesSelectVari = new JMenuItem("Select Variabilities");
-		menuFeaturesSelectVari.addActionListener(controllerProject);
-		menuFeaturesSelectVari.setEnabled(false);
+//		menuFeaturesSelectComm = new JMenuItem("Select Commonalities");
+//		menuFeaturesSelectComm.addActionListener(controllerProject);
+//		menuFeaturesSelectComm.setEnabled(false);
+//		
+//		menuFeaturesSelectVari = new JMenuItem("Select Variabilities");
+//		menuFeaturesSelectVari.addActionListener(controllerProject);
+//		menuFeaturesSelectVari.setEnabled(false);
 		
 		menuFeatures.add(menuFeaturesExtractComm);
 		menuFeatures.add(menuFeaturesExtractVari);
-		menuFeatures.addSeparator();
-		menuFeatures.add(menuFeaturesSelectComm);		
-		menuFeatures.add(menuFeaturesSelectVari);
+//		menuFeatures.addSeparator();
+//		menuFeatures.add(menuFeaturesSelectComm);		
+//		menuFeatures.add(menuFeaturesSelectVari);
 		
 		menu.add(menuFeatures);
 
@@ -320,10 +315,6 @@ public class ViewProject implements Observer/*, Runnable*/{
 		frameProject.setPreferredSize(frameProject.getSize());
 		frameProject.validate();
 		
-		System.out.println(trayIconURL);
-		
-		OSUtils.createAndShowGUI(trayIconURL, ToolNames.CMT, controllerProject, "Exit");
-
 	}
 	
 	/** 
@@ -524,19 +515,27 @@ public class ViewProject implements Observer/*, Runnable*/{
 		panelCentralProject = new ViewPanelCentral();
 		frameProject.repaint();
 		
-		menuDiagramCreate.setEnabled(false);
-		menuDiagramOpen.setEnabled(false);
-		
+		menuProjectCreate.setEnabled(true);
+		menuProjectDelete.setEnabled(false);
+		menuProjectLoad.setEnabled(true);
+		menuProjectSave.setEnabled(false);
+		menuProjectExit.setEnabled(true);
+
+		menuFilesLoad.setEnabled(false);
+		menuFilesLoadFolder.setEnabled(false);
+		menuFilesDelete.setEnabled(false);
+
 		menuFeaturesExtractComm.setEnabled(false);
 		menuFeaturesExtractVari.setEnabled(false);
-		menuFeaturesSelectComm.setEnabled(false);
-		menuFeaturesSelectVari.setEnabled(false);
+
+		menuDiagramCreate.setEnabled(false);
+		menuDiagramOpen.setEnabled(true);
 		
-		menuFilesLoad.setEnabled(false);
-		menuFilesDelete.setEnabled(false);
+//		menuFeaturesSelectComm.setEnabled(false);
+//		menuFeaturesSelectVari.setEnabled(false);
 		
-		menuProjectSave.setEnabled(false);
-		menuProjectDelete.setEnabled(false);
+		
+
 	}
 	
 	/** 
@@ -548,12 +547,13 @@ public class ViewProject implements Observer/*, Runnable*/{
 		FileDialog d = new FileDialog(new JFrame("Load File"));
     	d.setMode(FileDialog.LOAD);
     	d.setFilenameFilter(new FilterFileProject());
-	    d.setDirectory("../"+savedProjectsDir);
+	    d.setDirectory(CMTConstants.getSaveAnalisysDir());
 	    d.setVisible(true);
 	    
 	    if(d.getFile() == null) return null;
 
-	    return d.getFile().toString();
+//	    return d.getFile().toString();
+	    return d.getDirectory()+d.getFile().toString();
 	}
 	
 	/** 
@@ -610,7 +610,7 @@ public class ViewProject implements Observer/*, Runnable*/{
 		FileDialog d = new FileDialog(new JFrame("Load File"));
     	d.setMode(FileDialog.LOAD);
     	d.setFilenameFilter(new FilterFileInput());
-	    d.setDirectory("../"+savedProjectsDir);
+	    d.setDirectory(CMTConstants.getSaveAnalisysDir());
 	    d.setVisible(true);
 	    
 	    if(d.getFile() == null) return null;
@@ -985,5 +985,39 @@ public class ViewProject implements Observer/*, Runnable*/{
 //			System.out.println("loadFileDialog: "+dir.getAbsolutePath()+name);
 			return name.endsWith( ".xml" );
 		}
+	}
+	
+	/**
+	 * Sets the root frame to maximum size and brings it to front.
+	 */
+	public void maximize(){
+      frameProject.setExtendedState(JFrame.MAXIMIZED_BOTH);
+      frameProject.setAlwaysOnTop(true);
+      frameProject.requestFocus();
+      frameProject.setAlwaysOnTop(false);		
+	}
+	
+	/**
+	 * Sets the root frame to iconified state and sends it to tray.
+	 */
+	public void minimize(){
+		frameProject.setState(JFrame.ICONIFIED);
+	}
+	
+	/**
+	 * Brings the root frame to front.
+	 */
+	public void bringToFront(){
+	  frameProject.setState(JFrame.ICONIFIED);		
+	  try {
+		Thread.sleep(350);
+	  } catch (InterruptedException e) {
+		e.printStackTrace();
+	  }
+	  
+	  frameProject.setExtendedState(JFrame.MAXIMIZED_BOTH);
+	  frameProject.setAlwaysOnTop(true);
+	  frameProject.requestFocus();
+	  frameProject.setAlwaysOnTop(false);		
 	}
 }

@@ -51,6 +51,8 @@ import javax.swing.text.Highlighter.Highlight;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.html.HTMLEditorKit;
 
+import main.OSUtils;
+
 public class ViewPanelCentral{
 	
 	/**variable used to activate prints in the code*/
@@ -983,7 +985,8 @@ public class ViewPanelCentral{
 			  textIndexes.get(currentSelectedCheckBox).put(fileName, currentIndex);
 
 			  //updating occurrences label
-			  occurrsLabel.setText( (currentIndex+1)+"/"+occurrIndexesList.size()+"[Index: "+occurrence[0]+"]");
+			  occurrsLabel.setText( (currentIndex+1)+ OSUtils.getFilePathSeparator() 
+					  +occurrIndexesList.size()+"[Index: "+occurrence[0]+"]");
 
 			  /* ***VERBOSE****/					
 			  if (verbose) System.out.println(
@@ -1127,7 +1130,8 @@ public class ViewPanelCentral{
 		  jta.setCaretPosition(occurrence[0]);
 		  
 		  //updating occurrences label
-		  occurrsLabel.setText( (currentIndex+1)+"/"+occurrIndexesList.size()+"[Index: "+occurrence[0]+"]");
+		  occurrsLabel.setText( (currentIndex+1)+ OSUtils.getFilePathSeparator()
+				  +occurrIndexesList.size()+"[Index: "+occurrence[0]+"]");
 		
 	}	
 

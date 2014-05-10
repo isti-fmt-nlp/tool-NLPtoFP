@@ -1,6 +1,8 @@
 package view;
 
 import main.CMTConstants;
+import main.OSUtils;
+import main.TrayUtils;
 import main.FeatureNode.FeatureTypes;
 
 import java.awt.Color;
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
@@ -38,6 +41,7 @@ import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+
 import main.GroupNode.GroupTypes;
 import view.EditorModel.ConstraintTypes;
 import view.EditorView.ItemsType;
@@ -62,6 +66,12 @@ public class EditorController implements
 //	
 //	/** Suffix of the path where SXFM exported files will be saved*/
 //	private static String imagesSubPath="_IMAGES"; 
+
+	/** Default name for a diagram*/
+	public static final String DEFAULT_DIAGRAM_NAME="New Diagram";
+	
+	/** Name of the current diagram */
+	private String diagramName= DEFAULT_DIAGRAM_NAME;	
 
 	/** Path where diagram files will be saved*/
 	private String diagramPath = null;		
@@ -210,6 +220,7 @@ public class EditorController implements
           //clicked on the diagram panel, not on an element
           if(comp.getName()==null || comp.getName().compareTo("")==0 || comp.getName().startsWith(EditorView.diagramPanelName)){
         	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemPrintModelDebug());
+        	  editorView.getDiagramElementsMenu().add(editorView.getPopMenuItemFitDiagram());
               editorView.setDiagramElementsMenuPosX(e.getX());
               editorView.setDiagramElementsMenuPosY(e.getY());
               editorView.showDiagramElementsMenu();
@@ -497,12 +508,15 @@ public class EditorController implements
 			//mouse directly pressed on an anchor panel in the diagram panel
 			else if(/*tmpNode.getElement().getClass().equals(AnchorPanel.class) &&*/(
 					((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.startMandatoryNamePrefix) ||
-					((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.endMandatoryNamePrefix)  ||
+					((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.endMandatoryNamePrefix)   ||
 					((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.startOptionalNamePrefix)  ||
 					((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.endOptionalNamePrefix) ) ){
 			  editorView.setActiveItem(ActiveItems.DRAGGING_EXTERN_ANCHOR);
 			  editorView.setLastAnchorFocused((AnchorPanel)tmpNode.getElement());
 			  editorView.moveComponentToTop(editorView.getLastAnchorFocused());
+			  if( ((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.startMandatoryNamePrefix) ||
+				  ((JComponent)tmpNode.getElement()).getName().startsWith(EditorView.startOptionalNamePrefix) )
+				editorView.startGroupOpeningAnimation();
 			}
 			//mouse directly pressed on a group panel in the diagram panel
 			else if(/*tmpNode.getElement().getClass().equals(GroupPanel.class) &&*/
@@ -717,8 +731,10 @@ public class EditorController implements
 
 	@Override
 	public void windowClosing(WindowEvent e) {
-      if(modified && editorView.confirmSaveDiagramDialog()==1) saveDiagram();
-      modified=false;    	  
+      if(modified && editorView.confirmSaveDiagramDialog("Diagram "+diagramName+" modified. Do you want to save it?"))
+    	saveDiagram();
+      //removing instance from tray and closing it
+      TrayUtils.removeInstanceFDE(diagramName);
 	}
 
 	@Override
@@ -863,18 +879,27 @@ public class EditorController implements
         //updating the modified field
         modified=true;
       }
+	  //popup menu command: Show Control Point
       else if(e.getActionCommand().equals("Show Control Point")){
     	editorView.showControlPoint((ConstraintPanel)popupElement);
 
         //updating the modified field
         modified=true;
       }
+	  //popup menu command: Hide Control Point
       else if(e.getActionCommand().equals("Hide Control Point")){
       	editorView.hideControlPoint(popupElement);    	  
 
         //updating the modified field
         modified=true;
       }
+	  //popup menu command: Fit Diagram
+      else if(e.getActionCommand().equals("Fit Diagram")){
+    	editorView.fitDiagram();
+
+    	//updating the modified field
+    	modified=true;
+      }      
 	  //popup menu command: Print Model[DEBUG COMMAND]
       else if(e.getActionCommand().equals("Print Model[DEBUG COMMAND]")){
     	editorModel.printModel();
@@ -909,9 +934,9 @@ public class EditorController implements
       }
 	  //menuFiles command: New Diagram
       else if(e.getActionCommand().equals("New Diagram")){
-    	
     	//asking the user if the current diagram must be saved
-    	if(modified && editorView.confirmSaveDiagramDialog()==1) saveDiagram();
+    	if(modified && editorView.confirmSaveDiagramDialog("Diagram "+diagramName+" modified. Do you want to save it?"))
+    	  saveDiagram();
     	modified=false;    	  
     	  
     	//creating model
@@ -938,6 +963,9 @@ public class EditorController implements
   		  return;
   		}      	  
 
+		//setting the default diagram name and updating tray
+		setDiagramNameAndTray(fetchUniqueNewDiagramName(), true);
+
 		//disposing of old frame
   		currentView.dispose();
       }      
@@ -949,11 +977,13 @@ public class EditorController implements
       else if(e.getActionCommand().equals("Import from SXFM")){
 
     	//asking the user if the current diagram must be saved
-      	if(modified && editorView.confirmSaveDiagramDialog()==1) saveDiagram();
+      	if(modified && editorView.confirmSaveDiagramDialog("Diagram "+diagramName+" modified. Do you want to save it?")) 
+      	  saveDiagram();
       	modified=false;    	  
 
   		String s = null;
-  		if((s = editorView.loadXMLDialog("Import from SXFM", CMTConstants.saveDiagramDir+"/..")) == null) return;
+  		if((s = editorView.loadXMLDialog("Import from SXFM", CMTConstants.getSaveDiagramDir()
+  				+OSUtils.getFilePathSeparator()+"..")) == null) return;
     	
     	//creating model
     	try{
@@ -1002,12 +1032,12 @@ public class EditorController implements
     	  if(modelDataPaths==null) editorView.errorDialog("Error during save.");
     	  else try{
     		//checking if the SXFM files save directory must be created
-      		File dir=new File(CMTConstants.saveDiagramDir);			
+      		File dir=new File(CMTConstants.getSaveDiagramDir());			
     		if(!dir.isDirectory() && !dir.mkdirs() ) 
     		  throw new IOException("Save Directory can't be created.");
 
     		PrintWriter pw1 = new PrintWriter(new BufferedWriter(
-  					new FileWriter(CMTConstants.saveDiagramDir+"/"+s) ));
+  					new FileWriter(CMTConstants.getSaveDiagramDir()+OSUtils.getFilePathSeparator()+s) ));
     		for(String path : modelDataPaths) pw1.println(path);
     		pw1.close();  	
     	  }catch (IOException ex){
@@ -1029,7 +1059,7 @@ public class EditorController implements
         File tmpFile=null;
         String s = null;
         
-        if((s = editorView.loadXMLDialog("Delete Diagram", CMTConstants.saveDiagramDir)) != null){
+        if((s = editorView.loadXMLDialog("Delete Diagram", CMTConstants.getSaveDiagramDir())) != null){
           //deleting general save file
           tmpFile=new File(s);
           if (tmpFile.exists()){
@@ -1038,17 +1068,21 @@ public class EditorController implements
           }  
         }
       }
-	  //menuFiles command: Exit
+	  //menuFiles and Tray command: Exit
       else if(e.getActionCommand().equals("Exit")){
-      	//asking the user if the current diagram must be saved
-      	if(modified && editorView.confirmSaveDiagramDialog()==1) saveDiagram();
-
-      	if(editorView.getOnCloseOperation()==JFrame.DISPOSE_ON_CLOSE){
-      	  editorView.dispose();
-      	  editorView=null;
-      	  editorModel=null;
-      	}
-      	else System.exit(0);
+      	closeToolInstance();
+      }
+	  //Tray command: To Front
+      else if(e.getActionCommand().equals("To Front")){
+      	bringToFront();
+      }
+	  //Tray command: Maximize
+      else if(e.getActionCommand().equals("Maximize")){    	
+    	editorView.maximize();
+      }
+	  //Tray command: Minimize
+      else if(e.getActionCommand().equals("Minimize")){
+    	editorView.minimize();
       }
       //menuView command: View Commonality/Variability
       else if(e.getActionCommand().equals("View Commonality/Variability")){
@@ -1057,11 +1091,75 @@ public class EditorController implements
     	else editorView.viewCommVarsDistinction(false);
       }      
 	}
+
+	/**
+	 * Returns a default name for a diagram that is not used yet in the tray.
+	 * If a possible default name appears in the tray because it's used by this instance, that name can be returned.
+	 * 
+	 * @return a default name, unique in the tray, for a new diagram
+	 */
+	private String fetchUniqueNewDiagramName() {
+		String newDiagramName=DEFAULT_DIAGRAM_NAME;
+		//if the current diagram is already called with this name, it's ok
+		if(diagramName.compareTo(newDiagramName)==0) return newDiagramName;
+
+		int i=1;
+		if(TrayUtils.isFDEInstancePresent(newDiagramName)){
+		  newDiagramName=DEFAULT_DIAGRAM_NAME+"_"+i;
+		  //if the current diagram is already called with this name, it's ok
+		  if(diagramName.compareTo(newDiagramName)==0) return newDiagramName;
+		  while(TrayUtils.isFDEInstancePresent(newDiagramName)){
+			newDiagramName=DEFAULT_DIAGRAM_NAME+"_"+(++i);
+		  }
+		}
+		
+		return newDiagramName;
+	}
+
+	/**
+	 * Returns a default name, not used yet in the tray, for a new diagram.
+	 * 
+	 * @return a default name, unique in the tray, for a new diagram
+	 */
+	public String fetchUniqueNameForNewDiagram() {
+		String newDiagramName=DEFAULT_DIAGRAM_NAME;
+		int i=1;
+		if(TrayUtils.isFDEInstancePresent(newDiagramName)){
+		  newDiagramName=DEFAULT_DIAGRAM_NAME+"_"+i;
+		  while(TrayUtils.isFDEInstancePresent(newDiagramName)){
+			newDiagramName=DEFAULT_DIAGRAM_NAME+"_"+(++i);
+		  }
+		}
+		
+		return newDiagramName;
+	}
+
+	/**
+	 * Closes this tool instance.
+	 */
+	public void closeToolInstance() {
+      	//asking the user if the current diagram must be saved
+      	if(modified && editorView.confirmSaveDiagramDialog("Diagram "+diagramName+" modified. Do you want to save it?"))
+      	  saveDiagram();
+
+		//removing instance from tray and closing it
+      	TrayUtils.removeInstanceFDE(diagramName);
+      	if(editorView.getOnCloseOperation()==JFrame.DISPOSE_ON_CLOSE){
+      	  editorView.dispose();
+      	  editorView=null;
+      	  editorModel=null;
+      	}
+      	else System.exit(0);
+	}
 	
+	/**
+	 * Loads a saved diagram.
+	 */
 	private void loadDiagram() {
 		int operation;
 		EditorView currentView;
   		String projectName=null;
+  		String savedDiagramName=null;
 
   		SAXParser saxParser = null;
   		InputStream stream = null;
@@ -1069,14 +1167,25 @@ public class EditorController implements
   		FDEXMLHandler xmlHandler = new FDEXMLHandler();  		
   		
   		//asking the user if the current diagram must be saved
-    	if(modified && editorView.confirmSaveDiagramDialog()==1) saveDiagram();
+    	if(modified && editorView.confirmSaveDiagramDialog("Diagram "+diagramName+" modified. Do you want to save it?")) 
+    	  saveDiagram();
     	modified=false;    	  
 
   		//loading diagram save file
-  		String loadDirectory=CMTConstants.saveDiagramDir;
+  		String loadDirectory=CMTConstants.getSaveDiagramDir();
   		
   		String s = null;
   		if((s = editorView.loadXMLDialog("Load Diagram", loadDirectory)) != null) try{
+  		  savedDiagramName=s.substring(s.lastIndexOf(OSUtils.getFilePathSeparator())+1, s.length());
+  		  if(savedDiagramName.endsWith(".xml")) savedDiagramName=savedDiagramName.substring(0, savedDiagramName.length()-4);  	
+  		  
+  		  //if the selected diagram is already loaded, its instance is brought to front and this is closed
+  		  if(TrayUtils.isFDEInstancePresent(savedDiagramName)){
+  			TrayUtils.bringToFrontFDEInstance(savedDiagramName);
+  			closeToolInstance();
+  			return;  			
+  		  }
+  			
   		  stream=new FileInputStream(s);
   		  saxParser = saxFactory.newSAXParser();
   		  saxParser.parse(stream, xmlHandler);  			  			
@@ -1103,8 +1212,8 @@ public class EditorController implements
   		currentView=editorView;
   		editorView= new EditorView();
 
-  		//setting diagrams save path
-  		setSavePath(projectName);
+  		//setting diagram's save path
+  		setSavePath(projectName);  		
 
   		//adding the view as observer to the model
   		editorModel.addObserver(editorView);
@@ -1125,6 +1234,9 @@ public class EditorController implements
   		  editorView.errorDialog("Error while loading diagram.");
   		  return;
   		}
+
+		//setting the default diagram name and updating tray
+  		setDiagramNameAndTray(savedDiagramName, true);
   		
   		//disposing of old frame
   		currentView.dispose();
@@ -1140,6 +1252,7 @@ public class EditorController implements
 	  File s = null;	
 	  String xml="<?xml version=\"1.0\" encoding=\"UTF-8\"?><DiagramData>";
 	  boolean viewCommsOrVarsWasSelected=false;
+	  String savedDiagramName=null;
 		
 	  //checking if the diagrams save directory must be created
 	  File dir=new File(diagramPath);
@@ -1148,7 +1261,14 @@ public class EditorController implements
 		return;
 	  }
 	  
-	  if((s = editorView.assignNameDiagramDialog(diagramPath)) != null){
+	  if((s = editorView.assignNameDiagramDialog(diagramPath, diagramName)) != null){
+		savedDiagramName=s.getName();
+		if(savedDiagramName.endsWith(".xml")) savedDiagramName=savedDiagramName.substring(0, savedDiagramName.length()-4);  
+
+		if (diagramName.compareTo(savedDiagramName)!=0 && s.exists() && s.isFile() && 
+			!editorView.confirmSaveDiagramDialog("Diagram with the same name already exists. Do you want to overwrite it?"))			
+			return;
+		  
 		diagDataPath=editorView.saveDiagram2(/*diagramPath, */s);
 		modelDataPaths=editorModel.saveModel2(/*diagramPath, */s);
 		if(diagDataPath==null || modelDataPaths==null) editorView.errorDialog("Error during save.");
@@ -1164,9 +1284,6 @@ public class EditorController implements
 			viewCommsOrVarsWasSelected=true;
 		  }
 
-//		  PrintWriter pw1 = new PrintWriter(new BufferedWriter(
-//			new FileWriter(CMTConstants.saveDiagramDir+"/"+s) ));
-
 		  PrintWriter pw1 = new PrintWriter(new BufferedWriter(new FileWriter(s)));
 
 		  //printing general save data in the file
@@ -1179,7 +1296,13 @@ public class EditorController implements
 			editorView.viewCommVarsDistinction(true);
 		  }
 
-		  //updating the modified field
+  		  //if an another open diagram was overwrited by save, we try to close instance 
+  		  if(diagramName.compareTo(savedDiagramName)!=0 && TrayUtils.isFDEInstancePresent(savedDiagramName)){
+  			TrayUtils.tryCloseFDEInstance(savedDiagramName);  			
+  		  }
+
+		  //updating the name and the modified field
+		  setDiagramNameAndTray(savedDiagramName, true);
 		  modified=false;
 		  
 		}catch (IOException ex){
@@ -1220,18 +1343,28 @@ public class EditorController implements
 	private void dropAnchor(MouseEvent e) {
 		GroupTypes type=null;
 		Component comp=editorView.dropAnchorOnDiagram(e);
+		//comp can be a feature, the diagram panel, or a group(if anchor is a starting anchor)
 		if (comp!=null) System.out.println("comp.getName()= "+comp.getName());
 		JComponent anchor=editorView.getLastAnchorFocused();
 		JComponent otherEnd=((AnchorPanel)anchor).getOtherEnd();
 		//anchor dropped directly on the diagram panel
-		if (comp==null) return;
+		if (comp==null){
+		  if (  anchor.getName().startsWith(EditorView.startMandatoryNamePrefix)
+			 || anchor.getName().startsWith(EditorView.startOptionalNamePrefix) ){
+			 editorView.stopGroupOpeningAnimation();
+			 editorView.addNewCloserTimer(null, null, null);
+		  }
+		  return;
+		}
 		//anchor directly dropped on a feature inside the diagram panel
 		else if (comp.getName().startsWith(EditorView.featureNamePrefix)){
+			
 		  /* ***DEBUG*** */
 		  if(debug) System.out.println("anchor.getName()= "+anchor.getName()
 				  			+"\notherEnd.getParent().getName(): "+otherEnd.getParent().getName());
 		  /* ***DEBUG*** */
 			
+		  //this is an ending anchor
 		  if( anchor.getName().startsWith(EditorView.endMandatoryNamePrefix)||
 			  anchor.getName().startsWith(EditorView.endOptionalNamePrefix) ){
 
@@ -1268,6 +1401,7 @@ public class EditorController implements
 			  return;
 			}	
 		  }
+		  //this is a starting anchor, and the other end of the connector is anchored to a feature
 		  if ( (anchor.getName().startsWith(EditorView.startMandatoryNamePrefix)
 				|| anchor.getName().startsWith(EditorView.startOptionalNamePrefix) )
 			  && otherEnd.getParent().getName().startsWith(EditorView.featureNamePrefix)){			  
@@ -1281,12 +1415,15 @@ public class EditorController implements
 
 			return;
 		  }
-		  //the other end of the connector is not anchored to anything
+		  //this is a starting anchor, and the other end of the connector is not anchored to anything
 		  if (otherEnd.getParent().getName().startsWith(EditorView.diagramPanelName) ){
-			editorView.addAnchorToFeature(); return;
+//			editorView.stopGroupOpeningAnimation();
+			editorView.addAnchorToFeature();
+//			editorView.addNewCloserTimer();
+			return;
 		  }
 		}
-		
+		//this is a starting anchor, and it has been dropped on a group
 		else if (comp.getName().startsWith(EditorView.altGroupNamePrefix)
 				 || comp.getName().startsWith(EditorView.orGroupNamePrefix)){
 		  //about to merge a connector with a group
@@ -1446,17 +1583,67 @@ public class EditorController implements
 	 */
 	public void setSavePath(String projectName){		
 		if(projectName!=null){
-		  this.diagramPath=CMTConstants.saveDiagramDir+"/"+projectName;
+		  this.diagramPath=CMTConstants.getSaveDiagramDir()+OSUtils.getFilePathSeparator()+projectName;
 		  this.projectName=projectName;
 		}
 		else{			
-		  this.diagramPath=CMTConstants.saveDiagramDir+"/"+CMTConstants.customSaveDiagramDir;
+		  this.diagramPath=CMTConstants.getSaveDiagramDir()+OSUtils.getFilePathSeparator()+CMTConstants.customSaveDiagramDir;
 		  this.projectName=CMTConstants.customSaveDiagramDir;
 		}
 		this.sxfmPath=diagramPath+CMTConstants.sxfmSubPath;
 		this.imagesPath=diagramPath+CMTConstants.imagesSubPath;	
 		System.out.println("setSavePath(): diagramPath="+diagramPath+"\nprojectName="
 							+projectName+"\nthis.projectName="+this.projectName);
+	}
+	
+	/**
+	 * Returns the diagram name.
+	 * 
+	 * @return - a String representing the last name with which this diagram was saved
+	 */
+	public String getDiagramName(){
+	  return diagramName;
+	}
+	
+	/**
+	 * Sets the diagram name.
+	 * NOTE: This method should be called anytime the diagram name has to be set, 
+	 * in order to update the tool's tray.
+	 * 
+	 * @param name - the new diagram name
+	 * @param check - if true, the tray will be checked for the current instance name and if present,
+	 *  instance name will be updated in tray too; if false, name will be updated but the new submenu is always added to tray
+	 */
+	public void setDiagramNameAndTray(String name, boolean check){
+		if(!check || !TrayUtils.isFDEInstancePresent(diagramName)){
+		  this.diagramName=name;
+		  TrayUtils.createAndShowFDETray(this);
+		}
+		else{
+		  TrayUtils.updateInstanceFDE(diagramName, name);
+		  this.diagramName=name;			
+		}		
+	}
+	
+	/**
+	 * Brings this instance root frame to front.
+	 */
+	public void bringToFront(){
+//	  editorView.minimize();
+//	  editorView.maximize();
+
+	  editorView.setState(JFrame.ICONIFIED);		
+	  try {
+		Thread.sleep(350);
+	  } catch (InterruptedException e) {
+		e.printStackTrace();
+	  }
+	  
+	  editorView.setExtendedState(JFrame.MAXIMIZED_BOTH);
+	  editorView.setAlwaysOnTop(true);
+	  editorView.requestFocus();
+	  editorView.setAlwaysOnTop(false);		
+	      
 	}
 
 	/**
@@ -1466,7 +1653,7 @@ public class EditorController implements
 		ArrayList<String> startingCommonalities=editorView.getStartingCommonalities();			
 		ArrayList<String> startingVariabilities=editorView.getStartingVariabilities();
 		int i=0;
-		String[] strArr=projectName.split("/");
+		String[] strArr=projectName.split(OSUtils.getFilePathSeparator());
 		String rootName = strArr[strArr.length-1];
 		//adding root feature
 		System.out.println("Adding root: "+rootName);

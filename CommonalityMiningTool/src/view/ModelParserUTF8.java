@@ -17,6 +17,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import main.OSUtils;
+
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
@@ -42,7 +44,7 @@ public class ModelParserUTF8{
 	 */
 	public ModelParserUTF8(String pathFile, String pathProject){
 		this.pathFile = pathFile;
-		this.pathFileUTF8 = pathProject+"/"
+		this.pathFileUTF8 = pathProject + OSUtils.getFilePathSeparator()
 		  + new File(pathFile).getName().substring(0, new File(pathFile).getName().length() - 4) + ".txt";
 	}
 	

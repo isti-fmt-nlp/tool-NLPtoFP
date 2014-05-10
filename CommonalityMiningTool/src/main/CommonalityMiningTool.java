@@ -39,6 +39,7 @@ public /*final */class CommonalityMiningTool{
 		}else if (OSUtils.isUnix()){
 	      try{
 	    	UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
+//            UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
 	      }catch(ClassNotFoundException e){ 	
 	      }catch(InstantiationException e){
 	      }catch(IllegalAccessException e){
@@ -61,5 +62,8 @@ public /*final */class CommonalityMiningTool{
 		
 		modelProject.addObserver(viewProject);
 		viewProject.addListener(controllerProject);
+		
+		TrayUtils.createAndShowCMTTray(controllerProject);
+
 	}
 }

@@ -5,7 +5,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FileDialog;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -107,7 +106,6 @@ import main.OrderedList;
 import main.OrderedListNode;
 import main.SortUtils;
 import main.ViewXMLHandler;
-import main.OSUtils.ToolNames;
 
 
 public class EditorView extends JFrame implements Observer{
@@ -298,8 +296,6 @@ public class EditorView extends JFrame implements Observer{
 	/** name ofthe diagram panel*/
 	public static final String toolsPanelname="---TOOLS_PANEL---";
 	
-	/** URL of the Feature Diagram Editor Tool tray icon*/
-	private static final URL trayIconURL = EditorView.class.getResource("/Tray/Tray Icon FDET_2.png");    
 	/** URL of the connector starting dot icon*/
 	private static final URL connectorStartDotIconURL=EditorView.class.getResource("/Connector Start Dot.png");
 	/** URL of the new group starting dot icon*/
@@ -318,6 +314,27 @@ public class EditorView extends JFrame implements Observer{
 	private static final URL connectorLineLengthIconURL=EditorView.class.getResource("/Connector Line Length.png");
 	/** URL of the group line-only icon*/
 	private static final URL groupLineLengthIconURL=EditorView.class.getResource("/Group Line Length.png");
+	
+	/** Base preferred size fot the diagramPanel*/
+	private static Dimension diagramPanelBasePreferredSize = 
+		new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width-160,
+					  Toolkit.getDefaultToolkit().getScreenSize().height);
+	
+	/** Base preferred size fot the diagramPanel*/
+	private static Dimension diagramPanelMinimumPreferredSize = 
+		new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width-160)/6,
+					   Toolkit.getDefaultToolkit().getScreenSize().height);
+	
+	/** Base preferred size fot the diagramScroller*/
+	private static Dimension diagramScrollerBasePreferredSize = 
+		new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width-160,
+					  Toolkit.getDefaultToolkit().getScreenSize().height);
+	
+	/** Base preferred size fot the diagramScroller*/
+	private static Dimension diagramScrollerMinimumPreferredSize = 
+		new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width-160)/6,
+					   Toolkit.getDefaultToolkit().getScreenSize().height);
+	
 
 	/** maps tool names in the corresponding icon resource path*/
 	private static HashMap<String, String> toolIconPaths=null;
@@ -367,6 +384,7 @@ public class EditorView extends JFrame implements Observer{
 	private JMenuItem popMenuItemHideControlPoint = new JMenuItem("Hide Control Point");
 
 	private JMenuItem popMenuItemPrintModelDebug = new JMenuItem("Print Model[DEBUG COMMAND]");
+	private JMenuItem popMenuItemFitDiagram = new JMenuItem("Fit Diagram");
 	
 	/** Popup menu coordinates*/
 	private int diagramElementsMenuPosX=0;
@@ -420,13 +438,19 @@ public class EditorView extends JFrame implements Observer{
 	private ArrayList<GroupPanel> altGroupPanels=null;	
 	/** List of Or Groups*/
 	private ArrayList<GroupPanel> orGroupPanels=null;	
+	
 	/** The group opener Timer*/
 	private GroupAnimationTimer openerTimer=null;
 	/** List of group closer Timers*/
-	private ArrayList<GroupAnimationTimer> closerTimers=new ArrayList<GroupAnimationTimer>();
-	
+	private ArrayList<GroupAnimationTimer> closerTimers=new ArrayList<GroupAnimationTimer>();	
 	/** Timer used to animate opening and closing group circles*/
-	private Timer timer=null;
+	private Timer globalTimer=null;
+	/** maximum opening radius for groups dock areas*/
+	private double groupDockRadius = 48.0;
+	/** radius step increment amount for opening animations*/
+	private double groupDockOpeningStepAmount = 0.8;
+	/** radius step increment amount for closing animations*/
+	private double groupDockClosingStepAmount = -0.3;
 	
 	/** List of starting commonalities selected by the user */
 	private ArrayList<String> startingCommonalities=new ArrayList<String>();
@@ -738,7 +762,8 @@ public class EditorView extends JFrame implements Observer{
 		
 		popMenuItemDelete.addActionListener(editorController);
         popMenuItemUngroup.addActionListener(editorController);        
-        popMenuItemPrintModelDebug.addActionListener(editorController);        
+        popMenuItemPrintModelDebug.addActionListener(editorController);  
+    	popMenuItemFitDiagram.addActionListener(editorController);  
 
     	popMenuItemShowControlPoint.addActionListener(editorController);
     	popMenuItemHideControlPoint.addActionListener(editorController);
@@ -776,14 +801,19 @@ public class EditorView extends JFrame implements Observer{
 		//creating tools items
 		toolIconPaths=new HashMap<String, String>();
 		toolIconPaths.put("New Feature", "/New Feature2.png");
-		toolIconPaths.put("Mandatory Link", "/Mandatory Link.png");
-		toolIconPaths.put("Optional Link", "/Optional Link.png");
+//		toolIconPaths.put("Mandatory Link", "/Mandatory Link.png");
+		toolIconPaths.put("Mandatory Link", "/Mandatory Link_2nd.png");		
+//		toolIconPaths.put("Optional Link", "/Optional Link.png");
+		toolIconPaths.put("Optional Link", "/Optional Link_2nd.png");
 		toolIconPaths.put("Excludes", "/Excludes.png");
 		toolIconPaths.put("Includes", "/Includes.png");
-		toolIconPaths.put("Alternative Group", "/Alternative Group.png");
-		toolIconPaths.put("Or Group", "/Or Group.png");
-		
-		
+//		toolIconPaths.put("Alternative Group", "/Alternative Group.png");
+		toolIconPaths.put("Alternative Group", "/Alternative Group_2nd_tmp4.png");
+//		toolIconPaths.put("Or Group", "/Or Group.png");
+//		toolIconPaths.put("Or Group", "/Or Group_2nd_tmp2.png");
+		toolIconPaths.put("Or Group", "/Or Group_2nd_tmp4.png");		
+		toolIconPaths.put("Start Link Dot", "/Connector Start Dot.png");		
+				
 		JComponent iconTmpPanel=null;
 
 		iconTmpPanel=getToolIcon("Mandatory Link", true);
@@ -827,22 +857,30 @@ public class EditorView extends JFrame implements Observer{
 		//creating diagram panel, that will be inserted in the scroller
 		diagramPanel = new ScrollLayeredPane();
 		diagramPanel.setName(diagramPanelName);
-		diagramPanel.setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width-160,
-		Toolkit.getDefaultToolkit().getScreenSize().height));
 		diagramPanel.setLayout(null);		
-		diagramPanel.setMinimumSize(new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width-160)/6,
-				Toolkit.getDefaultToolkit().getScreenSize().height));
+		diagramPanel.setPreferredSize(diagramPanelBasePreferredSize);
+		diagramPanel.setMinimumSize(diagramPanelMinimumPreferredSize);
 		
 
 		//creating diagram scroller, which will fit the rest of the root frame		
 		diagramScroller=new JScrollPane( diagramPanel, 
 				   ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				   ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-
-		diagramScroller.setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width-160,
-		Toolkit.getDefaultToolkit().getScreenSize().height));
-		diagramScroller.setMinimumSize(new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width-160)/6,
-				Toolkit.getDefaultToolkit().getScreenSize().height));
+		
+		diagramScroller.setPreferredSize(diagramScrollerBasePreferredSize);
+		diagramScroller.setMinimumSize(diagramScrollerMinimumPreferredSize);
+		
+//		Dimension minDim=diagramScroller.getMinimumSize();
+//		System.out.println("********\nminDim.width: "+minDim.width
+//				+"\nminDim.height: "+minDim.height
+//				+"\nminDim.getWidth(): "+minDim.getWidth()
+//				+"\nminDim.getHeight(): "+minDim.getHeight());
+//		
+//		Dimension screenDim = Toolkit.getDefaultToolkit().getScreenSize();
+//		System.out.println("********\nscreenDim.width: "+screenDim.width
+//				+"\nscreenDim.height: "+screenDim.height
+//				+"\nscreenDim.getWidth(): "+screenDim.getWidth()
+//				+"\nscreenDim.getHeight(): "+screenDim.getHeight());
 
 //		toolsPanel.setMinimumSize(new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width-160)/12,
 //				Toolkit.getDefaultToolkit().getScreenSize().height));		
@@ -895,10 +933,8 @@ public class EditorView extends JFrame implements Observer{
 		setPreferredSize(getSize());
 		validate();
 		
-		System.out.println(trayIconURL);
-
-		OSUtils.createAndShowGUI(trayIconURL, ToolNames.FDET, editorController, "Exit");
-
+//		OSUtils.createAndShowFDETray(trayIconURL, editorController);
+//
 		
 /*		
 		//adding starting commonalities and variabilities
@@ -922,17 +958,19 @@ public class EditorView extends JFrame implements Observer{
 		  diagramPanel.setComponentZOrder(newFeature, 0);
 		  ++featuresCount; i+=70;
 		}
-*/		
+		
+*/				
+//		Dimension currentDim=diagramScroller.getSize();
+//		System.out.println("********\ncurrentDim.width: "+currentDim.width
+//		+"\ncurrentDim.height: "+currentDim.height
+//		+"\ncurrentDim.getWidth(): "+currentDim.getWidth()
+//		+"\ncurrentDim.getHeight(): "+currentDim.getHeight());
         return true;
 	}
 
 	@Override
 	public void paint(java.awt.Graphics g) {
-		double radius=0.;
-		Ellipse2D ellipse=null;
-		double ellipseX=0.;
-		double ellipseY=0.;
-		
+//		double radius=0.;		
 		super.paint(g);
 
 		Graphics2D g2 = (Graphics2D)g.create();
@@ -941,12 +979,15 @@ public class EditorView extends JFrame implements Observer{
 		if(debug3) System.out.println("PAINT: isActiveItem="+isActiveItem);
 		/* ***DEBUG*** */
 		
+		//drawing tool icon being dragged
 		if(toolDragImage!=null) 
 		  g2.drawImage(toolDragImage, toolDragPosition.x, toolDragPosition.y, null);
+		//drawing selection rectangle
 		if(isActiveItem==ActiveItems.DRAGGING_SELECTION_RECT){
 		  g2.setColor(Color.BLUE);
 		  g2.draw(selectionRect);			
 		}
+		//drawing selection group borders
 		if(selectionGroupFocused.size()>0){
 		  g2.setColor(Color.BLUE);
 		  Rectangle elementSelectionFrame=new Rectangle();
@@ -966,28 +1007,86 @@ public class EditorView extends JFrame implements Observer{
 			g2.draw(elementSelectionFrame);
 		  }
 		}
-		if(openerTimer!=null && openerTimer.isRunning()){
-		  g2.setColor(Color.BLUE);
-		  radius=openerTimer.getRadius();
+		//drawing groups dock opening animation
+		if(openerTimer!=null && openerTimer.getRadius()>0.0){
+		  drawCirclesAroundGroups(openerTimer.getRadius(), g2);
+		}
+		//drawing groups dock closing animations
+		drawAllGroupClosingAnimations(g2);
+	}
+
+
+	/**
+	 * Draws the circles around groups for the dock opening and closing animations, for all closer timers.
+	 * 
+	 * @param g2 - Graphics2D object on which to draw
+	 */
+	public void drawAllGroupClosingAnimations(Graphics2D g2) {
+	  for(int i=0; i<closerTimers.size(); ++i){
+		if(closerTimers.get(i).getRadius()>=1) drawCirclesAroundGroups(closerTimers.get(i).getRadius(), g2);
+		drawMergingAnchor(g2, closerTimers.get(i));
+//		if(!closerTimers.get(i).isRunning()){
+//		  removeCloserTimer(closerTimers.get(i));
+//		  /* closerTimers.remove(i);*/
+//		  --i;
+//		}
+	  }
+	}
+
+	/**
+	 * Draws the image of a connector starting anchor on the frame.
+	 * 
+	 * @param g2 - Graphics2D object on which to draw
+	 * @param timer - the GroupAnimationTimer containing image and image location data 
+	 */
+	public void drawMergingAnchor(Graphics2D g2, GroupAnimationTimer timer) {
+		int anchorImageLocationX=0;
+		int anchorImageLocationY=0;
+		if(timer.getAnchorImage()!=null){
+		  //repainting previous location of anchor image
+		  if(timer.getAnchorImagePrevLocation()!=null){
+		    anchorImageLocationX=(int)(timer.getAnchorImagePrevLocation().getX()-frameRoot.getLocationOnScreen().getX());
+		    anchorImageLocationY=(int)(timer.getAnchorImagePrevLocation().getY()-frameRoot.getLocationOnScreen().getY());
+		    this.repaint(anchorImageLocationX, anchorImageLocationY,
+				  	     timer.getAnchorImage().getWidth(), timer.getAnchorImage().getHeight());
+		  }
+			
+		  anchorImageLocationX=(int)(timer.getAnchorImageLocation().getX()-frameRoot.getLocationOnScreen().getX());
+		  anchorImageLocationY=(int)(timer.getAnchorImageLocation().getY()-frameRoot.getLocationOnScreen().getY());
+//		  System.out.println("anchorImageLocationX: "+anchorImageLocationX
+//				  		  +"\nanchorImageLocationY: "+anchorImageLocationY);	
+		  g2.drawImage(timer.getAnchorImage(), anchorImageLocationX, anchorImageLocationY, null);			  
+		}
+	}
+
+	/**
+	 * Draws the circles around groups for the dock opening and closing animations.
+	 * 
+	 * @param radius - radius of the circles
+	 * @param g2 - Graphics2D object on which to draw
+	 */
+	public void drawCirclesAroundGroups(double radius, Graphics2D g2) {
+		Ellipse2D ellipse=null;
+		Point2D ellipseCenter = null;
+		g2.setColor(Color.BLUE);
 		  if(radius>=1.){
 			for(GroupPanel group : orGroupPanels){
-		      ellipseX=(group.getLocationOnScreen().getX()-this.getLocationOnScreen().getX())-group.getWidth()/2;
-		      ellipseY=(group.getLocationOnScreen().getY()-this.getLocationOnScreen().getY()+3)-group.getWidth()/2;
-		      
-			  ellipse = new Ellipse2D.Double(ellipseX, ellipseY, group.getWidth()*2, group.getWidth()*2);
+			  ellipseCenter = getVisibleStartAnchorCenterOnView(group);
+			  ellipse = new Ellipse2D.Double(ellipseCenter.getX()-radius, ellipseCenter.getY()-radius, radius*2, radius*2);
 
+			  repaint((int)(ellipseCenter.getX()-radius)-3, (int)(ellipseCenter.getY()-radius)-3,
+					  (int)(radius*2)+6, (int)(radius*2)+6);
 			  g2.draw(ellipse);
 			}
 			for(GroupPanel group : altGroupPanels){
-			  ellipseX=(group.getLocationOnScreen().getX()-this.getLocationOnScreen().getX())-group.getWidth()/2;
-			  ellipseY=(group.getLocationOnScreen().getY()-this.getLocationOnScreen().getY()+3)-group.getWidth()/2;
+			  ellipseCenter = getVisibleStartAnchorCenterOnView(group);
+			  ellipse = new Ellipse2D.Double(ellipseCenter.getX()-radius, ellipseCenter.getY()-radius, radius*2, radius*2);
 
-			  ellipse = new Ellipse2D.Double(ellipseX, ellipseY, group.getWidth()*2, group.getWidth()*2);
-
+			  repaint((int)(ellipseCenter.getX()-radius)-3, (int)(ellipseCenter.getY()-radius)-3,
+					  (int)(radius*2)+6, ((int)radius*2)+6);
 			  g2.draw(ellipse);					
 			}
 		  }
-		}
 	}
 
 	/**
@@ -1015,14 +1114,14 @@ public class EditorView extends JFrame implements Observer{
 		g2.setColor(Color.BLACK);
 		for (int i=0; i< startIncludesDots.size(); ++i){
 		  g2.setStroke(new BasicStroke());
-		  drawConstraint(g2, getVisibleStartAnchorCenter(startIncludesDots.get(i)),
-			getVisibleStartAnchorCenter(((ConstraintPanel)startIncludesDots.get(i)).getOtherEnd()), 
+		  drawConstraint(g2, getVisibleStartAnchorCenterOnDiagram(startIncludesDots.get(i)),
+			getVisibleStartAnchorCenterOnDiagram(((ConstraintPanel)startIncludesDots.get(i)).getOtherEnd()), 
 			((ConstraintPanel)startIncludesDots.get(i)).getControlPoint().getLocation(), ItemsType.START_INCLUDES_DOT);
 		}
 		for (int i=0; i< startExcludesDots.size(); ++i){
 		  g2.setStroke(new BasicStroke());
-		  drawConstraint(g2, getVisibleStartAnchorCenter(startExcludesDots.get(i)),
-			getVisibleStartAnchorCenter(((ConstraintPanel)startExcludesDots.get(i)).getOtherEnd()), 
+		  drawConstraint(g2, getVisibleStartAnchorCenterOnDiagram(startExcludesDots.get(i)),
+			getVisibleStartAnchorCenterOnDiagram(((ConstraintPanel)startExcludesDots.get(i)).getOtherEnd()), 
 			((ConstraintPanel)startExcludesDots.get(i)).getControlPoint().getLocation(), ItemsType.START_EXCLUDES_DOT);
 		}
 	}
@@ -1358,7 +1457,7 @@ public class EditorView extends JFrame implements Observer{
 	 */
 	private Arc2D getGroupArc(GroupPanel groupPanel, ArrayList<AnchorPanel> members) {
 		int[] angles= new int[members.size()];
-		Point2D startCenter=getVisibleStartAnchorCenter(groupPanel);
+		Point2D startCenter=getVisibleStartAnchorCenterOnDiagram(groupPanel);
 		Point2D childCenter=null;
 		double centreX=startCenter.getX();
 		double centreY=startCenter.getY();
@@ -1371,7 +1470,7 @@ public class EditorView extends JFrame implements Observer{
 
 		//calculating arc minimum radius and intersection points angles
 		for(AnchorPanel groupChild : members){
-		  childCenter=getVisibleStartAnchorCenter(groupChild);
+		  childCenter=getVisibleStartAnchorCenterOnDiagram(groupChild);
 
 		  //getting line length
 		  lineLength=Math.sqrt(Math.pow(childCenter.getX()-startCenter.getX(), 2)
@@ -1607,8 +1706,8 @@ public class EditorView extends JFrame implements Observer{
 //	}
 
 	private void drawConnectionLine(Graphics2D g2, JComponent startPanel, JComponent endPanel) {
-		lineStart.setLocation(getVisibleStartAnchorCenter(startPanel));
-		lineEnd.setLocation(getVisibleStartAnchorCenter(endPanel));
+		lineStart.setLocation(getVisibleStartAnchorCenterOnDiagram(startPanel));
+		lineEnd.setLocation(getVisibleStartAnchorCenterOnDiagram(endPanel));
 		g2.drawLine((int)lineStart.getX(), (int)lineStart.getY(), (int)lineEnd.getX(), (int)lineEnd.getY() );
 	};
 	
@@ -1618,9 +1717,22 @@ public class EditorView extends JFrame implements Observer{
      * @param anchor - the JComponent representing a visible starting anchor
      * @return the visible center point of the anchor
      */
-    private Point2D getVisibleStartAnchorCenter(JComponent anchor) {
+    private Point2D getVisibleStartAnchorCenterOnDiagram(JComponent anchor) {
     	double x=(anchor.getLocationOnScreen().getX()-diagramPanel.getLocationOnScreen().getX()+anchor.getWidth()/2);
-    	double y=(anchor.getLocationOnScreen().getY()-diagramPanel.getLocationOnScreen().getY()+anchor.getHeight()/2+3);
+    	double y=(anchor.getLocationOnScreen().getY()-diagramPanel.getLocationOnScreen().getY()+anchor.getHeight()/2+2);
+    	
+    	return new Point2D.Double(x, y);
+    }
+    
+	/**
+     * Returns a Point2D representing the visible center of a starting anchor image on the diagram panel coordinates system.
+     * 
+     * @param anchor - the JComponent representing a visible starting anchor
+     * @return the visible center point of the anchor
+     */
+    private Point2D getVisibleStartAnchorCenterOnView(JComponent anchor) {
+    	double x=(anchor.getLocationOnScreen().getX()-this.getLocationOnScreen().getX()+anchor.getWidth()/2);
+    	double y=(anchor.getLocationOnScreen().getY()-this.getLocationOnScreen().getY()+anchor.getHeight()/2+1);
     	
     	return new Point2D.Double(x, y);
     }
@@ -1866,6 +1978,51 @@ public class EditorView extends JFrame implements Observer{
 			return null;
 		}
 		return toolImage;
+	}
+
+	/**
+	 * Adds a JComponent to the diagramPanel, in the topmost position.
+	 * @param comp - the JComponent to be added
+	 */
+	private void addToDiagramOnTop(JComponent comp) {
+	  diagramPanel.setLayer(comp, 0);
+	  diagramPanel.add(comp);
+	  diagramPanel.setComponentZOrder(comp, 0);
+	}
+
+	/**
+	 * Adds a JComponent to the diagramPanel, in the topmost position.
+	 * 
+	 * @param container - the JLayeredPane on which comp must be added
+	 * @param comp - the JComponent to be added
+	 * @param layer - the layer at which comp should be added
+	 */
+	private void addToComponentOnLayer(JLayeredPane container, JComponent comp, int layer) {
+		boolean done = false;
+		
+		/* ***DEBUG*** */
+		if(debug){
+			System.out.println("**container.getLocation(): "+container.getLocation()
+							+"\n**comp.getLocation(): "+comp.getLocation());
+		}
+		/* ***DEBUG*** */
+
+		//adjustign comp location
+		Point loc = comp.getLocation();		
+		if(loc.getY()<0) loc.y=-3;
+		else if(loc.getY()>container.getHeight()-comp.getHeight()) loc.y=container.getHeight()-comp.getHeight();
+		if(loc.getX()<0) loc.x=0;
+		else if(loc.getX()>container.getWidth()-comp.getWidth()) loc.x=container.getWidth()-comp.getWidth();
+		comp.setLocation(loc);
+		//adding comp to container
+		container.setLayer(comp, layer);
+		
+		while(!done)try{
+		  container.add(comp);
+		  done=true;
+		}catch(RuntimeException e){ }
+		
+		container.setComponentZOrder(comp, layer);
 	}
 
 	/**
@@ -2491,26 +2648,45 @@ public class EditorView extends JFrame implements Observer{
 	 * @return - the anchor's underlying JComponent
 	 */
 	public Component dropAnchorOnDiagram(MouseEvent e) {
-	  Component comp = null;
-	  int anchorPanelOnScreenX =0;
-	  int anchorPanelOnScreenY =0;
-	  Point relativePosition=null;
+//	  Component comp = null;
+//	  int anchorPanelOnScreenX =0;
+//	  int anchorPanelOnScreenY =0;
+//	  Point relativePosition=null;
+	  Point2D relativePosition2D=null;
+	  Point2D ellipseCenter = null;
+	  Ellipse2D ellipse = null;
 	  OrderedListNode tmpNode=visibleOrderDraggables.getFirst();
+	  if(openerTimer!=null) System.out.println("openerTimer.getRadius(): "+openerTimer.getRadius());
+	  
+	  //first we check wether a starting anchor should be merged with a group
+	  if(   lastAnchorFocused.getName().startsWith(startMandatoryNamePrefix)
+		 || lastAnchorFocused.getName().startsWith(startOptionalNamePrefix) ){
+		while(tmpNode!=null){	  
+		  if(   ((Component)tmpNode.getElement()).getName().startsWith(altGroupNamePrefix)
+			 || ((Component)tmpNode.getElement()).getName().startsWith(orGroupNamePrefix)){
+		    ellipseCenter = getVisibleStartAnchorCenterOnView((GroupPanel)tmpNode.getElement());
+		    ellipse = new Ellipse2D.Double(
+		    	ellipseCenter.getX()-openerTimer.getRadius(),
+				ellipseCenter.getY()-openerTimer.getRadius(),
+				openerTimer.getRadius()*2, openerTimer.getRadius()*2);
+		    
+		    
+		    relativePosition2D = getVisibleStartAnchorCenterOnView(lastAnchorFocused);
+			  System.out.println("relativePosition2D: "+relativePosition2D);
+			  System.out.println("ellipse: "+ellipse.getBounds());
+		    if(ellipse.contains(relativePosition2D.getX(), relativePosition2D.getY())){
+			  underlyingComponent=(JComponent)tmpNode.getElement();
+			  return underlyingComponent;			  
+		    }
+		  }
+		  tmpNode=tmpNode.getNext();			  
+		}		  
+	  }
+
+	  //checking others elements
+	  tmpNode=visibleOrderDraggables.getFirst();
 	  while(tmpNode!=null){	  
 		if (((Component)tmpNode.getElement()).getBounds().contains(e.getX(), e.getY()) ){	
-//		  if (((Component)tmpNode.getElement()).getName().startsWith(featureNamePrefix)){
-//			underlyingPanel=(FeaturePanel)tmpNode.getElement();
-//			addAnchorToFeature(lastAnchorFocused, underlyingPanel);
-//			frameRoot.repaint();
-//			break;					  
-//		  }
-//		  if (lastAnchorFocused.getName().startsWith(startConnectorsNamePrefix) && 
-//			   (  ((Component)tmpNode.getElement()).getName().startsWith(altGroupNamePrefix)
-//			    || ((Component)tmpNode.getElement()).getName().startsWith(orGroupNamePrefix)) ){
-//			addStartAnchorToGroup((AnchorPanel)lastAnchorFocused, (GroupPanel)tmpNode.getElement());
-//			frameRoot.repaint();
-//			break;					  
-//		  }
 			
 		  //anchor will be dropped over a feature panel
 		  if (((Component)tmpNode.getElement()).getName().startsWith(featureNamePrefix)){
@@ -2524,45 +2700,60 @@ public class EditorView extends JFrame implements Observer{
 					 || child.getName().startsWith(endOptionalNamePrefix) ) ) return null;				
 			}
 			
-//			underlyingPanel=(FeaturePanel)tmpNode.getElement();
 			underlyingComponent=(JComponent)tmpNode.getElement();			  
 
 			//checking if anchor must be added to a group
-			anchorPanelOnScreenX=(int)lastAnchorFocused.getLocationOnScreen().getX();
-			anchorPanelOnScreenY=(int)lastAnchorFocused.getLocationOnScreen().getY();
-			relativePosition = new Point((int)(anchorPanelOnScreenX-underlyingComponent.getLocationOnScreen().getX()),
-					(int)(anchorPanelOnScreenY-underlyingComponent.getLocationOnScreen().getY()) );	
-			  
-			if( lastAnchorFocused.getName().startsWith(startMandatoryNamePrefix)
-			   || lastAnchorFocused.getName().startsWith(startOptionalNamePrefix) ){
-			  comp = underlyingComponent.getComponentAt(relativePosition);
-			  if (comp!=null && comp.getName()!=null && (comp.getName().startsWith(altGroupNamePrefix) 
-				  || comp.getName().startsWith(orGroupNamePrefix) )){
-//			    startAnchor=(AnchorPanel)lastAnchorFocused;
-//			    group=(GroupPanel)comp;
-				underlyingComponent=(JComponent)comp;
-//				return underlyingComponent;
-//				addStartAnchorToGroup(startAnchor, group);
-//			    return true;
-			  }
-			}			  
-			  
-			  
-//			addAnchorToFeature(lastAnchorFocused, underlyingPanel);
-//			frameRoot.repaint();
+
+//			anchorPanelOnScreenX=(int)lastAnchorFocused.getLocationOnScreen().getX();
+//			anchorPanelOnScreenY=(int)lastAnchorFocused.getLocationOnScreen().getY();
+
+//			relativePosition = new Point(anchorPanelOnScreenX-(int)underlyingComponent.getLocationOnScreen().getX(),
+//										 anchorPanelOnScreenY-(int)underlyingComponent.getLocationOnScreen().getY() );	
+
+//			//if it is a starting anchor, we use the visible center position
+//			Point2D relativePos = getVisibleStartAnchorCenterOnDiagram(lastAnchorFocused);
+//			
+//			relativePosition = new Point((int)(relativePos.getX()-underlyingComponent.getX()),
+//										 (int)(relativePos.getY()-underlyingComponent.getY()) );	
+//			  
+//			if(   lastAnchorFocused.getName().startsWith(startMandatoryNamePrefix)
+//			   || lastAnchorFocused.getName().startsWith(startOptionalNamePrefix) ){
+//			  for(Component subComp : underlyingComponent.getComponents()){
+//			    if(subComp.getName()!=null && 
+//				  ( subComp.getName().startsWith(altGroupNamePrefix) || subComp.getName().startsWith(orGroupNamePrefix) ) ){
+//				  ellipseCenter = getVisibleStartAnchorCenterOnView((GroupPanel)subComp);
+//				  ellipseCenter.setLocation(
+//						  ellipseCenter.getX()-underlyingComponent.getLocationOnScreen().getX(),
+//						  ellipseCenter.getY()-underlyingComponent.getLocationOnScreen().getY());
+//				  ellipse = new Ellipse2D.Double(
+//						  ellipseCenter.getX()-openerTimer.getRadius(),
+//						  ellipseCenter.getY()-openerTimer.getRadius(),
+//						  openerTimer.getRadius()*2, openerTimer.getRadius()*2);
+//				  if(ellipse.contains(relativePosition))
+//					underlyingComponent=(JComponent)subComp;
+//			    }
+//			  }
+//			}
+
+//			if( lastAnchorFocused.getName().startsWith(startMandatoryNamePrefix)
+//			   || lastAnchorFocused.getName().startsWith(startOptionalNamePrefix) ){
+//			  comp = underlyingComponent.getComponentAt(relativePosition);
+//			  if (comp!=null && comp.getName()!=null && (comp.getName().startsWith(altGroupNamePrefix) 
+//				  || comp.getName().startsWith(orGroupNamePrefix) )){
+//				underlyingComponent=(JComponent)comp;
+//			  }
+//			}		
+			
 			return underlyingComponent;					  
 		  }
-		  //anchor dropped directly over the diagram panel, checking if anchor must be added to a group
-		  if ( (lastAnchorFocused.getName().startsWith(startMandatoryNamePrefix)
-				|| lastAnchorFocused.getName().startsWith(startOptionalNamePrefix) ) && 
-			   (  ((Component)tmpNode.getElement()).getName().startsWith(altGroupNamePrefix)
-				|| ((Component)tmpNode.getElement()).getName().startsWith(orGroupNamePrefix)) ){
-			underlyingComponent=(JComponent)tmpNode.getElement();
-//			addStartAnchorToGroup((AnchorPanel)lastAnchorFocused, (GroupPanel)tmpNode.getElement());
-//			frameRoot.repaint();
-			return underlyingComponent;					  
-		  }
-//		  else return null;
+//		  //anchor dropped directly over the diagram panel, checking if anchor must be added to a group
+//		  if ( (lastAnchorFocused.getName().startsWith(startMandatoryNamePrefix)
+//				|| lastAnchorFocused.getName().startsWith(startOptionalNamePrefix) ) && 
+//			   (  ((Component)tmpNode.getElement()).getName().startsWith(altGroupNamePrefix)
+//				|| ((Component)tmpNode.getElement()).getName().startsWith(orGroupNamePrefix)) ){
+//			underlyingComponent=(JComponent)tmpNode.getElement();
+//			return underlyingComponent;					  
+//		  }
 		}
 		tmpNode=tmpNode.getNext();
 	  }		
@@ -2627,16 +2818,14 @@ public class EditorView extends JFrame implements Observer{
 		if( ( lastAnchorFocused.getName().startsWith(startMandatoryNamePrefix)
 			|| lastAnchorFocused.getName().startsWith(startOptionalNamePrefix) ) ){
 			
-		  if(openerTimer!=null && openerTimer.isRunning()){
-		    openerTimer.stop(); openerTimer.clearRadius();
-		  }
-		  if(timer!=null && timer.isRunning() && closerTimers.size()==0) timer.stop();
-		}
-		
-//		if(lastAnchorFocused.getParent()==null || !lastAnchorFocused.isDisplayable()) return false;
+		  stopGroupOpeningAnimation();
+		  addNewCloserTimer(null, null, null);
+		  if(globalTimer!=null && globalTimer.isRunning() && closerTimers.size()==0) globalTimer.stop();
+		}		
 		
 		moveComponentToTop(underlyingComponent);
-
+		diagramPanel.validate();
+		
 		//if it is an ending anchor, location is set to top-middle of underlying feature
 		if( lastAnchorFocused.getName().startsWith(endMandatoryNamePrefix)
 			|| lastAnchorFocused.getName().startsWith(endOptionalNamePrefix) ){
@@ -2654,9 +2843,12 @@ public class EditorView extends JFrame implements Observer{
 		//Adding anchor to the feature
 		diagramPanel.remove(lastAnchorFocused);
 		diagramPanel.validate();
-		((JLayeredPane)underlyingComponent).setLayer(lastAnchorFocused, 0);
-		((JLayeredPane)underlyingComponent).add(lastAnchorFocused);
-		((JLayeredPane)underlyingComponent).setComponentZOrder(lastAnchorFocused, 0);
+				
+		addToComponentOnLayer((JLayeredPane)underlyingComponent, lastAnchorFocused, 0);
+
+//		((JLayeredPane)underlyingComponent).setLayer(lastAnchorFocused, 0);
+//		((JLayeredPane)underlyingComponent).add(lastAnchorFocused);
+//		((JLayeredPane)underlyingComponent).setComponentZOrder(lastAnchorFocused, 0);
 
 		return;
 	}
@@ -2702,7 +2894,6 @@ public class EditorView extends JFrame implements Observer{
 			}
 		  }
 		  
-		  System.out.println("About to add to group: "+((Component)tmpNode.getElement()).getName());
 		  //if it's not anchored to a feature, or it's a feature, it gets added to group
 		  selectionGroupFocused.add((JComponent) tmpNode.getElement());
 		}
@@ -2739,6 +2930,9 @@ public class EditorView extends JFrame implements Observer{
 	 */
 	private void addStartAnchorToGroup() {
 		AnchorPanel otherEnd = (AnchorPanel)((AnchorPanel)lastAnchorFocused).getOtherEnd();
+		BufferedImage anchorImage = null;
+		Point2D.Double lastAnchorFocusedLocation = 
+		  new Point2D.Double(lastAnchorFocused.getLocationOnScreen().getX(), lastAnchorFocused.getLocationOnScreen().getY());
 
 		//changing the connector icon to the one requiered for and ending group connector
 		for( Component comp : otherEnd.getComponents())
@@ -2759,6 +2953,17 @@ public class EditorView extends JFrame implements Observer{
 		visibleOrderDraggables.remove(lastAnchorFocused);
 		startConnectorDots.remove(lastAnchorFocused);
 		frameRoot.repaint();
+		
+		//adding groups dock closing animation timer
+		try {
+			anchorImage = ImageIO.read(this.getClass().getResourceAsStream(getToolIconPath("Start Link Dot")));
+		} catch (IOException e) {
+			System.out.println("Anchor Image for animation not found");
+			e.printStackTrace();
+		}
+		lastAnchorFocusedLocation.setLocation(lastAnchorFocusedLocation.getX(), lastAnchorFocusedLocation.getY());
+		addNewCloserTimer((GroupPanel)underlyingComponent, lastAnchorFocusedLocation, anchorImage);		
+
 		return;
 	}
 
@@ -2811,9 +3016,10 @@ public class EditorView extends JFrame implements Observer{
 		featureColor);
 
 	  visibleOrderDraggables.addToTop(newFeature);
-	  diagramPanel.setLayer(newFeature, 0);
-	  diagramPanel.add(newFeature);
-	  diagramPanel.setComponentZOrder(newFeature, 0);
+	  addToDiagramOnTop(newFeature);
+//	  diagramPanel.setLayer(newFeature, 0);
+//	  diagramPanel.add(newFeature);
+//	  diagramPanel.setComponentZOrder(newFeature, 0);
 	  cancelToolDrag();
 
 	  /* ***DEBUG*** */
@@ -2886,9 +3092,10 @@ public class EditorView extends JFrame implements Observer{
 			
 			moveComponentToTop(featurePanel);
 
-			featurePanel.setLayer(newConnectorStartDot, 0);
-			featurePanel.add(newConnectorStartDot);
-			featurePanel.setComponentZOrder(newConnectorStartDot, 0);
+			addToComponentOnLayer(featurePanel, newConnectorStartDot, 0);
+//			featurePanel.setLayer(newConnectorStartDot, 0);
+//			featurePanel.add(newConnectorStartDot);
+//			featurePanel.setComponentZOrder(newConnectorStartDot, 0);
 
 			startDotInsertedInPanel=true;
 			
@@ -2938,15 +3145,11 @@ public class EditorView extends JFrame implements Observer{
 		
 		visibleOrderDraggables.addToTop(newConnectorStartDot);
 		if(!startDotInsertedInPanel){
-		  diagramPanel.setLayer(newConnectorStartDot, 0);
-		  diagramPanel.add(newConnectorStartDot);
-		  diagramPanel.setComponentZOrder(newConnectorStartDot, 0);
+		  addToDiagramOnTop(newConnectorStartDot);
 		}
 
 		visibleOrderDraggables.addToTop(newConnectorEndDot);
-		diagramPanel.setLayer(newConnectorEndDot, 0);
-		diagramPanel.add(newConnectorEndDot);
-		diagramPanel.setComponentZOrder(newConnectorEndDot, 0);
+		addToDiagramOnTop(newConnectorEndDot);
 
 		/* ***DEBUG*** */
 		if(debug) System.out.println("Actual location of Connector1: ("+newConnectorStartDot.getLocationOnScreen()
@@ -3019,9 +3222,10 @@ public class EditorView extends JFrame implements Observer{
 
 			moveComponentToTop(featurePanel);
 
-			featurePanel.setLayer(newConstraintStartDot, 0);
-			featurePanel.add(newConstraintStartDot);
-			featurePanel.setComponentZOrder(newConstraintStartDot, 0);
+			addToComponentOnLayer(featurePanel, newConstraintStartDot, 0);
+//			featurePanel.setLayer(newConstraintStartDot, 0);
+//			featurePanel.add(newConstraintStartDot);
+//			featurePanel.setComponentZOrder(newConstraintStartDot, 0);
 
 			startDotInsertedInPanel=true;
 			
@@ -3063,15 +3267,17 @@ public class EditorView extends JFrame implements Observer{
 		
 		visibleOrderDraggables.addToTop(newConstraintStartDot);
 		if(!startDotInsertedInPanel){
-		  diagramPanel.setLayer(newConstraintStartDot, 0);
-		  diagramPanel.add(newConstraintStartDot);
-		  diagramPanel.setComponentZOrder(newConstraintStartDot, 0);
+		  addToDiagramOnTop(newConstraintStartDot);
+//		  diagramPanel.setLayer(newConstraintStartDot, 0);
+//		  diagramPanel.add(newConstraintStartDot);
+//		  diagramPanel.setComponentZOrder(newConstraintStartDot, 0);
 		}
 
 		visibleOrderDraggables.addToTop(newConstraintEndDot);
-		diagramPanel.setLayer(newConstraintEndDot, 0);
-		diagramPanel.add(newConstraintEndDot);
-		diagramPanel.setComponentZOrder(newConstraintEndDot, 0);
+		addToDiagramOnTop(newConstraintEndDot);
+//		diagramPanel.setLayer(newConstraintEndDot, 0);
+//		diagramPanel.add(newConstraintEndDot);
+//		diagramPanel.setComponentZOrder(newConstraintEndDot, 0);
 
 		newConstraintControlPointDot=(JLabel)getDraggableConnectionDot(
 			ItemsType.CONSTRAINT_CONTROL_POINT,
@@ -3100,6 +3306,12 @@ public class EditorView extends JFrame implements Observer{
 		cancelToolDrag();		
 	}
 
+	/**
+	 * Adds a new Or Group to the diagram. If the starting connector dot is dropped over a feature panel, <br>
+	 * it gets attached to it.
+	 * 
+	 * @param e - MouseEvent of the type Mouse Released.
+	 */
 	public void addOrGroupToDiagram(MouseEvent e) {
 		GroupPanel newGroupStartDot = addGroupToDiagram(e, ItemsType.OR_GROUP_START_CONNECTOR);
 		if (newGroupStartDot==null) return;
@@ -3173,15 +3385,16 @@ public class EditorView extends JFrame implements Observer{
 			featurePanel=(FeaturePanel)underlyingPanel;
 
 			newGroupStartDot=(GroupPanel)getDraggableConnectionDot(requestedType, 
-				toolDragPosition.x-(int)featurePanel.getLocationOnScreen().getX()
+				toolDragPosition.x-(int)featurePanel.getLocationOnScreen().getX()-1
 					+groupIcon.getIconWidth()/2-startConnectorIcon.getIconWidth()/2,
 				toolDragPosition.y-(int)featurePanel.getLocationOnScreen().getY()-5);			
 
 			moveComponentToTop(featurePanel);
 
-			featurePanel.setLayer(newGroupStartDot, 0);
-			featurePanel.add(newGroupStartDot);
-			featurePanel.setComponentZOrder(newGroupStartDot, 0);
+			addToComponentOnLayer(featurePanel, newGroupStartDot, 0);
+//			featurePanel.setLayer(newGroupStartDot, 0);
+//			featurePanel.add(newGroupStartDot);
+//			featurePanel.setComponentZOrder(newGroupStartDot, 0);
 
 			startDotInsertedInPanel=true;
 			
@@ -3201,7 +3414,7 @@ public class EditorView extends JFrame implements Observer{
 		
 		if(!startDotInsertedInPanel) 
 			newGroupStartDot=(GroupPanel)getDraggableConnectionDot(requestedType,
-				actualPositionX+groupIcon.getIconWidth()/2-startConnectorIcon.getIconWidth()/2, actualPositionY-5);			
+				actualPositionX-1+groupIcon.getIconWidth()/2-startConnectorIcon.getIconWidth()/2, actualPositionY-5);			
 		
 		newGroupEndpoint1=(AnchorPanel)getDraggableConnectionDot(ItemsType.END_MANDATORY_CONNECTOR,
 				actualPositionX+groupIcon.getIconWidth()/2-startConnectorIcon.getIconWidth()/2
@@ -3222,20 +3435,17 @@ public class EditorView extends JFrame implements Observer{
 		
 		visibleOrderDraggables.addToTop(newGroupStartDot);
 		if(!startDotInsertedInPanel){
-		  diagramPanel.setLayer(newGroupStartDot, 0);
-		  diagramPanel.add(newGroupStartDot);
-		  diagramPanel.setComponentZOrder(newGroupStartDot, 0);
+		  addToDiagramOnTop(newGroupStartDot);
+//		  diagramPanel.setLayer(newGroupStartDot, 0);
+//		  diagramPanel.add(newGroupStartDot);
+//		  diagramPanel.setComponentZOrder(newGroupStartDot, 0);
 		}
 
 		visibleOrderDraggables.addToTop(newGroupEndpoint1);
-		diagramPanel.setLayer(newGroupEndpoint1, 0);
-		diagramPanel.add(newGroupEndpoint1);
-		diagramPanel.setComponentZOrder(newGroupEndpoint1, 0);
+		addToDiagramOnTop(newGroupEndpoint1);
 
 		visibleOrderDraggables.addToTop(newGroupEndpoint2);
-		diagramPanel.setLayer(newGroupEndpoint2, 0);
-		diagramPanel.add(newGroupEndpoint2);
-		diagramPanel.setComponentZOrder(newGroupEndpoint2, 0);
+		addToDiagramOnTop(newGroupEndpoint2);
 
 		cancelToolDrag();
 
@@ -3464,9 +3674,11 @@ public class EditorView extends JFrame implements Observer{
 		
 		//adding the text
 		layer=container.getComponentCount();
-		container.setLayer(textLabel, layer);
-		container.add(textLabel);
-		container.setComponentZOrder(textLabel, layer);
+
+		addToComponentOnLayer(container, textLabel, layer);
+//		container.setLayer(textLabel, layer);
+//		container.add(textLabel);
+//		container.setComponentZOrder(textLabel, layer);
 		
 		/* ***DEBUG*** */
 		/*if(debug)*/ System.out.println("container.getBounds(): "+container.getBounds());
@@ -3486,7 +3698,12 @@ public class EditorView extends JFrame implements Observer{
 		OrderedListNode tmp=null;
 
 //		Dimension baseDim=Toolkit.getDefaultToolkit().getScreenSize();
-		Dimension baseDim=diagramScroller.getSize();
+//		Dimension baseDim=diagramScroller.getSize();
+//		Dimension baseDim=diagramPanel.getPreferredSize();
+		Dimension baseDim=diagramPanelBasePreferredSize;
+		
+//		System.out.println("********\nbaseDim.width: "+baseDim.width+"\nbaseDim.height: "+baseDim.height
+//						  +"\nbaseDim.getWidth(): "+baseDim.getWidth()+"\nbaseDim.getHeight(): "+baseDim.getHeight());
 		
 		tmp=visibleOrderDraggables.getFirst();
 		while(tmp!=null){
@@ -3523,6 +3740,78 @@ public class EditorView extends JFrame implements Observer{
 		diagramPanel.setSize(diagramSize);
 		diagramPanel.revalidate();
 		frameRoot.repaint();
+	}
+
+	/**
+	 * Activate the global timer, responsable for drawing groups animations.
+	 * If the timer needs to be created, it will be created; if the timer is already running, 
+	 * this call does nothing.
+	 */
+	private void activateGlobalAnimationTimer() {
+		if(globalTimer==null) globalTimer = new Timer(20, new ActionListener() {
+		    @Override
+		    public void actionPerformed(ActionEvent ae){
+		      if(!(openerTimer!=null && openerTimer.getRadius()>0.0) && closerTimers.size()==0){
+		    	globalTimer.stop(); return;
+		      }
+		      
+		      Graphics2D g2 = (Graphics2D)frameRoot.getGraphics();
+			  //drawing groups dock opening animation
+			  if(openerTimer!=null && openerTimer.getRadius()>0.0){
+				drawCirclesAroundGroups(openerTimer.getRadius(), g2);
+			  }
+			  //drawing groups dock closing animations
+			  drawAllGroupClosingAnimations(g2);	
+			}
+		});
+
+		if(!globalTimer.isRunning()) globalTimer.start();
+	}
+
+	/**
+	 * Starts the group dock opening animation.
+	 */
+	protected void startGroupOpeningAnimation() {
+		if(openerTimer==null) openerTimer = 
+			new GroupAnimationTimer(0.0, groupDockOpeningStepAmount, groupDockRadius, this, null, null, null);
+		else openerTimer.clearRadius();
+		openerTimer.start();
+		activateGlobalAnimationTimer();
+	}
+
+	/**
+	 * Stops the group dock opening animation.
+	 */
+	protected void stopGroupOpeningAnimation() {
+//		if(openerTimer!=null){
+//		    if(openerTimer.isRunning()) openerTimer.stop();
+//		    openerTimer.clearRadius();
+//		}
+//		repaintRootFrame();
+		
+		if(openerTimer!=null && openerTimer.isRunning()) openerTimer.stop();
+	}
+
+	/**
+	 * Adds a new timer for the group dock closing animation.
+	 */
+	protected void addNewCloserTimer(GroupPanel group, Point2D.Double anchorLocation, BufferedImage anchorImage){
+		if(openerTimer.getRadius()<1){ openerTimer.clearRadius(); return;}
+		GroupAnimationTimer closerTimer =
+			new GroupAnimationTimer(openerTimer.getRadius(), groupDockClosingStepAmount, 1,
+									this, group, anchorLocation, anchorImage);
+		openerTimer.clearRadius();
+		closerTimers.add(closerTimer);
+		closerTimer.start();
+		activateGlobalAnimationTimer();
+	}
+
+	/**
+	 * Removes a group dock closer timer.
+	 */
+	public void removeCloserTimer(GroupAnimationTimer timer) {
+		System.out.println("removing closing timer from list");
+		closerTimers.remove(timer);
 	}
 	
 	/**
@@ -3682,10 +3971,9 @@ public class EditorView extends JFrame implements Observer{
 	  anchor.setOtherEnd(startConnectorDot);
 	  visibleOrderDraggables.addToTop(startConnectorDot);
 	  startConnectorDots.add(startConnectorDot);
+
 	  
-	  diagramPanel.setLayer(startConnectorDot, 0);
-	  diagramPanel.add(startConnectorDot);
-	  diagramPanel.setComponentZOrder(startConnectorDot, 0);
+	  addToDiagramOnTop(startConnectorDot);
 	}
 	
 	/**
@@ -3710,25 +3998,19 @@ public class EditorView extends JFrame implements Observer{
 		anchor.setLocation(
 		  (int)(anchorPanelOnScreenX-diagramPanel.getLocationOnScreen().getX()),
 		  (int)(anchorPanelOnScreenY-diagramPanel.getLocationOnScreen().getY()));
-		diagramPanel.setLayer(anchor, 0);
-		diagramPanel.add(anchor);
-		diagramPanel.setComponentZOrder(anchor, 0);
+		
+		addToDiagramOnTop(anchor);
+//		diagramPanel.setLayer(anchor, 0);
+//		diagramPanel.add(anchor);
+//		diagramPanel.setComponentZOrder(anchor, 0);
 		moveComponentToTop(anchor);
 		
-		if (  !( anchor.getName().startsWith(startMandatoryNamePrefix)
-			|| anchor.getName().startsWith(startOptionalNamePrefix)) ) return;
+		if (anchor.getName().startsWith(startMandatoryNamePrefix) || anchor.getName().startsWith(startOptionalNamePrefix))
+		  startGroupOpeningAnimation();
 		
-		if(openerTimer==null) openerTimer = new GroupAnimationTimer(0., 0.05);
-		openerTimer.start();
-		
-		if(timer==null) timer = new Timer(50, new ActionListener() {
-		    @Override
-		    public void actionPerformed(ActionEvent ae) {
-		       repaintRootFrame();
-		    }
-		});
+		activateGlobalAnimationTimer();
 
-		if(!timer.isRunning()) timer.start();
+		return;
 	}
 	
 	/**
@@ -3870,6 +4152,11 @@ public class EditorView extends JFrame implements Observer{
 	/** Returns the 'Print Model[DEBUG COMMAND]' popup menu item */
 	public JMenuItem getPopMenuItemPrintModelDebug(){
 		return popMenuItemPrintModelDebug;
+	};
+
+	/** Returns the 'Print Model[DEBUG COMMAND]' popup menu item */
+	public JMenuItem getPopMenuItemFitDiagram(){
+		return popMenuItemFitDiagram;
 	};
 
 	/** Returns the popup menu X coordinate on the diagram*/
@@ -4311,34 +4598,43 @@ public class EditorView extends JFrame implements Observer{
 	@Override
 	public void update(Observable o, Object arg) {
 		System.out.println("Message received: "+arg);
-		if(arg.equals("New Feature Correctly Added")) addNewFeatureToDiagram();		
+		if(		arg.equals("New Feature Correctly Added")) addNewFeatureToDiagram();		
 		else if(arg.equals("Feature Renamed")) renameFeature();	
 		else if(arg.equals("Feature Not Renamed")) undoRenameFeature();	
 		else if(arg.equals("New Named Feature Correctly Added")) addNamedFeatureToDiagram();		
 		else if(arg.equals("Feature Deleted")) deleteFeature(popUpElement);
 		else if(arg.equals("Group Deleted")) deleteGroup(popUpElement);
 		else if(arg.equals("Feature Not Deleted")) System.out.println("Cannot delete this feature!");
-		else if(arg.equals("Two Features Directly Linked")) addAnchorToFeature();
 		else if(arg.equals("Grouped a Feature") ) addAnchorToFeature();
 		else if(arg.equals("Group Added To Feature") ) addAnchorToFeature();	
-		else if(arg.equals("Merged a Connector") ) addStartAnchorToGroup();
 		else if(arg.equals("Constraint Added") ) addAnchorToFeature();
 		else if(arg.equals("Constraint Removed") ) detachAnchor(lastFeatureFocused, lastAnchorFocused);
+		else if(arg.equals("Two Features Directly Linked")){
+			addAnchorToFeature();
+		}
+		else if(arg.equals("Merged a Connector") ){
+			stopGroupOpeningAnimation();
+			addStartAnchorToGroup();
+		}
+		else if(arg.equals("Two Features Not Linked")
+			 || arg.equals("Not Merged a Connector")){
+			System.out.println("Operation would create a cycle and it has been aborted!");
+			stopGroupOpeningAnimation();
+			addNewCloserTimer(null, null, null);
+		}
 		else if(arg.equals("Not Grouped a Feature")
-			     || arg.equals("Two Features Not Linked")
-			     || arg.equals("Group Not Added To Feature")
-			     || arg.equals("Not Merged a Connector")){
+			 || arg.equals("Group Not Added To Feature")){
 			System.out.println("Operation would create a cycle and it has been aborted!");
 		}
 		else if(arg.equals("Direct Link Destroyed")
-				|| arg.equals("Group Removed From Feature")){
+			 || arg.equals("Group Removed From Feature")){
 			detachAnchor(lastFeatureFocused, lastAnchorFocused);
 		}
 		else if(arg.equals("Direct Link Not Destroyed")
-				|| arg.equals("Group Not Removed From Feature")
-				|| arg.equals("Constraint Not Added")
-				|| arg.equals("Constraint Not Removed")
-				|| arg.equals("Direct Link Not Destroyed") ){
+			 || arg.equals("Group Not Removed From Feature")
+			 || arg.equals("Constraint Not Added")
+			 || arg.equals("Constraint Not Removed")
+			 || arg.equals("Direct Link Not Destroyed") ){
 			resetActiveItems();
 		}
 	}
@@ -4348,11 +4644,13 @@ public class EditorView extends JFrame implements Observer{
 	 * 
 	 * @return s - String representing the diagram name, or null if dialog has been aborted
 	 */
-	public File assignNameDiagramDialog(String diagramPath){		
+	public File assignNameDiagramDialog(String diagramPath, String diagramName){		
 	  JFileChooser saveChooser= new JFileChooser(diagramPath);
 	  String fileName=null;
 	  File chosenFile=null;
 	  saveChooser.setDialogTitle("Save Diagram");
+	  saveChooser.setDialogType(JFileChooser.SAVE_DIALOG);
+	  saveChooser.setSelectedFile(new File(diagramName));
 
       if (saveChooser.showSaveDialog(new JFrame()) == JFileChooser.APPROVE_OPTION){
     	chosenFile = saveChooser.getSelectedFile();
@@ -4437,9 +4735,11 @@ public class EditorView extends JFrame implements Observer{
 	 * @return s - the selected project file path 
 	 */
 	public String loadXMLDialog(String message, String pathProject){
-		FileDialog d = new FileDialog(new JFrame("message"));
-    	d.setMode(FileDialog.LOAD);
-	    d.setResizable(true);
+//		FileDialog d = new FileDialog(new JFrame(message));
+//    	d.setMode(FileDialog.LOAD);
+//	    d.setResizable(true);
+	    
+
     	
     	//checking if the diagrams save directory must be created
     	File dir=new File(pathProject);		
@@ -4448,12 +4748,25 @@ public class EditorView extends JFrame implements Observer{
     		return null;
     	}
 
-    	d.setDirectory(pathProject);
-	    d.setVisible(true);
-	    
-	    System.out.println("DIR IS: "+d.getDirectory()+"\nFILE IS: "+d.getFile());
-	    if(d.getFile() == null) return null;
-	    return d.getDirectory()+d.getFile().toString();
+		JFileChooser loadChooser= new JFileChooser(pathProject);
+		File chosenFile=null;
+		loadChooser.setDialogTitle("Save Diagram");
+		loadChooser.setDialogType(JFileChooser.OPEN_DIALOG);
+
+		if (loadChooser.showSaveDialog(new JFrame()) == JFileChooser.APPROVE_OPTION){
+		  chosenFile = loadChooser.getSelectedFile();
+		  return chosenFile.getAbsolutePath();
+		}
+		else return null;
+	      
+	      
+
+//    	d.setDirectory(pathProject);
+//	    d.setVisible(true);
+//	    
+//	    System.out.println("DIR IS: "+d.getDirectory()+"\nFILE IS: "+d.getFile());
+//	    if(d.getFile() == null) return null;
+//	    return d.getDirectory()+d.getFile().toString();
 	}
 	
 	/** 
@@ -4472,19 +4785,19 @@ public class EditorView extends JFrame implements Observer{
 	/** 
 	 * Asks user confirmation for saving this diagram.
 	 * 
-	 * @return - 1 if the user confirmed, 0 otherwise
+	 * @return true if the user confirmed, false otherwise
 	 */
-	public int confirmSaveDiagramDialog(){
+	public boolean confirmSaveDiagramDialog(String message){
 		JFrame f = new JFrame("Save Diagram");
 		
     	Object[] options = {"No","Yes"};			
 		
 		int i = JOptionPane.showOptionDialog(
-				f, "Do you want save the diagram?", "Save Diagram",
+				f, message, "Save Diagram",
 				JOptionPane.OK_OPTION, JOptionPane.NO_OPTION, null, options, options[1]);
 		
-		if(i == 1) return 1;		
-		else return 0;
+		if(i == 1) return true;		
+		else return false;
 	}
 
 	/**
@@ -4515,7 +4828,7 @@ public class EditorView extends JFrame implements Observer{
 	  Graphics g = bi.createGraphics();
 	  diagramPanel.paint(g);
 	  g.dispose();	  
-	  
+
 	  try{
 		ImageIO.write(bi, type, fileName);
 	  }catch(Exception e) {
@@ -4561,7 +4874,7 @@ public class EditorView extends JFrame implements Observer{
 		
 		
 		//saving diagram graphic elements data
-		String savePath = pathProject + "/" + s + "_DiagView.xml"; 
+		String savePath = pathProject + OSUtils.getFilePathSeparator() + s + "_DiagView.xml"; 
 
 		xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 			  +"<Diagram name=\"" + s + "\">"
@@ -4781,7 +5094,6 @@ public class EditorView extends JFrame implements Observer{
 
 	/**
 	 * Saves the visual elements of the diagram and the diagram state as XML String.
-	 * @param pathProject - the directory path where to save the diagram
 	 * @param s - the name of the file in which to save the diagram
 	 * 
 	 * @return - the XML String produced
@@ -5229,9 +5541,7 @@ public class EditorView extends JFrame implements Observer{
 		startConnector=(AnchorPanel)buildConnectionDot(ItemsType.START_MANDATORY_CONNECTOR, startConnectorName, startX, startY);
 		if(startOwnerName.length()==0){//adding connector to the diagram panel directly
 		  visibleOrderDraggables.addToTop(startConnector);
-		  diagramPanel.setLayer(startConnector, 0);
-		  diagramPanel.add(startConnector);
-		  diagramPanel.setComponentZOrder(startConnector, 0);			
+		  addToDiagramOnTop(startConnector);			
 		}
 		else{//adding connector to its owner feature panel
 		  OrderedListNode tmp=visibleOrderDraggables.getFirst();
@@ -5247,9 +5557,10 @@ public class EditorView extends JFrame implements Observer{
 			throw new RuntimeException("Couldn't find feature '"+startOwnerName+"' as owner of '"+startConnectorName+"'");
 
 		  visibleOrderDraggables.addToTop(startConnector);
-		  owner.setLayer(startConnector, 0);
-		  owner.add(startConnector);
-		  owner.setComponentZOrder(startConnector, 0);
+		  addToComponentOnLayer(owner, startConnector, 0);
+//		  owner.setLayer(startConnector, 0);
+//		  owner.add(startConnector);
+//		  owner.setComponentZOrder(startConnector, 0);
 		}
 		
 		
@@ -5260,9 +5571,7 @@ public class EditorView extends JFrame implements Observer{
 			endConnector=(AnchorPanel)buildConnectionDot(ItemsType.END_MANDATORY_CONNECTOR, endConnectorName, endX, endY);
 		if(endOwnerName.length()==0){//adding connector to the diagram panel directly
 		  visibleOrderDraggables.addToTop(endConnector);
-		  diagramPanel.setLayer(endConnector, 0);
-		  diagramPanel.add(endConnector);
-		  diagramPanel.setComponentZOrder(endConnector, 0);			
+		  addToDiagramOnTop(endConnector);			
 		}
 		else{//adding connector to its owner feature panel
 		  OrderedListNode tmp=visibleOrderDraggables.getFirst();
@@ -5276,9 +5585,10 @@ public class EditorView extends JFrame implements Observer{
 			throw new RuntimeException("Couldn't find feature '"+endOwnerName+"' as owner of '"+endConnectorName);
 
 		  visibleOrderDraggables.addToTop(endConnector);
-		  owner.setLayer(endConnector, 0);
-		  owner.add(endConnector);
-		  owner.setComponentZOrder(endConnector, 0);
+		  addToComponentOnLayer(owner, endConnector, 0);
+//		  owner.setLayer(endConnector, 0);
+//		  owner.add(endConnector);
+//		  owner.setComponentZOrder(endConnector, 0);
 		}		
 		
 		//adding mutual references
@@ -5332,9 +5642,10 @@ public class EditorView extends JFrame implements Observer{
 		group=(GroupPanel)buildConnectionDot(groupType, groupConnectorName, groupX, groupY);
 		if(groupOwnerName.compareTo("")==0){//adding connector to the diagram panel directly
 		  visibleOrderDraggables.addToTop(group);
-		  diagramPanel.setLayer(group, 0);
-		  diagramPanel.add(group);
-		  diagramPanel.setComponentZOrder(group, 0);			
+		  addToDiagramOnTop(group);
+//		  diagramPanel.setLayer(group, 0);
+//		  diagramPanel.add(group);
+//		  diagramPanel.setComponentZOrder(group, 0);			
 		}
 		else{//adding group to its owner feature panel
 		  OrderedListNode tmp=visibleOrderDraggables.getFirst();
@@ -5365,9 +5676,7 @@ public class EditorView extends JFrame implements Observer{
 		  member=(AnchorPanel)buildConnectionDot(ItemsType.END_MANDATORY_CONNECTOR, memberName, memberX, memberY);
 		  if(memberOwnerName.compareTo("")==0){//adding member to the diagram panel directly
 			visibleOrderDraggables.addToTop(member);
-			diagramPanel.setLayer(member, 0);
-			diagramPanel.add(member);
-			diagramPanel.setComponentZOrder(member, 0);			
+			addToDiagramOnTop(member);			
 		  }
 		  else{//adding member to its owner feature panel
 			OrderedListNode tmp=visibleOrderDraggables.getFirst();
@@ -5381,9 +5690,10 @@ public class EditorView extends JFrame implements Observer{
 			  throw new RuntimeException("Couldn't find feature '"+memberOwnerName+"' as owner of '"+memberName);
 
 			visibleOrderDraggables.addToTop(member);
-			owner.setLayer(member, 0);
-			owner.add(member);
-			owner.setComponentZOrder(member, 0);
+			addToComponentOnLayer(owner, member, 0);
+//			owner.setLayer(member, 0);
+//			owner.add(member);
+//			owner.setComponentZOrder(member, 0);
 		  }	
 
 		  //adding mutual references
@@ -5391,9 +5701,9 @@ public class EditorView extends JFrame implements Observer{
 		  group.getMembers().add(member);
 		}
 
-		//adding group to draw list
-		if(groupType==ItemsType.ALT_GROUP_START_CONNECTOR) altGroupPanels.add(group);
-		else orGroupPanels.add(group);
+//		//adding group to draw list
+//		if(groupType==ItemsType.ALT_GROUP_START_CONNECTOR) altGroupPanels.add(group);
+//		else orGroupPanels.add(group);
 	  }	  
 
 	}
@@ -5468,9 +5778,10 @@ public class EditorView extends JFrame implements Observer{
 		
 		if(startOwnerName.length()==0){//adding anchor to the diagram panel directly
 		  visibleOrderDraggables.addToTop(startConstraint);
-		  diagramPanel.setLayer(startConstraint, 0);
-		  diagramPanel.add(startConstraint);
-		  diagramPanel.setComponentZOrder(startConstraint, 0);			
+		  addToDiagramOnTop(startConstraint);
+//		  diagramPanel.setLayer(startConstraint, 0);
+//		  diagramPanel.add(startConstraint);
+//		  diagramPanel.setComponentZOrder(startConstraint, 0);			
 		}
 		else{//adding anchor to its owner feature panel
 		  OrderedListNode tmp=visibleOrderDraggables.getFirst();
@@ -5484,9 +5795,10 @@ public class EditorView extends JFrame implements Observer{
 			throw new RuntimeException("Couldn't find feature '"+startOwnerName+"' as owner of '"+startConstraintName+"'");
 
 		  visibleOrderDraggables.addToTop(startConstraint);
-		  owner.setLayer(startConstraint, 0);
-		  owner.add(startConstraint);
-		  owner.setComponentZOrder(startConstraint, 0);
+		  addToComponentOnLayer(owner, startConstraint, 0);
+//		  owner.setLayer(startConstraint, 0);
+//		  owner.add(startConstraint);
+//		  owner.setComponentZOrder(startConstraint, 0);
 		}
 
 		//adding constraint end anchor
@@ -5497,9 +5809,10 @@ public class EditorView extends JFrame implements Observer{
 		
 		if(endOwnerName.length()==0){//adding anchor to the diagram panel directly
 		  visibleOrderDraggables.addToTop(endConstraint);
-		  diagramPanel.setLayer(endConstraint, 0);
-		  diagramPanel.add(endConstraint);
-		  diagramPanel.setComponentZOrder(endConstraint, 0);			
+		  addToDiagramOnTop(endConstraint);
+//		  diagramPanel.setLayer(endConstraint, 0);
+//		  diagramPanel.add(endConstraint);
+//		  diagramPanel.setComponentZOrder(endConstraint, 0);			
 		}
 		else{//adding anchor to its owner feature panel
 		  OrderedListNode tmp=visibleOrderDraggables.getFirst();
@@ -5513,9 +5826,10 @@ public class EditorView extends JFrame implements Observer{
 			throw new RuntimeException("Couldn't find feature '"+endOwnerName+"' as owner of '"+endConstraintName);
 
 		  visibleOrderDraggables.addToTop(endConstraint);
-		  owner.setLayer(endConstraint, 0);
-		  owner.add(endConstraint);
-		  owner.setComponentZOrder(endConstraint, 0);
+		  addToComponentOnLayer(owner, endConstraint, 0);
+//		  owner.setLayer(endConstraint, 0);
+//		  owner.add(endConstraint);
+//		  owner.setComponentZOrder(endConstraint, 0);
 		}	
 		
 		//adding constraint control point
@@ -5524,9 +5838,10 @@ public class EditorView extends JFrame implements Observer{
 		//adding anchor to the diagram panel directly
 		constControlPoint.setLocation(controlX, controlY);
 		visibleOrderDraggables.addToTop(constControlPoint);
-		diagramPanel.setLayer(constControlPoint, 0);
-		diagramPanel.add(constControlPoint);
-		diagramPanel.setComponentZOrder(constControlPoint, 0);
+		addToDiagramOnTop(constControlPoint);
+//		diagramPanel.setLayer(constControlPoint, 0);
+//		diagramPanel.add(constControlPoint);
+//		diagramPanel.setComponentZOrder(constControlPoint, 0);
 	    constControlPoint.setVisible(true);
 		
 	    //setting other ends of constraint dots
@@ -5746,9 +6061,10 @@ public class EditorView extends JFrame implements Observer{
 	public void showControlPoint(ConstraintPanel constraint) {
 	  JComponent controlPoint = constraint.getControlPoint();
 	  visibleOrderDraggables.addToTop(controlPoint);
-	  diagramPanel.setLayer(controlPoint, 0);
-	  diagramPanel.add(controlPoint);
-	  diagramPanel.setComponentZOrder(controlPoint, 0);	
+	  addToDiagramOnTop(controlPoint);
+//	  diagramPanel.setLayer(controlPoint, 0);
+//	  diagramPanel.add(controlPoint);
+//	  diagramPanel.setComponentZOrder(controlPoint, 0);	
 	  controlPoint.setVisible(true);
 	  frameRoot.repaint();
 	}
@@ -6363,7 +6679,8 @@ public class EditorView extends JFrame implements Observer{
 		  textIndexes.get(currentSelectedFeatureName).put(fileName, currentIndex);
 
 		  //updating occurrences label
-		  occurrsLabel.setText( (currentIndex+1)+"/"+occurrIndexesList.size()+"[Index: "+occurrence[0]+"]");
+		  occurrsLabel.setText( (currentIndex+1)+ OSUtils.getFilePathSeparator() 
+				  +occurrIndexesList.size()+"[Index: "+occurrence[0]+"]");
 
 		  /* ***VERBOSE****/					
 		  if (debug4) System.out.println(
@@ -6678,7 +6995,8 @@ public class EditorView extends JFrame implements Observer{
 		  jta.setCaretPosition(occurrence[0]);
 
 		  //updating occurrences label
-		  occurrsLabel.setText( (currentIndex+1)+"/"+occurrIndexesList.size()+"[Index: "+occurrence[0]+"]");
+		  occurrsLabel.setText( (currentIndex+1)+ OSUtils.getFilePathSeparator() 
+				  +occurrIndexesList.size()+"[Index: "+occurrence[0]+"]");
 		
 	}
 
@@ -6732,9 +7050,10 @@ public class EditorView extends JFrame implements Observer{
 		newFeature.setSize(width, height);
 		
 		visibleOrderDraggables.addToTop(newFeature);
-		diagramPanel.setLayer(newFeature, 0);
-		diagramPanel.add(newFeature);
-		diagramPanel.setComponentZOrder(newFeature, 0);
+		addToDiagramOnTop(newFeature);
+//		diagramPanel.setLayer(newFeature, 0);
+//		diagramPanel.add(newFeature);
+//		diagramPanel.setComponentZOrder(newFeature, 0);
 		
 		return newFeature;
 	}
@@ -6744,13 +7063,14 @@ public class EditorView extends JFrame implements Observer{
 	 * This method is used to add anchors that have never been added to the diagram panel, on a feature panel.
 	 * 
 	 * @param anchorPanel - the anchor to add
-	 * @param featurePanel -  the feature on which the anchor must be added
+	 * @param featurePanel - the feature on which the anchor must be added
 	 */
 	public void directlyAddAnchorToFeature(AnchorPanel anchorPanel, FeaturePanel featurePanel) {
 		visibleOrderDraggables.addToTop(anchorPanel);
-		featurePanel.setLayer(anchorPanel, 0);
-		featurePanel.add(anchorPanel);
-		featurePanel.setComponentZOrder(anchorPanel, 0);
+		addToComponentOnLayer(featurePanel, anchorPanel, 0);
+//		featurePanel.setLayer(anchorPanel, 0);
+//		featurePanel.add(anchorPanel);
+//		featurePanel.setComponentZOrder(anchorPanel, 0);
 
 		//adding start anchor to draw list
 		if(anchorPanel.getName().startsWith(startMandatoryNamePrefix)
@@ -6760,6 +7080,40 @@ public class EditorView extends JFrame implements Observer{
 		  startExcludesDots.add(anchorPanel);
 		else if(anchorPanel.getName().startsWith(startIncludesNamePrefix))
 		  startIncludesDots.add(anchorPanel);
+		
+/*
+ 		//adding members
+ 		for(int k=4; k<groupData.length; k+=3){
+		  //adding member
+		  member=(AnchorPanel)buildConnectionDot(ItemsType.END_MANDATORY_CONNECTOR, memberName, memberX, memberY);
+		  if(memberOwnerName.compareTo("")==0){//adding member to the diagram panel directly
+			visibleOrderDraggables.addToTop(member);
+			diagramPanel.setLayer(member, 0);
+			diagramPanel.add(member);
+			diagramPanel.setComponentZOrder(member, 0);			
+		  }
+		  else{//adding member to its owner feature panel
+			OrderedListNode tmp=visibleOrderDraggables.getFirst();
+			while(tmp!=null){
+			  if(((JComponent)tmp.getElement()).getName().compareTo(memberOwnerName)==0){
+				owner=(FeaturePanel)tmp.getElement(); break;
+			  }
+			  tmp=tmp.getNext();
+			}
+			if(owner==null)
+			  throw new RuntimeException("Couldn't find feature '"+memberOwnerName+"' as owner of '"+memberName);
+
+			visibleOrderDraggables.addToTop(member);
+			owner.setLayer(member, 0);
+			owner.add(member);
+			owner.setComponentZOrder(member, 0);
+		  }	
+*/
+
+		
+		
+		
+		
 	}
 
 	/**
@@ -6771,13 +7125,14 @@ public class EditorView extends JFrame implements Observer{
 	 */
 	public void directlyAddGroupToFeature(GroupPanel group, FeaturePanel owner, ItemsType groupType) {
 		visibleOrderDraggables.addToTop(group);
-		owner.setLayer(group, 0);
-		owner.add(group);
-		owner.setComponentZOrder(group, 0);
+		addToComponentOnLayer(owner, group, 0);
+//		owner.setLayer(group, 0);
+//		owner.add(group);
+//		owner.setComponentZOrder(group, 0);
 
-//		//adding group to draw list
-//		if(groupType==ItemsType.ALT_GROUP_START_CONNECTOR) altGroupPanels.add(group);
-//		else orGroupPanels.add(group);
+		//adding group to draw list
+		if(groupType==ItemsType.ALT_GROUP_START_CONNECTOR) altGroupPanels.add(group);
+		else orGroupPanels.add(group);
 	}
 
 	/**
@@ -6788,14 +7143,32 @@ public class EditorView extends JFrame implements Observer{
 	 */
 	public void directlyAddAnchorToDiagram(JComponent anchorPanel) {
 		visibleOrderDraggables.addToTop(anchorPanel);
-		diagramPanel.setLayer(anchorPanel, 0);
-		diagramPanel.add(anchorPanel);
-		diagramPanel.setComponentZOrder(anchorPanel, 0);
+		addToDiagramOnTop(anchorPanel);
+//		diagramPanel.setLayer(anchorPanel, 0);
+//		diagramPanel.add(anchorPanel);
+//		diagramPanel.setComponentZOrder(anchorPanel, 0);
 
 		//adding start anchor to draw list
 		if(anchorPanel.getName().startsWith(startMandatoryNamePrefix)
 		   || anchorPanel.getName().startsWith(startOptionalNamePrefix) )
 		  startConnectorDots.add(anchorPanel);
 	}		
+	
+	/**
+	 * Sets the root frame to maximum size and brings it to front.
+	 */
+	public void maximize(){
+      frameRoot.setExtendedState(JFrame.MAXIMIZED_BOTH);
+      frameRoot.setAlwaysOnTop(true);
+      frameRoot.requestFocus();
+      frameRoot.setAlwaysOnTop(false);		
+	}
+	
+	/**
+	 * Sets the root frame to iconified state and sends it to tray.
+	 */
+	public void minimize(){
+      frameRoot.setState(JFrame.ICONIFIED);
+	}
 	
 }

@@ -29,6 +29,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import main.CombinatoryUtils;
+import main.OSUtils;
 import main.SortUtils;
 
 import org.xml.sax.SAXException;
@@ -1383,19 +1384,19 @@ public class ModelProject extends Observable implements Runnable{
 		
 		nameProject = s;
 		
-		pathProject = CMTConstants.saveAnalisysDir+"/" + s;
-		pathXML = CMTConstants.saveAnalisysDir + "/" + s + ".xml"; 
+		pathProject = CMTConstants.getSaveAnalisysDir()+ OSUtils.getFilePathSeparator() + s;
+		pathXML = CMTConstants.getSaveAnalisysDir() + OSUtils.getFilePathSeparator() + s + ".xml"; 
 
-		pathCommonalitiesCandidates = pathProject + CMTConstants.CCsubpath;
-		pathCommonalitiesSelected = pathProject + CMTConstants.CSsubpath;
-		pathCommonalitiesSelectedHTML = pathProject + CMTConstants.CSHsubpath;
+		pathCommonalitiesCandidates = pathProject + CMTConstants.getCCsubpath();
+		pathCommonalitiesSelected = pathProject + CMTConstants.getCSsubpath();
+		pathCommonalitiesSelectedHTML = pathProject + CMTConstants.getCSHsubpath();
 
-		pathVariabilitiesCandidates = pathProject + CMTConstants.VCsubpath;
-		pathVariabilitiesSelected = pathProject + CMTConstants.VSsubpath;
-		pathVariabilitiesSelectedHTML = pathProject + CMTConstants.VSHsubpath;
+		pathVariabilitiesCandidates = pathProject + CMTConstants.getVCsubpath();
+		pathVariabilitiesSelected = pathProject + CMTConstants.getVSsubpath();
+		pathVariabilitiesSelectedHTML = pathProject + CMTConstants.getVSHsubpath();
 		
-		pathRelevantTerms = pathProject + CMTConstants.RTsubpath;		
-		pathTermsVersions = pathProject + CMTConstants.TVsubpath;
+		pathRelevantTerms = pathProject + CMTConstants.getRTsubpath();		
+		pathTermsVersions = pathProject + CMTConstants.getTVsubpath();
 		
 		stateProject[0] = true;
 		stateProject[1] = true;
@@ -2143,22 +2144,25 @@ public class ModelProject extends Observable implements Runnable{
 			filesProject = new ArrayList <ModelFile> ();
 			
 			workerProject = new ArrayList <Thread> ();
+
+			nameProject = s.substring(s.lastIndexOf(OSUtils.getFilePathSeparator())+1, s.length() - 4);
+
+//			pathProject = CMTConstants.getSaveAnalisysDir()+ OSUtils.getFilePathSeparator() + nameProject;
+//			pathXML = CMTConstants.getSaveAnalisysDir() + OSUtils.getFilePathSeparator() + nameProject + ".xml"; 
+
+			pathProject =s.substring(0, s.length() - 4);
+			pathXML = s; 
+
+			pathCommonalitiesCandidates = pathProject + CMTConstants.getCCsubpath();
+			pathCommonalitiesSelected = pathProject + CMTConstants.getCSsubpath();
+			pathCommonalitiesSelectedHTML = pathProject + CMTConstants.getCSHsubpath();
+
+			pathVariabilitiesCandidates = pathProject + CMTConstants.getVCsubpath();
+			pathVariabilitiesSelected = pathProject + CMTConstants.getVSsubpath();
+			pathVariabilitiesSelectedHTML = pathProject + CMTConstants.getVSHsubpath();
 			
-			nameProject = s.substring(0, s.length() - 4);
-
-			pathProject = CMTConstants.saveAnalisysDir+"/" + nameProject;
-			pathXML = CMTConstants.saveAnalisysDir + "/" + nameProject + ".xml"; 
-
-			pathCommonalitiesCandidates = pathProject + CMTConstants.CCsubpath;
-			pathCommonalitiesSelected = pathProject + CMTConstants.CSsubpath;
-			pathCommonalitiesSelectedHTML = pathProject + CMTConstants.CSHsubpath;
-
-			pathVariabilitiesCandidates = pathProject + CMTConstants.VCsubpath;
-			pathVariabilitiesSelected = pathProject + CMTConstants.VSsubpath;
-			pathVariabilitiesSelectedHTML = pathProject + CMTConstants.VSHsubpath;
-			
-			pathRelevantTerms = pathProject + CMTConstants.RTsubpath;		
-			pathTermsVersions = pathProject + CMTConstants.TVsubpath;			
+			pathRelevantTerms = pathProject + CMTConstants.getRTsubpath();		
+			pathTermsVersions = pathProject + CMTConstants.getTVsubpath();			
 			
 			System.out.println("pathProject: "+pathProject+"\nnameProject: "+nameProject+"\npathXML: "+pathXML);
 

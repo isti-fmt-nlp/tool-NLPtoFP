@@ -24,6 +24,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import main.FDEXMLHandler;
 import main.FeatureNode;
+import main.OSUtils;
 import main.FeatureNode.FeatureTypes;
 import main.GroupNode.GroupTypes;
 import main.ModelXMLHandler;
@@ -663,9 +664,19 @@ public class EditorModel extends Observable{
 	  FeatureNode parent = null;
 	  FeatureNode sub= searchFeature(groupMemberID);
 	  GroupNode group = searchGroup(groupName);
+	  
+	  System.out.println("Sono in removeFeatureFromGroup");
 		  
 	  if(groupOwnerID!=null) parent = searchFeature(groupOwnerID);
-
+	  
+	  System.out.println("***removeFeatureFromGroup():"
+			  +"\ngroupOwnerID: "+groupOwnerID
+			  +"\ngroupMemberID: "+groupMemberID
+			  +"\ngroupName: "+groupName			  
+			  +"\nparent: "+(parent==null? "Null": parent.getName())
+			  +"\ngroup: "+(group==null? "Null": group.getID())
+			  +"\nsub: "+(sub==null? "Null": sub.getName()));
+	  
 	  //if the group or the member was not found, operation is aborted
 	  if(sub==null || group==null) {
 		setChanged();
@@ -895,7 +906,7 @@ public class EditorModel extends Observable{
 	 */
 	public ArrayList<String> saveModel(String pathProject, final String s) {
 	  String xml = null;
-	  final String savePathPrefix = pathProject + "/" + s + "_DiagModel"; 
+	  final String savePathPrefix = pathProject + OSUtils.getFilePathSeparator() + s + "_DiagModel"; 
 	  String savePathSuffix= ".xml";
 	  String date=null;
 	  ArrayList<String> modelPaths=new ArrayList<String>();
@@ -1026,7 +1037,7 @@ public class EditorModel extends Observable{
 	 */
 	public ArrayList<String> exportAsSXFM(String savePath, String s) {
 	  String xml = null;
-	  String savePathPrefix = savePath + "/" + s + "_SXFM"; 
+	  String savePathPrefix = savePath + OSUtils.getFilePathSeparator() + s + "_SXFM"; 
 	  String savePathSuffix= ".xml";
 	  String date=null;
 	  ArrayList<String> modelPaths=new ArrayList<String>();
@@ -1994,7 +2005,14 @@ public class EditorModel extends Observable{
 
 	  //getting the ID of the group	  
 	  groupID=elementData[elementData.length-2].substring(1, elementData[elementData.length-2].length()-1);
+
+	  //added patch
+	  if(maxCard==1){
+		if(!groupID.startsWith(EditorView.altGroupNamePrefix)) groupID=EditorView.altGroupNamePrefix+groupID;
+	  }
+	  else if(!groupID.startsWith(EditorView.orGroupNamePrefix)) groupID=EditorView.orGroupNamePrefix+groupID;
 	  
+	  System.out.println("addGroupToParentFromSXFM() - About to add groupID: "+groupID);
 	  //adding new group to the model
 	  newGroup=new GroupNode(groupID, minCard, maxCard);
 	  parent.getSubGroups().add(newGroup);
@@ -2065,8 +2083,6 @@ public class EditorModel extends Observable{
 		  parentGroup.getSubFeatures().add(newFeature);
 		  newFeature.setParent(groupOwner);
 		  featuresList.put(featureID, newFeature);
-//		  unrootedFeatures.put(featureName, newFeature);
-		  
 		  return newFeature;
 	}	
 
