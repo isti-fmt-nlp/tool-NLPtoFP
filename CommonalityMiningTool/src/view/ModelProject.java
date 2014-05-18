@@ -348,6 +348,10 @@ public class ModelProject extends Observable implements Runnable{
 	  //creating global structures needed to assign colors
 	  buildColorStructures();
 	  
+	  /* ***DEBUG*** */
+	  printUncoloredTerms();
+	  /* ***DEBUG*** */
+		
 	  setChanged();
 	  notifyObservers("End Extract Commonalities");
 	}
@@ -562,6 +566,11 @@ public class ModelProject extends Observable implements Runnable{
 	  //creating the array that will hold bottom and upper boundary occurrences of leaders
 	  leadersBoundaries= new int[groupLeaders.size()][2];
 	  
+	  /* ***DEBUG*** */
+	  printRelevantTermsOccurrences();
+	  /* ***DEBUG*** */
+	  
+	  
 	  for(int k=0; k<filesProject.size(); k++){//for each file
 		allTermsOccurrences.clear();
 		  
@@ -569,6 +578,11 @@ public class ModelProject extends Observable implements Runnable{
 		termsIterator=relevantTerms.entrySet().iterator();
 		while(termsIterator.hasNext()){
 		  termsEntry=termsIterator.next();
+		  
+		  /* ***DEBUG*** */
+		  System.out.println("(!)termsEntry.getKey(): "+termsEntry.getKey()
+				  		  +"\n(!)filesProject.get(k).readPathFileUTF8(): "+filesProject.get(k).readPathFileUTF8());
+		  /* ***DEBUG*** */
 		  
 		  termOccurrences=relevantTerms.get(termsEntry.getKey()).get(filesProject.get(k).readPathFileUTF8());
 //		  termOccurrences=termsEntry.getValue().get(filesProject.get(k).readPathFileUTF8());
@@ -637,6 +651,7 @@ public class ModelProject extends Observable implements Runnable{
 		  if(distances.get(termName)==null){//initializing term's minimum distances array
 			tmpArr=new int[groupLeaders.size()];
 			for(int u=0; u<tmpArr.length; ++u) tmpArr[u]=-1;
+//			System.out.println("(!)Adding to distances the term: "+termName);
 			distances.put(termName, tmpArr);
 		  }
 		  
@@ -718,6 +733,17 @@ public class ModelProject extends Observable implements Runnable{
 	  }
 	  
 	  distIter = distances.entrySet().iterator();
+	  
+	  /* ***DEBUG*** */
+	  System.out.println("(!)distEntry List(!)");
+	  while(distIter.hasNext()){
+		distEntry = distIter.next();
+		System.out.println("(!)distEntry.getKey(): "+distEntry.getKey());
+	  }
+	  /* ***DEBUG*** */
+
+	  distIter = distances.entrySet().iterator();
+
 	  while(distIter.hasNext()){//for each term
 		distEntry = distIter.next();
 
@@ -747,8 +773,10 @@ public class ModelProject extends Observable implements Runnable{
 		  else if(tmpArr[j]==computedDistance) currentMinDistances[tierIndex++]=j;
 		}
 		
-		if(currentMinDistances[1]<0)//no tier leaders, adding term to a cluster
+		if(currentMinDistances[1]<0){//no tier leaders, adding term to a cluster
+		  System.out.println("No tie-break needed, adding term "+distEntry.getKey());
 		  ((ArrayList<String>)clusters[currentMinDistances[0]]).add(distEntry.getKey());
+		}
 		else{//there are tier leaders
 			
 		  if(debugColors) System.out.println("********GOT A LEADER TIE!!!!********");
@@ -804,6 +832,7 @@ public class ModelProject extends Observable implements Runnable{
 		  }
 		  
 		  if(maxSentences!=prevMaxSentences && maxSentences>0){//no more tier leaders, adding term to a cluster
+			System.out.println("First tie-breaker, adding term "+distEntry.getKey());
 			((ArrayList<String>)clusters[maxIndex]).add(distEntry.getKey());
 			continue;//go work on next term to add to a cluster
 		  }
@@ -905,6 +934,7 @@ public class ModelProject extends Observable implements Runnable{
 
 	    	
 			if(tiers[1]<0){//tiers[0] wins, adding term to its cluster
+			  System.out.println("Second tie-breaker, adding term "+distEntry.getKey());
 			  ((ArrayList<String>)clusters[tiers[0]]).add(distEntry.getKey());
 
 			  /* ***DEBUG*** */
@@ -939,10 +969,12 @@ public class ModelProject extends Observable implements Runnable{
 	  }
 	  
 	  /* ****DEBUG*** */
+	  debugColors=true;
 	  if(debugColors) for(@SuppressWarnings("rawtypes") ArrayList arr : clusters){
 		System.out.println("---Cluster leader: "+arr.get(0));
 		for(String term : (ArrayList<String>)arr) System.out.println("-Term: "+term);
 	  }
+	  debugColors=false;
 	  /* ****DEBUG*** */
 	  
 	  //assigning colors to terms, with saturation based on arities
@@ -952,6 +984,8 @@ public class ModelProject extends Observable implements Runnable{
 //	  assignColorsDistanceGraduation(colors, clusters, distances);
 
 	  //assigning base colors to terms, each term will have the same color of its cluster leader
+	  
+	  
 	  assignColorsClusterBasic(colors, clusters);
 	}
 
@@ -2147,11 +2181,11 @@ public class ModelProject extends Observable implements Runnable{
 
 			nameProject = s.substring(s.lastIndexOf(OSUtils.getFilePathSeparator())+1, s.length() - 4);
 
-//			pathProject = CMTConstants.getSaveAnalisysDir()+ OSUtils.getFilePathSeparator() + nameProject;
-//			pathXML = CMTConstants.getSaveAnalisysDir() + OSUtils.getFilePathSeparator() + nameProject + ".xml"; 
+			pathProject = CMTConstants.getSaveAnalisysDir()+ OSUtils.getFilePathSeparator() + nameProject;
+			pathXML = CMTConstants.getSaveAnalisysDir() + OSUtils.getFilePathSeparator() + nameProject + ".xml"; 
 
-			pathProject =s.substring(0, s.length() - 4);
-			pathXML = s; 
+//			pathProject =s.substring(0, s.length() - 4);
+//			pathXML = s; 
 
 			pathCommonalitiesCandidates = pathProject + CMTConstants.getCCsubpath();
 			pathCommonalitiesSelected = pathProject + CMTConstants.getCSsubpath();
@@ -2211,6 +2245,10 @@ public class ModelProject extends Observable implements Runnable{
 			//building global structures to calculate terms colors, after load
 			buildColorStructures();
 
+			/* ***DEBUG*** */
+			printUncoloredTerms();
+			/* ***DEBUG*** */
+			
 			//setting menus state
 			if(commonalitiesCandidates!=null && commonalitiesCandidates.size()>0){
 			  if(variabilitiesCandidates==null || variabilitiesCandidates.size()==0){
@@ -2413,6 +2451,21 @@ public class ModelProject extends Observable implements Runnable{
 		}
 		br1.close();
 		return true;
+	}
+	
+	/**
+	 * DEBUG FUNCTION: Prints the uncolored terms.
+	 */
+	public void printUncoloredTerms(){
+	  int i=0, tot=0;
+	  for(String term : relevantTerms.keySet().toArray(new String[0])){
+		++tot;
+		if(termsColor.get(term)==null){
+		  System.out.println(term+" is non colored");
+		  ++i;
+		}
+	  }
+	  System.out.println(i+" uncolored terms on a total of "+tot);
 	}
 	
 }

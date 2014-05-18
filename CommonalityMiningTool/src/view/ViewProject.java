@@ -872,13 +872,15 @@ public class ViewProject implements Observer/*, Runnable*/{
 	}
 	
 	/** 
-	 * Loads the lateral panel
+	 * Loads the lateral panel.
 	 * 
 	 * @param projectName - Project name
 	 * @param al - array containing input files names, it is null if the project doesn't yet have any
+	 * @param controllerProject - controller to be set on the lateral panel
 	 * @param newProject - tells if this is a new project or it has been loaded from a save file
 	 */
-	public void loadPanelLateral(String projectName, ArrayList <String> al, ControllerProject controllerProject, boolean newProject){
+	public void loadPanelLateral(String projectName, ArrayList <String> al, ControllerProject controllerProject,
+								 boolean newProject){
 		panelLateralProject = new ViewPanelLateral(menuTreeProject);				
 		panelCentralProject = new ViewPanelCentral();
 		

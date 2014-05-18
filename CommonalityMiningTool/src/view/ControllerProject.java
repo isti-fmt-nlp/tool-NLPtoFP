@@ -84,16 +84,21 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 	  }
 	  else if(ae.getActionCommand().equals("Load Project")){
 		String s = null;
+		String projectName=null;
 		ArrayList<String> al = null;
 		
 		if((s = viewProject.loadProjectDialog()) != null){
 			al=modelProject.loadProject(s);
 			if(al==null){ viewProject.errorDialog("Error during load"); return;}		
 			else{
-			  viewProject.loadPanelLateral(s.substring(0, s.length()-4), al, this, false);	
+			  projectName=s.substring(s.lastIndexOf(OSUtils.getFilePathSeparator())+1, s.length()-4);
+			  viewProject.loadPanelLateral(projectName, al, this, false);	
 
 			  //setting project's name and tray
-			  setProjectNameAndTray(s.substring(0, s.length()-4));
+//			  setProjectNameAndTray(s.substring(0, s.length()-4));
+			  setProjectNameAndTray(projectName);
+			  
+//			  modelProject.printUncoloredTerms();
 			}
 		}
 	  }

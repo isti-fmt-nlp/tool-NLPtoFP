@@ -800,7 +800,8 @@ public class EditorView extends JFrame implements Observer{
 		
 		//creating tools items
 		toolIconPaths=new HashMap<String, String>();
-		toolIconPaths.put("New Feature", "/New Feature2.png");
+//		toolIconPaths.put("New Feature", "/New Feature2.png");
+		toolIconPaths.put("New Feature", "/New Feature3.png");
 //		toolIconPaths.put("Mandatory Link", "/Mandatory Link.png");
 		toolIconPaths.put("Mandatory Link", "/Mandatory Link_2nd.png");		
 //		toolIconPaths.put("Optional Link", "/Optional Link.png");
@@ -882,21 +883,21 @@ public class EditorView extends JFrame implements Observer{
 //				+"\nscreenDim.getWidth(): "+screenDim.getWidth()
 //				+"\nscreenDim.getHeight(): "+screenDim.getHeight());
 
-//		toolsPanel.setMinimumSize(new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width-160)/12,
-//				Toolkit.getDefaultToolkit().getScreenSize().height));		
 		toolsPanel.setMinimumSize(new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width-160)/12,
-				Toolkit.getDefaultToolkit().getScreenSize().height/2));
+				Toolkit.getDefaultToolkit().getScreenSize().height));		
+//		toolsPanel.setMinimumSize(new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width-160)/12,
+//				Toolkit.getDefaultToolkit().getScreenSize().height/2));
 		
 		splitterPanel = new EditorSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		splitterPanel.setContinuousLayout(true);
+		splitterPanel.setDividerSize(6);
 //		splitterPanel.setOneTouchExpandable(true);
 //		splitterPanel.setDividerLocation(0.5);
-		splitterPanel.setDividerSize(6);
 //		splitterPanel.setDoubleBuffered(true);
-		splitterPanel.setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width,
-				Toolkit.getDefaultToolkit().getScreenSize().height));
 //		splitterPanel.setLocation(0,0);
 //		splitterPanel.setResizeWeight(0.5);
+		splitterPanel.setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width,
+				Toolkit.getDefaultToolkit().getScreenSize().height));
 		
 		JPanel controllerPanel=new JPanel();
 		controllerPanel.setLayout(new BorderLayout());
@@ -909,10 +910,12 @@ public class EditorView extends JFrame implements Observer{
 		treePanel.setBackground(Color.RED);
 		treePanel.add(new JLabel("Caio!"));
 
-		controllerPanel.add(toolsPanel, BorderLayout.NORTH);		
-		controllerPanel.add(treePanel, BorderLayout.SOUTH);
+//		controllerPanel.add(toolsPanel, BorderLayout.NORTH);		
+//		controllerPanel.add(treePanel, BorderLayout.SOUTH);
+//		
+//		splitterPanel.add(controllerPanel);
 		
-		splitterPanel.add(controllerPanel);
+		splitterPanel.add(toolsPanel);
 		splitterPanel.add(diagramScroller);
 		
 				

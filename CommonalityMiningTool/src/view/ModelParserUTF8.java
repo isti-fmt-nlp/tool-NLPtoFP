@@ -43,6 +43,7 @@ public class ModelParserUTF8{
 	 * @param pathProject - project path
 	 */
 	public ModelParserUTF8(String pathFile, String pathProject){
+		System.out.println("(!)pathFile: "+pathFile+"\npathProject: "+pathProject);
 		this.pathFile = pathFile;
 		this.pathFileUTF8 = pathProject + OSUtils.getFilePathSeparator()
 		  + new File(pathFile).getName().substring(0, new File(pathFile).getName().length() - 4) + ".txt";
