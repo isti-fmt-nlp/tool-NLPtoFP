@@ -157,6 +157,7 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 			viewProject.showFeaturesSelected(ViewPanelCentral.FeatureType.VARIABILITIES);
 	  }
 	  else if(ae.getActionCommand().equals("Create Diagram")){
+		String filePathSeparator=null;
 		//creating model
 		EditorModel editorModel= new EditorModel();
 
@@ -171,10 +172,14 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		//creating controller
 		EditorController editorController =new EditorController(editorView, editorModel);
 		
+		filePathSeparator=OSUtils.getFilePathSeparator();
+		if (filePathSeparator.compareTo("\\")==0) filePathSeparator="\\";
 		//setting diagrams save path
-		String[] strArr=modelProject.getPathProject().split(OSUtils.getFilePathSeparator());
+//		String[] strArr=modelProject.getPathProject().split(OSUtils.getFilePathSeparator());
 		
-		editorController.setSavePath(strArr[strArr.length-1]);
+//		editorController.setSavePath(strArr[strArr.length-1]);
+		String tmpmp=modelProject.getPathProject();
+		editorController.setSavePath(tmpmp.substring(tmpmp.lastIndexOf(filePathSeparator)+1, tmpmp.length()));
 		
   		//setting diagram's name and FDE tray
 		String newDiagramName=editorController.fetchUniqueNameForNewDiagram();

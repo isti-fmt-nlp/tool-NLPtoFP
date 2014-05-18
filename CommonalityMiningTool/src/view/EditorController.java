@@ -1653,8 +1653,9 @@ public class EditorController implements
 		ArrayList<String> startingCommonalities=editorView.getStartingCommonalities();			
 		ArrayList<String> startingVariabilities=editorView.getStartingVariabilities();
 		int i=0;
-		String[] strArr=projectName.split(OSUtils.getFilePathSeparator());
-		String rootName = strArr[strArr.length-1];
+//		String[] strArr=projectName.split(OSUtils.getFilePathSeparator());
+//		String rootName = strArr[strArr.length-1];
+		String rootName = projectName.substring(projectName.lastIndexOf(OSUtils.getFilePathSeparator())+1, projectName.length());
 		//adding root feature
 		System.out.println("Adding root: "+rootName);
 		editorModel.addUnrootedFeatureNoNotify(rootName, ""+0, /*1*/FeatureTypes.COMMONALITY);
