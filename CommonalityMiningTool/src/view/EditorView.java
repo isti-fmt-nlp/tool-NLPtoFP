@@ -495,6 +495,7 @@ public class EditorView extends JFrame implements Observer{
 	private String featureToAddName = null;
 	
 	private int verticalShift=0;
+	private int horizontalShift=0;
 	
 	/** The panel containing the diagram */
 	private ScrollLayeredPane diagramPanel=null;	
@@ -870,6 +871,8 @@ public class EditorView extends JFrame implements Observer{
 		
 		diagramScroller.setPreferredSize(diagramScrollerBasePreferredSize);
 		diagramScroller.setMinimumSize(diagramScrollerMinimumPreferredSize);
+		diagramScroller.setWheelScrollingEnabled(false);
+		
 		
 //		Dimension minDim=diagramScroller.getMinimumSize();
 //		System.out.println("********\nminDim.width: "+minDim.width
@@ -924,7 +927,7 @@ public class EditorView extends JFrame implements Observer{
 
 		diagramPanel.addMouseListener(editorController);
 		diagramPanel.addMouseMotionListener(editorController);
-//		diagramPanel.addMouseWheelListener(editorController);
+		diagramPanel.addMouseWheelListener(editorController);
 		
 
 //		setSize(Toolkit.getDefaultToolkit().getScreenSize());
@@ -4339,6 +4342,11 @@ public class EditorView extends JFrame implements Observer{
 		return diagramPanel;
 	}
 
+	/** Returns the diagram scroller*/
+	public JScrollPane getDiagramScroller(){
+		return diagramScroller;
+	}
+
 	/** Returns the toolbar panel*/
 	public JPanel getToolsPanel(){
 		return toolsPanel;
@@ -4483,6 +4491,17 @@ public class EditorView extends JFrame implements Observer{
 	/** Sets the verticalShift of the diagram.*/
 	public void setVerticalShift(int y){
 	  verticalShift+=y;
+	  repaintRootFrame();
+	}
+	
+	/** Returns the verticalShift of the diagram.*/
+	public int getHorizontalShift(){
+	  return horizontalShift;
+	}
+	
+	/** Sets the verticalShift of the diagram.*/
+	public void setHorizontalShift(int y){
+	  horizontalShift+=y;
 	  repaintRootFrame();
 	}
 	

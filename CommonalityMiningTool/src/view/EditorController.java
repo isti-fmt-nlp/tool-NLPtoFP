@@ -39,6 +39,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import javax.swing.JScrollBar;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -111,6 +112,7 @@ public class EditorController implements
 
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
+		JScrollBar bar = null;
         System.out.println("MouseWheelListenerDemo.mouseWheelMoved");
         if (e.getWheelRotation() < 0) {
             System.out.println("!!Rotated Up... " + e.getWheelRotation());
@@ -136,7 +138,13 @@ public class EditorController implements
             System.out.println("!!MouseWheelEvent.WHEEL_BLOCK_SCROLL");
         }		
 
-        editorView.setVerticalShift(-10*e.getWheelRotation());
+//        editorView.setVerticalShift(-10*e.getWheelRotation());
+        
+        if (e.isShiftDown()) bar = editorView.getDiagramScroller().getHorizontalScrollBar();
+        else bar = editorView.getDiagramScroller().getVerticalScrollBar();
+
+        
+        bar.setValue(bar.getValue()+(bar.getMaximum()/40)*e.getWheelRotation());
 	}
 	
 	@Override
