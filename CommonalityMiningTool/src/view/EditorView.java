@@ -548,7 +548,8 @@ public class EditorView extends JFrame implements Observer{
 		activeVarsHighlightPainter = new DefaultHighlighter.DefaultHighlightPainter(getNewColor(AVcol));
 	
 	/** The splitter panel containing diagramPanel and toolsPanel*/
-	private EditorSplitPane splitterPanel=null;
+//	private EditorSplitPane splitterPanel=null;
+	private JSplitPane splitterPanel=null;	
 	
 	/** The active Feature panel*/
 	private FeaturePanel lastFeatureFocused=null;
@@ -3702,6 +3703,7 @@ public class EditorView extends JFrame implements Observer{
 		int diagramMaxX=0;
 		int diagramMaxY=0;
 		OrderedListNode tmp=null;
+//		ConstraintControlPointPanel controlPoint=null;
 
 //		Dimension baseDim=Toolkit.getDefaultToolkit().getScreenSize();
 //		Dimension baseDim=diagramScroller.getSize();
@@ -3716,7 +3718,8 @@ public class EditorView extends JFrame implements Observer{
 		  if (((JComponent)tmp.getElement()).getParent().getName().startsWith(EditorView.diagramPanelName)) break;
 		  tmp=tmp.getNext();
 		}
-		if(tmp==null) return;//no draggables found
+		
+		if(tmp==null /*&& startIncludesDots.size()==0 && startExcludesDots.size()==0*/) return;//no draggables found
 		diagramMinX=((JComponent)tmp.getElement()).getX();
 		diagramMinY=((JComponent)tmp.getElement()).getY();
 		diagramMaxX=((JComponent)tmp.getElement()).getX()+((JComponent)tmp.getElement()).getWidth();
@@ -3735,6 +3738,35 @@ public class EditorView extends JFrame implements Observer{
 		  }
 		  tmp=tmp.getNext();
 		}
+
+/*		
+		//checking hidden constraint control points
+		for(JComponent constraint : startIncludesDots){
+		  controlPoint=(ConstraintControlPointPanel)((ConstraintPanel)constraint).getControlPoint();
+		  
+		  if (controlPoint.getX()<diagramMinX)
+			diagramMinX=controlPoint.getX();
+		  if (controlPoint.getY()<diagramMinY)
+			diagramMinY=controlPoint.getY();
+		  if (controlPoint.getX()+controlPoint.getWidth()>diagramMaxX)
+			diagramMaxX=controlPoint.getX()+controlPoint.getWidth();
+		  if (controlPoint.getY()+controlPoint.getHeight()>diagramMaxY)
+			diagramMaxY=controlPoint.getY()+controlPoint.getHeight();		
+		}
+		for(JComponent constraint : startExcludesDots){
+		  controlPoint=(ConstraintControlPointPanel)((ConstraintPanel)constraint).getControlPoint();
+		  
+		  if (controlPoint.getX()<diagramMinX)
+			diagramMinX=controlPoint.getX();
+		  if (controlPoint.getY()<diagramMinY)
+			diagramMinY=controlPoint.getY();
+		  if (controlPoint.getX()+controlPoint.getWidth()>diagramMaxX)
+			diagramMaxX=controlPoint.getX()+controlPoint.getWidth();
+		  if (controlPoint.getY()+controlPoint.getHeight()>diagramMaxY)
+			diagramMaxY=controlPoint.getY()+controlPoint.getHeight();	
+		}
+*/		
+		
 		//moving components and resizing diagram
 		shiftAllDraggablesButGroupBothDirections(-diagramMinX, -diagramMinY, null, true);
 		Dimension diagramSize = diagramPanel.getPreferredSize();
@@ -4353,7 +4385,7 @@ public class EditorView extends JFrame implements Observer{
 	}
 
 	/** Returns the splitter panel containing diagram and toolbar panels*/
-	public EditorSplitPane getSplitterPanel(){
+	public JSplitPane/*EditorSplitPane*/ getSplitterPanel(){
 		return splitterPanel;
 	}
 

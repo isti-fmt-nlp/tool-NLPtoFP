@@ -40,9 +40,10 @@ public class ModelAnalysis extends ModelParserUTF8{
 	private static final boolean SAVE_RELEVANT_TERMS_IMMEDIATELY = true;
 
 	/* URL da cui ottenere le analisi del file */
-//	public final String URL_ANALYSIS = "http://www.ilc.cnr.it/dylanlab/index.php?page=texttools&hl=en_US&showtemplate=false";
-//    									http://www.ilc.cnr.it/dylanlab/apps/texttools/?tt_lang=it&tt_tmid=tm_sentencesplitter
-//										http://www.ilc.cnr.it/dylanlab/apps/texttools/?tt_lang=it&tt_tmid=tm_sentencesplitter&tt_jid=1390844913949403_it
+//	public final String URL_ANALYSIS = 
+//	  "http://www.ilc.cnr.it/dylanlab/index.php?page=texttools&hl=en_US&showtemplate=false";
+//    "http://www.ilc.cnr.it/dylanlab/apps/texttools/?tt_lang=it&tt_tmid=tm_sentencesplitter";
+//	  "http://www.ilc.cnr.it/dylanlab/apps/texttools/?tt_lang=it&tt_tmid=tm_sentencesplitter&tt_jid=1390844913949403_it";
 
 	public static final String URL_ANALYSIS = "http://www.ilc.cnr.it/dylanlab/apps/texttools/?tt_user=guest"; //---TRY1
 	
@@ -102,7 +103,8 @@ public class ModelAnalysis extends ModelParserUTF8{
       //loading relevant terms
       try{
     	BufferedReader br = 
-    	  new BufferedReader(new FileReader(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.TERMSsuffix/*".log"*/));
+    	  new BufferedReader(
+    		new FileReader(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.TERMSsuffix));
 
     	while( (s = br.readLine()) != null )
           if(!s.equals("") && !s.equals("\n") && !s.equals(" ")){        	  
@@ -983,7 +985,8 @@ public class ModelAnalysis extends ModelParserUTF8{
 					  computedRelevantTerm=cleanTermRelevant(computedRelevantTerm);
 
 					  /* ***DEBUG*** */
-					  if(debug2) System.out.println("\n***Found term: "+possibleRelevantTerm+"\n***Original:"+ computedRelevantTerm);
+					  if(debug2) 
+						System.out.println("\n***Found term: "+possibleRelevantTerm+"\n***Original:"+ computedRelevantTerm);
 					  /* ***DEBUG*** */
 
 					  //adding cleaned extracted version term to sentence set and updating its arity
@@ -1162,7 +1165,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 	private void saveRelevantTerms() throws IOException {
 	  String line=null;
 	  if(termRelevant==null){//just creating an empty file
-		File emptyFile=new File(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.TERMSsuffix/*".log"*/);
+		File emptyFile=new File(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.TERMSsuffix);
 		emptyFile.getParentFile().mkdirs(); emptyFile.createNewFile();
 		return;
 	  }
@@ -1170,7 +1173,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 	  PrintWriter writer =
 		new PrintWriter(
 		  new BufferedWriter(
-				  new FileWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.TERMSsuffix/*".log"*/)));
+				  new FileWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.TERMSsuffix)));
 
 	  Iterator<Entry<String, ArrayList<String>>> termIter = termRelevant.entrySet().iterator();
 	  Entry<String, ArrayList<String>> termEntry=null;
@@ -1192,7 +1195,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 	private void saveRelevantTermsSets() throws IOException {
 	  PrintWriter writer=null;
 	  if(termsInSentencesSet==null){//just creating an empty file
-		File emptyFile=new File(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.SETSsuffix/*"SETS.log"*/);
+		File emptyFile=new File(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.SETSsuffix);
 		emptyFile.getParentFile().mkdirs(); emptyFile.createNewFile();
 		return;
 	  }
@@ -1200,7 +1203,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 	  writer =
 		new PrintWriter(
 		  new BufferedWriter(
-			new FileWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.SETSsuffix/*"SETS.log"*/)));
+			new FileWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.SETSsuffix)));
 
 	  for(int j = 0; j< termsInSentencesSet.size(); j++){
 		writer.print(SENTENCE_PREFIX+j+SENTENCE_SUFFIX);
@@ -1216,14 +1219,14 @@ public class ModelAnalysis extends ModelParserUTF8{
 	private void saveRelevantTermsArities() throws IOException {
 	  PrintWriter writer=null;
 	  if(termsArity==null){//just creating an empty file
-		File emptyFile=new File(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.ARITYsuffix/*"ARITY.log"*/);
+		File emptyFile=new File(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.ARITYsuffix);
 		emptyFile.getParentFile().mkdirs(); emptyFile.createNewFile();
 		return;
 	  }
 	  writer =
 		new PrintWriter(
 		  new BufferedWriter(
-			new FileWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.ARITYsuffix/*"ARITY.log"*/)));
+			new FileWriter(readPathFileUTF8().substring(0, readPathFileUTF8().length()-4) + CMTConstants.ARITYsuffix)));
 
 	  Iterator<Entry<String, Integer>> iter = termsArity.entrySet().iterator();
 	  Entry<String, Integer> entry=null;

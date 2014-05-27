@@ -224,8 +224,7 @@ public class ViewPanelLateral/* extends JFrame*/{
 	 */
 	public int getAnalysisLeaf()
 	{
-		if(selectNode == null || selectNode.getLastPathComponent() == null)
-			return -1;
+		if(selectNode == null || selectNode.getLastPathComponent() == null)	return -1;
 		
 		DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) selectNode.getLastPathComponent();
 		

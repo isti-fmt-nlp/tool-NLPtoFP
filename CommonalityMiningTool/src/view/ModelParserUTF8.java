@@ -35,6 +35,8 @@ public class ModelParserUTF8{
 	private String textUTF8 = null;
 	
 	private boolean isAnalisysDir=false;
+
+	private static boolean debug=false;//variable used to activate prints in the code
 	
 	/** 
 	 * Constructor.
@@ -43,7 +45,11 @@ public class ModelParserUTF8{
 	 * @param pathProject - project path
 	 */
 	public ModelParserUTF8(String pathFile, String pathProject){
-		System.out.println("(!)pathFile: "+pathFile+"\npathProject: "+pathProject);
+
+		/* ***DEBUG*** */
+		if(debug) System.out.println("(!)pathFile: "+pathFile+"\npathProject: "+pathProject);
+		/* ***DEBUG*** */
+
 		this.pathFile = pathFile;
 		this.pathFileUTF8 = pathProject + OSUtils.getFilePathSeparator()
 		  + new File(pathFile).getName().substring(0, new File(pathFile).getName().length() - 4) + ".txt";
@@ -132,9 +138,9 @@ public class ModelParserUTF8{
 	public File filterFile(){          		
         //Clean the file content
 		if (isAnalisysDir()){
-	      if((textUTF8 = /*cleanString*/cleanTextContent(encodeFileToStringUTF8()))==null) return null;   
+	      if((textUTF8 = cleanTextContent(encodeFileToStringUTF8()))==null) return null;   
 		}	
-		else if((textUTF8 = /*cleanString*/(encodeFileToStringUTF8()))==null) return null;        
+		else if((textUTF8 = encodeFileToStringUTF8())==null) return null;        
         try{
           //writes UTF8 version file
           PrintStream ps = new PrintStream(new FileOutputStream(pathFileUTF8),false,"UTF-8");      	

@@ -10,7 +10,6 @@ import java.util.ArrayList;
 public class GroupNode extends FeatureTreeNode{
 	
 	/** GroupTypes describes the possible types for a group decomposition*/
-//	/** enumeration used to specify a group type in the model*/
 	public static enum GroupTypes { ALT_GROUP, OR_GROUP, N_M_GROUP};
 	
 	/**
