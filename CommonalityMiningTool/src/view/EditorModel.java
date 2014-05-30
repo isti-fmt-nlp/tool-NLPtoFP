@@ -1038,7 +1038,7 @@ public class EditorModel extends Observable{
 	public ArrayList<String> exportAsSXFM(String savePath, String s) {
 	  String xml = null;
 	  String savePathPrefix = savePath + OSUtils.getFilePathSeparator() + s + "_SXFM"; 
-	  String savePathSuffix= ".xml";
+	  String savePathSuffix = ".xml";
 	  String date=null;
 	  ArrayList<String> modelPaths=new ArrayList<String>();
 
@@ -1051,27 +1051,27 @@ public class EditorModel extends Observable{
 	    //skipping features that have a parent feature
 		if(feature.getValue().getParent()!=null) continue;
 		
-		xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			  +"<feature_model name=\""+s+"_"+feature.getValue().getID()+"\">"
-				+"<meta>"
-			    +"<data name=\"date\">"+date+"</data>"
-				+"</meta>"
-				+"<feature_tree>";
+		xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+			  +"<feature_model name=\""+s+"_"+feature.getValue().getID()+"\">\n"
+				+"<meta>\n"
+			    +"<data name=\"date\">"+date+"</data>\n"
+				+"</meta>\n"
+				+"<feature_tree>\n";
 		
-		xml+=":r "+feature.getValue().getName()+" ("+feature.getValue().getID()+")"
+		xml+=":r "+feature.getValue().getName()+"("+feature.getValue().getID()+")\n"
 				+recursiveSXFMTreeBuilder(feature.getValue(), 1);
 
-		xml+=	 "</feature_tree>"
-				+"<constraints>";
+		xml+=	 "</feature_tree>\n"
+				+"<constraints>\n";
 
 		for(String[] strArr: constraints){
 		  if(strArr[0].startsWith(includesConstraintNamePrefix))
-			xml+=strArr[0].substring(includesConstraintNamePrefix.length())+": ~"+strArr[1]+" or "+strArr[2]+"\n";
+			xml+=strArr[0].substring(includesConstraintNamePrefix.length())+":~"+strArr[1]+" or "+strArr[2]+"\n";
 		  else
-			xml+=strArr[0].substring(excludesConstraintNamePrefix.length())+": ~"+strArr[1]+" or ~"+strArr[2]+"\n";
+			xml+=strArr[0].substring(excludesConstraintNamePrefix.length())+":~"+strArr[1]+" or ~"+strArr[2]+"\n";
 		}
 
-		xml+=	 "</constraints>"
+		xml+=	 "</constraints>\n"
 				+"</feature_model>";
 
 		//saving xml string on file
@@ -1179,23 +1179,28 @@ public class EditorModel extends Observable{
 	 */
 	private String recursiveSXFMTreeBuilder(FeatureNode featureRoot, int depth) {
 	  String xml="";
+	  String groupID=null, cardMax=null;
 	  for(FeatureNode child : featureRoot.getSubFeatures()){
 		for(int i=0; i<depth; ++i) xml+="\t";
 		if(child.getMinCardinality()==0) xml+=":o ";
 		else xml+=":m ";
 		
-		xml+= child.getName()+" ("+child.getID()+")"
+		xml+= child.getName()+"("+child.getID()+")\n"
 			 +recursiveSXFMTreeBuilder(child, depth+1);
 	  }
 	  for(GroupNode group : featureRoot.getSubGroups()){
 		for(int i=0; i<depth; ++i) xml+="\t";
-		xml+=":g ["+group.getMinCardinality()+"."+group.getMaxCardinality()+"]";
+		groupID=(group.getMaxCardinality()==1)? 
+		  group.getID().substring(EditorView.altGroupNamePrefix.length()) :
+		  group.getID().substring(EditorView.orGroupNamePrefix.length());
+		cardMax=(group.getMaxCardinality()<0)? "*" : ""+group.getMaxCardinality();
+		  
+		xml+=":g ("+groupID+")"+" ["+group.getMinCardinality()+","+cardMax+"]\n";
 		for(FeatureNode member : group.getSubFeatures()){
 			for(int i=0; i<depth+1; ++i) xml+="\t";
-			xml+= ": "+member.getName()+" ("+member.getID()+")"
+			xml+= ": "+member.getName()+"("+member.getID()+")\n"
 			   +recursiveSXFMTreeBuilder(member, depth+2);			
 		}
-
 	  }
 
 	  return xml;
