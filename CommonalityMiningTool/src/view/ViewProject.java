@@ -400,19 +400,25 @@ public class ViewProject implements Observer/*, Runnable*/{
 		  splitterPanelMain.setRightComponent(panelCentralProject.getPanelAnalysis());
 		}
 		else if(o.equals("Input File Deleted")){
-		  menuFeaturesExtractComm.setEnabled(true);
 		  menuFeaturesExtractVari.setEnabled(false);
 		  menuDiagramCreate.setEnabled(false);
+		  if(panelLateralProject.getAnalysisLeafTree().size() == 0){
+			//updating menu items
+			menuFilesDelete.setEnabled(false);
+			menuFeaturesExtractComm.setEnabled(false);
+		  }
+		  else menuFeaturesExtractComm.setEnabled(true);
 		}		
 		else if(o.equals("New File Loaded")){
+		  //activating menu items
 		  menuFeaturesExtractComm.setEnabled(true);
-		  menuFeaturesExtractVari.setEnabled(false);			
+		  menuFeaturesExtractVari.setEnabled(false);	
+		  menuFilesDelete.setEnabled(true);		
 		  menuDiagramCreate.setEnabled(false);
 		}
 		else if(o.equals("New Analisys Folder Loaded")){
 		  //stopping throbber
 		  frameProject.setEnabled(true);
-//		  setStateThrobber(true);
 		  stopThrobber();
 
 		  //setting color Green to all input file nodes in the tree
@@ -722,18 +728,8 @@ public class ViewProject implements Observer/*, Runnable*/{
 	  int i = JOptionPane.showOptionDialog(f, "Do you want delete the file?", "Delete File",
 			  			JOptionPane.OK_OPTION, JOptionPane.NO_OPTION, null, options, options[1]);
 
-	  if(i == 1){
-		if((i = panelLateralProject.deleteSelectedInputNode()) != -1){
-		  if(panelLateralProject.getAnalysisLeafTree().size() == 0){
-
-			  //activating menu items
-			  menuFilesDelete.setEnabled(false);
-			  menuFeaturesExtractComm.setEnabled(false);
-		  }
-		}
-		return i;
-	  }	
-	  return -1;
+	  if(i == 1) return panelLateralProject.deleteSelectedInputNode();
+	  else return -1;
 	}
 
 	/** 
@@ -750,9 +746,6 @@ public class ViewProject implements Observer/*, Runnable*/{
 		int i = JOptionPane.showOptionDialog(
 				f, "Choose the file you want to delete", "Delete File", JOptionPane.OK_OPTION, JOptionPane.NO_OPTION,
 				null, options, options[0]);
-//		int i = JOptionPane.showOptionDialog(
-//				f, "Choose the file you want to delete", "Delete File", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE
-//				, null, options, options[1]);
 
 		/* ***VERBOSE*** */
 		if(verbose)System.out.println("Scelta fatta: "+i);
@@ -760,14 +753,7 @@ public class ViewProject implements Observer/*, Runnable*/{
 
 		if(i==-1) return -1;
 		deleted=panelLateralProject.deleteSpecifiedInputNode(i);
-		if(deleted){
-		  if(panelLateralProject.getAnalysisLeafTree().size() == 0){
-			  //activating menu items
-			  menuFilesDelete.setEnabled(false);
-			  menuFeaturesExtractComm.setEnabled(false);
-		  }
-		  return i;
-		}
+		if(deleted) return i;
 		else return -1;
 	}
 	

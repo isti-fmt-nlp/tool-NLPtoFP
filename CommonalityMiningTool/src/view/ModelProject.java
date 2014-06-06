@@ -1698,6 +1698,9 @@ public class ModelProject extends Observable implements Runnable{
 //	  }
 	  
 	  stateProject[1] = true;
+	  
+	  setChanged();
+	  notifyObservers("Input File Deleted");
 	}
 	
 	/* -= FUNZIONI lettura parametri =- */
