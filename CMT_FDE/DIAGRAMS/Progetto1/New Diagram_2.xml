@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?><DiagramData><feature_model name="New Diagram_2.xml_0"><meta><data name="date">2014-39-24 20:11</data></meta><feature_tree>:r Progetto1 (0) [1.1]	:m system (1) [1.1]		:g ---ALT_GROUP---#0 [1.1]			: mainline solution (6) [1.1]			: rail industry (7) [1.1]	:m CBTC (2) [1.1]		:g ---OR_GROUP---#0 [1.2]			: ATS (3) [1.1]				:m ---FEATURE---#10 (10) [1.1]			: service (4) [1.1]			: Nuova Feature Added (9) [1.1]	:o ERTMS level (5) [0.1]	:o service brake (8) [0.1]</feature_tree><modelConstraints>0: ~5 or ~8
+</modelConstraints></feature_model><Diagram name="New Diagram_2.xml"><features>Name=system ContName=1 Color=0-0-0 Loc=180.210 Size=140.80
+Name=Progetto1 ContName=0 Color=0-0-0 Loc=406.41 Size=140.80
+Name=mainline solution ContName=6 Color=0-0-0 Loc=88.343 Size=140.80
+Name=rail industry ContName=7 Color=0-0-0 Loc=238.343 Size=140.80
+Name=CBTC ContName=2 Color=0-0-0 Loc=815.208 Size=140.80
+Name=ATS ContName=3 Color=0-0-0 Loc=678.361 Size=140.80
+Name=service ContName=4 Color=0-0-0 Loc=828.361 Size=140.80
+Name=Nuova Feature Added ContName=9 Color=0-0-0 Loc=978.361 Size=140.80
+Name=---FEATURE---#10 ContName=10 Color=0-0-0 Loc=678.471 Size=140.80
+Name=ERTMS level ContName=5 Color=0-0-0 Loc=383.218 Size=140.80
+Name=service brake ContName=8 Color=0-0-0 Loc=558.217 Size=140.80
+</features><connectors>StartName=---START_MANDATORY---#0 Loc=65.66 StartOwner=---FEATURE---#0 EndName=---END_MANDATORY---#0 Loc=65.0 EndOwner=---FEATURE---#1
+StartName=---START_MANDATORY---#0 Loc=65.66 StartOwner=---FEATURE---#0 EndName=---END_MANDATORY---#0 Loc=65.0 EndOwner=---FEATURE---#2
+StartName=---START_OPTIONAL---#0 Loc=65.66 StartOwner=---FEATURE---#0 EndName=---END_OPTIONAL---#0 Loc=65.0 EndOwner=---FEATURE---#5
+StartName=---START_OPTIONAL---#0 Loc=65.66 StartOwner=---FEATURE---#0 EndName=---END_OPTIONAL---#0 Loc=65.0 EndOwner=---FEATURE---#8
+StartName=---START_MANDATORY---#0 Loc=65.66 StartOwner=---FEATURE---#3 EndName=---END_MANDATORY---#0 Loc=65.0 EndOwner=---FEATURE---#10
+</connectors><groups>GroupName=---ALT_GROUP---#---ALT_GROUP---#0 type=ALT Loc=53.66 StartOwner=---FEATURE---#1 MemberName=---END_MANDATORY---#0 Loc=65.0 EndOwner=---FEATURE---#6 MemberName=---END_MANDATORY---#0 Loc=65.0 EndOwner=---FEATURE---#7
+GroupName=---ALT_GROUP---#---OR_GROUP---#0 type=OR Loc=77.66 StartOwner=---FEATURE---#2 MemberName=---END_MANDATORY---#0 Loc=65.0 EndOwner=---FEATURE---#3 MemberName=---END_MANDATORY---#0 Loc=65.0 EndOwner=---FEATURE---#4 MemberName=---END_MANDATORY---#0 Loc=65.0 EndOwner=---FEATURE---#9
+</groups><constraints>StartName=---START_EXCLUDES---#0 Loc=95.66 StartOwner=---FEATURE---#5 EndName=---END_EXCLUDES---#0 Loc=28.66 EndOwner=---FEATURE---#8 ControlName=---CONSTRAINT_CONTROL_POINT---#0 Loc=522.372
+</constraints><misc>connectorsCount=0 includesCount=0 excludesCount=0 constraintControlsCount=1 altGroupsCount=0 orGroupsCount=0 featuresCount=11</misc><startingCommonalities></startingCommonalities><startingVariabilities></startingVariabilities><featureColors></featureColors><featureOccurrences></featureOccurrences><featureVersions></featureVersions></Diagram></DiagramData>

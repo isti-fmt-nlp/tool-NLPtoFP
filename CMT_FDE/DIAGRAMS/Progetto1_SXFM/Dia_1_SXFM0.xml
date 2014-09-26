@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature_model name="Dia_1_0">
+<meta>
+<data name="date">2014-39-24 19:57</data>
+</meta>
+<feature_tree>
+:r Progetto1(0)
+	:m system(1)
+		:g (0) [1,1]
+			: mainline solution(6)
+			: rail industry(7)
+	:m CBTC(2)
+		:g (0) [1,2]
+			: ATS(3)
+				:m ---FEATURE---#10(10)
+			: service(4)
+			: Nuova Feature Added(9)
+	:o ERTMS level(5)
+	:o service brake(8)
+</feature_tree>
+<constraints>
+0:~5 or ~8
+</constraints>
+</feature_model>

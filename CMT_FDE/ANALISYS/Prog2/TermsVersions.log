@@ -1,0 +1,247 @@
+train regulation	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	train regulation
+los antennas	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	LOS antennas
+equipment	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	equipment	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	equipment
+CBTC system	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	CBTC system	CBTC systems	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	CBTC system
+installation	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	installation
+energy optimization algorithms	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	energy optimization algorithms
+ERTMS level	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	ERTMS Level
+time	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	time
+system hazard	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	system hazards
+movement	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	movement
+system architecture	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	System Architecture
+CBTC-equipped train	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	CBTC-equipped train	CBTC-equipped trains
+supplier	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	supplier
+train door	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	train doors
+automatic train protection	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Automatic Train Protection
+group of CBTC	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	group of CBTC
+CBTC territory	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	CBTC territory
+train stop information	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	train stop information
+Neihu line	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Neihu Line	Neihu lines
+project	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	project
+train identification	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	train identification
+system	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	system	systems	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	system	systems
+system performance	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	system performance
+station sign	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	station sign
+ATS function	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	ATS functions
+wayside for display	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	wayside for display
+automatic train regulation	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	Automatic train regulation
+wayside equipment	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	wayside equipment
+train control	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Train Control
+train health data	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	train health data
+TWC equipment	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	TWC equipment
+optimization versus schedule/headway	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	optimization versus schedule/headway
+location data	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	location data
+train control product	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	train control products
+Stover CITYFLO	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Stover CITYFLO
+data communication network	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	data communications network
+Neihu depot	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Neihu depot
+authority	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	authority	authorities
+figure	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Figure
+metro installation	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	metro installation
+passenger information	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	Passenger information
+ability	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	ability
+car wash	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	car wash
+number of region	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	number of regions
+door control inhibit	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	Door control inhibit
+head footprint	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	head footprint
+interoperability requirement	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	interoperability requirements
+interoperability	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	interoperability
+Muzha vehicle	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Muzha vehicles	Muzha vehicle
+end of line	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	End of Line
+moving-block system	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	moving-block system	moving-block systems
+october	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	October
+train location information	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	Train location information
+skip station information	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	skip station information
+track circuit	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	track circuits	track circuit
+line of Sight	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Line of Sight
+control action confirmation	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	Control action confirmation
+operating unit	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	operating unit
+Wayside network	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Wayside Network
+occupancy generation	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	occupancy generation
+train en route	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	train en route
+ATS	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	ATS	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	ATS
+Region Number	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Region Number
+control	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	control
+passenger information system	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	passenger information systems	Passenger Information system	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	Passenger information system	passenger information systems
+station	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	station	stations
+energy optimization	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	Energy optimization
+interoperability interface requirement	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	interoperability interface requirements
+Wayside network backbone	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Wayside Network backbone
+track in CBTC	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	track in CBTC
+line system INTERFLO	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	line system INTERFLO
+Bombardier CITYFLO	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Bombardier CITYFLO
+section of track	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	section of track
+storage area	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	storage areas
+station departure time	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	station departure time
+interlocking system	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	interlocking system	interlocking systems
+radio frequency	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	radio frequency
+train at station	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	train at station
+service brake rate	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	service brake rates
+phase	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	phase
+transit application	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	transit application
+ATS train stop	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	ATS train stop
+service strategy	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	service strategy	service strategies
+group of station	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	group of stations
+movement authority	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	movement authority	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	movement authorities	movement authority
+central control system	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Central Control System
+response	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	response
+revenue service	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	revenue service
+atp system	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	ATP systems	ATP system
+ato system	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	ATO system
+vehicle tag reader	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	vehicle tag readers
+train lenght data	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	train length data
+work zone	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	work zones	work zone
+coaxial cable	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	coaxial cable
+radio system	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Radio system
+speed	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	speed
+conductor	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	conductor
+communication	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Communication	Communications
+emergency brake application	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	emergency brake application
+track	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	track	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	track
+interface design standard	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	interface design standards
+testing program	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	testing program
+test track	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	test track
+Neihu extension	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Neihu extension
+speed restriction	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	speed restrictions
+system Overview	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	System Overview
+dwell time variance	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	dwell time variance
+Distribution Amplifiers	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Distribution Amplifiers
+train Registry system	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Train Registry System
+rerouting of train	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	rerouting of trains
+Region ato	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Region ATO
+Region atp	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Region ATP
+train occupancy	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	train occupancy
+service	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	service	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	service
+passenger information message	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	passenger information messages
+train operator	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	train operator
+ATP/ATO maintenance data	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	ATP/ATO maintenance data
+CBTC fault reporting	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	CBTC fault reporting
+control action	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	control actions	Control action
+station in ato	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	station in ATO
+wayside atc	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	wayside ATC
+operation	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Operation	operations
+customer s need	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	customer s need
+profile between station	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	profile between stations
+information system interface	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	information system interfaces
+central control network	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Central Control Network
+capability	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	capability
+information	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Information	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	information
+mode of operation	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	mode of operation
+railway industry	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	railway industry
+movement of train	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	movement of trains
+CBTC-equipped train operating	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	CBTC-equipped train operating
+regulation function	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	regulation function	regulation functions
+IEEE Std 1474.2-2003.	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	IEEE Std 1474.2-2003.
+overlay project	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	overlay project
+ATS user-directed service	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	ATS user-directed service
+mainline solution	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	mainline solutions
+Bombardier inc	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Bombardier Inc
+line speed limit	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	line speed limit
+operating	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	operating
+Wayside communication	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Wayside Communication	Wayside Communications
+cost of fuel	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	cost of fuel
+Phase	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Phase
+rail industry	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	rail industry
+south korea	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	South Korea
+train location	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	Train location
+position error	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	position error
+vehicle	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Vehicle	vehicles
+type of train	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	type of train
+line	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	line	lines
+protection of work	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	protection of work
+train service	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	train service
+CBTC train location	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	CBTC train location
+Neihu system	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Neihu System
+distance	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	distance
+group of CBTC-equipped	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	group of CBTC-equipped
+position of train	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	position of trains
+service brake	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	service braking	service brake	service brakes
+train location report	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	train location reports
+train operation	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Train Operation
+railway network	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	railway network
+speed regulation function	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	speed regulation function
+run time	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	run times
+train arrival information	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	train arrival information
+performance of CBTC	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	performance of CBTC
+safety restriction	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	safety restrictions
+track within CBTC	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	track within CBTC
+operating in CBTC	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	operating in CBTC
+route	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	route
+IEEE Std	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	IEEE Std
+Muzha depot	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Muzha depot
+CITYFLO	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	CITYFLO
+fault reporting	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	Fault reporting
+Skip station stop	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	Skip station stop
+CBTC	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	CBTC	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	CBTC
+direction of train	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	direction of trains
+train fault reporting	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	Train fault reporting
+work train	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	work trains
+location	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	location	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	location
+subclause in order	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	subclause in order
+CITYFLO system	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	CITYFLO System
+operating within CBTC	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	operating within CBTC
+jeffrey s	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Jeffrey S
+train control system	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	train control system	train control systems
+jurisdiction	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	jurisdiction
+base data radio	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Base Data Radio	base data radios
+vehicle atc	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Vehicle ATC
+central control	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Central Control
+mobile data radio	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Mobile Data Radio
+dispatching function	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	dispatching function
+OCC	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	OCC
+Operational central control	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Operational Central Control
+transition area	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	transition areas	transition area
+interoperability interface standard	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	interoperability interface standards
+CBTC-equipped	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	CBTC-equipped
+ATS user	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	ATS user	ATS users
+train	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Train	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	Train	trains
+auto operation	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	auto operation
+work	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	work	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	work
+frequency band	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	frequency bands
+user interface	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	user interface
+wayside	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	wayside
+CBTC equipment	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	CBTC equipment
+mass transit system	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	mass transit systems	mass transit system
+Interoperability interface requirement	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	Interoperability interface requirements
+train control data	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Train control data
+regulation	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	regulation
+vehicle atp	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Vehicle ATP
+vehicle ato	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Vehicle ATO
+accordance with IEEE	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	accordance with IEEE
+Muzha line	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Muzha Line	Muzha lines
+CBTC functionality	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	CBTC functionality
+system operation	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	system operations	system operation
+train service data	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	train service data
+user interface display	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	user interface display	user interface displays
+ATS system	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	ATS system
+CBTC train	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	CBTC train
+automatic train control	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Automatic Train Control
+Neihu vehicle	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Neihu vehicles	Neihu vehicle
+UTO system	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	UTO systems
+risk	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	risk
+atc equipment	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	ATC equipment
+CBTC train identification	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	CBTC train identification
+ato mode	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	ATO mode
+service history	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	service history
+ATS functionality	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	ATS functionality
+control of run	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	control of run
+ato	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	ATO
+CITYFLO solution	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	CITYFLO solutions	CITYFLO solution
+atp	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	ATP
+atc system	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	ATC system	ATC systems
+block CITYFLO	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	block CITYFLO
+train movement	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	train movement
+atc	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	ATC
+train regulation function	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	train regulation functions
+san francisco	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	San Francisco
+application	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	application
+CBTC movement authority	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	CBTC movement authority
+coordination of train	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	coordination of train
+ATS user interface	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	ATS user interface
+interface	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	interface	interfaces
+initialization process	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	initialization process
+implementation	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	implementation
+group	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	group
+transit system	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	transit system
+user	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	user	users
+cab signalling	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	cab signalling
