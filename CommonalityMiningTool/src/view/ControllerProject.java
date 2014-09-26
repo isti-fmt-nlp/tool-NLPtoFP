@@ -1,7 +1,5 @@
 /**
- * 
  * @author Manuel Musetti, Daniele Cicciarella
- *
  */
 package view;
 
@@ -204,6 +202,7 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		
   		//creating view from model
 		editorController.addStartingfeatures();
+		editorView.requestFocus();
 	  }
 	  else if(ae.getActionCommand().equals("Open Diagram")){
 		EditorModel editorModel=null;
@@ -218,6 +217,10 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		if((s = viewProject.loadDiagramDialog(CMTConstants.getSaveDiagramDir())) != null) try{
 
 		  diagramName = s.substring(s.lastIndexOf(OSUtils.getFilePathSeparator())+1, s.length());
+
+		  projectName=s.substring(0, s.lastIndexOf(OSUtils.getFilePathSeparator()));
+  		  projectName=projectName.substring(projectName.lastIndexOf(OSUtils.getFilePathSeparator())+1, projectName.length());
+
 		  if(s.endsWith(".xml")) diagramName = diagramName.substring(0, diagramName.length()-4);			
 			 	
 		  //if the selected diagram is already loaded, its instance is just brought to front
@@ -276,6 +279,8 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 		  viewProject.errorDialog("Error while loading diagram.");
 		  return;
 		}
+
+		editorView.requestFocus();
 	  }
 	  else if(ae.getActionCommand().equals("Exit")){
 		closeToolInstance();
@@ -299,6 +304,7 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 	 * Closes this tool instance.
 	 */
 	public void closeToolInstance() {
+		TrayUtils.tryCloseAllFDEInstance();
 		if(modelProject.readStateProject()[1]){
 		  if(viewProject.saveProjectDialog() == 0){
 			if(modelProject.readStateProject()[0]) modelProject.deleteProject();

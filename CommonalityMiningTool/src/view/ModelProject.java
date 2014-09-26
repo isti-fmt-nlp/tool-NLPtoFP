@@ -996,8 +996,8 @@ public class ModelProject extends Observable implements Runnable{
 	 * @param colors - int[][] containing colors in the form of a 3-position int[] containing RGB values
 	 * @param clusters - terms clusters with same size of colors, the actual type must be an array of ArrayList<String>
 	 */
-	@SuppressWarnings("unchecked")
-	private void assignColorsArityGraduation(int[][] colors, ArrayList[] clusters) {
+	@SuppressWarnings({ "unchecked", "unused" })
+	private void assignColorsArityGraduation(int[][] colors, @SuppressWarnings("rawtypes") ArrayList[] clusters) {
 		double maxColorReduction=0.35;
 		double colorReductionUnit=0;
 		int maxArity=0;
@@ -1040,7 +1040,7 @@ public class ModelProject extends Observable implements Runnable{
 	 * with same size and indexes as colors and clusters. The map does not need to contain distances of clusters leaders,
 	 * and if present they're ignored.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "unused" })
 	private void assignColorsDistanceGraduation(int[][] colors,
 			@SuppressWarnings("rawtypes") ArrayList[] clusters, HashMap<String, int[]> distances) {
 		double maxColorReduction=0.35;
@@ -1129,6 +1129,7 @@ public class ModelProject extends Observable implements Runnable{
 	/**
 	 * Assigns a color to each relevant term, based on sentences separation and arities.
 	 */
+	@SuppressWarnings("unused")
 	private void computeColorsBySets() {
 		double card=0;
 		int cardUpper=0;
@@ -1886,6 +1887,8 @@ public class ModelProject extends Observable implements Runnable{
 	 */
 	private String getHexRGB(int[] color) {
 		String red=null, green=null, blue=null;
+		
+		if (color==null) return "000000";
 
 		red=Integer.toHexString(color[0]);
 		green=Integer.toHexString(color[1]);
@@ -2038,6 +2041,11 @@ public class ModelProject extends Observable implements Runnable{
 		
 		s += "</node><node>Commonalities</node></root>";
 		
+		//checking if the SXFM files save directory must be created
+  		File dir=new File(CMTConstants.getSaveAnalisysDir());			
+		if(!dir.isDirectory() && !dir.mkdirs() ) 
+		  throw new IOException("Save Directory can't be created.");
+
 		PrintWriter pw1 = new PrintWriter(new BufferedWriter(new FileWriter(pathXML)));
 		pw1.print(s);
 		pw1.close();
@@ -2145,6 +2153,7 @@ public class ModelProject extends Observable implements Runnable{
 	 * @param tableHeader - string used as table header
 	 * @throws IOException
 	 */
+	@SuppressWarnings("unused")
 	private void saveSelectedFeaturesHTML(ArrayList<String> features, String path, String tableHeader) throws IOException {
 		String s=null;
 		PrintWriter pw4 = new PrintWriter(new BufferedWriter(new FileWriter(path)));

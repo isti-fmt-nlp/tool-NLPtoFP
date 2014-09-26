@@ -1,7 +1,5 @@
 /**
- * 
- * @author Daniele Cicciarella
- *
+ * @author Manuel Musetti, Daniele Cicciarella
  */
 package view;
 
@@ -22,31 +20,30 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 
-public class ViewPanelLateral/* extends JFrame*/{
-//	private static final long serialVersionUID = 1L;
+public class ViewPanelLateral{
 
-	/* JPanel in cui viene inserito l'albero del progetto */
+	/** JPanel containing the project tree*/
 	private JPanel panelTree = new JPanel();
 	
-	/* DefaultMutableTreeNode contenente la radice dell'albero */
+	/** DefaultMutableTreeNode containing the tree root*/
 	private DefaultMutableTreeNode rootTree = null;
 	
 	/** the tree model of  the project*/
 	private DefaultTreeModel treeModel = null;
 	
-	/** view for the project tree model  */
+	/** view for the project tree model*/
 	private JTree treeView = null;
 	
-	/* TreePath contenente il nodo selezionato */
+	/** TreePath containing the selected node*/
 	private TreePath selectNode = null;
 	
-	/* JPopupMenu contenente il men� dell'albero */
+	/** JPopupMenu for the project tree  */
 	private JPopupMenu menuTree = null;
 	
-	/* ArrayList contenente le informazioni sull'analisi degli elementi del nodo Input */
+	/** ArrayList containing info about the analysis of input node elements*/
 	private ArrayList <String> analysisLeafTree = new ArrayList <String> ();
 	
-	private static boolean debug=true;//variabile usata per attivare stampe di debug
+	private static boolean debug=true;//variabile used to activate debug prints
 
 	/** 
 	 * Constructor.
@@ -122,11 +119,11 @@ public class ViewPanelLateral/* extends JFrame*/{
 		treeView.setCellRenderer(new ColorTree(s, rootTree, analysisLeafTree));
 		treeView.addMouseListener(getTreeMouseAdapter(tmp));
 		
-		for(int i = 0; i < al.size(); i++)
-		{
-			treeModel.insertNodeInto(
-					new DefaultMutableTreeNode(al.get(i)), (MutableTreeNode) rootTree.getChildAt(0), rootTree.getChildAt(0).getChildCount());
-			analysisLeafTree.add("NO");
+		for(int i = 0; i < al.size(); i++){
+		  treeModel.insertNodeInto(
+			new DefaultMutableTreeNode(al.get(i)), (MutableTreeNode) rootTree.getChildAt(0),
+			rootTree.getChildAt(0).getChildCount() );
+		  analysisLeafTree.add("NO");
 		}	
 		panelTree.removeAll();
 		panelTree.add(treeView, BorderLayout.CENTER);
@@ -149,7 +146,7 @@ public class ViewPanelLateral/* extends JFrame*/{
 	}
 	
 	/** 
-	 * Adds an element to the Input node
+	 * Adds an element to the Input node.
 	 * 
 	 * @param s - Stringa containing the name of the node to be added
 	 * @return - true if the node can be added, false if a node with the same name is already present
@@ -222,8 +219,7 @@ public class ViewPanelLateral/* extends JFrame*/{
 	 *   
 	 *   @return the index above described
 	 */
-	public int getAnalysisLeaf()
-	{
+	public int getAnalysisLeaf(){
 		if(selectNode == null || selectNode.getLastPathComponent() == null)	return -1;
 		
 		DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) selectNode.getLastPathComponent();
@@ -261,83 +257,79 @@ public class ViewPanelLateral/* extends JFrame*/{
 	
 	/* -= FUNZIONI lettura parametri =- */
 	
-	/** Lettura del panello panelTree
+	/** 
+	 * Return the JPanel containing the project tree.
 	 * 
-	 * @return panelTree
+	 * @return the tree's JPanel
 	 */
-	public JPanel getPanelTree()
-	{
+	public JPanel getPanelTree(){
 		return panelTree;
 	}
 	
-	/** Lettura del JTree treeProject
+	/** 
+	 * Return the JTree representing the project tree.
 	 * 
-	 * @return treeProject
+	 * @return the project JTree
 	 */
-	public JTree getTree()
-	{
+	public JTree getTree(){
 		return treeView;
 	}
 	
-	/** Lettura delle informazioni sull'analisi degli elementi del nodo Input
+	/** 
+	 * Return the ArrayList containing info about the analysis of input node elements
 	 * 
 	 * @return analysisLeafTree
 	 */
-	public ArrayList <String> getAnalysisLeafTree()
-	{
+	public ArrayList <String> getAnalysisLeafTree(){
 		return analysisLeafTree;
 	}
 	
-	/** Setta gli elementi del nodo Input come analizzati
-	 * 
+	/** 
+	 * Sets all elements of Input node ad analyzed.
 	 */
-	public void setAnalysisLeafTree()
-	{
+	public void setAnalysisLeafTree(){
 		for(int i = 0; i < analysisLeafTree.size(); i++)
 			analysisLeafTree.set(i, "YES");
 	}
 	
-	/** Setta gli elementi del nodo Input come analizzati
+	/**
+	 * Sets the specified elements of Input node ad analyzed.
 	 * 
-	 * @param al ArrayList contenente gli elementi del nodo Input da settare come analizzati
+	 * @param al - ArrayList containing the elements to be set as analyzed
 	 */
 
-	public void setAnalysisLeafTree(ArrayList <String> al)
-	{
+	public void setAnalysisLeafTree(ArrayList <String> al){
 		for(int i = 0; i < al.size(); i++)
 			analysisLeafTree.set(Integer.valueOf(al.get(i)), "YES");
 	}
 	
 	/* -= FUNZIONI Ausiliarie =- */
 	
-	/** Lettura nodo selezionato
+	/** 
+	 * Highlights the selected node.
 	 * 
-	 * @param me evento mouse
+	 * @param me - the MouseEvent
 	 */
-	private void clickNodeTree(MouseEvent me)
-	{
+	private void clickNodeTree(MouseEvent me){
 		selectNode = treeView.getPathForLocation(me.getX(), me.getY());
 		treeView.setSelectionPath(selectNode);
 	}
 	
-	/** Mostra men� dell'albero del progetto
+	/**
+	 * Show the project tree's menu.
 	 * 
-	 * @param s Stringa contenente il nome del nodo selezionato
-	 * 
-	 * @param me evento mouse
+	 * @param s - String containing the name of selected node
+	 * @param me - the MouseEvent
 	 */
-	private void showMenuTree(String s, MouseEvent me) 
-	{
-		if(s == null)
-			return;
+	private void showMenuTree(String s, MouseEvent me){
+		if(s == null) return;
 		
-		if(selectNode != null && selectNode.getLastPathComponent() != null)
-		{
-			if(s != selectNode.getLastPathComponent().toString() && selectNode.getLastPathComponent().toString() != "Input" && selectNode.getLastPathComponent().toString() != "Commonalities")
-			{
-				menuTree.show(me.getComponent(), me.getX(), me.getY());
-				me.consume();
-			}	
+		if(selectNode != null && selectNode.getLastPathComponent() != null){
+		  if( s != selectNode.getLastPathComponent().toString() && selectNode.getLastPathComponent().toString() != "Input" 
+			  && selectNode.getLastPathComponent().toString() != "Commonalities"){
+			menuTree.show(me.getComponent(), me.getX(), me.getY());
+			me.consume();
+		  }	
 		}
 	}
 }

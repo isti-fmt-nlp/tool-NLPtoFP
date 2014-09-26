@@ -1,7 +1,5 @@
 /**
- * 
- * @author Daniele Cicciarella
- *
+ * @author Manuel Musetti, Daniele Cicciarella
  */
 package view;
 
@@ -27,6 +25,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
+//import java.util.regex.Matcher;
+//import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -52,6 +52,7 @@ import javax.swing.text.JTextComponent;
 import javax.swing.text.html.HTMLEditorKit;
 
 import main.OSUtils;
+import main.StringUtils;
 
 public class ViewPanelCentral{
 	
@@ -93,7 +94,7 @@ public class ViewPanelCentral{
 	private ArrayList <JCheckBox> checkBoxFeatures = null;
 	
 	/**(MANUEL M.) relevant terms set, each term X has a list of input files
-	 and each file has a list of characters indexex, which are the start positions of X occorrences*/
+	 and each file has a list of characters indexes, which are the start positions of X occorrences*/
 	private HashMap<String,HashMap<String,ArrayList<int[]>>> relevantTerms=null;
 	
 //	/** Contains all project's relevant terms, in both original version and term-extraction version*/
@@ -107,6 +108,7 @@ public class ViewPanelCentral{
 
 //	/**last removed commonality highlight tags for each relevant term and file*/
 //	private HashMap<String, HashMap<String, ArrayList<Highlight>>> lastRemovedHighlights=null;
+	
 	/** For each feature name(outer map's Key) and file name(inner map's Key), there is a list
 	 *  of last removed highlight tags, each potentially having a list of replacement tags*/
 	private HashMap<String, HashMap<String, ArrayList<Entry<Highlight, ArrayList<Highlight>>>>> lastRemovedHighlights=null;
@@ -153,8 +155,7 @@ public class ViewPanelCentral{
 	 * @param relevantTerm ArrayList containing file relevant terms 
 	 */
 	public void createTabFile(String [] s, ArrayList <String> relevantTerm){
-		if(s == null || relevantTerm == null)
-			return;
+		if(s == null || relevantTerm == null) return;
 		
 		tabFile = new JTabbedPane();
 		tabFile.setPreferredSize(panelAnalysis.getPreferredSize());
@@ -205,14 +206,6 @@ public class ViewPanelCentral{
 		splitterPanelInner.setContinuousLayout(true);
 		splitterPanelInner.setDividerSize(6);
 		splitterPanelInner.setResizeWeight(0.5);
-		splitterPanelInner.setPreferredSize(
-		  new Dimension(9*Toolkit.getDefaultToolkit().getScreenSize().width/10-6, Toolkit.getDefaultToolkit().getScreenSize().height));
-		
-		searchPanel.setPreferredSize(
-				  new Dimension(splitterPanelInner.getPreferredSize().width/2-3, splitterPanelInner.getPreferredSize().height));
-
-		tabFeaturesCandidates.setPreferredSize(
-				  new Dimension(splitterPanelInner.getPreferredSize().width/2-3, splitterPanelInner.getPreferredSize().height));
 
 		splitterPanelInner.setLeftComponent(searchPanel);
 		splitterPanelInner.setRightComponent(tabFeaturesCandidates);
@@ -296,14 +289,14 @@ public class ViewPanelCentral{
 		    
     		/* ***VERBOSE****/
             if (verbose){
-              System.out.println("uso lo StringReader");
+              System.out.println("getTabTextFile - printing file '"+s1+"' lines");
               String tmpTest=null;
               StringReader strReader= new StringReader(s);
               BufferedReader bufReader= new BufferedReader(strReader);
               while((tmpTest=bufReader.readLine())!=null){
             	  System.out.println(tmpTest+"\n");
               }
-              System.out.println("fatto con lo StringReader");
+              System.out.println("end printing lines");
             }
     		/* ***VERBOSE****/
 		    
@@ -326,17 +319,16 @@ public class ViewPanelCentral{
 	private JScrollPane getRegisteredTabTextFile(String term, String file, ArrayList <String> al){
 		try{
 			String s = getFileContent(file);
-		    
+			if(OSUtils.isMac()) s = StringUtils.cleanTextCompatibilityForMac(s);
+			if(OSUtils.isWindows()) s = StringUtils.cleanTextCompatibilityForWindows(s);
+						
     		/* ***VERBOSE****/
             if (verbose){
-              System.out.println("uso lo StringReader");
+              System.out.println("getRegisteredTabTextFile - printing file '"+file+"' lines:");
               String tmpTest=null;
-              StringReader strReader= new StringReader(s);
-              BufferedReader bufReader= new BufferedReader(strReader);
-              while((tmpTest=bufReader.readLine())!=null){
-            	  System.out.println(tmpTest+"\n");
-              }
-              System.out.println("fatto con lo StringReader");
+              BufferedReader bufReader= new BufferedReader(new StringReader(s));
+              while((tmpTest=bufReader.readLine())!=null) System.out.println(tmpTest+"\n");
+              System.out.println("end printing lines");
             }
     		/* ***VERBOSE****/
 		    
@@ -379,12 +371,13 @@ public class ViewPanelCentral{
 	 */
 	private JScrollPane getRegisteredTabTextString(String term, String name, String s, ArrayList<String> al) {
 		JTextArea jta = getTextAreaString(name, s);
+		jta.setEditable(false);
 		textTabs.put(name, jta);
 		if (!textIndexes.containsKey(term)){
 			
     		/* ***DEBUG****/			
 			if (debug) System.out.println("\n****textIndexes.containsKey("+term+")="+textIndexes.containsKey(term)
-					+". Creo la lista di indici per il termine "+term+"****\n");
+					+". Creating indexes list for term "+term+" ****\n");
     		/* ***DEBUG****/
 
 			textIndexes.put(term, new HashMap<String, Integer>());
@@ -422,15 +415,22 @@ public class ViewPanelCentral{
 	private String getFileContent(String s1){
 		String s = "";
 		String tmp=null;   
+
+//		File file =new File(s1);
+//		StringBuffer strBuf = new StringBuffer((int)file.length()+1);
+		
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(s1));    
-			  
+			BufferedReader br = new BufferedReader(new FileReader(s1));    			  
 			while((tmp = br.readLine()) != null) s = s + tmp + "\n";
+//			  strBuf.append(tmp+"\n");
+
 			br.close();
 		}catch (IOException e) {
 			System.out.println("Exception tabTextFile: " + e.getMessage());
 			return null;
 		}
+//		s=strBuf.toString();
+		
 		return s;
 	}
 
@@ -707,6 +707,7 @@ public class ViewPanelCentral{
 		
 		//adding buttons panel for term occurences navigation
 		buttonPanel = new JPanel();
+		buttonPanel.setLayout(null);
 		buttonPanel.setPreferredSize(new Dimension(occursTabbedPane.getPreferredSize().width, 40));
 		
 		//initializing utility maps
@@ -784,22 +785,23 @@ public class ViewPanelCentral{
 		  }
 
 		  //adding occurences navigation controls
-		  buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
-		  buttonPanel.setBorder(BorderFactory.createEmptyBorder(3, 5, 6, 5));
-//		  buttonPanel.setLocation(0, 10);
-		  
-		  buttonPanel.add(Box.createHorizontalGlue());
-		  buttonPanel.add(XBackwardOccurrButton);
-		  buttonPanel.add(Box.createHorizontalGlue());
-		  buttonPanel.add(prevOccurrButton);
-		  buttonPanel.add(Box.createHorizontalGlue());
-		  buttonPanel.add(occurrsLabelPanel);
-		  buttonPanel.add(Box.createHorizontalGlue());
-		  buttonPanel.add(nextOccurrButton);
-		  buttonPanel.add(Box.createHorizontalGlue());
-		  buttonPanel.add(XForwardOccurrButton);
-		  buttonPanel.add(Box.createHorizontalGlue());
-//		  buttonPane.add(Box.createRigidArea(new Dimension(10, 0)));
+		  if(buttonPanel.getLayout()==null){
+			buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
+			buttonPanel.setBorder(BorderFactory.createEmptyBorder(3, 5, 6, 5));
+
+			buttonPanel.add(Box.createHorizontalGlue());
+			buttonPanel.add(XBackwardOccurrButton);
+			buttonPanel.add(Box.createHorizontalGlue());
+			buttonPanel.add(prevOccurrButton);
+			buttonPanel.add(Box.createHorizontalGlue());
+			buttonPanel.add(occurrsLabelPanel);
+			buttonPanel.add(Box.createHorizontalGlue());
+			buttonPanel.add(nextOccurrButton);
+			buttonPanel.add(Box.createHorizontalGlue());
+			buttonPanel.add(XForwardOccurrButton);
+			buttonPanel.add(Box.createHorizontalGlue());
+//			buttonPane.add(Box.createRigidArea(new Dimension(10, 0)));
+		  }
 		  
 		  searchPanel.repaint();
 		  
@@ -1173,13 +1175,10 @@ public class ViewPanelCentral{
 	 * @param s - String containing the feature name to be removed
 	 */
 	private void removeCheckBox(String s){
-		if(s == null)
-			return;
+		if(s == null) return;
 		
-		for(int i = 0; i < checkBoxFeatures.size(); i++)
-		{
-			if(s.equals(checkBoxFeatures.get(i).getText()))
-			{
+		for(int i = 0; i < checkBoxFeatures.size(); i++){
+			if(s.equals(checkBoxFeatures.get(i).getText())){
 				panelFeatures.remove(checkBoxFeatures.get(i));
 				checkBoxFeatures.remove(i);
 				panelFeatures.validate();

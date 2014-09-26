@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import main.CMTConstants;
 
 public class ModelAnalysis extends ModelParserUTF8{
@@ -388,12 +389,11 @@ public class ModelAnalysis extends ModelParserUTF8{
         }
 	}
 	
-	/** Restituisce il jid assegnatoci dal sito URL_ANALYSIS
+	/** Return the jid assigned by the site URL_ANALYSIS
 	 * 
-	 * @param s stringa inviatoci dal sito
+	 * @param s - String sent by the site
 	 * 
-	 * @return jid stringa contenente il jid assegnatoci
-	 * @return null jid non assegnato
+	 * @return jid - a String containing the assigned jid, or null if the jid was not assigned
 	 */
 	private String returnJid(String s)
 	{
@@ -423,26 +423,18 @@ public class ModelAnalysis extends ModelParserUTF8{
         return jid;
 	}
 	
-	/** Controlla se l'analisi del testo � stata completata
+	/** Check if document analysis has been completed.
+	 * (USED FOR THE OLD TERM EXTRACTOR OF DylanLab)
 	 * 
-	 * @param s stringa da cui verificare se l'analisi � stata completata 
+	 * @param s - String containing the document's text 
 	 * 
-	 * @return true analisi completata
-	 * @return false analisi non completata
+	 * @return true - if the analysis has been completed, false otherwise
 	 */
-	private boolean checkAnalysis(String s)
-	{
-		if(s == null || s.equals(""))
-            return false;
-
-		/* 
-		   Se � presente il campo "<meta HTTP-EQUIV" 
-		   l'analisi � terminata 
-		 */
-         if(s.indexOf("<meta HTTP-EQUIV") != -1)
-            return false;
-         else
-            return true;
+	@SuppressWarnings("unused")
+	private boolean checkAnalysis(String s){
+		if(s == null || s.equals("")) return false;
+		//If the field "<meta HTTP-EQUIV" is present, the analysis ends.
+		return (s.indexOf("<meta HTTP-EQUIV") != -1);
 	}
 	
 	/** 
@@ -533,6 +525,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 	 * @param f - the file containing the relevant terms
 	 * @return - true if extraction was successful, false otherwise
 	 */
+	@SuppressWarnings("unused")
 	private boolean extractTermsFrom_DylanLabTermExtractor(File f){
 		String[] termVersions=null;
         int i = 2;
@@ -618,7 +611,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 		
 		int startSidIndex=0, endSidIndex=0;
 		String sid=null, term=null; 
-		String[] termVersions=null;
+//		String[] termVersions=null;
 		ArrayList<String> termSet = new ArrayList<String>();
 
 		termRelevant = new HashMap<String, ArrayList<String>>();
@@ -781,7 +774,6 @@ public class ModelAnalysis extends ModelParserUTF8{
       String pathPrefix = readPathFileUTF8().substring(0, readPathFileUTF8().length()-4);
       int sentencesCount=0;
       String[] elementData=null;
-      String currentToken=null, previousToken=null;
       ArrayList<String> arStr=new ArrayList<String>();
       ArrayList<Point> sentencesBounds=new ArrayList<Point>();
     		  
@@ -822,13 +814,14 @@ public class ModelAnalysis extends ModelParserUTF8{
 			+"<td bgcolor=\"#cccccc\" valign=\"top\" align=\"left\">"+elementData[5]+"</td>"
 					 +"</tr>");
 			
-			//moving in input text to reach current token index
-			previousToken=currentToken; currentToken=elementData[1];
 		  }
 		  else{//found a newLine, calculating sentence boundaries
-			if(sentencesCount%100==0)System.out.println("Found newLine! #"+sentencesCount);
+			  
+			/* ***DEBUG*** */
+			if(debug && sentencesCount%100==0)System.out.println("Found newLine! #"+sentencesCount);
+			/* ***DEBUG*** */
+
 			++sentencesCount;
-			previousToken=currentToken; currentToken=null;
 		  }
 		}
 
@@ -883,11 +876,11 @@ public class ModelAnalysis extends ModelParserUTF8{
       ArrayList<String> modifiedTokensInSequence=null;
       String possibleRelevantTerm=null, computedRelevantTerm=null;
       int start=0, limit=0;
-      HashMap<String, String> termsVersions=null;
+//      HashMap<String, String> termsVersions=null;
       ArrayList<String> termSet =null;    		  
 //	  termRelevant=new ArrayList<String[]>();
 	  termRelevant=new HashMap<String, ArrayList<String>>();
-	  String[] singleTermBothVersions=null;
+//	  String[] singleTermBothVersions=null;
 	  int i=0;
 	  
 	  //creating html content of the result file
@@ -950,7 +943,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 		printer = new PrintWriter(tmp);
 		for(String a: arStr) printer.print(a);
 		printer.close();
-	  } catch (IOException e1) {
+	  } catch (Exception e1) {
 		System.out.println("createResultFileTermExtractor(): File Write Problem!");
 		if(printer!=null) printer.close();
 		e1.printStackTrace(); return;
@@ -963,7 +956,7 @@ public class ModelAnalysis extends ModelParserUTF8{
 	  termsArity= new HashMap<String, Integer>();
 	  originalTokensInSequence=new ArrayList<String>();
 	  modifiedTokensInSequence=new ArrayList<String>();
-	  termsVersions=new HashMap<String, String>();
+//	  termsVersions=new HashMap<String, String>();
 	  try {
 		reader=new BufferedReader(new FileReader(tmp));
 		while((line=reader.readLine())!=null){

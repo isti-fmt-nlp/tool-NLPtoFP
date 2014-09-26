@@ -988,7 +988,7 @@ public class EditorModel extends Observable{
 	 * 
 	 * @return - the XML String produced
 	 */
-	public ArrayList<String> saveModel2(/*String pathProject, final */  /*String*/File s) {
+	public ArrayList<String> saveDiagramModel(/*String pathProject, final */  /*String*/File s) {
 	  String xml = null;
 	  String date=null;
 	  ArrayList<String> modelPaths=new ArrayList<String>();
@@ -1221,8 +1221,9 @@ public class EditorModel extends Observable{
 	  ModelXMLHandler xmlHandler = new ModelXMLHandler();
 	  StringWrapper featureTree=null;
 	  String[] strArr=null, tmpArr=null, newConstraint=null;
-	  int negations=0;
+//	  int negations=0;
 	  BufferedReader str1 = null;
+	  boolean firstNegated=false, secondNegated=false;
 //	  String cleanedFeatureTree = null;
 
 	  EditorModel newModel=new EditorModel();
@@ -1319,11 +1320,14 @@ public class EditorModel extends Observable{
 		
 		for(String constr: strArr){
 		  if(constr.length()==0) continue;
-		  
+
 		  for(int i=0; i<constr.length(); ++i)
 			if(constr.charAt(i)==':' && constr.charAt(i+1)!=' ') constr=constr.substring(0, i+1)+" "+constr.substring(i+1);
 
-		  negations=0;
+//		  negations=0;
+		  firstNegated=false;
+		  secondNegated=false;
+		  
 		  tmpArr=constr.split(" ");		
 		  
 		  for(int u=0; u<tmpArr.length; ++u) System.out.println("tmpArr["+u+"]="+tmpArr[u]);
@@ -1331,15 +1335,34 @@ public class EditorModel extends Observable{
 		  
 		  newConstraint=new String[3];
 		  newConstraint[0]=tmpArr[0].substring(0, tmpArr[0].length()-1);
-		  if(tmpArr[1].charAt(0)=='~'){ ++negations; newConstraint[1]=tmpArr[1].substring(1);}
-		  else newConstraint[1]=tmpArr[1];
-		  if(tmpArr[3].charAt(0)=='~'){ ++negations; newConstraint[2]=tmpArr[3].substring(1);}
-		  else newConstraint[2]=tmpArr[3];
+		  
+		  if(tmpArr[1].charAt(0)=='~') firstNegated=true;
+		  if(tmpArr[3].charAt(0)=='~') secondNegated=true;
 
-		  /*new stuff*/
-		  if(negations==2) newConstraint[0]=excludesConstraintNamePrefix+newConstraint[0];
-		  else newConstraint[0]=includesConstraintNamePrefix+newConstraint[0];
-		  /*new stuff*/
+		  if(firstNegated && secondNegated){//excludes
+			newConstraint[0]=excludesConstraintNamePrefix+newConstraint[0];
+			newConstraint[1]=tmpArr[1].substring(1);
+			newConstraint[2]=tmpArr[3].substring(1);
+		  }
+		  else if (firstNegated){//includes from first to second Feature
+			newConstraint[0]=includesConstraintNamePrefix+newConstraint[0];
+			newConstraint[1]=tmpArr[1].substring(1);
+			newConstraint[2]=tmpArr[3];
+		  }
+		  else if (secondNegated){//includes from second to first Feature
+			newConstraint[0]=includesConstraintNamePrefix+newConstraint[0];
+			newConstraint[1]=tmpArr[3].substring(1);
+			newConstraint[2]=tmpArr[1];
+		  }
+		  else throw new RuntimeException("Error while load saved model");
+		  
+//		  if(tmpArr[1].charAt(0)=='~'){ ++negations; newConstraint[1]=tmpArr[1].substring(1);}
+//		  else newConstraint[1]=tmpArr[1];
+//		  if(tmpArr[3].charAt(0)=='~'){ ++negations; newConstraint[2]=tmpArr[3].substring(1);}
+//		  else newConstraint[2]=tmpArr[3];
+//
+//		  if(negations==2) newConstraint[0]=excludesConstraintNamePrefix+newConstraint[0];
+//		  else newConstraint[0]=includesConstraintNamePrefix+newConstraint[0];
 
 		  newModel.constraints.add(newConstraint);
 		}

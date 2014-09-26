@@ -129,6 +129,7 @@ public class ModelParserUTF8{
         
         return inputTextContent;
 	}
+
 	
 	/** 
 	 * Cleans the file content and creates an UTF8-compatible version.
@@ -203,6 +204,10 @@ public class ModelParserUTF8{
 		  pp.parse();              
 	            
 		  s = new String(new PDFTextStripper().getText(new PDDocument(pp.getDocument())).getBytes(),"UTF-8");
+		  
+		  //added for compatibility with mac and Windows
+		  
+		  
 		}catch (IOException e){
 		  System.out.println("Exception encodeFileToStringUTF8: " + e.getMessage());
 		  return null;

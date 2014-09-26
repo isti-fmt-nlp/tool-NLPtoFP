@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.security.InvalidParameterException;
+
 import javax.swing.Timer;
 
 import view.EditorView;
@@ -66,8 +67,16 @@ public class GroupAnimationTimer extends Timer{
 		throw new InvalidParameterException("startFrom is lower than limit with negative amount parameter"); 
 	  if(amount>0.0 && startFrom>limit)
 		throw new InvalidParameterException("startFrom is greater than limit with positive amount parameter"); 
-//	  if(amount<0 && (group==null || anchorLocation==null))
-//		throw new InvalidParameterException("group or anchor location is null with negative amount parameter"); 
+
+//	  anchorImage = new BufferedImage();
+//	  
+//	  anchorImage.getScaledInstance(
+//		(int)(image.getWidth()*viewRef.getScaleFactor()),
+//		(int)(image.getHeight()*viewRef.getScaleFactor()),
+//		BufferedImage.SCALE_FAST);
+
+	  
+	  
 	  //a timer for the opening animation has been requested
 	  if(amountPerIter>0.0) addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent ae) {
@@ -87,27 +96,45 @@ public class GroupAnimationTimer extends Timer{
 		  radius+=amountPerIter;
 //		  if(radius>=1.0) viewRef.drawAllGroupClosingAnimations((Graphics2D)viewRef.getGraphics());
 		  
-		  //drawing anchor image in a location more near to the group than previous iteration
+		  //placing anchor image in a location more near to the group than previous iteration
 		  if(anchorToBeMergedLocation!=null && groupToMergeWith!=null && anchorImage!=null){
 			//getting group location and adjusting it
-			if(groupToMergeWithLocation==null) groupToMergeWithLocation = 
-			  new Point2D.Double(0, 0);
-			groupToMergeWithLocation.setLocation(
-			  groupToMergeWith.getLocationOnScreen().getX()+1, groupToMergeWith.getLocationOnScreen().getY()+5);
+//			if(groupToMergeWithLocation==null) groupToMergeWithLocation = new Point2D.Double(0, 0);
 			  
-			distanceFromGroupX=groupToMergeWithLocation.getX()-anchorToBeMergedLocation.getX();
+//			if(groupToMergeWithLocation==null){ 
+			  groupToMergeWithLocation = 
+				viewRef.getVisibleStartAnchorCenterOnView(groupToMergeWith);
+			  groupToMergeWithLocation.setLocation(
+				groupToMergeWithLocation.getX()-6*viewRef.getScaleFactor(),
+				groupToMergeWithLocation.getY()-6*viewRef.getScaleFactor());
+//			}
+			
+//			groupToMergeWithLocation.setLocation(
+//(groupToMergeWith.getLocationOnScreen().getX()-viewRef.getDiagramPanel().getLocationOnScreen().getX())*viewRef.getScaleFactor()
+//+viewRef.getDiagramPanel().getLocationOnScreen().getX()-viewRef.getLocationOnScreen().getX(),
+//(groupToMergeWith.getLocationOnScreen().getY()-viewRef.getDiagramPanel().getLocationOnScreen().getY())*viewRef.getScaleFactor()
+//+viewRef.getDiagramPanel().getLocationOnScreen().getY()-viewRef.getLocationOnScreen().getY());
+			  
+//	    	double x=((anchor.getLocationOnScreen().getX()+anchor.getWidth()/2
+//					-diagramPanel.getLocationOnScreen().getX())*scaleFactor
+//					+diagramPanel.getLocationOnScreen().getX()-this.getLocationOnScreen().getX());
+//	    	double y=((anchor.getLocationOnScreen().getY()+anchor.getHeight()/2
+//					-diagramPanel.getLocationOnScreen().getY())*scaleFactor
+//					+diagramPanel.getLocationOnScreen().getY()-this.getLocationOnScreen().getY());
+
+	    	distanceFromGroupX=groupToMergeWithLocation.getX()-anchorToBeMergedLocation.getX();
 			distanceFromGroupY=groupToMergeWithLocation.getY()-anchorToBeMergedLocation.getY();
 			
-			System.out.println("Distanza Pre Calcolo"
-					+"\ndistanceFromGroupX: "+distanceFromGroupX
-					+"\ndistanceFromGroupY: "+distanceFromGroupY);
+//			System.out.println("Distanza Pre Calcolo"
+//					+"\ndistanceFromGroupX: "+distanceFromGroupX
+//					+"\ndistanceFromGroupY: "+distanceFromGroupY);
 			
 			distanceFromGroupX=(distanceFromGroupX/(double)steps)*(double)(steps-1);
 			distanceFromGroupY=(distanceFromGroupY/(double)steps)*(double)(steps-1);
 			
-			System.out.println("Distanza Post Calcolo"
-							+"\ndistanceFromGroupX: "+distanceFromGroupX
-							+"\ndistanceFromGroupY: "+distanceFromGroupY);
+//			System.out.println("Distanza Post Calcolo"
+//							+"\ndistanceFromGroupX: "+distanceFromGroupX
+//							+"\ndistanceFromGroupY: "+distanceFromGroupY);
 			
 			anchorToBeMergedLocation.setLocation(
 				groupToMergeWithLocation.getX()-distanceFromGroupX,
@@ -116,9 +143,9 @@ public class GroupAnimationTimer extends Timer{
 		  }
 		  
 		  --steps;
-		  System.out.println("Current steps: "+steps);
+//		  System.out.println("Current steps: "+steps);
 		  if(steps==0){
-			System.out.println("Reached steps 0");
+//			System.out.println("Reached steps 0");
 			stop();
 			viewRef.removeCloserTimer(timer);
 		  }

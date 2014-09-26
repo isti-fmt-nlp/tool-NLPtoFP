@@ -1,7 +1,5 @@
 /**
- * 
- * @author Daniele Cicciarella
- *
+ * @author Manuel Musetti, Daniele Cicciarella
  */
 package view;
 
@@ -18,7 +16,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.FilenameFilter;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -32,14 +29,43 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.Timer;
 
 import main.CMTConstants;
-//import main.OSUtils;
+import main.FileInputFilter;
+import main.XMLFileFilter;
 
 public class ViewProject implements Observer/*, Runnable*/{ 
 
 	private static boolean verbose=false;//variable used to activate prints in the code
+	
+//	/** Class used to filter input files*/
+//	class FileInputFilter implements FilenameFilter{
+//		@Override
+//		public boolean accept(File dir, String name){
+//			return name.endsWith( ".pdf" ) || name.endsWith(".txt");
+//	    }
+//	}
+	
+//	/** Class used to filter project files*/
+//	class XMLFileFilter extends FileFilter implements  FilenameFilter{
+//		@Override
+//		public boolean accept(File dir, String name){
+////			System.out.println("loadFileDialog: "+dir.getAbsolutePath()+name);
+//			return name.endsWith( ".xml" );
+//		}
+//
+//		@Override
+//		public boolean accept(File arg0) {
+//			return (arg0.isDirectory() || arg0.getName().endsWith( ".xml" ));
+//		}
+//
+//		@Override
+//		public String getDescription() {
+//			return null;
+//		}
+//	}
 	
 	private ModelProject modelProject = null;
 	
@@ -186,6 +212,7 @@ public class ViewProject implements Observer/*, Runnable*/{
 
 		menuProjectCreate = new JMenuItem("Create Project");
 		menuProjectCreate.addActionListener(controllerProject);
+		menuProjectCreate.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
 		
 		menuProjectDelete = new JMenuItem("Delete Project");
 		menuProjectDelete.addActionListener(controllerProject);
@@ -193,13 +220,16 @@ public class ViewProject implements Observer/*, Runnable*/{
 		
 		menuProjectLoad = new JMenuItem("Load Project");
 		menuProjectLoad.addActionListener(controllerProject);
+		menuProjectLoad.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.CTRL_MASK));
 		
 		menuProjectSave = new JMenuItem("Save Project");
 		menuProjectSave.addActionListener(controllerProject);
+		menuProjectSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
 		menuProjectSave.setEnabled(false);
 		
 		menuProjectExit = new JMenuItem("Exit");
 		menuProjectExit.addActionListener(controllerProject);	
+		menuProjectExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, ActionEvent.CTRL_MASK));
 		
 		menuProject.add(menuProjectCreate);
 		menuProject.add(menuProjectDelete);
@@ -217,14 +247,17 @@ public class ViewProject implements Observer/*, Runnable*/{
 
 		menuFilesLoad = new JMenuItem("Load File");
 		menuFilesLoad.addActionListener(controllerProject);
+		menuFilesLoad.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, ActionEvent.CTRL_MASK|ActionEvent.SHIFT_MASK));
 		menuFilesLoad.setEnabled(false);
 		
 		menuFilesDelete = new JMenuItem("Delete File");
 		menuFilesDelete.addActionListener(controllerProject);
+		menuFilesDelete.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.CTRL_MASK|ActionEvent.SHIFT_MASK));
 		menuFilesDelete.setEnabled(false);
 		
 		menuFilesLoadFolder = new JMenuItem("Load Analisys Folder");
 		menuFilesLoadFolder.addActionListener(controllerProject);
+		menuFilesLoadFolder.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, ActionEvent.CTRL_MASK|ActionEvent.SHIFT_MASK));
 		menuFilesLoadFolder.setEnabled(false);
 				
 //		menuFiles.add(menuFilesLoad);		
@@ -239,10 +272,12 @@ public class ViewProject implements Observer/*, Runnable*/{
 
 		menuFeaturesExtractComm = new JMenuItem("Extract Commonalities");
 		menuFeaturesExtractComm.addActionListener(controllerProject);
+		menuFeaturesExtractComm.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK|ActionEvent.SHIFT_MASK));
 		menuFeaturesExtractComm.setEnabled(false);
 		
 		menuFeaturesExtractVari = new JMenuItem("Extract Variabilities");
 		menuFeaturesExtractVari.addActionListener(controllerProject);
+		menuFeaturesExtractVari.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionEvent.CTRL_MASK|ActionEvent.SHIFT_MASK));
 		menuFeaturesExtractVari.setEnabled(false);
 
 		menuFeatures.addSeparator();
@@ -269,10 +304,12 @@ public class ViewProject implements Observer/*, Runnable*/{
 
 		menuDiagramCreate = new JMenuItem("Create Diagram");
 		menuDiagramCreate.addActionListener(controllerProject);
+		menuDiagramCreate.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, ActionEvent.CTRL_MASK));
 		menuDiagramCreate.setEnabled(false);
 		
 		menuDiagramOpen = new JMenuItem("Open Diagram");
 		menuDiagramOpen.addActionListener(controllerProject);
+		menuDiagramOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.CTRL_MASK));
 		menuDiagramOpen.setEnabled(true);
 		
 		menuDiagram.add(menuDiagramCreate);		
@@ -550,9 +587,20 @@ public class ViewProject implements Observer/*, Runnable*/{
 	 * @return s - the selected project file path 
 	 */
 	public String loadProjectDialog(){
-		FileDialog d = new FileDialog(new JFrame("Load File"));
+
+	    JFileChooser chooser = new JFileChooser();
+	    
+	    chooser.setDialogType(JFileChooser.OPEN_DIALOG);
+	    chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+	    chooser.setFileFilter(new XMLFileFilter());
+	    chooser.setCurrentDirectory(new File(CMTConstants.getSaveAnalisysDir()));
+	    
+	    int returnVal = chooser.showOpenDialog(new JFrame("Load Project"));
+	    if(returnVal == JFileChooser.CANCEL_OPTION) return null;
+/*
+		FileDialog d = new FileDialog(new JFrame("Load Project"));
     	d.setMode(FileDialog.LOAD);
-    	d.setFilenameFilter(new FilterFileProject());
+    	d.setFilenameFilter(new XMLFileFilter());
 	    d.setDirectory(CMTConstants.getSaveAnalisysDir());
 	    d.setVisible(true);
 	    
@@ -560,6 +608,8 @@ public class ViewProject implements Observer/*, Runnable*/{
 
 //	    return d.getFile().toString();
 	    return d.getDirectory()+d.getFile().toString();
+*/	    
+	    return chooser.getSelectedFile().getAbsolutePath();
 	}
 	
 	/** 
@@ -568,6 +618,18 @@ public class ViewProject implements Observer/*, Runnable*/{
 	 * @return s - the selected project file path 
 	 */
 	public String loadDiagramDialog(String pathProject){
+
+	    JFileChooser chooser = new JFileChooser();
+	    
+	    chooser.setDialogType(JFileChooser.OPEN_DIALOG);
+	    chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+	    chooser.setFileFilter(new XMLFileFilter());
+	    chooser.setCurrentDirectory(new File(pathProject));
+	    
+	    int returnVal = chooser.showOpenDialog(new JFrame("Load Diagram"));
+	    if(returnVal == JFileChooser.CANCEL_OPTION) return null;
+	    
+	    /*
 		FileDialog d = new FileDialog(new JFrame("Load File"));
 	    d.setResizable(true);
     	d.setMode(FileDialog.LOAD);
@@ -584,8 +646,13 @@ public class ViewProject implements Observer/*, Runnable*/{
 	    
 	    if(d.getFile() == null) return null;
 
-	    System.out.println("DIR IS: "+d.getDirectory()+"\nFILE IS: "+d.getFile());
 	    return d.getDirectory()+d.getFile().toString();
+*/
+//	    System.out.println("Path: " +chooser.getSelectedFile().getAbsolutePath());
+//	    System.out.println("name: " +chooser.getSelectedFile().getName());           
+
+	    return chooser.getSelectedFile().getAbsolutePath();
+
 	}
 	
 	/** 
@@ -606,7 +673,7 @@ public class ViewProject implements Observer/*, Runnable*/{
 	}
 	
 	/** 
- 	 * Loads a file into the project.
+ 	 * Loads a file into the project. Used with DylanLab tools.
 	 * 
 	 * @return - a String[] containing the file name and the file path
 	 */
@@ -615,7 +682,7 @@ public class ViewProject implements Observer/*, Runnable*/{
 		
 		FileDialog d = new FileDialog(new JFrame("Load File"));
     	d.setMode(FileDialog.LOAD);
-    	d.setFilenameFilter(new FilterFileInput());
+    	d.setFilenameFilter(new FileInputFilter());
 	    d.setDirectory(CMTConstants.getSaveAnalisysDir());
 	    d.setVisible(true);
 	    
@@ -645,35 +712,78 @@ public class ViewProject implements Observer/*, Runnable*/{
 	 * or null if the content is not correct.
 	 */
 	public String [] loadFolderDialog(){		
-		String [] analisysFiles = new String[4];
-	    JFileChooser chooser = new JFileChooser();
-	    File analisysDir=null;
-	    //booleans used to check if 1 and only one of such files exist inside selected folder
-	    boolean txtFound=false;
-	    boolean termTmpFound=false;
-	    boolean posFound=false;
-	    boolean conllFound=false;
+		File chosenFile = null;
+		JFileChooser chooser = new JFileChooser();
 	    
-	    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-	    int returnVal = chooser.showOpenDialog(new JFrame("Select Analisys Folder"));
+
+	    chooser.setDialogType(JFileChooser.OPEN_DIALOG);		
+		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+	    chooser.setCurrentDirectory(new File(CMTConstants.getTopSaveDirParent()));
+	    int returnVal = chooser.showOpenDialog(new JFrame("Load Analisys Folder"));
 
 //	    if(returnVal == JFileChooser.APPROVE_OPTION) {
 //	    }
 
 	    if(returnVal == JFileChooser.CANCEL_OPTION) return null;
 	    
-	    System.out.println("Path: " +chooser.getSelectedFile().getAbsolutePath());
-	    System.out.println("name: " +chooser.getSelectedFile().getName());           
+//	    System.out.println("Path: " +chooser.getSelectedFile().getAbsolutePath());
+//	    System.out.println("name: " +chooser.getSelectedFile().getName());           
 
-    	if(panelLateralProject.addNodeInput(chooser.getSelectedFile().getName()) == false){
+/*
+	    if(panelLateralProject.addNodeInput(chooser.getSelectedFile().getName()) == false){
     	  errorDialog("The file "+chooser.getSelectedFile().getName()+" has already been loaded");
     	  return null;
     	}    	
     	frameProject.repaint();	    	    
 	    
+//	    analisysDir=new File(chooser.getSelectedFile().getAbsolutePath());
+	    //checking that all needed files are present
+	    String[] analisysFiles = checkValidFolder(chooser.getSelectedFile());
+
+    	//activating throbber
+    	if (analisysFiles != null) startThrobber();
+*/
+
+	    
+//	    analisysDir=new File(chooser.getSelectedFile().getAbsolutePath());
+
+	    //checking that all needed files are present
+	    String[] analisysFiles = checkValidFolder(chooser.getSelectedFile());
+
+    	if (analisysFiles == null) return null;
+
+    	chosenFile = new File(analisysFiles[0]);
+	    if(panelLateralProject.addNodeInput(chosenFile.getName()) == false){
+	      errorDialog("The file "+chosenFile.getName()+" has already been loaded");
+	      return null;
+	    }    	
+	    frameProject.repaint();	    	
+	    
+    	//activating throbber
+	    startThrobber();
+	    
+	    return analisysFiles;
+	}
+
+	/**
+	 * Checks if the selected input folder contains all needed analysis files.
+	 * 
+	 * @param analisysDir - directory that must contain the analysis files
+	 * @return a String[] of size 4 containing the analysis files paths in this order:<br>
+	 * index 0: the document '.txt' file <br>
+	 * index 1: the 'term.tmp' file containing the term extraction<br>
+	 * index 2: the '.pos' file containing the part-of-speech classification<br>
+	 * index 3: the '.conll' file containing the candidate-terms token sequences<br>
+	 */
+	private String[] checkValidFolder(File analisysDir) {
+		String [] analisysFiles = new String[4];
+	    //booleans used to check if 1 and only one of such files exist inside selected folder
+	    boolean txtFound=false;
+	    boolean termTmpFound=false;
+	    boolean posFound=false;
+	    boolean conllFound=false;
 	    //no more than 1 file per type(suffix) will be accepted
-	    analisysDir=new File(chooser.getSelectedFile().getAbsolutePath());
-    	for(File file : analisysDir.listFiles()){
+	    for(File file : analisysDir.listFiles()){
       	  if(file.getName().endsWith(".txt")){
       		if(txtFound){ System.out.println("Double .txt file!"); return null;}
       		else{
@@ -706,13 +816,10 @@ public class ViewProject implements Observer/*, Runnable*/{
 
     	//1 file per type(suffix) is needed
     	if(!txtFound || !termTmpFound || !posFound || !conllFound){
-    	  System.out.println("one kind of file is missing!"); return null;
+    	  errorDialog("one kind of analysis file is missing!"); return null;
     	}
-
-    	//activating throbber
-    	startThrobber();
-
-	    return analisysFiles;
+    	
+		return analisysFiles;
 	}
 
 	/** 
@@ -821,12 +928,6 @@ public class ViewProject implements Observer/*, Runnable*/{
 		
 //		waitFrame.setVisible(false);
 //		waitFrame.dispose();
-		
-		
-		
-		
-		
-		
 //		setStateThrobber(false);
 //		throbber = new Thread(this);
 //		throbber.start();
@@ -907,8 +1008,7 @@ public class ViewProject implements Observer/*, Runnable*/{
 		
 		if((i = panelLateralProject.getAnalysisLeaf()) != -1){
 			if(i >= 0){//an input file node has been selected
-				panelCentralProject.createTabFile(
-					modelProject.readAnalysisFile(i), modelProject.readTermRelevantFile(i));
+				panelCentralProject.createTabFile(modelProject.readAnalysisFile(i), modelProject.readTermRelevantFile(i));
 			}
 			else if(i==-2){//the commonality node has been selected
 				lastButtonSelectionEnd=buttonCommonalitiesSelectionEnd;
@@ -948,31 +1048,6 @@ public class ViewProject implements Observer/*, Runnable*/{
 	public void closeProject(){
 		frameProject.dispose();
 		System.exit(0);
-	}
-
-	/** Class used to filter input files*/
-	class FilterFileInput implements FilenameFilter{
-		@Override
-		public boolean accept(File dir, String name){
-			return name.endsWith( ".pdf" ) || name.endsWith(".txt");
-	    }
-	}
-
-	/** Class used to filter input folders containing analisys files*/
-	class FilterFolderInput implements FilenameFilter{
-		@Override
-		public boolean accept(File dir, String name){
-			return true;
-	    }
-	}
-	
-	/** Class used to filter project files*/
-	class FilterFileProject implements FilenameFilter{
-		@Override
-		public boolean accept(File dir, String name){
-//			System.out.println("loadFileDialog: "+dir.getAbsolutePath()+name);
-			return name.endsWith( ".xml" );
-		}
 	}
 	
 	/**

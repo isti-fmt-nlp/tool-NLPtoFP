@@ -132,9 +132,13 @@ public class TrayUtils {
 			  						  ActionListener exitListener, String instanceName) {
         final String aboutTitle=trayDescr;
 
+
+//    	Display display = new Display ();
+
         //creating tray icon and popup menu
         final JPopupMenu popup = new JPopupMenu();
         final TrayIcon trayIcon = new TrayIcon((new ImageIcon(imageURL, trayDescr)).getImage());
+//        final org.eclipse.swt.widgets.TrayItem item = new org.eclipse.swt.widgets.TrayItem (tray, org.eclipse.swt.widgets.NONE);
         
         switch(trayName){
           case CMT: cmtTrayIcon=trayIcon; cmtPopup=popup; break;
@@ -152,16 +156,38 @@ public class TrayUtils {
         popup.addSeparator();
         popup.add(instanceMenu);
         
-        trayIcon.addMouseListener(new MouseAdapter() {
-            public void mouseReleased(MouseEvent e) {
-                if (e.getButton()==MouseEvent.BUTTON3) {
-                	popup.setLocation(e.getX(), e.getY());
-                	popup.setInvoker(popup);
-                	popup.setVisible(true);
-                }
-            }
-        });
+//        trayIcon.addMouseListener(new MouseAdapter() {
+//            public void mouseReleased(MouseEvent e) {
+//                if (e.getButton()==MouseEvent.BUTTON3
+//                	|| (/*OSUtils.isMac() &&*/ e.getButton() == MouseEvent.BUTTON1) ){ 
+////                		&& (e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK)== MouseEvent.CTRL_DOWN_MASK)){                		
+//                  if(OSUtils.isMac()) popup.setLocation((int)e.getLocationOnScreen().getX(), (int)e.getLocationOnScreen().getY());
+//                  else popup.setLocation(e.getX(), e.getY());
+//                  popup.setInvoker(popup);
+//                  popup.setVisible(true);
+//                }
+//            }
+//        });
   
+        if(OSUtils.isMac()) trayIcon.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+           	  if(OSUtils.isMac()) popup.setLocation((int)e.getLocationOnScreen().getX(), (int)e.getLocationOnScreen().getY());
+        	  else popup.setLocation(e.getX(), e.getY());
+           	  popup.setInvoker(popup);
+           	  popup.setVisible(true);
+            }
+          });
+
+        else trayIcon.addMouseListener(new MouseAdapter() {
+        	public void mouseClicked(MouseEvent e) {
+        	  if(OSUtils.isMac()) popup.setLocation((int)e.getLocationOnScreen().getX(), (int)e.getLocationOnScreen().getY());
+        	  else popup.setLocation(e.getX(), e.getY());
+        	  popup.setInvoker(popup);
+        	  popup.setVisible(true);
+        	}
+          });
+ 
+
         //adding tray icon to system tray
         try {
             tray.add(trayIcon);
@@ -393,6 +419,16 @@ public class TrayUtils {
 		  ((ControllerProject)menu.getItem(0).getActionListeners()[0]).closeToolInstance();
 		  break;
 	  }
+	}
+	
+	/**
+	 * Try to close all instances of CMT and FDE tool.
+	 * 
+	 * @param instanceName - name of the specified instance
+	 */
+	public static void tryCloseAllFDEInstance(){
+	  while(fdeList.size()>0)
+ 	    ((EditorController)fdeList.get(0).getItem(0).getActionListeners()[0]).closeToolInstance();
 	}
 
 	/**

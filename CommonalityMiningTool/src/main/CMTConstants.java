@@ -2,10 +2,22 @@ package main;
 
 public class CMTConstants {
 	
+	/** parent of top level save folder*/
+	private static final String topSaveFolderParent = "..";
+
+	/*Linux Versions*/	
+	/** top level save folder for both tools*/
+	private static final String topSaveFolder = topSaveFolderParent+"/CMT_FDE";
+
+	/*Windows Versions*/
+	/** top level save folder for both tools*/
+	private static final String topSaveFolder_Win = topSaveFolderParent+"\\CMT_FDE";
+
 	/* Save paths for analisys tool*/
-	/*Linux Versions*/
+
+	/*Linux Versions*/	
 	/** general save path for analisys tool*/
-	private static final String saveAnalisysDir ="../Usage Tries/ANALISYS";
+	private static final String saveAnalisysDir = topSaveFolder+"/ANALISYS";
 	
 	/** sub path used to save commonalities candidates*/
 	private static final String CCsubpath = "/CommonalitiesC.log";
@@ -27,7 +39,7 @@ public class CMTConstants {
 
 	/*Windows Versions*/
 	/** general save path for analisys tool*/
-	private static final String saveAnalisysDir_Win ="..\\Usage Tries\\ANALISYS";
+	private static final String saveAnalisysDir_Win = topSaveFolder_Win+"\\ANALISYS";
 	
 	/** sub path used to save commonalities candidates*/
 	private static final String CCsubpath_Win = "\\CommonalitiesC.log";
@@ -53,12 +65,13 @@ public class CMTConstants {
 	
 	
 	/* Save paths for diagram editor tool*/
+
 	/*Linux Versions*/
 	/** general save path for diagram editor tool*/
-	private static final String saveDiagramDir = "../Usage Tries/DIAGRAMS";
+	private static final String saveDiagramDir = topSaveFolder+"/DIAGRAMS";
 	
 	/*Windows Versions*/
-	private static final String saveDiagramDir_Win = "..\\Usage Tries\\DIAGRAMS";
+	private static final String saveDiagramDir_Win = topSaveFolder_Win+"\\DIAGRAMS";
 
 
 	/** sub path used to save exported SXFM diagram files*/
@@ -67,6 +80,17 @@ public class CMTConstants {
 	public static String imagesSubPath = "_IMAGES"; 
 	/** sub path used to save custom diagram files, without using data from the analisys tool*/
 	public static String customSaveDiagramDir = "_CUSTOM_DIAGRAMS_";
+
+	/** Returns the path of the top save directory's parent directory*/
+	public static String getTopSaveDirParent(){
+	  return topSaveFolderParent;
+	}
+
+	/** Returns the path of the top save directory*/
+	public static String getTopSaveDir(){
+	  if(OSUtils.isWindows()) return topSaveFolder_Win;
+	  else return topSaveFolder;	  
+	}
 
 	/** Returns the general sub path used for analisys tool*/
 	public static String getSaveAnalisysDir(){

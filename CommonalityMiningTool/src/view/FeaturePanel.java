@@ -24,7 +24,6 @@ public class FeaturePanel extends JLayeredPane {
 	public String getID(){
 		String compName=getName();
 		return compName.substring(EditorView.featureNamePrefix.length(), compName.length());
-		//		return getName();
 	}
 
 	/**
