@@ -11,6 +11,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Point;
@@ -885,8 +887,8 @@ public class EditorView extends JFrame implements Observer{
 
 		//creating tools panel
 		toolsPanel = new JPanel();		
-		toolsPanel.setLayout(new GridLayout(0, 2, 2, 2));		
-//		toolsPanel.setPreferredSize(new Dimension(140, Toolkit.getDefaultToolkit().getScreenSize().height));
+		toolsPanel.setLayout(new GridBagLayout());		
+	//	toolsPanel.setPreferredSize(new Dimension(140, Toolkit.getDefaultToolkit().getScreenSize().height));
 		toolsPanel.setPreferredSize(new Dimension(140, Toolkit.getDefaultToolkit().getScreenSize().height/2));
 		toolsPanel.setBackground(Color.white);
 		toolsPanel.setName(toolsPanelname);
@@ -912,42 +914,63 @@ public class EditorView extends JFrame implements Observer{
 		toolIconPaths.put("Or Group", "/Or Group_2nd_tmp4.png");		
 		toolIconPaths.put("Start Link Dot", "/Connector Start Dot.png");		
 				
-		JComponent iconTmpPanel=null;
-
+		JLabel iconTmpPanel=null;
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		 c.weightx = 1;
+		 c.weighty = 0.1;
 		iconTmpPanel=getToolIcon(TOOL_MANDATORY_LINK, true);
 		iconTmpPanel.addMouseListener(editorController);
 		iconTmpPanel.addMouseMotionListener(editorController);
-		toolsPanel.add(iconTmpPanel);
+		toolsPanel.add(iconTmpPanel,c);
 
+		
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		 c.weightx = 1;
 		iconTmpPanel=getToolIcon(TOOL_OPTIONAL_LINK, true);
 		iconTmpPanel.addMouseListener(editorController);
 		iconTmpPanel.addMouseMotionListener(editorController);
-		toolsPanel.add(iconTmpPanel);
+		toolsPanel.add(iconTmpPanel,c);
 
+		
+		
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		 c.weightx = 1;
 		iconTmpPanel=getToolIcon(TOOL_INCLUDES, true);
 		iconTmpPanel.addMouseListener(editorController);
 		iconTmpPanel.addMouseMotionListener(editorController);
-		toolsPanel.add(iconTmpPanel);
+		toolsPanel.add(iconTmpPanel,c);
 
+		
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		 c.weightx = 1;
 		iconTmpPanel=getToolIcon(TOOL_EXCLUDES, true);
 		iconTmpPanel.addMouseListener(editorController);
 		iconTmpPanel.addMouseMotionListener(editorController);
-		toolsPanel.add(iconTmpPanel);
+		toolsPanel.add(iconTmpPanel,c);
 
+		
+		
+		
 		iconTmpPanel=getToolIcon(TOOL_ALT_GROUP, true);
 		iconTmpPanel.addMouseListener(editorController);
 		iconTmpPanel.addMouseMotionListener(editorController);
-		toolsPanel.add(iconTmpPanel);
+		toolsPanel.add(iconTmpPanel,c);
 
+		
+		
 		iconTmpPanel=getToolIcon(TOOL_OR_GROUP, true);
 		iconTmpPanel.addMouseListener(editorController);
 		iconTmpPanel.addMouseMotionListener(editorController);
-		toolsPanel.add(iconTmpPanel);	
+		toolsPanel.add(iconTmpPanel,c);	
 
+		
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		 c.weightx = 1;
 		iconTmpPanel=getToolIcon(TOOL_NEWFEATURE, true);
 		iconTmpPanel.addMouseListener(editorController);
 		iconTmpPanel.addMouseMotionListener(editorController);
-		toolsPanel.add(iconTmpPanel);
+		toolsPanel.add(iconTmpPanel,c);
 
 //		toolsPanel.addMouseListener(editorController);
 //		toolsPanel.addMouseMotionListener(editorController);
@@ -992,8 +1015,8 @@ public class EditorView extends JFrame implements Observer{
 //				+"\nscreenDim.getWidth(): "+screenDim.getWidth()
 //				+"\nscreenDim.getHeight(): "+screenDim.getHeight());
 
-		toolsPanel.setMinimumSize(new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width-160)/12,
-				Toolkit.getDefaultToolkit().getScreenSize().height));		
+//		toolsPanel.setMinimumSize(new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width-160)/12,
+//				Toolkit.getDefaultToolkit().getScreenSize().height));		
 //		toolsPanel.setMinimumSize(new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width-160)/12,
 //				Toolkit.getDefaultToolkit().getScreenSize().height/2));
 		
@@ -1878,10 +1901,12 @@ public class EditorView extends JFrame implements Observer{
 		ImageIcon toolImage = getIconImage(name);
 		
 		iconPanel = new JLabel(toolImage);
+		int w = toolImage.getIconWidth();
+		int h = toolImage.getIconHeight();
 		
-		iconPanel.setBounds(0, 0, toolImage.getIconWidth(), toolImage.getIconHeight());
+		iconPanel.setBounds(0, 0, w,h);
 		iconPanel.setOpaque(backgroundVisible);
-		iconPanel.setBackground(Color.LIGHT_GRAY);
+		iconPanel.setBackground(Color.WHITE);
 		iconPanel.setName(name);
 		iconPanel.setToolTipText(name);
 		
