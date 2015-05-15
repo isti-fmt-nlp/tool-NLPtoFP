@@ -33,6 +33,7 @@ import javax.swing.KeyStroke;
 import javax.swing.Timer;
 
 import main.CMTConstants;
+import main.CreateT2kFile;
 import main.FileInputFilter;
 import main.XMLFileFilter;
 
@@ -85,7 +86,7 @@ public class ViewProject implements Observer/*, Runnable*/{
 					  menuProjectExit=null;
 
 	//Files Management Menu items	
-	private JMenuItem menuFilesLoad=null, menuFilesDelete=null, menuFilesLoadFolder=null;
+	private JMenuItem menuFilesLoad=null, menuFilesDelete=null, menuFilesLoadFolderFile=null, menuFilesLoadFolder=null;
 
 
 	//Features Management Menu items
@@ -255,14 +256,21 @@ public class ViewProject implements Observer/*, Runnable*/{
 		menuFilesDelete.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.CTRL_MASK|ActionEvent.SHIFT_MASK));
 		menuFilesDelete.setEnabled(false);
 		
-		menuFilesLoadFolder = new JMenuItem("Load Analisys Folder");
+		menuFilesLoadFolder = new JMenuItem("Load Analysis Folder");
 		menuFilesLoadFolder.addActionListener(controllerProject);
 		menuFilesLoadFolder.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, ActionEvent.CTRL_MASK|ActionEvent.SHIFT_MASK));
 		menuFilesLoadFolder.setEnabled(false);
+		
+		menuFilesLoadFolderFile = new JMenuItem("Load2 File");
+		menuFilesLoadFolderFile.addActionListener(controllerProject);
+		menuFilesLoadFolderFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, ActionEvent.CTRL_MASK|ActionEvent.SHIFT_MASK));
+		menuFilesLoadFolderFile.setEnabled(false);
+		
 				
 //		menuFiles.add(menuFilesLoad);		
 		menuFiles.add(menuFilesDelete);
 		menuFiles.add(menuFilesLoadFolder);
+		menuFiles.add(menuFilesLoadFolderFile);
 		
 		menu.add(menuFiles);
 		
@@ -719,7 +727,7 @@ public class ViewProject implements Observer/*, Runnable*/{
 	    chooser.setDialogType(JFileChooser.OPEN_DIALOG);		
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 	    chooser.setCurrentDirectory(new File(CMTConstants.getTopSaveDirParent()));
-	    int returnVal = chooser.showOpenDialog(new JFrame("Load Analisys Folder"));
+	    int returnVal = chooser.showOpenDialog(new JFrame("Load Analysis Folder"));
 
 //	    if(returnVal == JFileChooser.APPROVE_OPTION) {
 //	    }
@@ -764,6 +772,61 @@ public class ViewProject implements Observer/*, Runnable*/{
 	    
 	    return analisysFiles;
 	}
+	
+	
+	public String [] loadFile(){		
+		File chosenFile = null;
+		JFileChooser chooser = new JFileChooser();
+	    
+
+	    chooser.setDialogType(JFileChooser.OPEN_DIALOG);		
+		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+	    chooser.setCurrentDirectory(new File(CMTConstants.getTopSaveDirParent()));
+	    int returnVal = chooser.showOpenDialog(new JFrame("Load File"));
+
+//	    if(returnVal == JFileChooser.APPROVE_OPTION) {
+//	    }
+
+	    if(returnVal == JFileChooser.CANCEL_OPTION) return null;
+	    
+//	    System.out.println("Path: " +chooser.getSelectedFile().getAbsolutePath());
+//	    System.out.println("name: " +chooser.getSelectedFile().getName());           
+
+/*
+	    if(panelLateralProject.addNodeInput(chooser.getSelectedFile().getName()) == false){
+    	  errorDialog("The file "+chooser.getSelectedFile().getName()+" has already been loaded");
+    	  return null;
+    	}    	
+    	frameProject.repaint();	    	    
+	    
+//	    analisysDir=new File(chooser.getSelectedFile().getAbsolutePath());
+	    //checking that all needed files are present
+	    String[] analisysFiles = checkValidFolder(chooser.getSelectedFile());
+
+    	//activating throbber
+    	if (analisysFiles != null) startThrobber();
+*/
+	    CreateT2kFile t2k = new CreateT2kFile(chooser.getSelectedFile());
+	    File dir = t2k.run();
+//	    analisysDir=new File(chooser.getSelectedFile().getAbsolutePath());
+
+	    //checking that all needed files are present
+	    String[] analisysFiles = checkValidFolder(dir);
+
+    	if (analisysFiles == null) return null;
+
+    	chosenFile = new File(analisysFiles[0]);
+	    if(panelLateralProject.addNodeInput(chosenFile.getName()) == false){
+	      errorDialog("The file "+chosenFile.getName()+" has already been loaded");
+	      return null;
+	    }    	
+	    frameProject.repaint();	    	
+	    
+    	//activating throbber
+	    startThrobber();
+	    
+	    return analisysFiles;
+	}
 
 	/**
 	 * Checks if the selected input folder contains all needed analysis files.
@@ -791,7 +854,7 @@ public class ViewProject implements Observer/*, Runnable*/{
       		  analisysFiles[0]=file.getAbsolutePath();
       		}
       	  }      	  
-    	  if(file.getName().endsWith(".term.tmp")){
+    	  if(file.getName().endsWith(".term.tmp") || file.getName().endsWith(".ter")){
     		if(termTmpFound){ System.out.println("Double .term.tmp file!"); return null;}
       		else{
       		  termTmpFound=true;
@@ -988,7 +1051,8 @@ public class ViewProject implements Observer/*, Runnable*/{
 
     	menuFilesLoad.setEnabled(true);
     	menuFilesLoadFolder.setEnabled(true);
-    	
+
+    	menuFilesLoadFolderFile.setEnabled(true);
     	if (panelLateralProject.getAnalysisLeafTree().size()>0){
     	  menuFilesDelete.setEnabled(true);
     	  //if the project was loaded from a save file the load method already set menuFeatures right

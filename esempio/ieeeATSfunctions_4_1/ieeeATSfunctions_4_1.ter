@@ -1,0 +1,242 @@
+Lemma_of_Term	Domain_relavance	Frequency
+CBTC	100.0	44
+ATS	100.0	44
+ATS system	99.9999989577	19
+ATS user	99.9999981505	14
+CBTC system	99.9999981505	14
+CBTC-equipped	99.999997198	11
+ATS user interface	99.9999952484	8
+CBTC territory	99.9999952484	8
+train operator	99.9999952484	8
+train	99.9999947017	65
+ATS function	99.9999940803	7
+work zone	99.9999923587	6
+CBTC-equipped train	99.9999923587	6
+CBTC equipment	99.9999896145	5
+interoperability	99.9999896145	5
+ato	99.9999896145	5
+conductor	99.9999846905	8
+datum	99.9999846905	4
+jurisdiction	99.9999794579	13
+section of track	99.9999738821	3
+passenger information system	99.9999738821	3
+speed restriction	99.9999738821	3
+movement authority	99.9999738821	3
+crew	99.9999582956	8
+implementation	99.9999530166	4
+accordance	99.9999371797	4
+group of CBTC-equipped	99.9999371797	2
+train en route	99.9999371797	2
+ato mode	99.9999371797	2
+control action	99.9999371797	2
+train location	99.9999371797	2
+operating unit	99.9999371797	2
+energy optimization	99.9999371797	2
+service strategy	99.9999371797	2
+interoperability requirement	99.9999371797	2
+train length	99.9999371797	2
+train identification	99.9999371797	2
+IEEE Std	99.9999371797	2
+system hazard	99.9999371797	2
+wayside-to-train	99.9999371797	2
+blocking	99.9999371797	2
+subclause	99.9999371797	2
+display	99.999928063	10
+capability	99.9999188399	6
+station	99.9999006978	14
+function	99.9998843898	8
+transit system	99.9998738319	2
+train service	99.9998738319	2
+wayside	99.9998738319	2
+command	99.9998406554	3
+authority	99.9998189265	15
+alarm	99.9998140101	3
+mean	99.9998104841	2
+interface	99.9998104841	2
+hazard	99.9997946472	4
+speed	99.9997426425	7
+track	99.9997064523	6
+supplier	99.9997058775	5
+movement	99.9994303975	4
+following	99.9994303975	2
+route	99.9993876848	3
+switch	99.9993670497	2
+facility	99.9993388583	6
+profile	99.9993037019	2
+removal	99.9991770064	2
+operating	99.9986068764	4
+information	99.9982871927	5
+section	99.998268581	3
+service	99.9977296137	6
+application	99.9975933121	2
+performance	99.9967764425	3
+control	99.9965480738	4
+approach	99.9961996611	2
+condition	99.993729098	2
+response	99.9936024024	2
+group	99.9929847616	4
+area	99.987901103	2
+position	99.9865707998	2
+order	99.9808695007	2
+IEEE Std 1474.2-2003.	0.0	1
+interface design standard	0.0	1
+train health datum	0.0	1
+position of train	0.0	1
+CBTC-equipped train operating	0.0	1
+skip station information	0.0	1
+subclause in order	0.0	1
+control action confirmation	0.0	1
+station departure time	0.0	1
+train fault reporting	0.0	1
+train at junction	0.0	1
+interoperability interface standard	0.0	1
+group of station	0.0	1
+door control inhibit	0.0	1
+change in service	0.0	1
+performance of CBTC	0.0	1
+headways between train	0.0	1
+type of train	0.0	1
+energy optimization algorithm	0.0	1
+emergency brake application	0.0	1
+CBTC fault reporting	0.0	1
+Skip station stop	0.0	1
+train location information	0.0	1
+movement of train	0.0	1
+wayside for display	0.0	1
+speed on approach	0.0	1
+dwell time variance	0.0	1
+speed regulation function	0.0	1
+train length datum	0.0	1
+passenger information message	0.0	1
+group of CBTC	0.0	1
+train arrival information	0.0	1
+direction of train	0.0	1
+station without stopping	0.0	1
+rerouting of train	0.0	1
+Interoperability interface requirement	0.0	1
+CBTC train identification	0.0	1
+train in response	0.0	1
+train service datum	0.0	1
+CBTC movement authority	0.0	1
+interoperability interface requirement	0.0	1
+automatic train regulation	0.0	1
+service brake rate	0.0	1
+train regulation function	0.0	1
+station in ato	0.0	1
+train identity	0.0	1
+user information	0.0	1
+service disruption	0.0	1
+train meet	0.0	1
+storage area	0.0	1
+service management	0.0	1
+Junction management	0.0	1
+headway adherence	0.0	1
+train acceleration	0.0	1
+roadway worker	0.0	1
+run time	0.0	1
+dispatching function	0.0	1
+CBTC control	0.0	1
+train braking	0.0	1
+Wayside equipment	0.0	1
+train schedule	0.0	1
+authority limit	0.0	1
+transit application	0.0	1
+CBTC standard	0.0	1
+user interfaces/inputs	0.0	1
+brake application	0.0	1
+communication network	0.0	1
+datum communication	0.0	1
+rail condition	0.0	1
+user interface	0.0	1
+merge point	0.0	1
+exit signal	0.0	1
+length icon	0.0	1
+system delay	0.0	1
+display datum	0.0	1
+work train	0.0	1
+speed profile	0.0	1
+train door	0.0	1
+train routing	0.0	1
+fault reporting	0.0	1
+ATS equipment	0.0	1
+work crew	0.0	1
+Hold train	0.0	1
+track configuration	0.0	1
+stop train	0.0	1
+Schedule/headway regulation	0.0	1
+entry point	0.0	1
+train route	0.0	1
+headway regulation	0.0	1
+train coasting	0.0	1
+train tracking	0.0	1
+CBTC functionality	0.0	1
+datum com	0.0	1
+track circuit	0.0	1
+munications interface	0.0	1
+train operation	0.0	1
+schedule/headway regulation	0.0	1
+restriction	0.0	1
+unblock	0.0	1
+relation	0.0	1
+adjustment	0.0	1
+availability	0.0	1
+impact	0.0	1
+Schedule	0.0	1
+location	0.0	1
+input	0.0	1
+junction	0.0	1
+auto	0.0	1
+NOTE-Examples	0.0	1
+front	0.0	1
+loss	0.0	1
+subsystem	0.0	1
+requirement	0.0	1
+operation	0.0	1
+acknowledgment	0.0	1
+coordination	0.0	1
+method	0.0	1
+rerouting	0.0	1
+circumstance	0.0	1
+protection	0.0	1
+variation	0.0	1
+extent	0.0	1
+consideration	0.0	1
+change	0.0	1
+merging	0.0	1
+implement	0.0	1
+headways	0.0	1
+probability	0.0	1
+transfer	0.0	1
+responsibility	0.0	1
+priority	0.0	1
+reduction	0.0	1
+type	0.0	1
+direction	0.0	1
+precision	0.0	1
+visibility	0.0	1
+failure	0.0	1
+line	0.0	1
+account	0.0	1
+characteristic	0.0	1
+record	0.0	1
+optimization	0.0	1
+stopping	0.0	1
+e.g.	0.0	1
+tions	0.0	1
+general	0.0	1
+minimum	0.0	1
+manner	0.0	1
+acceleration	0.0	1
+latency	0.0	1
+outage	0.0	1
+purpose	0.0	1
+identity	0.0	1
+rule	0.0	1
+
+
+Configuration:
+POS_Start	p:NN p:NNP p:NNS
+POS_Internal	p:JJ p:IN p:NN p:NNP p:NNS p:POS
+POS_End	p:NN p:NNP p:NNS
+Ortografic unit	L
+Max term length	3

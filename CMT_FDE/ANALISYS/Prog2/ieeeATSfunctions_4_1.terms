@@ -1,130 +1,130 @@
-control action	control actions	Control action
-train regulation	train regulation
-equipment	equipment
-station in ato	station in ATO
-CBTC system	CBTC system
-energy optimization algorithms	energy optimization algorithms
-system hazard	system hazards
-profile between station	profile between stations
-information system interface	information system interfaces
-movement	movement
-CBTC-equipped train	CBTC-equipped train	CBTC-equipped trains
-capability	capability
-supplier	supplier
-train door	train doors
-information	information
-group of CBTC	group of CBTC
-mode of operation	mode of operation
-CBTC territory	CBTC territory
-movement of train	movement of trains
-train stop information	train stop information
-CBTC-equipped train operating	CBTC-equipped train operating
-regulation function	regulation function	regulation functions
-IEEE Std 1474.2-2003.	IEEE Std 1474.2-2003.
-ATS user-directed service	ATS user-directed service
-train identification	train identification
-system	system	systems
-operating	operating
-ATS function	ATS functions
-wayside for display	wayside for display
-automatic train regulation	Automatic train regulation
-train location	Train location
-type of train	type of train
-train health data	train health data
-optimization versus schedule/headway	optimization versus schedule/headway
-protection of work	protection of work
-train service	train service
-CBTC train location	CBTC train location
-data communication network	data communications network
-authority	authority	authorities
-group of CBTC-equipped	group of CBTC-equipped
-position of train	position of trains
-train location report	train location reports
-passenger information	Passenger information
-speed regulation function	speed regulation function
-run time	run times
-train arrival information	train arrival information
-performance of CBTC	performance of CBTC
-door control inhibit	Door control inhibit
-interoperability requirement	interoperability requirements
-interoperability	interoperability
-track within CBTC	track within CBTC
-operating in CBTC	operating in CBTC
-IEEE Std	IEEE Std
-fault reporting	Fault reporting
-Skip station stop	Skip station stop
-CBTC	CBTC
 direction of train	direction of trains
-train location information	Train location information
-train fault reporting	Train fault reporting
-skip station information	skip station information
-work train	work trains
-location	location
-subclause in order	subclause in order
+passenger information	Passenger information
 control action confirmation	Control action confirmation
+ATS user interface	ATS user interface
+movement of train	movement of trains
+train location report	train location reports
+CBTC	CBTC
+ATS train stop	ATS train stop
+supplier	supplier
+coordination of train	coordination of train
+CBTC-equipped train operating	CBTC-equipped train operating
+track in CBTC	track in CBTC
+Interoperability interface requirement	Interoperability interface requirements
+information system interface	information system interfaces
+passenger information system	Passenger information system	passenger information systems
+wayside for display	wayside for display
+train regulation	train regulation
+station in ato	station in ATO
+mode of operation	mode of operation
+work	work
+CBTC-equipped train	CBTC-equipped train	CBTC-equipped trains
+dwell time variance	dwell time variance
+control of run	control of run
+interface design standard	interface design standards
+ATS system	ATS system
+system	system	systems
+train at station	train at station
+ATS user	ATS user	ATS users
+train identification	train identification
+accordance with IEEE	accordance with IEEE
+IEEE Std	IEEE Std
+CBTC train	CBTC train
 operating unit	operating unit
-operating within CBTC	operating within CBTC
+CBTC functionality	CBTC functionality
+train arrival information	train arrival information
 jurisdiction	jurisdiction
-dispatching function	dispatching function
+station departure time	station departure time
+optimization versus schedule/headway	optimization versus schedule/headway
+operating in CBTC	operating in CBTC
+rerouting of train	rerouting of trains
+energy optimization algorithms	energy optimization algorithms
+capability	capability
+automatic train regulation	Automatic train regulation
+group of CBTC-equipped	group of CBTC-equipped
+regulation function	regulation function	regulation functions
+subclause in order	subclause in order
+operating	operating
+data communication network	data communications network
+emergency brake application	emergency brake application
+service brake rate	service brake rates
+conductor	conductor
+passenger information message	passenger information messages
+user interface	user interface
+run time	run times
+section of track	section of track
+CBTC movement authority	CBTC movement authority
+transit system	transit system
+transit application	transit application
+CBTC train identification	CBTC train identification
+information	information
+movement	movement
+profile between station	profile between stations
+group of CBTC	group of CBTC
+CBTC fault reporting	CBTC fault reporting
+train regulation function	train regulation functions
+ATS	ATS
+CBTC territory	CBTC territory
+train operator	train operator
+train service	train service
+CBTC system	CBTC system
+skip station information	skip station information
 interoperability interface standard	interoperability interface standards
+ato	ATO
+train fault reporting	Train fault reporting
+train	Train	trains
+train lenght data	train length data
+group	group
+ato mode	ATO mode
+interoperability interface requirement	interoperability interface requirements
+system hazard	system hazards
+equipment	equipment
+operating within CBTC	operating within CBTC
+ATS function	ATS functions
+interoperability	interoperability
+train location	Train location
+protection of work	protection of work
+CBTC equipment	CBTC equipment
+performance of CBTC	performance of CBTC
+authority	authority	authorities
+control action	control actions	Control action
+fault reporting	Fault reporting
+work train	work trains
+position of train	position of trains
+speed regulation function	speed regulation function
 train en route	train en route
 CBTC-equipped	CBTC-equipped
-ATS user	ATS user	ATS users
-train	Train	trains
-ATS	ATS
-work	work
-control	control
-passenger information system	Passenger information system	passenger information systems
-station	station	stations
-user interface	user interface
-interoperability interface requirement	interoperability interface requirements
-energy optimization	Energy optimization
-track in CBTC	track in CBTC
-CBTC equipment	CBTC equipment
-section of track	section of track
-storage area	storage areas
-station departure time	station departure time
-Interoperability interface requirement	Interoperability interface requirements
-regulation	regulation
-accordance with IEEE	accordance with IEEE
-service brake rate	service brake rates
-train at station	train at station
-transit application	transit application
-CBTC functionality	CBTC functionality
-ATS train stop	ATS train stop
-service strategy	service strategy	service strategies
-train service data	train service data
-user interface display	user interface display	user interface displays
 group of station	group of stations
-movement authority	movement authorities	movement authority
-ATS system	ATS system
-CBTC train	CBTC train
-response	response
-ato mode	ATO mode
-CBTC train identification	CBTC train identification
-train lenght data	train length data
-control of run	control of run
-ato	ATO
-work zone	work zones	work zone
-train regulation function	train regulation functions
-application	application
-conductor	conductor
-speed	speed
-coordination of train	coordination of train
-emergency brake application	emergency brake application
-CBTC movement authority	CBTC movement authority
-track	track
-interface design standard	interface design standards
-ATS user interface	ATS user interface
+train health data	train health data
+IEEE Std 1474.2-2003.	IEEE Std 1474.2-2003.
 interface	interface	interfaces
-speed restriction	speed restrictions
-dwell time variance	dwell time variance
-rerouting of train	rerouting of trains
+speed	speed
+user interface display	user interface display	user interface displays
+work zone	work zones	work zone
+energy optimization	Energy optimization
+station	station	stations
+movement authority	movement authorities	movement authority
+type of train	type of train
+service strategy	service strategy	service strategies
+Skip station stop	Skip station stop
+track	track
+train location information	Train location information
+ATS user-directed service	ATS user-directed service
 implementation	implementation
+control	control
+train service data	train service data
+train door	train doors
+storage area	storage areas
+track within CBTC	track within CBTC
+CBTC train location	CBTC train location
+regulation	regulation
+application	application
+train stop information	train stop information
+response	response
 service	service
-passenger information message	passenger information messages
-train operator	train operator
-group	group
+location	location
+speed restriction	speed restrictions
+interoperability requirement	interoperability requirements
 user	user	users
-transit system	transit system
-CBTC fault reporting	CBTC fault reporting
+door control inhibit	Door control inhibit
+dispatching function	dispatching function

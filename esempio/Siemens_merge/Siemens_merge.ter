@@ -1,0 +1,609 @@
+Lemma_of_Term	Domain_relavance	Frequency
+Trainguard	100.0	59
+Trainguard MT	99.999999984	57
+CBTC	99.9999998664	46
+train control	99.9999998524	45
+Airlink	99.9999995401	31
+Trainguard MT CBTC	99.9999989915	21
+metro	99.9999986771	18
+bandwidth	99.9999983854	16
+train	99.9999980604	139
+train operation	99.9999974336	20
+WLAN	99.99999742	12
+headways	99.99999742	12
+CBTC system	99.9999970357	11
+mass transit	99.9999970357	11
+revenue service	99.9999965511	10
+datum	99.9999965511	10
+train control system	99.9999959241	9
+Moving block	99.9999959241	9
+mobility	99.9999959241	9
+CBTC solution	99.9999950861	8
+metro system	99.9999939179	7
+radio technology	99.9999939179	7
+STO	99.9999939179	7
+realtime	99.9999939179	7
+CCTV	99.9999939179	7
+interlocking	99.9999939179	7
+broadband	99.9999939179	7
+siemens	99.9999931082	26
+moving-block	99.9999921963	6
+km	99.9999921963	6
+RATP	99.9999921963	6
+functionality	99.9999921963	6
+migration	99.9999898071	8
+Moving block CBTC	99.9999894521	5
+train control level	99.9999894521	5
+passenger information	99.9999894521	5
+metro line	99.9999894521	5
+passenger service	99.9999894521	5
+CBTC operation	99.9999894521	5
+access point	99.9999894521	5
+Guangzhou	99.9999894521	5
+atc	99.9999894521	5
+ato	99.9999894521	5
+atp	99.9999894521	5
+lyons	99.9999894521	5
+ATS	99.9999894521	5
+Vicos	99.9999894521	5
+reliability	99.9999894521	5
+wayside	99.9999874708	7
+interface	99.9999870424	9
+km of line	99.9999845281	4
+mass transit system	99.9999845281	4
+mass transit authority	99.9999845281	4
+radio link	99.9999845281	4
+train speed	99.9999845281	4
+radio coverage	99.9999845281	4
+communication channel	99.9999845281	4
+paris line	99.9999845281	4
+datum transmission	99.9999845281	4
+VAL	99.9999845281	4
+DTO	99.9999845281	4
+CTC	99.9999845281	4
+redundancy	99.9999845281	4
+stepwise	99.9999845281	4
+interchangeability	99.9999845281	4
+fleet operation	99.9999840275	6
+automation	99.9999826015	9
+passenger	99.9999760447	37
+track vacancy detection	99.9999737197	3
+realtime CCTV Streaming	99.9999737197	3
+quality of service	99.9999737197	3
+level of automation	99.9999737197	3
+broadband wireless connection	99.9999737197	3
+depot area	99.9999737197	3
+train supervision	99.9999737197	3
+atc system	99.9999737197	3
+platform concept	99.9999737197	3
+￼Trainguard MT	99.9999737197	3
+metro network	99.9999737197	3
+migration strategy	99.9999737197	3
+train set	99.9999737197	3
+system performance	99.9999737197	3
+siemens pulz8	99.9999737197	3
+railway environment	99.9999737197	3
+realtime passenger	99.9999737197	3
+migration phase	99.9999737197	3
+Flash OFDM	99.9999737197	3
+rail line	99.9999737197	3
+Vicos oc	99.9999737197	3
+moving-block functionality	99.9999737197	3
+olympic branch	99.9999737197	3
+balise	99.9999737197	3
+Maggaly	99.9999737197	3
+LTE	99.9999737197	3
+Maintenance	99.9999737197	3
+diagnostics	99.9999737197	3
+interoperability	99.9999737197	3
+balises	99.9999737197	3
+scalability	99.9999737197	3
+Meteor	99.9999737197	3
+ixl	99.9999737197	3
+BKV	99.9999737197	3
+Ouragan	99.9999737197	3
+signalling	99.9999737197	3
+rail	99.9999698537	10
+budapest	99.9999681294	7
+refurbishment	99.9999676262	5
+barcelona	99.9999676262	5
+railway	99.9999616823	7
+solution	99.9999590404	22
+radio	99.9999580096	28
+com	99.9999528542	4
+headway	99.9999528542	4
+depot	99.9999528542	4
+platform	99.9999475752	8
+radio communication	99.9999470744	3
+transport	99.9999431563	10
+communication	99.9999419137	23
+line	99.9999416779	62
+operator	99.9999389969	16
+availability	99.9999381926	9
+￼Trainguard MT CBTC	99.9999370173	2
+life cycle cost	99.9999370173	2
+budapest line M4	99.9999370173	2
+color light signal	99.9999370173	2
+odometer pulse generator	99.9999370173	2
+track-to-train datum communication	99.9999370173	2
+platform screen door	99.9999370173	2
+Intermittent train control	99.9999370173	2
+advantage of Airlink	99.9999370173	2
+line in operation	99.9999370173	2
+train control solution	99.9999370173	2
+automatic train control	99.9999370173	2
+Moving block Signalling	99.9999370173	2
+Guangzhou metro lines	99.9999370173	2
+olympic branch line	99.9999370173	2
+train protection	99.9999370173	2
+Istanbul line	99.9999370173	2
+service frequency	99.9999370173	2
+automation level	99.9999370173	2
+broadband connection	99.9999370173	2
+operation control	99.9999370173	2
+maintenance cost	99.9999370173	2
+CBTC equipment	99.9999370173	2
+train interval	99.9999370173	2
+wayside CBTC	99.9999370173	2
+train movement	99.9999370173	2
+line M2	99.9999370173	2
+overlay system	99.9999370173	2
+railway operator	99.9999370173	2
+transport capacity	99.9999370173	2
+radio equipment	99.9999370173	2
+train fleet	99.9999370173	2
+transportation provider	99.9999370173	2
+interlocking system	99.9999370173	2
+system availability	99.9999370173	2
+rail operator	99.9999370173	2
+data communication	99.9999370173	2
+pa BF	99.9999370173	2
+operator console	99.9999370173	2
+chicago o	99.9999370173	2
+datum communication	99.9999370173	2
+WLAN radio	99.9999370173	2
+communication system	99.9999370173	2
+design flexibility	99.9999370173	2
+barcelona line	99.9999370173	2
+WLAN communication	99.9999370173	2
+transport authority	99.9999370173	2
+radio component	99.9999370173	2
+line d	99.9999370173	2
+Eurobalise S21	99.9999370173	2
+procurement strategy	99.9999370173	2
+mode operation	99.9999370173	2
+Nanjing line	99.9999370173	2
+3G	99.9999370173	2
+landside	99.9999370173	2
+leu	99.9999370173	2
+Sicas	99.9999370173	2
+Toulouse	99.9999370173	2
+upgradeability	99.9999370173	2
+Rennes	99.9999370173	2
+subsystem	99.9999370173	2
+OCC	99.9999370173	2
+serve	99.9999370173	2
+resignalling	99.9999370173	2
+signaling	99.9999370173	2
+efficient	99.9999370173	2
+Lille	99.9999370173	2
+freepropagation	99.9999370173	2
+GPS	99.9999370173	2
+Headways	99.9999370173	2
+module	99.9999370173	2
+application	99.9999362228	18
+mode	99.9999239743	5
+track	99.9999225361	15
+station	99.9999172211	16
+fleet	99.9999012032	10
+supervision	99.9998671384	3
+itc	99.9998671384	3
+upgrade	99.9998671384	3
+system	99.9998636454	37
+paris	99.9998625051	14
+driver	99.9998614962	6
+connection	99.9998605309	11
+maintenance	99.999839187	7
+signal	99.9998206524	6
+performance	99.9998104252	19
+year of experience	99.9998103217	2
+communication technology	99.9998103217	2
+transit	99.9998103217	2
+operation	99.9997916153	34
+thanks	99.9997628109	4
+function	99.9997602799	5
+logistics	99.9997469739	2
+kilometer	99.9997469739	2
+equipment	99.9997146933	12
+safety	99.9997143213	10
+efficiency	99.9996994631	4
+combination	99.9996948021	5
+speed limit	99.9996836262	2
+advantage	99.9996730682	8
+phase	99.9996273304	3
+integration	99.9996006851	3
+need	99.9995991625	8
+service	99.9995928923	20
+block	99.9995919273	6
+design	99.9995592523	6
+new york city	99.9995265773	6
+second	99.9995094198	4
+traffic	99.9994983689	5
+requirement	99.9994302351	4
+pa	99.9994143981	4
+network	99.9994038402	8
+speed	99.9993668873	4
+infrastructure	99.9993668873	2
+component	99.9993075865	3
+video	99.9993075865	3
+stage	99.9993035395	4
+compliance	99.9992809411	3
+monitoring	99.9992401918	2
+distance	99.9992401918	2
+beijing	99.9992085179	4
+transportation	99.9992079958	6
+environment	99.999176844	4
+disruption	99.999176844	2
+reference	99.999176844	2
+channel	99.9991134962	2
+quality	99.9991055023	5
+movement	99.9990411332	3
+challenge	99.9990144878	3
+taipei	99.9989868007	2
+level	99.9989706077	10
+camera	99.9988601051	2
+location	99.9988546159	3
+use	99.9987560702	7
+stop	99.9987334096	2
+type	99.9986858988	4
+flexibility	99.9986700618	2
+experience	99.9986680986	3
+hdtv	99.998606714	2
+control	99.9985948921	7
+airport	99.9984166707	2
+feature	99.9984166707	2
+technology	99.9983088562	5
+concept	99.9980999319	2
+city	99.9978438138	6
+ability	99.997735512	3
+world	99.9976342708	7
+cost	99.9975182225	7
+information	99.997513965	4
+benefit	99.9973891227	3
+time	99.9970788565	12
+number	99.9970596134	6
+area	99.9969755089	4
+way	99.9969573228	7
+answer	99.9968963242	2
+choice	99.9967696286	2
+strategy	99.9967229895	3
+ground	99.9966429331	2
+example	99.9966112592	4
+unit	99.9965939944	6
+device	99.9961994987	2
+term	99.9955185101	4
+capacity	99.9955026732	2
+project	99.9954440137	3
+china	99.9953640777	3
+opportunity	99.9949325432	2
+vehicle	99.9943624133	2
+size	99.9942357178	2
+security	99.9938081203	4
+staff	99.9937922833	2
+france	99.9937289356	2
+impact	99.9934755445	2
+december	99.9926520235	2
+contract	99.9923265101	3
+kind	99.9918285024	2
+day	99.9910953895	5
+program	99.990830775	4
+option	99.9898013737	2
+case	99.9895021052	3
+hour	99.9894846349	2
+part	99.9855852419	3
+investment	99.9841996849	3
+customer	99.9837199879	2
+future	99.9808059905	2
+share	99.9631319656	4
+issue	99.9613582285	2
+stock	99.9601389571	3
+year	99.9456796633	4
+market	99.9045353434	2
+traction power sub-system.	0.0	1
+WLAN transmission channel	0.0	1
+budapest line M2	0.0	1
+communication for staff	0.0	1
+requirement for performance	0.0	1
+budapest transport authority	0.0	1
+radio design network	0.0	1
+principle in combination	0.0	1
+reversal of train	0.0	1
+CTC with STO	0.0	1
+standard in automation	0.0	1
+line in beijing	0.0	1
+Intermittent track-to-train communication	0.0	1
+Wayside CBTC sub-system	0.0	1
+answer for mobility	0.0	1
+itc with STO	0.0	1
+interface between radio	0.0	1
+Interlocking train control	0.0	1
+operation control Centre	0.0	1
+datum communication system	0.0	1
+time passenger information	0.0	1
+solution in term	0.0	1
+service for passenger	0.0	1
+solution of CTC	0.0	1
+tomorrow 's challenge	0.0	1
+VAL for airport	0.0	1
+automatic train supervision	0.0	1
+term of bandwidth	0.0	1
+movingblock principle result	0.0	1
+leadership for interoperability	0.0	1
+type of balises	0.0	1
+track-to-train transmission system	0.0	1
+train control application	0.0	1
+Trainguard MT installation	0.0	1
+level of control	0.0	1
+mobility in city	0.0	1
+passenger protection sub-systems	0.0	1
+High-availability Sicas interlocking	0.0	1
+challenge of time	0.0	1
+sensor fusion algorithm	0.0	1
+metropolitan train set	0.0	1
+Wi-Fi backhaul system	0.0	1
+wayside CBTC system	0.0	1
+platform enable operator	0.0	1
+stopping accuracy requirement	0.0	1
+train supervision system	0.0	1
+system in case	0.0	1
+station from Huangzhou	0.0	1
+Moving block principle	0.0	1
+efficient train control	0.0	1
+behaviour under operation	0.0	1
+serve for example	0.0	1
+duplex voice communication	0.0	1
+level for part	0.0	1
+train control Solution	0.0	1
+siemens ' answer	0.0	1
+driver for communication	0.0	1
+VAL in city	0.0	1
+Real-time Operation datum	0.0	1
+variety of solution	0.0	1
+track-to-train datum transmission	0.0	1
+term of performance	0.0	1
+project in china	0.0	1
+china 's megacities	0.0	1
+focus on quality	0.0	1
+algiers transport authority	0.0	1
+evolution in performance	0.0	1
+number of train	0.0	1
+train control equipment	0.0	1
+turnkey driverless solution	0.0	1
+world of CBTC	0.0	1
+propagation radio solution	0.0	1
+Configuration / Diagnostic	0.0	1
+Trainguard MT project	0.0	1
+passenger counting information	0.0	1
+south of paris	0.0	1
+year of success	0.0	1
+objective of Ouragan	0.0	1
+siemens ' pa	0.0	1
+need for transport	0.0	1
+km of track	0.0	1
+train speed control	0.0	1
+choice for commuter	0.0	1
+proven CBTC solution	0.0	1
+need for capacity	0.0	1
+compliance with interoperability	0.0	1
+train control method	0.0	1
+train in operation	0.0	1
+installation of equipment	0.0	1
+solution of itc	0.0	1
+kind of application	0.0	1
+variety of application	0.0	1
+impact on operation	0.0	1
+broadband onboard connection	0.0	1
+upgradability of bandwidth	0.0	1
+access point malfunction	0.0	1
+block driverless system	0.0	1
+public data system	0.0	1
+case of refurbishment	0.0	1
+block atc technology	0.0	1
+performance broadband connection	0.0	1
+operation control system	0.0	1
+flow of traffic	0.0	1
+kilometer of track	0.0	1
+point of sale	0.0	1
+plenty of muscle	0.0	1
+radio communication system	0.0	1
+concept of interchangeability	0.0	1
+Driverless train operation	0.0	1
+data communication sub-system	0.0	1
+Flash OFDM 3G	0.0	1
+Doppler radar sensor	0.0	1
+connection from Airlink	0.0	1
+CBTC system equips	0.0	1
+media Content Platform	0.0	1
+metro control system	0.0	1
+forefront of technology	0.0	1
+onboard train equipment	0.0	1
+paris transport authority	0.0	1
+upgradeability of bandwidth	0.0	1
+WLAN access point	0.0	1
+communication via WLAN	0.0	1
+rail operator DSB	0.0	1
+￼￼￼￼￼￼￼￼￼￼￼￼￼Trainguard MT CBTC	0.0	1
+train for CCTV	0.0	1
+Lyons line d	0.0	1
+safety by compliance	0.0	1
+lyons line d	0.0	1
+transport capacity arises	0.0	1
+CBTC line	0.0	1
+energy consumption	0.0	1
+line length	0.0	1
+olympic park	0.0	1
+STO train	0.0	1
+city center	0.0	1
+railway application	0.0	1
+system design	0.0	1
+moving-block technology	0.0	1
+wayside network	0.0	1
+home pc	0.0	1
+Setup principle	0.0	1
+stepwise commissioning	0.0	1
+transportation network	0.0	1
+security demand	0.0	1
+train regulation	0.0	1
+revenue stream	0.0	1
+standardisation committee	0.0	1
+mainline transport	0.0	1
+system component	0.0	1
+CBTC standard	0.0	1
+delivery guarantee	0.0	1
+maintenance support	0.0	1
+communication performance	0.0	1
+headway requirement	0.0	1
+ixl TVD	0.0	1
+infrastructure equipment	0.0	1
+traffic split	0.0	1
+paris Ouragan	0.0	1
+onboard internet	0.0	1
+fleet management	0.0	1
+Driverless system	0.0	1
+transport today	0.0	1
+shuttle operation	0.0	1
+Fixed-data balises	0.0	1
+operation management	0.0	1
+movement authority	0.0	1
+education facility	0.0	1
+￼Greenfield installation	0.0	1
+driving instruction	0.0	1
+train departure	0.0	1
+bus passenger	0.0	1
+rail automation	0.0	1
+CTC level	0.0	1
+maximum flexibility	0.0	1
+frequency shift	0.0	1
+CBTC sub-system	0.0	1
+WLAN component	0.0	1
+caching feature	0.0	1
+transportation possibility	0.0	1
+At-seat Audio	0.0	1
+service planning	0.0	1
+moving-block principle	0.0	1
+Variable-data balises	0.0	1
+Internet onboard	0.0	1
+telecommunication regulation	0.0	1
+driverless version	0.0	1
+balise telegram	0.0	1
+radio device	0.0	1
+WLAN server	0.0	1
+black box	0.0	1
+travel time	0.0	1
+siemens component	0.0	1
+construction share	0.0	1
+signal change	0.0	1
+wayside infrastructure	0.0	1
+WLAN router	0.0	1
+passenger comfort	0.0	1
+IP protocol	0.0	1
+stepwise installation	0.0	1
+waiting time	0.0	1
+train tracking	0.0	1
+itc level	0.0	1
+beijing metro	0.0	1
+CTC operation	0.0	1
+paris metro	0.0	1
+broadband bandwidth	0.0	1
+key element	0.0	1
+reliability upgrade	0.0	1
+staff on-board	0.0	1
+connection cable	0.0	1
+balise system	0.0	1
+system Router	0.0	1
+performance requirement	0.0	1
+world leader	0.0	1
+train separation	0.0	1
+signalling system	0.0	1
+cellular coverage	0.0	1
+Jiakou station	0.0	1
+passenger volume	0.0	1
+train location	0.0	1
+gaulle airport	0.0	1
+control center	0.0	1
+video surveillance	0.0	1
+track-to-train connectivity	0.0	1
+ato algorithm	0.0	1
+interlocking function	0.0	1
+mainline train	0.0	1
+backhaul system	0.0	1
+butler network	0.0	1
+ato capability	0.0	1
+emergency situation	0.0	1
+cargo traffic	0.0	1
+wheel rotation	0.0	1
+Nanjing metro	0.0	1
+Incident analysis	0.0	1
+system setup	0.0	1
+time overview	0.0	1
+control system	0.0	1
+internet connection	0.0	1
+speed supervision	0.0	1
+iec WG	0.0	1
+Canarsie line	0.0	1
+CBTC train	0.0	1
+control operation	0.0	1
+train attendant	0.0	1
+overlay solution	0.0	1
+paris Orly	0.0	1
+digital advertising	0.0	1
+track-to-train communication	0.0	1
+rail metro	0.0	1
+block signalling	0.0	1
+interchangeability requirement	0.0	1
+cost effectiveness	0.0	1
+Airlink work	0.0	1
+landside system	0.0	1
+STO DTO	0.0	1
+olympic line	0.0	1
+automation system	0.0	1
+customer requirement	0.0	1
+key factor	0.0	1
+track circuit	0.0	1
+rail vehicle	0.0	1
+Nanjing ‘s	0.0	1
+software platform	0.0	1
+algiers line	0.0	1
+operation center	0.0	1
+GPS datum	0.0	1
+operator requirement	0.0	1
+equipment thanks	0.0	1
+track operation	0.0	1
+Airlink combine	0.0	1
+mexico city	0.0	1
+bandwidth need	0.0	1
+Wenyuan station	0.0	1
+driverless system	0.0	1
+safety thanks	0.0	1
+passenger infotainment	0.0	1
+logistics solution	0.0	1
+signalling contract	0.0	1
+subway line	0.0	1
+￼Environment adaptability	0.0	1
+energy saving	0.0	1
+cost saving	0.0	1
+rail traffic	0.0	1
+fall-back solution	0.0	1
+transport system	0.0	1
+future backbone	0.0	1
+transmission system	0.0	1
+CCTV channel	0.0	1
+communication infrastructure	0.0	1
+
+
+Configuration:
+POS_Start	p:NN p:NNP p:NNS
+POS_Internal	p:JJ p:IN p:NN p:NNP p:NNS p:POS
+POS_End	p:NN p:NNP p:NNS
+Ortografic unit	L
+Max term length	3

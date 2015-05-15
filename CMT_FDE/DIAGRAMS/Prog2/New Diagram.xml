@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><DiagramData><feature_model name="New Diagram.xml_0"><meta><data name="date">2015-20-15 10:32</data></meta><feature_tree>:r Prog2 (0) [1.1]	:m CBTC (1) [1.1]		:o CBTC fault reporting (10) [0.1]	:m ATS (2) [1.1]		:g ---ALT_GROUP---#0 [1.1]			: Stover CITYFLO (5) [0.1]				:o service brake (6) [0.1]			: Bombardier CITYFLO (7) [0.1]	:m passenger information system (3) [1.1]	:o central control system (8) [0.1]		:o user interface (9) [0.1]	:m track (4) [1.1]</feature_tree><modelConstraints></modelConstraints></feature_model><Diagram name="New Diagram.xml"><features>Name=passenger information system ContName=3 Color=255-0-0 Loc=385.190 Size=140.80
+Name=CBTC fault reporting ContName=10 Color=0-0-255 Loc=78.311 Size=140.80
+Name=CBTC ContName=1 Color=0-0-255 Loc=85.190 Size=140.80
+Name=service brake ContName=6 Color=255-120-0 Loc=519.468 Size=140.80
+Name=Prog2 ContName=0 Color=0-0-0 Loc=411.34 Size=140.80
+Name=Stover CITYFLO ContName=5 Color=255-0-0 Loc=625.327 Size=140.80
+Name=Bombardier CITYFLO ContName=7 Color=0-0-255 Loc=421.329 Size=140.80
+Name=user interface ContName=9 Color=255-255-0 Loc=819.319 Size=140.80
+Name=central control system ContName=8 Color=255-0-0 Loc=794.188 Size=140.80
+Name=track ContName=4 Color=90-70-180 Loc=234.190 Size=140.80
+Name=ATS ContName=2 Color=255-255-0 Loc=535.191 Size=140.80
+</features><connectors>StartName=---START_MANDATORY---#0 Loc=65.66 StartOwner=---FEATURE---#0 EndName=---END_MANDATORY---#0 Loc=65.0 EndOwner=---FEATURE---#1
+StartName=---START_MANDATORY---#0 Loc=65.66 StartOwner=---FEATURE---#0 EndName=---END_MANDATORY---#0 Loc=65.0 EndOwner=---FEATURE---#2
+StartName=---START_MANDATORY---#0 Loc=65.66 StartOwner=---FEATURE---#0 EndName=---END_MANDATORY---#0 Loc=65.0 EndOwner=---FEATURE---#3
+StartName=---START_MANDATORY---#0 Loc=65.66 StartOwner=---FEATURE---#0 EndName=---END_MANDATORY---#0 Loc=65.0 EndOwner=---FEATURE---#4
+StartName=---START_OPTIONAL---#0 Loc=54.66 StartOwner=---FEATURE---#5 EndName=---END_OPTIONAL---#0 Loc=65.0 EndOwner=---FEATURE---#6
+StartName=---START_OPTIONAL---#0 Loc=122.66 StartOwner=---FEATURE---#0 EndName=---END_OPTIONAL---#0 Loc=65.0 EndOwner=---FEATURE---#8
+StartName=---START_OPTIONAL---#0 Loc=66.66 StartOwner=---FEATURE---#8 EndName=---END_OPTIONAL---#0 Loc=65.0 EndOwner=---FEATURE---#9
+StartName=---START_OPTIONAL---#0 Loc=58.66 StartOwner=---FEATURE---#1 EndName=---END_OPTIONAL---#0 Loc=65.0 EndOwner=---FEATURE---#10
+</connectors><groups>GroupName=---ALT_GROUP---#0 type=ALT Loc=66.64 StartOwner=---FEATURE---#2 MemberName=---END_MANDATORY---#0 Loc=65.0 EndOwner=---FEATURE---#5 MemberName=---END_MANDATORY---#1 Loc=65.0 EndOwner=---FEATURE---#7
+</groups><constraints></constraints><misc>connectorsCount=2 includesCount=0 excludesCount=0 constraintControlsCount=0 altGroupsCount=1 orGroupsCount=0 featuresCount=11</misc><startingCommonalities>CBTC	ATS	passenger information system	track	</startingCommonalities><startingVariabilities>Stover CITYFLO	service brake	Bombardier CITYFLO	central control system	user interface	CBTC fault reporting	</startingVariabilities><featureColors>ATS	255-255-0
+CBTC	0-0-255
+service brake	255-120-0
+Bombardier CITYFLO	0-0-255
+central control system	255-0-0
+passenger information system	255-0-0
+track	90-70-180
+Stover CITYFLO	255-0-0
+user interface	255-255-0
+CBTC fault reporting	0-0-255
+</featureColors><featureOccurrences>ATS	f: ../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt i: 2813-2816 4289-4292 5830-5833 26418-26421 26822-26825 39018-39021 39202-39205 39297-39300 40271-40274 40936-40939 41319-41322 41936-41939 42258-42261 42463-42466 42529-42532 45548-45551 f: ../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt i: 0-3 130-133 248-251 664-667 754-757 782-785 1144-1147 1212-1215 1237-1240 1524-1527 1586-1589 1624-1627 1930-1933 2158-2161 2248-2251 2341-2344 2418-2421 3064-3067 3165-3168 3456-3459 3638-3641 3892-3895 4267-4270 4437-4440 4642-4645 4994-4997 5190-5193 5399-5402 6056-6059 6408-6411 6722-6725 7137-7140 7392-7395 7624-7627 8099-8102 8512-8515 8925-8928 9244-9247 9457-9460 9875-9878 10380-10383 10631-10634 11241-11244 11609-11612 12429-12432 
+CBTC	f: ../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt i: 11-15 196-200 570-574 964-968 2450-2454 2867-2871 3346-3350 3484-3488 5882-5886 6346-6350 6904-6908 7266-7270 7452-7456 7641-7645 7687-7691 7887-7891 7983-7987 10129-10133 12582-12586 16792-16796 20269-20273 20417-20421 20474-20478 20619-20623 21043-21047 21120-21124 21183-21187 21292-21296 21471-21475 21528-21532 21668-21672 21774-21778 21866-21870 22498-22502 23463-23467 24593-24597 26402-26406 26935-26939 30939-30943 30991-30995 31025-31029 31088-31092 32242-32246 33907-33911 34387-34391 50274-50278 f: ../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt i: 81-85 234-238 362-366 651-655 972-976 1131-1135 1573-1577 2175-2179 2265-2269 2399-2403 2808-2812 2859-2863 2896-2900 3260-3264 3298-3302 3378-3382 3685-3689 3719-3723 3783-3787 4518-4522 4552-4556 4568-4572 5086-5090 5121-5125 5275-5279 5447-5451 5985-5989 6143-6147 6210-6214 6478-6482 6805-6809 7189-7193 7223-7227 7363-7367 7489-7493 7697-7701 7885-7889 8009-8013 8145-8149 8177-8181 8297-8301 8583-8587 8975-8979 9007-9011 9043-9047 9336-9340 9395-9399 9605-9609 9623-9627 9650-9654 10023-10027 10309-10313 10815-10819 10976-10980 11067-11071 11182-11186 11459-11463 12145-12149 12216-12220 12253-12257 12485-12489 12628-12632 12682-12686 
+service brake	f: ../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt i: 49723-49737 57193-57208 57222-57235 57755-57770 57793-57807 57873-57888 57931-57946 57964-57977 58001-58016 58109-58124 58135-58150 58262-58277 
+Bombardier CITYFLO	f: ../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt i: 134-152 2483-2501 2773-2791 25902-25920 26508-26526 29682-29700 
+central control system	f: ../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt i: 47142-47164 48810-48832 
+passenger information system	f: ../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt i: 15127-15156 27554-27582 47880-47908 f: ../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt i: 10587-10615 10688-10717 10856-10884 
+track	f: ../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt i: 9442-9447 9458-9463 10864-10869 10986-10991 11132-11137 11847-11852 12300-12305 14730-14735 15519-15524 19165-19170 19865-19870 20368-20373 20761-20766 30771-30776 31359-31364 32624-32629 32955-32960 35169-35174 37893-37898 38464-38469 43952-43957 52781-52786 52912-52917 53104-53109 54117-54122 55824-55829 f: ../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt i: 501-506 1745-1750 3118-3123 3961-3966 9386-9391 9438-9443 9592-9597 9800-9805 10517-10522 
+Stover CITYFLO	f: ../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt i: 26699-26713 31222-31236 37119-37133 41603-41617 46422-46436 51915-51929 55699-55713 
+user interface	f: ../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt i: 952-966 1216-1230 1241-1255 3169-3183 3460-3474 4271-4285 4646-4660 11245-11259 11613-11627 
+CBTC fault reporting	f: ../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt i: 10976-10996 
+</featureOccurrences><featureVersions>ATS	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	ATS	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	ATS
+CBTC	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	CBTC	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	CBTC
+service brake	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	service braking	service brake	service brakes
+Bombardier CITYFLO	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Bombardier CITYFLO
+central control system	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Central Control System
+passenger information system	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	passenger information systems	Passenger Information system	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	Passenger information system	passenger information systems
+track	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	track	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	track
+Stover CITYFLO	f:	../CMT_FDE/ANALISYS/Prog2/Bombardier_merge_1.txt	Stover CITYFLO
+user interface	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	user interface
+CBTC fault reporting	f:	../CMT_FDE/ANALISYS/Prog2/ieeeATSfunctions_4_1.txt	CBTC fault reporting
+</featureVersions></Diagram></DiagramData>

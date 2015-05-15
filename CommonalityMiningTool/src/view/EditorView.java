@@ -900,19 +900,19 @@ public class EditorView extends JFrame implements Observer{
 		//creating tools items
 		toolIconPaths=new HashMap<String, String>();
 //		toolIconPaths.put("New Feature", "/New Feature2.png");
-		toolIconPaths.put("New Feature", "/New Feature3.png");
+		toolIconPaths.put("New Feature", "/cmt/newf.png");
 //		toolIconPaths.put("Mandatory Link", "/Mandatory Link.png");
-		toolIconPaths.put("Mandatory Link", "/Mandatory Link_2nd.png");		
+		toolIconPaths.put("Mandatory Link", "/cmt/mandatory.png");		
 //		toolIconPaths.put("Optional Link", "/Optional Link.png");
-		toolIconPaths.put("Optional Link", "/Optional Link_2nd.png");
-		toolIconPaths.put("Excludes", "/Excludes.png");
-		toolIconPaths.put("Includes", "/Includes.png");
+		toolIconPaths.put("Optional Link", "/cmt/optional2.png");
+		toolIconPaths.put("Excludes", "/cmt/excludes.png");
+		toolIconPaths.put("Includes", "/cmt/includes.png");
 //		toolIconPaths.put("Alternative Group", "/Alternative Group.png");
-		toolIconPaths.put("Alternative Group", "/Alternative Group_2nd_tmp4.png");
+		toolIconPaths.put("Alternative Group", "/cmt/alternativenew3.png");
 //		toolIconPaths.put("Or Group", "/Or Group.png");
 //		toolIconPaths.put("Or Group", "/Or Group_2nd_tmp2.png");
-		toolIconPaths.put("Or Group", "/Or Group_2nd_tmp4.png");		
-		toolIconPaths.put("Start Link Dot", "/Connector Start Dot.png");		
+		toolIconPaths.put("Or Group", "/cmt/and2.png");		
+		toolIconPaths.put("Start Link Dot", "/cmt/start.png");		
 				
 		JLabel iconTmpPanel=null;
 		GridBagConstraints c = new GridBagConstraints();

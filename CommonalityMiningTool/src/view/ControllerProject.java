@@ -110,10 +110,22 @@ public class ControllerProject implements ActionListener, WindowListener, MouseL
 				modelProject.addFileProject(s[1]);
 			
 	  }
-	  else if(ae.getActionCommand().equals("Load Analisys Folder")){
+	  else if(ae.getActionCommand().equals("Load Analysis Folder")){
 			String [] s = null;
 			
 			if((s = viewProject.loadFolderDialog()) != null){
+			  
+			  /* ***DEBUG*** */
+			  if(verbose) for(String file : s) System.out.println("file: "+file);
+			  /* ***DEBUG*** */
+
+			  modelProject.addAnalisysFolderProject(s);				
+			}
+
+	  }else if(ae.getActionCommand().equals("Load2 File")){
+			String [] s = null;
+			
+			if((s = viewProject.loadFile()) != null){
 			  
 			  /* ***DEBUG*** */
 			  if(verbose) for(String file : s) System.out.println("file: "+file);

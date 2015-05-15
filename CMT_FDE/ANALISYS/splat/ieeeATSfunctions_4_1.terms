@@ -1,0 +1,233 @@
+extent	extent
+direction of train	direction of trains
+control action confirmation	Control action confirmation
+roadway worker	roadway workers
+movement of train	movement of trains
+train braking	train braking
+record	records
+NOTE-Examples	NOTE-Examples
+Interoperability interface requirement	Interoperability interface requirements
+passenger information system	Passenger information system	passenger information systems
+merging	merging
+impact	impact
+profile	profile	profiles
+train length	train length
+input	input
+route	route	routes
+user interfaces/inputs	user interfaces/inputs
+stopping	stopping
+ATS user	ATS user	ATS users
+energy optimization algorithm	energy optimization algorithms
+consideration	consideration
+IEEE Std	IEEE Std
+CBTC functionality	CBTC functionality
+jurisdiction	jurisdiction
+Junction management	Junction management
+availability	availability
+characteristic	characteristics
+wayside-to-train	wayside-to-train
+rerouting of train	rerouting of trains
+capability	capabilities	capability
+train at junction	trains at junctions
+automatic train regulation	Automatic train regulation
+group of CBTC-equipped	group of CBTC-equipped
+exit signal	exit signal
+responsibility	responsibility
+blocking	blocking
+subclause in order	subclause in order
+operating	operating
+accordance	accordance
+user interface	user interface
+run time	run times
+section of track	section of track	sections of track
+CBTC movement authority	CBTC movement authority
+subclause	subclause
+transit application	transit application
+information	information
+operation	operations	operation
+CBTC fault reporting	CBTC fault reporting
+ATS	ATS
+junction	junctions
+train operator	train operator
+coordination	coordination
+work crew	work crews
+CBTC system	CBTC system
+acceleration	acceleration
+rail condition	rail conditions
+munications interface	munications interface
+implement	implement
+interoperability interface standard	interoperability interface standards
+ato	ATO
+Wayside equipment	Wayside equipment
+train	Train	trains
+train fault reporting	Train fault reporting
+area	areas	area
+communication network	communications network
+ato mode	ATO mode
+visibility	visibility
+interoperability interface requirement	interoperability interface requirements
+system hazard	system hazards
+ATS function	ATS functions
+CBTC standard	CBTC standard
+train location	Train location
+CBTC equipment	CBTC equipment
+circumstance	circumstances
+headway regulation	headway regulation
+failure	Failures
+authority	authority	authorities
+control action	control actions	Control action
+fault reporting	Fault reporting
+adjustment	adjustments
+speed regulation function	speed regulation function
+entry point	entry point
+group of station	group of stations
+IEEE Std 1474.2-2003.	IEEE Std 1474.2-2003.
+rule	rules
+headways	headways
+interface	interface	interfaces
+speed	speed	speeds
+work zone	work zones	work zone
+energy optimization	Energy optimization
+train schedule	train schedule
+track circuit	track circuits
+outage	outages
+headways between train	headways between trains
+ATS equipment	ATS equipment
+stop train	Stop train
+speed profile	speed profile
+train in response	trains in response
+train door	train doors
+storage area	storage areas
+service	service
+Schedule	Schedule
+removal	removal
+location	location	locations
+e.g.	e.g.
+acknowledgment	acknowledgment
+headway adherence	headway adherence
+train length datum	train length data
+train tracking	train tracking
+type	type
+authority limit	authority limits
+datum communication	data communications
+ATS user interface	ATS user interface
+approach	approach
+variation	Variations
+relation	relation
+train operation	train operations
+speed on approach	speeds on approach
+CBTC	CBTC
+unblock	unblock
+loss	loss
+schedule/headway regulation	schedule/headway regulation
+hazard	hazards	hazard
+optimization	optimization
+Schedule/headway regulation	Schedule/headway regulation
+supplier	supplier	suppliers
+CBTC control	CBTC control
+CBTC-equipped train operating	CBTC-equipped train operating
+wayside for display	wayside for display
+station in ato	station in ATO
+order	order
+method	methods
+service management	service management
+probability	probability
+CBTC-equipped train	CBTC-equipped train	CBTC-equipped trains
+dwell time variance	dwell time variance
+train identity	train identities
+priority	priority
+interface design standard	interface design standards
+ATS system	ATS system
+following	following
+restriction	restrictions	restriction
+train identification	train identification
+operating unit	operating unit
+station without stopping	stations without stopping
+datum com	data com
+length icon	length icon
+train arrival information	train arrival information
+station departure time	station departure time
+protection	protection
+tions	tions
+crew	crews
+identity	identities
+train acceleration	train acceleration
+system delay	system delays
+train health datum	train health data
+display	display	displays
+change	changes
+emergency brake application	emergency brake application
+service brake rate	service brake rates
+train service datum	train service data
+conductor	conductor
+passenger information message	passenger information messages
+track configuration	track configuration
+train meet	train meets
+transit system	transit system
+service disruption	service disruptions
+CBTC train identification	CBTC train identification
+minimum	minimum
+movement	movement
+facility	facilities
+group of CBTC	group of CBTC
+train regulation function	train regulation functions
+auto	auto
+CBTC territory	CBTC territory
+precision	precision
+brake application	brake application
+subsystem	subsystems
+section	section	sections
+manner	manner
+train service	train service
+train route	Train routes
+merge point	merge point
+function	functions	function
+skip station information	skip station information
+change in service	changes in service
+group	group
+display datum	display data
+interoperability	interoperability
+wayside	wayside
+train coasting	train coasting
+condition	conditions
+transfer	transfers
+performance of CBTC	performance of CBTC
+work train	work trains
+position	position
+position of train	position of trains
+datum	data
+train en route	train en route
+CBTC-equipped	CBTC-equipped
+purpose	purposes
+line	lines
+latency	latencies
+user information	user information
+train routing	Train routing
+switch	switch	switches
+general	General
+rerouting	rerouting
+movement authority	movement authorities	movement authority
+station	stations	station
+alarm	alarms
+type of train	type of train
+service strategy	service strategy	service strategies
+track	track	tracks
+Skip station stop	Skip station stop
+train location information	Train location information
+direction	direction
+implementation	implementation
+control	control
+requirement	requirements
+command	commands
+Hold train	Hold train
+performance	performance
+application	application
+response	response
+mean	means
+speed restriction	speed restrictions
+front	front
+reduction	reductions
+interoperability requirement	interoperability requirements
+account	account
+door control inhibit	Door control inhibit
+dispatching function	dispatching function

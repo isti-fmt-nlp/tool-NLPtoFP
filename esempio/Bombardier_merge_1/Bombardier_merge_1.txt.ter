@@ -1,0 +1,609 @@
+Lemma_of_Term	Domain_relavance	Frequency
+CITYFLO	100.0	65
+Region	99.999999851	48
+Muzha	99.9999997962	44
+atc	99.999999709	39
+train control	99.9999996429	36
+CBTC	99.9999995912	34
+Neihu	99.999999463	30
+Bombardier	99.9999991059	23
+train control system	99.9999989501	21
+Region ato	99.9999987539	19
+central control	99.9999985004	17
+train	99.9999982858	154
+wayside	99.9999982503	26
+CBTC system	99.9999981617	15
+Region atp	99.9999981617	15
+atp	99.9999981617	15
+datum	99.9999979468	14
+Muzha vehicle	99.99999769	13
+ato	99.99999769	13
+ATS	99.99999769	13
+Wayside	99.99999769	13
+VATP	99.9999973786	12
+Muzha line	99.9999965097	10
+mass transit	99.9999965097	10
+OCC	99.9999965097	10
+metro	99.9999965097	10
+RF	99.9999958828	9
+TWC	99.9999958828	9
+Phase	99.9999958828	9
+central control network	99.9999950447	8
+system Overview	99.9999950447	8
+onboard	99.9999950447	8
+signalling	99.9999950447	8
+atc system	99.9999938765	7
+Wayside network	99.9999938765	7
+Neihu vehicle	99.9999938765	7
+Stover CITYFLO	99.9999938765	7
+VATO	99.9999938765	7
+wayside atc	99.9999921549	6
+revenue service	99.9999921549	6
+RATP	99.9999921549	6
+train operation	99.9999914419	9
+overlay	99.9999914419	9
+line of Sight	99.9999894107	5
+Neihu line	99.9999894107	5
+Bombardier CITYFLO	99.9999894107	5
+coaxial cable	99.9999894107	5
+cutover	99.9999894107	5
+sub-systems	99.9999894107	5
+CCO	99.9999894107	5
+Norming	99.9999894107	5
+CFMS	99.9999894107	5
+Sight	99.9999894107	5
+BDR	99.9999894107	5
+MDR	99.9999894107	5
+braking	99.9999894107	5
+tag	99.999987001	9
+occupancy	99.999985068	10
+railway	99.9999845215	13
+train Registry system	99.9999844867	4
+CITYFLO system	99.9999844867	4
+Muzha system	99.9999844867	4
+wayside equipment	99.9999844867	4
+block CITYFLO	99.9999844867	4
+vehicle atp	99.9999844867	4
+vehicle atc	99.9999844867	4
+Wayside communication	99.9999844867	4
+train movement	99.9999844867	4
+railway network	99.9999844867	4
+system architecture	99.9999844867	4
+Neihu system	99.9999844867	4
+Muzha depot	99.9999844867	4
+track circuit	99.9999844867	4
+atp system	99.9999844867	4
+retrofit	99.9999844867	4
+Conflict	99.9999844867	4
+redundancy	99.9999844867	4
+Segment	99.9999844867	4
+sweeping	99.9999844867	4
+RATO	99.9999844867	4
+overview	99.9999844867	4
+initialization	99.9999844867	4
+TRS	99.9999844867	4
+reliability	99.9999844867	4
+implementation	99.9999809823	7
+distance	99.9999800682	18
+installation	99.999976872	20
+automatic train protection	99.9999736783	3
+mass transit system	99.9999736783	3
+vehicle tag reader	99.9999736783	3
+base data radio	99.9999736783	3
+Region atp computer	99.9999736783	3
+madrid metro	99.9999736783	3
+Neihu-Muzha line	99.9999736783	3
+vehicle ato	99.9999736783	3
+interlocking system	99.9999736783	3
+emergency brake	99.9999736783	3
+service brake	99.9999736783	3
+Neihu extension	99.9999736783	3
+atc equipment	99.9999736783	3
+Neihu depot	99.9999736783	3
+ato system	99.9999736783	3
+position error	99.9999736783	3
+mainline solution	99.9999736783	3
+test track	99.9999736783	3
+TWC equipment	99.9999736783	3
+Bombardier INTERFLO	99.9999736783	3
+system performance	99.9999736783	3
+EBI cab	99.9999736783	3
+Bombardier inc	99.9999736783	3
+Region atc	99.9999736783	3
+jeffrey s	99.9999736783	3
+ERTMS	99.9999736783	3
+subsystem	99.9999736783	3
+Radiax	99.9999736783	3
+interlockings	99.9999736783	3
+EoCell	99.9999736783	3
+MBCS	99.9999736783	3
+interoperability	99.9999736783	3
+DTO/UTO	99.9999736783	3
+UTO	99.9999736783	3
+INTERFLO	99.9999736783	3
+automated	99.9999736783	3
+mobile	99.9999675848	5
+system	99.9999671975	116
+interface	99.9999528128	4
+depot	99.9999528128	4
+vehicle	99.9999489901	41
+central	99.9999429332	18
+phase	99.9999381512	9
+system operation	99.9999369759	4
+automatic train control	99.9999369759	2
+Wayside network backbone	99.9999369759	2
+Driverless train Operation	99.9999369759	2
+number of region	99.9999369759	2
+line system INTERFLO	99.9999369759	2
+passenger information system	99.9999369759	2
+Operational central control	99.9999369759	2
+customer s need	99.9999369759	2
+train control product	99.9999369759	2
+end of line	99.9999369759	2
+base datum radio	99.9999369759	2
+mass transit market	99.9999369759	2
+line speed limit	99.9999369759	2
+central control system	99.9999369759	2
+mobile data radio	99.9999369759	2
+ATP/ATO maintenance datum	99.9999369759	2
+cost of fuel	99.9999369759	2
+station sign	99.9999369759	2
+Norming Points	99.9999369759	2
+head footprint	99.9999369759	2
+ATS functionality	99.9999369759	2
+service history	99.9999369759	2
+CITYFLO solution	99.9999369759	2
+metro installation	99.9999369759	2
+location datum	99.9999369759	2
+rail transit	99.9999369759	2
+transition area	99.9999369759	2
+ERTMS level	99.9999369759	2
+overlay project	99.9999369759	2
+UTO system	99.9999369759	2
+rail industry	99.9999369759	2
+los antenna	99.9999369759	2
+railway solution	99.9999369759	2
+train location	99.9999369759	2
+rail operator	99.9999369759	2
+tag location	99.9999369759	2
+Norming point	99.9999369759	2
+RF distribution	99.9999369759	2
+initialization process	99.9999369759	2
+train occupancy	99.9999369759	2
+safety restriction	99.9999369759	2
+ATS system	99.9999369759	2
+block system	99.9999369759	2
+Region Number	99.9999369759	2
+car wash	99.9999369759	2
+occupancy generation	99.9999369759	2
+rail vehicle	99.9999369759	2
+radio frequency	99.9999369759	2
+Segment Number	99.9999369759	2
+signalling solution	99.9999369759	2
+Bombardier transportation	99.9999369759	2
+testing program	99.9999369759	2
+moving-block system	99.9999369759	2
+Conflict Points	99.9999369759	2
+movement authority	99.9999369759	2
+radio system	99.9999369759	2
+railway industry	99.9999369759	2
+frequency band	99.9999369759	2
+segment layout	99.9999369759	2
+cab signalling	99.9999369759	2
+Distribution Amplifiers	99.9999369759	2
+Conventional	99.9999369759	2
+BDRs	99.9999369759	2
+jerk	99.9999369759	2
+VATC	99.9999369759	2
+switch	99.9999358524	7
+track	99.9999346848	17
+mode	99.9999239329	5
+fat	99.9999211389	4
+cab	99.9999203877	3
+headway	99.9999203877	3
+radio	99.9999182751	17
+testing	99.9999115059	9
+segment	99.9999055108	13
+communication	99.999905302	16
+integration	99.9999036168	7
+evolution	99.999902107	5
+station	99.9999004941	14
+route	99.9998981832	9
+location	99.9998981172	14
+block	99.9998922278	15
+capability	99.9998911941	5
+pair	99.9998736281	4
+development effort	99.9998736281	2
+identification	99.999867097	3
+function	99.9998584869	7
+architecture	99.9998584552	5
+speed	99.999847767	10
+error	99.9998455927	7
+element	99.9998451173	6
+platform	99.9998419542	4
+command	99.9998404517	3
+line	99.9998393728	28
+taipei	99.9998257163	5
+region	99.9998133317	13
+requirement	99.9998102803	8
+congestion	99.9998102803	2
+component	99.999787936	6
+availability	99.9997786065	4
+equipment	99.9997697649	14
+operation	99.9997652135	31
+solution	99.9997389235	6
+maintenance	99.9997274996	5
+fleet	99.9997165867	5
+safety	99.99971428	10
+service	99.9996617932	23
+disruption	99.9996539344	3
+hardware	99.9996539344	3
+design	99.999652179	7
+failure	99.9996519109	8
+figure	99.9996414126	14
+taiwan	99.999640196	5
+project	99.999630636	15
+status	99.999629283	5
+information	99.9996271512	14
+transmission	99.999620237	2
+emergency	99.9996139664	9
+feature	99.9996044001	4
+need	99.9995991211	8
+master	99.9995885631	4
+auto operation	99.9995568892	2
+technology	99.999543838	12
+concept	99.9995252154	4
+transition	99.9995207077	3
+operator	99.9995093784	4
+display	99.9994940624	3
+cell	99.9994765016	5
+flexibility	99.9994407717	3
+movement	99.9994301937	4
+challenge	99.9994143568	4
+introduction	99.9994141264	3
+application	99.9993985198	4
+set	99.9993826829	4
+approach	99.999345546	5
+storage	99.9993341904	3
+ability	99.9993059795	6
+supplier	99.9992808998	3
+traffic	99.9992718243	4
+site	99.9992084765	4
+risk	99.9991965229	9
+message	99.9990410918	3
+control	99.99903221	9
+passenger	99.9990144465	3
+performance	99.9990119044	6
+product line	99.9989867593	2
+section	99.9989709224	4
+customer	99.9988590154	9
+event	99.9987780721	5
+place	99.9987014917	6
+choice	99.9986414118	3
+position	99.9986335335	7
+point	99.9986044304	10
+purpose	99.9985614759	3
+work	99.9985110382	7
+october	99.9983093915	6
+announcement	99.9983057707	4
+step	99.9981157274	4
+los	99.9981123815	5
+delivery	99.9981085052	3
+data	99.9979731949	4
+area	99.9979159482	5
+type	99.9977887613	3
+example	99.9976649502	5
+cost	99.9975181812	7
+power	99.997435778	5
+time	99.9973877032	13
+process	99.997202564	3
+subsidiary	99.9971759187	3
+south korea	99.9971496739	2
+product	99.9971120124	7
+network	99.9969894014	3
+use	99.9969437936	4
+end	99.9968464781	5
+order	99.9967046097	5
+device	99.9961994573	2
+paper	99.9961836204	4
+advantage	99.9960727618	2
+number	99.996071658	5
+discussion	99.9959460662	2
+development	99.9957637162	3
+term	99.9955184688	4
+minute	99.995185893	2
+demand	99.9945113858	3
+fall	99.9942990241	2
+life	99.9938985432	3
+effort	99.9934189273	3
+plan	99.9933329706	4
+program	99.9908307336	4
+world	99.9902214877	3
+case	99.9895020639	3
+hour	99.9894845935	2
+problem	99.988462896	3
+way	99.9874237282	3
+action	99.9873307693	2
+san francisco	99.9868873349	2
+year	99.9719814974	6
+stock	99.905232126	2
+market	99.9045353021	2
+resumption of operation	0.0	1
+Sequence Spread spectrum	0.0	1
+pair per train	0.0	1
+movement of train	0.0	1
+end of route	0.0	1
+Region control equipment	0.0	1
+wayside control system	0.0	1
+Region ato computer	0.0	1
+wayside device interface	0.0	1
+EBI cab system	0.0	1
+place in preparation	0.0	1
+train control datum	0.0	1
+CITYFLO Monitoring system	0.0	1
+vehicle ATP/ATO equipment	0.0	1
+VATO Stopping accuracy	0.0	1
+pittsburgh in preparation	0.0	1
+integration of vehicle	0.0	1
+rail transit application	0.0	1
+safety critical task	0.0	1
+preparation for integration	0.0	1
+emergency Walkway location	0.0	1
+Neihu central control	0.0	1
+Muzha automated line	0.0	1
+Moving block Concept	0.0	1
+CITYFLO monitoring system	0.0	1
+mass transit operator	0.0	1
+safety the CITYFLO	0.0	1
+Muzha central control	0.0	1
+block Locations the	0.0	1
+tag reader antenna	0.0	1
+Introduction Increased urbanization	0.0	1
+determination of location	0.0	1
+Additional new vehicle	0.0	1
+communication system INTERFLO	0.0	1
+propulsion control unit	0.0	1
+Bombardier CITYFLO product	0.0	1
+application of CITYFLO	0.0	1
+term Region atc	0.0	1
+taipei city government	0.0	1
+central control equipment	0.0	1
+position measurement error	0.0	1
+overview of CITYFLO	0.0	1
+collection of switch	0.0	1
+implementation of speed	0.0	1
+cost of operation	0.0	1
+platform screen door	0.0	1
+date CBTC product	0.0	1
+spread spectrum technology	0.0	1
+number of train	0.0	1
+coaxial cable segment	0.0	1
+Neihu wayside system	0.0	1
+atp system interface	0.0	1
+RATP Occupancy generation	0.0	1
+VATP Overspeed protection	0.0	1
+er.com jeffrey s	0.0	1
+train control technology	0.0	1
+flexibility in term	0.0	1
+control operator workstation	0.0	1
+worst-case performance parameter	0.0	1
+high-performance backplane bus	0.0	1
+Muzha wayside equipment	0.0	1
+customer s requirement	0.0	1
+system in place	0.0	1
+processor for safety	0.0	1
+train operation system	0.0	1
+Neihu line CITYFLO	0.0	1
+vehicle atc system	0.0	1
+Muzha revenue service	0.0	1
+role in today	0.0	1
+OCC during Phase	0.0	1
+Rear of train	0.0	1
+onboard mobile antenna	0.0	1
+radio Frequency STO	0.0	1
+system issue command	0.0	1
+LRV control system	0.0	1
+vehicle integration issue	0.0	1
+automatic train Operation	0.0	1
+emergency brake stop	0.0	1
+RF-to-fiber conversion unit	0.0	1
+block CBTC technology	0.0	1
+industry standard interface	0.0	1
+time of occurrence	0.0	1
+site in taipei	0.0	1
+tag in turn	0.0	1
+train control equipment	0.0	1
+design Features CITYFLO	0.0	1
+block system trademark	0.0	1
+section of track	0.0	1
+train control data	0.0	1
+installation of CBTC	0.0	1
+ATS system monitor	0.0	1
+Neihu-Muzha line system	0.0	1
+train operation TRS	0.0	1
+mass transit requirement	0.0	1
+Neihu line enters	0.0	1
+system from central	0.0	1
+philosophy of interoperability	0.0	1
+control centre operator	0.0	1
+type of vehicle	0.0	1
+subsidiary jeffrey s	0.0	1
+RS-485 serial network	0.0	1
+Region atc refers	0.0	1
+benefit of CBTC	0.0	1
+train control DSSS	0.0	1
+RF-to-Fiber master converter	0.0	1
+information about CITYFLO	0.0	1
+EBI cruise system	0.0	1
+spread spectrum radio	0.0	1
+speed of zero	0.0	1
+operation control system	0.0	1
+system management function	0.0	1
+Bombardier CITYFLO Solutions	0.0	1
+ATS control screen	0.0	1
+overview in Fogure	0.0	1
+CITYFLO CBTC system	0.0	1
+pittsburgh test track	0.0	1
+information system INTERFLO	0.0	1
+Centralized Maintenance office	0.0	1
+production Neihu vehicle	0.0	1
+service proven component	0.0	1
+tolerance in equipment	0.0	1
+life cycle cost	0.0	1
+contract in mid-2003	0.0	1
+Muzha vehicle retrofit	0.0	1
+term Moving block	0.0	1
+CBTC on-board system	0.0	1
+Norming point Tag	0.0	1
+RF distribution network	0.0	1
+failure management strategy	0.0	1
+madrid metro lines	0.0	1
+VATO train operation	0.0	1
+LRT tunnel system	0.0	1
+train initialization information	0.0	1
+train in MBCS	0.0	1
+Region ato unit	0.0	1
+Muzha system atc	0.0	1
+STO metro system	0.0	1
+CITYFLO segment Layout	0.0	1
+CBTC system installation	0.0	1
+RATP Roll-back protection	0.0	1
+london heathrow terminal	0.0	1
+time of resumption	0.0	1
+Bombardier in taipei	0.0	1
+line of sight	0.0	1
+overlay in order	0.0	1
+event of failure	0.0	1
+train in Front	0.0	1
+train movement control	0.0	1
+action in order	0.0	1
+place during Phase	0.0	1
+VATP Parted-Train protection	0.0	1
+ITU recommendation	0.0	1
+jerk limitation	0.0	1
+vehicle equipment	0.0	1
+atc operation	0.0	1
+wheel axle	0.0	1
+service disruption	0.0	1
+master b	0.0	1
+master a	0.0	1
+onboard attendant	0.0	1
+automatic operation	0.0	1
+datum logger	0.0	1
+layout change	0.0	1
+traffic capacity	0.0	1
+NOTATION ATS	0.0	1
+transponder interrogator	0.0	1
+automatic Restart	0.0	1
+recovery system	0.0	1
+radio communication	0.0	1
+automatic Startup	0.0	1
+VATO Onboard	0.0	1
+override request	0.0	1
+platform door	0.0	1
+solution eliminates	0.0	1
+radio transmission	0.0	1
+atc CITYFLO	0.0	1
+Brownfield project	0.0	1
+power transmission	0.0	1
+Neihu/Muzha project	0.0	1
+Moving-Block system	0.0	1
+Radiax cable	0.0	1
+route assignment	0.0	1
+block technique	0.0	1
+MovingBlock system	0.0	1
+Additional workstation	0.0	1
+maintenance technician	0.0	1
+datum logging	0.0	1
+ATS display	0.0	1
+door control	0.0	1
+atc region	0.0	1
+Neihu OCC	0.0	1
+Dallas/Fort worth	0.0	1
+route segment	0.0	1
+Sight MDR	0.0	1
+cell fails	0.0	1
+rail control	0.0	1
+headway regulation	0.0	1
+train dispatch	0.0	1
+wheel diameter	0.0	1
+transit authority	0.0	1
+radio connection	0.0	1
+design process	0.0	1
+brownfield environment	0.0	1
+onboard operator	0.0	1
+positioning error	0.0	1
+mobile Antennas	0.0	1
+driver function	0.0	1
+braking Interlocks	0.0	1
+stock asset	0.0	1
+train management	0.0	1
+train Occupancy	0.0	1
+EoCell equipment	0.0	1
+communication highway	0.0	1
+system element	0.0	1
+radio signal	0.0	1
+UITP president	0.0	1
+user interface	0.0	1
+customer requirement	0.0	1
+planning skill	0.0	1
+Brownfield nature	0.0	1
+datum radio	0.0	1
+Muzha/Neihu line	0.0	1
+STO CBTC	0.0	1
+power distribution	0.0	1
+Sight antennae	0.0	1
+trainborne ATCs	0.0	1
+atc cutover	0.0	1
+coaxial antenna	0.0	1
+Conflict point	0.0	1
+traction SCADA	0.0	1
+interoperability conclusion	0.0	1
+traffic demand	0.0	1
+rail transportation	0.0	1
+redundant configuration	0.0	1
+salient feature	0.0	1
+braking distance	0.0	1
+track in	0.0	1
+configuration datum	0.0	1
+transmits datum	0.0	1
+EoCell device	0.0	1
+system availability	0.0	1
+Continuous track	0.0	1
+wayside element	0.0	1
+power supply	0.0	1
+transport capacity	0.0	1
+interoperability element	0.0	1
+rapid transit	0.0	1
+emergency braking	0.0	1
+Region Boundary	0.0	1
+Muzha switch	0.0	1
+fleet hold	0.0	1
+vehicle alarm	0.0	1
+ghz band	0.0	1
+key word	0.0	1
+track switch	0.0	1
+door operation	0.0	1
+display system	0.0	1
+test vehicle	0.0	1
+report generation	0.0	1
+lost-communication train	0.0	1
+skip station	0.0	1
+RF system	0.0	1
+Standby unit	0.0	1
+Manual tram	0.0	1
+occupancy detection	0.0	1
+radio component	0.0	1
+control datum	0.0	1
+operator interface	0.0	1
+message identifies	0.0	1
+antenna network	0.0	1
+CC subsystem	0.0	1
+
+
+Configuration:
+POS_Start	p:NN p:NNP p:NNS
+POS_Internal	p:JJ p:IN p:NN p:NNP p:NNS p:POS
+POS_End	p:NN p:NNP p:NNS
+Ortografic unit	L
+Max term length	3
