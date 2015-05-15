@@ -900,7 +900,7 @@ public class EditorView extends JFrame implements Observer{
 		//creating tools items
 		toolIconPaths=new HashMap<String, String>();
 //		toolIconPaths.put("New Feature", "/New Feature2.png");
-		toolIconPaths.put("New Feature", "/cmt/newf.png");
+		toolIconPaths.put("New Feature", "/cmt/newff.png");
 //		toolIconPaths.put("Mandatory Link", "/Mandatory Link.png");
 		toolIconPaths.put("Mandatory Link", "/cmt/mandatory.png");		
 //		toolIconPaths.put("Optional Link", "/Optional Link.png");
