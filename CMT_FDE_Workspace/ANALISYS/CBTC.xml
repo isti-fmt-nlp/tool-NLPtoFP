@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="UTF-8"?><root>CBTC<node>Input<leaf>Alstom.txt<path>../example/Alstom/Alstom.txt</path></leaf><leaf>Bombardier.txt<path>../example/Bombardier/Bombardier.txt</path></leaf><leaf>Siemens.txt<path>../example/Siemens/Siemens.txt</path></leaf><leaf>thales.txt<path>../example/thales/thales.txt</path></leaf></node><node>Commonalities</node></root>
