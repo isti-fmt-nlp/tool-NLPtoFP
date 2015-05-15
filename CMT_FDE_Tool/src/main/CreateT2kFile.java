@@ -9,8 +9,11 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.util.List;
 
+import javax.swing.JFrame;
+
 import org.apache.commons.io.FileUtils;
 
+import view.LoginDialog;
 import cnr.ilc.t2k.*;
 
 public class CreateT2kFile {
@@ -18,16 +21,26 @@ public class CreateT2kFile {
 	private String NomeFile;
 	private t2kCore t2k;
 	private File file;
-
+	private File resultdir;
 	public CreateT2kFile(File f){
 		NomeFile = f.getName();
-		t2k = new t2kCore("","");
-		file = f;
-		t2k.executeNewCorpus(file, file.getName(), Language.English);
-
+		JFrame frame = new JFrame("Login T2k");
+		LoginDialog loginDlg = new LoginDialog(frame);
+		loginDlg.setVisible(true);
+		// if logon successfully
+		if(loginDlg.isSucceeded()){
+			t2k = new t2kCore(loginDlg.getUsername(),loginDlg.getPassword());
+			file = f;
+			t2k.executeNewCorpus(file, file.getName(), Language.English);
+			resultdir = this.run();
+		}
 	}
 
-	public File run(){
+	public File getresultdir(){
+		return resultdir;
+	}
+
+	private File run(){
 
 
 		String absolutePath = file.getAbsolutePath();
@@ -86,28 +99,28 @@ public class CreateT2kFile {
 		t2k.downloadTerm_Extraction_Indexer(namedir);
 
 		t2k.delCorpus();
-		
+
 		File dir = new File(namedir);
 		if (dir.isDirectory()) { // make sure it's a directory
-		    for (final File f : dir.listFiles()) {
-		        try {
-		            File newfile =new File(f.getAbsolutePath().substring(0, f.getAbsolutePath().lastIndexOf(".")).replace(".txt", ""));
+			for (final File f : dir.listFiles()) {
+				try {
+					File newfile =new File(f.getAbsolutePath().substring(0, f.getAbsolutePath().lastIndexOf(".")).replace(".txt", ""));
 
-		            if(f.renameTo(newfile)){
-		                System.out.println("Rename succesful");
-		            }else{
-		                System.out.println("Rename failed");
-		            }
-		        } catch (Exception e) {
-		            // TODO: handle exception
-		            e.printStackTrace();
-		        }
-		    }
+					if(f.renameTo(newfile)){
+						System.out.println("Rename succesful");
+					}else{
+						System.out.println("Rename failed");
+					}
+				} catch (Exception e) {
+					// TODO: handle exception
+					e.printStackTrace();
+				}
+			}
 		}
 		File f = new File(namedir+file.getName());
 		copyFile(file,f);
 
-		
+
 		return dir;
 
 

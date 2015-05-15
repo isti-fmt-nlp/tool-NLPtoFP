@@ -806,8 +806,12 @@ public class ViewProject implements Observer/*, Runnable*/{
     	//activating throbber
     	if (analisysFiles != null) startThrobber();
 */
-	    CreateT2kFile t2k = new CreateT2kFile(chooser.getSelectedFile());
-	    File dir = t2k.run();
+	    CreateT2kFile t2k = null;
+	    File dir = null;
+	    while(dir==null){
+	    	t2k = new CreateT2kFile(chooser.getSelectedFile());
+		    dir = t2k.getresultdir();
+	    }
 //	    analisysDir=new File(chooser.getSelectedFile().getAbsolutePath());
 
 	    //checking that all needed files are present
