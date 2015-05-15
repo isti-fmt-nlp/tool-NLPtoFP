@@ -1,4 +1,4 @@
-tool-NLPtoFP
+tool-NLPtoPF
 ============
 
-tool for analyze requirements specification for generate family product 
+Tool that allows analysing NL documents, extract common and variant features, and graphically design the product family in the form of a feature diagram. 
