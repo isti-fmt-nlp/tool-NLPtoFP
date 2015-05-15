@@ -856,12 +856,17 @@ public class ModelProject extends Observable implements Runnable{
 	    		(double)modelFile.getTermsAriety().get(distEntry.getKey())/(double)modelFile.getTermsInSentencesSet().size() ) );	      
 	      
 	      //computing coverages for tier leaders for all files
-	      for(int i=0; i<tiersFileCoverage.length; ++i)
-	    	if(tiersFileCoverage[i]!=null) for(ModelFile modelFile : filesProject)
-	    	  tiersFileCoverage[i].add(
-	    		new AbstractMap.SimpleEntry<String, Double>( modelFile.readPathFileUTF8(), 
-	    		(double)modelFile.getTermsAriety().get(groupLeaders.get(i))/(double)modelFile.getTermsInSentencesSet().size() ) );
-	    	
+	      for(int i=0; i<tiersFileCoverage.length; ++i){
+	    	  if(tiersFileCoverage[i]!=null){ 
+	    		  for(ModelFile modelFile : filesProject){
+	    			 Integer f = modelFile.getTermsAriety().get(groupLeaders.get(i));
+	    			 if(f==null) f = 0;
+	    			  tiersFileCoverage[i].add(
+	    					  new AbstractMap.SimpleEntry<String, Double>( modelFile.readPathFileUTF8(), 
+	    							  (double)f/(double)modelFile.getTermsInSentencesSet().size() ) );
+	    		  }
+	    	  }
+	      }
 	    	/* ***DEBUG*** */
 	        if(debugColors){
 	          System.out.println("TiersFileCoverage before ordering");

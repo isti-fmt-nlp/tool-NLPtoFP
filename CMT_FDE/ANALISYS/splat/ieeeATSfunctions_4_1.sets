@@ -1,0 +1,802 @@
+*** + + SENTENCE#0 + + ***
+ATS function
+ATS
+function
+*** + + SENTENCE#1 + + ***
+general
+authority
+jurisdiction
+CBTC
+ATS system
+ATS
+*** + + SENTENCE#2 + + ***
+circumstance
+extent
+authority
+jurisdiction
+CBTC
+ATS function
+ATS
+function
+subclause in order
+subclause
+order
+characteristic
+CBTC system
+availability
+following
+*** + + SENTENCE#3 + + ***
+train location information
+train location
+train
+location
+information
+precision
+*** + + SENTENCE#4 + + ***
+track circuit
+track
+wayside-to-train
+datum communication
+datum
+*** + + SENTENCE#5 + + ***
+datum
+*** + + SENTENCE#6 + + ***
+capability
+ATS function
+ATS
+function
+subclause
+authority
+jurisdiction
+service management
+service
+transit system
+user interface
+interface
+*** + + SENTENCE#7 + + ***
+CBTC
+communication network
+wayside-to-train
+datum com
+datum
+munications interface
+interface
+ATS function
+ATS
+function
+authority
+jurisdiction
+*** + + SENTENCE#8 + + ***
+ATS user interface
+ATS user
+ATS
+user interface
+interface
+*** + + SENTENCE#9 + + ***
+ATS user interface
+ATS user
+ATS
+user interface
+interface
+information
+implement
+control action
+control
+latency
+authority
+jurisdiction
+*** + + SENTENCE#10 + + ***
+display datum
+display
+datum
+user information
+information
+accordance
+*** + + SENTENCE#11 + + ***
+IEEE Std 1474.2-2003.
+IEEE Std
+ATS user
+ATS
+ATS function
+function
+*** + + SENTENCE#12 + + ***
+ATS function
+ATS
+function
+train en route
+train
+route
+application
+removal
+speed restriction
+speed
+restriction
+blocking
+work zone
+system hazard
+hazard
+implementation
+*** + + SENTENCE#13 + + ***
+ATS
+tions
+manner
+hazard
+account
+minimum
+probability
+*** + + SENTENCE#14 + + ***
+command
+ATS user
+ATS
+*** + + SENTENCE#15 + + ***
+CBTC system
+CBTC
+command
+ATS user
+ATS
+*** + + SENTENCE#16 + + ***
+CBTC system
+CBTC
+command
+ATS user
+ATS
+*** + + SENTENCE#17 + + ***
+information
+CBTC system
+CBTC
+ATS user
+ATS
+*** + + SENTENCE#18 + + ***
+hazard
+consideration
+transit application
+application
+train
+crew
+*** + + SENTENCE#19 + + ***
+control action confirmation
+control action
+control
+user interfaces/inputs
+function
+implementation
+impact
+authority
+jurisdiction
+*** + + SENTENCE#20 + + ***
+CBTC train identification
+CBTC
+train identification
+train
+train tracking
+*** + + SENTENCE#21 + + ***
+CBTC-equipped train operating
+CBTC-equipped train
+CBTC-equipped
+train
+operating
+CBTC territory
+CBTC
+train identification
+*** + + SENTENCE#22 + + ***
+train identification
+train
+type of train
+type
+information
+*** + + SENTENCE#23 + + ***
+ATS system
+ATS
+capability
+record
+ATS user interface
+ATS user
+user interface
+interface
+location
+identity
+train schedule
+train
+datum
+CBTC-equipped train
+CBTC-equipped
+CBTC territory
+CBTC
+*** + + SENTENCE#24 + + ***
+front
+position of train
+position
+train
+CBTC
+train location
+location
+ATS user interface
+ATS user
+ATS
+user interface
+interface
+*** + + SENTENCE#25 + + ***
+variation
+train length
+train
+length icon
+train length datum
+datum
+*** + + SENTENCE#26 + + ***
+train routing
+train
+*** + + SENTENCE#27 + + ***
+ATS system
+ATS
+capability
+CBTC-equipped train
+CBTC-equipped
+train
+CBTC territory
+CBTC
+train location
+location
+accordance
+train service datum
+train service
+service
+datum
+rule
+service strategy
+*** + + SENTENCE#28 + + ***
+track configuration
+track
+merging
+train at junction
+train
+junction
+movement of train
+movement
+storage area
+area
+rerouting of train
+rerouting
+train in response
+response
+service disruption
+service
+outage
+*** + + SENTENCE#29 + + ***
+train route
+train
+route
+ATS user interface
+ATS user
+ATS
+user interface
+interface
+train operator
+conductor
+display
+authority
+jurisdiction
+*** + + SENTENCE#30 + + ***
+ATS system
+ATS
+movement authority
+movement
+authority
+CBTC-equipped train
+CBTC-equipped
+train
+CBTC territory
+CBTC
+*** + + SENTENCE#31 + + ***
+CBTC movement authority
+CBTC
+movement authority
+movement
+authority limit
+authority
+ATS user interface
+ATS user
+ATS
+user interface
+interface
+reduction
+*** + + SENTENCE#32 + + ***
+train
+crew
+movement authority
+movement
+authority limit
+authority
+train operator
+conductor
+display
+jurisdiction
+*** + + SENTENCE#33 + + ***
+automatic train regulation
+train
+*** + + SENTENCE#34 + + ***
+Schedule/headway regulation
+*** + + SENTENCE#35 + + ***
+ATS system
+ATS
+capability
+performance of CBTC
+performance
+CBTC
+train
+CBTC territory
+relation
+headway adherence
+*** + + SENTENCE#36 + + ***
+ATS system
+ATS
+dispatching function
+function
+train identity
+train
+identity
+CBTC
+train location
+location
+headways between train
+headways
+service strategy
+service
+ATS user
+*** + + SENTENCE#37 + + ***
+Schedule
+headway regulation
+train
+mean
+dwell time variance
+control
+run time
+station
+e.g.
+adjustment
+acceleration
+service brake rate
+service
+speed
+authority
+jurisdiction
+*** + + SENTENCE#38 + + ***
+train
+crew
+station departure time
+station
+speed profile
+speed
+profile
+train operator
+conductor
+display
+ato mode
+ato
+CBTC system
+CBTC
+speed regulation function
+function
+*** + + SENTENCE#39 + + ***
+ATS system
+ATS
+capability
+train service
+train
+service
+profile
+CBTC-equipped train
+CBTC-equipped
+response
+rail condition
+condition
+*** + + SENTENCE#40 + + ***
+CBTC system
+CBTC
+implementation
+change in service
+change
+service
+profile
+condition
+emergency brake application
+brake application
+application
+*** + + SENTENCE#41 + + ***
+Junction management
+*** + + SENTENCE#42 + + ***
+ATS system
+ATS
+train regulation function
+train
+function
+CBTC
+train location
+location
+train meet
+transfer
+track
+merge point
+line
+order
+system delay
+*** + + SENTENCE#43 + + ***
+energy optimization
+optimization
+*** + + SENTENCE#44 + + ***
+ATS system
+ATS
+capability
+energy optimization algorithm
+energy optimization
+optimization
+CBTC-equipped train
+CBTC-equipped
+train
+control
+coordination
+train acceleration
+acceleration
+train coasting
+train braking
+*** + + SENTENCE#45 + + ***
+priority
+optimization
+schedule/headway regulation
+authority
+jurisdiction
+*** + + SENTENCE#46 + + ***
+station
+function
+*** + + SENTENCE#47 + + ***
+stop train
+train
+station
+*** + + SENTENCE#48 + + ***
+ATS system
+ATS
+mean
+CBTC-equipped train
+CBTC-equipped
+train
+group of CBTC
+group
+CBTC
+station
+*** + + SENTENCE#49 + + ***
+train
+crew
+CBTC system
+CBTC
+ATS
+information
+train operator
+conductor
+display
+*** + + SENTENCE#50 + + ***
+ato mode
+ato
+CBTC-equipped train
+CBTC-equipped
+train
+station
+*** + + SENTENCE#51 + + ***
+Hold train
+train
+station
+*** + + SENTENCE#52 + + ***
+train
+crew
+ATS system
+ATS
+facility
+station
+*** + + SENTENCE#53 + + ***
+train
+crew
+function
+authority
+jurisdiction
+*** + + SENTENCE#54 + + ***
+function
+CBTC system
+CBTC
+train
+information
+train operator
+conductor
+display
+station in ato
+station
+ato mode
+ato
+*** + + SENTENCE#55 + + ***
+Skip station stop
+station
+*** + + SENTENCE#56 + + ***
+ATS system
+ATS
+facility
+train
+group of CBTC-equipped
+group
+CBTC-equipped train
+CBTC-equipped
+station
+group of station
+station without stopping
+stopping
+*** + + SENTENCE#57 + + ***
+train
+crew
+CBTC system
+CBTC
+skip station information
+station
+information
+train operator
+conductor
+display
+*** + + SENTENCE#58 + + ***
+ato mode
+ato
+train
+station
+*** + + SENTENCE#59 + + ***
+door control inhibit
+control
+*** + + SENTENCE#60 + + ***
+ATS system
+ATS
+facility
+CBTC control
+CBTC
+control
+train door
+train
+accordance
+*** + + SENTENCE#61 + + ***
+train operation
+train
+operation
+*** + + SENTENCE#62 + + ***
+application
+removal
+function
+system hazard
+hazard
+implementation
+*** + + SENTENCE#63 + + ***
+train en route
+train
+route
+*** + + SENTENCE#64 + + ***
+ATS system
+ATS
+CBTC-equipped train
+CBTC-equipped
+train
+group of CBTC-equipped
+group
+*** + + SENTENCE#65 + + ***
+CBTC system
+CBTC
+brake application
+application
+train
+train operator
+conductor
+display
+*** + + SENTENCE#66 + + ***
+speed restriction
+speed
+restriction
+*** + + SENTENCE#67 + + ***
+ATS system
+ATS
+facility
+speed restriction
+speed
+restriction
+CBTC
+train
+section of track
+section
+track
+CBTC territory
+*** + + SENTENCE#68 + + ***
+blocking
+*** + + SENTENCE#69 + + ***
+ATS system
+ATS
+facility
+unblock
+switch
+exit signal
+entry point
+section of track
+section
+track
+CBTC territory
+CBTC
+*** + + SENTENCE#70 + + ***
+CBTC system
+CBTC
+train
+movement authority
+movement
+authority
+switch
+position
+route
+section of track
+section
+track
+*** + + SENTENCE#71 + + ***
+work zone
+*** + + SENTENCE#72 + + ***
+ATS system
+ATS
+facility
+work zone
+protection
+work crew
+crew
+work train
+train
+*** + + SENTENCE#73 + + ***
+CBTC system
+CBTC
+speed on approach
+speed
+approach
+work zone
+*** + + SENTENCE#74 + + ***
+train
+crew
+information
+restriction
+work zone
+train operator
+conductor
+display
+CBTC system
+CBTC
+ato mode
+ato
+operation
+*** + + SENTENCE#75 + + ***
+ATS system
+ATS
+method
+approach
+direction of train
+direction
+train
+wayside
+roadway worker
+area
+visibility
+*** + + SENTENCE#76 + + ***
+passenger information system
+information
+interface
+*** + + SENTENCE#77 + + ***
+ATS system
+ATS
+passenger information system
+information
+passenger information message
+train arrival information
+train
+CBTC
+train location
+location
+*** + + SENTENCE#78 + + ***
+passenger information system
+information
+interface
+accordance
+IEEE Std
+*** + + SENTENCE#79 + + ***
+fault reporting
+*** + + SENTENCE#80 + + ***
+CBTC fault reporting
+CBTC
+fault reporting
+*** + + SENTENCE#81 + + ***
+failure
+condition
+input
+CBTC system
+CBTC
+performance
+transit system
+loss
+CBTC functionality
+auto
+ATS user interface
+ATS user
+ATS
+user interface
+interface
+display
+*** + + SENTENCE#82 + + ***
+alarm
+*** + + SENTENCE#83 + + ***
+alarm
+acknowledgment
+*** + + SENTENCE#84 + + ***
+train fault reporting
+train
+fault reporting
+*** + + SENTENCE#85 + + ***
+CBTC equipment
+CBTC
+interface
+subsystem
+purpose
+train health datum
+train
+datum
+wayside for display
+wayside
+display
+ATS user interface
+ATS user
+ATS
+user interface
+authority
+jurisdiction
+*** + + SENTENCE#86 + + ***
+Interoperability interface requirement
+interface
+requirement
+*** + + SENTENCE#87 + + ***
+performance
+requirement
+interface design standard
+interface
+interoperability
+*** + + SENTENCE#88 + + ***
+interoperability requirement
+interoperability
+requirement
+authority
+jurisdiction
+responsibility
+interoperability interface standard
+interface
+*** + + SENTENCE#89 + + ***
+NOTE-Examples
+interoperability requirement
+interoperability
+requirement
+following
+*** + + SENTENCE#90 + + ***
+train
+CBTC equipment
+CBTC
+supplier
+operating
+CBTC territory
+*** + + SENTENCE#91 + + ***
+supplier
+Wayside equipment
+area
+*** + + SENTENCE#92 + + ***
+ATS equipment
+ATS
+operating unit
+operating
+CBTC equipment
+CBTC
+supplier
+train
+*** + + SENTENCE#93 + + ***
+supplier
+CBTC standard
+CBTC
+interoperability interface requirement
+interoperability
+interface
+requirement

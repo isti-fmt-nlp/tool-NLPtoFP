@@ -1,0 +1,3380 @@
+*** + + SENTENCE#0 + + ***
+Bombardier
+CBTC
+Bombardier transportation
+paper
+overview
+Bombardier CITYFLO
+CITYFLO
+communication
+train control
+train
+control
+system
+*** + + SENTENCE#1 + + ***
+CITYFLO
+technology
+train control
+train
+control
+system
+Neihu
+rapid transit
+taiwan
+south korea
+madrid metro
+metro
+line
+*** + + SENTENCE#2 + + ***
+paper
+concept
+block CBTC technology
+block
+CBTC
+technology
+architecture
+CITYFLO
+system
+approach
+design
+*** + + SENTENCE#3 + + ***
+paper
+feature
+solution
+*** + + SENTENCE#4 + + ***
+paper
+overlay
+approach
+operator
+implementation
+CBTC system
+CBTC
+system
+operation
+*** + + SENTENCE#5 + + ***
+application of CITYFLO
+application
+CITYFLO
+Neihu-Muzha line
+line
+taiwan
+stock
+*** + + SENTENCE#6 + + ***
+paper
+Bombardier
+approach
+implementation
+requirement
+*** + + SENTENCE#7 + + ***
+introduction
+cost of fuel
+cost
+congestion
+need
+mass transit system
+mass transit
+system
+railway industry
+railway
+role in today
+*** + + SENTENCE#8 + + ***
+transit authority
+rail industry
+way
+reliability
+cost
+*** + + SENTENCE#9 + + ***
+element
+rail transportation
+train control system
+train control
+train
+control
+system
+*** + + SENTENCE#10 + + ***
+signalling
+train control product
+train control
+train
+control
+product
+component
+performance
+railway
+*** + + SENTENCE#11 + + ***
+signalling
+market
+requirement
+supplier
+product
+system
+customer s requirement
+customer
+*** + + SENTENCE#12 + + ***
+Bombardier transportation
+Bombardier
+supplier
+communication
+train control
+train
+control
+CBTC
+system
+*** + + SENTENCE#13 + + ***
+Bombardier CITYFLO product
+Bombardier CITYFLO
+Bombardier
+CITYFLO
+product
+technology
+mass transit requirement
+mass transit
+requirement
+rail control
+control
+*** + + SENTENCE#14 + + ***
+CITYFLO solution
+CITYFLO
+solution
+world
+technology
+performance
+*** + + SENTENCE#15 + + ***
+figure
+Bombardier CITYFLO Solutions
+Bombardier CITYFLO
+Bombardier
+CITYFLO
+NOTATION ATS
+ATS
+train
+BDR
+base data radio
+data
+radio
+CBTC
+communication
+train control DSSS
+train control
+control
+Driverless train Operation
+los
+line of Sight
+line
+Sight MDR
+Sight
+MDR
+mobile data radio
+mobile
+OCC
+RATP
+Region
+automatic train protection
+RATO
+automatic train Operation
+RF
+radio Frequency STO
+train operation TRS
+train operation
+operation
+TRS
+system
+TWC
+Wayside communication
+Wayside
+october
+Bombardier transportation
+UTO
+block
+CBTC system
+component
+product
+automatic train control
+atc
+service history
+service
+rail transit application
+rail transit
+application
+*** + + SENTENCE#16 + + ***
+CITYFLO system
+CITYFLO
+system architecture
+system
+architecture
+train control system
+train control
+train
+control
+atc
+subsystem
+function
+hardware
+*** + + SENTENCE#17 + + ***
+figure
+train control system
+train control
+train
+control
+system architecture
+system
+architecture
+metro installation
+metro
+installation
+*** + + SENTENCE#18 + + ***
+figure
+CITYFLO
+system architecture
+system
+architecture
+central control
+central
+control
+subsystem
+central control network
+network
+control operator workstation
+operator
+*** + + SENTENCE#19 + + ***
+operator
+system
+central control network
+central control
+central
+control
+network
+*** + + SENTENCE#20 + + ***
+central control network
+central control
+central
+control
+network
+ATS functionality
+ATS
+Wayside network
+Wayside
+*** + + SENTENCE#21 + + ***
+Wayside network
+Wayside
+network
+Region atp
+Region
+atp
+Region ato
+ato
+Region atp computer
+system
+*** + + SENTENCE#22 + + ***
+sub-systems
+performance
+train control system
+train control
+train
+control
+system
+*** + + SENTENCE#23 + + ***
+information
+sub-systems
+Wayside network backbone
+Wayside network
+Wayside
+network
+central control network
+central control
+central
+control
+*** + + SENTENCE#24 + + ***
+base data radio
+data
+radio
+BDR
+equipment
+RATP
+vehicle
+coaxial antenna
+line of Sight
+line
+Sight
+los
+radio system
+system
+*** + + SENTENCE#25 + + ***
+train control data
+train control
+train
+control
+data
+wayside
+system
+Wayside communication
+Wayside
+communication
+TWC
+*** + + SENTENCE#26 + + ***
+communication
+Sequence Spread spectrum
+radio
+*** + + SENTENCE#27 + + ***
+RATP
+datum
+train
+*** + + SENTENCE#28 + + ***
+information
+central control
+central
+control
+Region ato
+Region
+ato
+datum
+train
+*** + + SENTENCE#29 + + ***
+TWC equipment
+TWC
+equipment
+coaxial cable
+BDRs
+Distribution Amplifiers
+mobile Antennas
+mobile
+mobile data radio
+data
+radio
+MDR
+*** + + SENTENCE#30 + + ***
+data
+MDR
+vehicle atp
+vehicle
+atp
+VATP
+*** + + SENTENCE#31 + + ***
+VATP
+operation
+train
+train movement
+movement
+occupancy generation
+occupancy
+*** + + SENTENCE#32 + + ***
+vehicle ato
+vehicle
+ato
+VATO
+speed
+control
+jerk limitation
+jerk
+door control
+implementation of speed
+implementation
+ATS
+*** + + SENTENCE#33 + + ***
+train Registry system
+train
+system
+TRS
+CBTC system
+CBTC
+failure
+process
+region
+segment
+*** + + SENTENCE#34 + + ***
+sweeping
+train
+segment
+region
+*** + + SENTENCE#35 + + ***
+time
+process
+hour
+metro
+operation
+*** + + SENTENCE#36 + + ***
+CBTC system
+CBTC
+system
+*** + + SENTENCE#37 + + ***
+TRS
+CITYFLO
+recovery system
+system
+train
+*** + + SENTENCE#38 + + ***
+TRS
+train
+area
+*** + + SENTENCE#39 + + ***
+information
+automatic train protection
+train
+atp
+communication
+system
+*** + + SENTENCE#40 + + ***
+need
+sweeping
+auto operation
+operation
+time
+minute
+CBTC
+challenge
+ability
+train control system
+train control
+train
+control
+system
+railway
+revenue service
+service
+*** + + SENTENCE#41 + + ***
+overlay
+signalling
+system
+network
+operation
+*** + + SENTENCE#42 + + ***
+CBTC system
+CBTC
+system
+operation
+equipment
+CBTC system installation
+installation
+disruption
+service
+*** + + SENTENCE#43 + + ***
+october
+Bombardier
+CBTC
+Bombardier transportation
+CBTC system
+system
+component
+point
+radio system
+radio
+installation
+service disruption
+service
+disruption
+*** + + SENTENCE#44 + + ***
+CBTC system
+CBTC
+system
+signalling
+line
+*** + + SENTENCE#45 + + ***
+CITYFLO CBTC system
+CITYFLO
+CBTC system
+CBTC
+system
+capability
+radio frequency
+radio
+RF
+line of sight
+line
+transit authority
+*** + + SENTENCE#46 + + ***
+Bombardier
+process
+CITYFLO
+Muzha line
+Muzha
+line
+taipei
+madrid metro lines
+madrid metro
+metro
+*** + + SENTENCE#47 + + ***
+overlay project
+overlay
+project
+work
+component
+risk
+cutover
+*** + + SENTENCE#48 + + ***
+step
+wayside element
+wayside
+element
+*** + + SENTENCE#49 + + ***
+wayside
+point
+radio
+element
+*** + + SENTENCE#50 + + ***
+work
+implementation
+automatic train protection
+train
+atp
+automatic train Operation
+ato
+system
+*** + + SENTENCE#51 + + ***
+approach
+design
+installation
+interlocking system
+system
+vehicle
+automatic train control
+train control
+train
+control
+VATC
+*** + + SENTENCE#52 + + ***
+section
+train operation
+train
+operation
+*** + + SENTENCE#53 + + ***
+system
+plan
+installation
+case
+mode
+operation
+*** + + SENTENCE#54 + + ***
+example
+operation
+line
+project
+*** + + SENTENCE#55 + + ***
+element
+track switch
+track
+switch
+station
+*** + + SENTENCE#56 + + ***
+work
+*** + + SENTENCE#57 + + ***
+step
+installation
+central control equipment
+central control
+central
+control
+equipment
+*** + + SENTENCE#58 + + ***
+ability
+equipment
+testing program
+testing
+program
+*** + + SENTENCE#59 + + ***
+work
+overlay project
+overlay
+project
+system
+operation
+need
+*** + + SENTENCE#60 + + ***
+system
+work
+*** + + SENTENCE#61 + + ***
+Neihu-Muzha line
+line
+project
+Bombardier
+Neihu extension
+Neihu
+Muzha line
+Muzha
+taipei
+*** + + SENTENCE#62 + + ***
+plan
+Neihu line CITYFLO
+Neihu line
+Neihu
+line
+CITYFLO
+CBTC
+technology
+Muzha line
+Muzha
+order
+integration
+*** + + SENTENCE#63 + + ***
+design
+system
+delivery
+brownfield environment
+*** + + SENTENCE#64 + + ***
+Neihu/Muzha project
+project
+element
+*** + + SENTENCE#65 + + ***
+rapid transit
+taipei city government
+taipei
+taiwan
+contract in mid-2003
+Muzha
+system
+Neihu extension
+Neihu
+retrofit
+Muzha automated line
+automated
+line
+atc system
+atc
+*** + + SENTENCE#66 + + ***
+Neihu system
+Neihu
+system Overview
+system
+project
+track
+station
+depot
+Operational central control
+central control
+central
+control
+OCC
+equipment
+*** + + SENTENCE#67 + + ***
+line
+track
+station
+interlockings
+switch
+atc region
+atc
+region
+*** + + SENTENCE#68 + + ***
+Neihu depot
+Neihu
+depot
+OCC
+car wash
+test track
+track
+switch
+storage
+train
+pair per train
+pair
+*** + + SENTENCE#69 + + ***
+number
+vehicle
+pair
+Phase
+*** + + SENTENCE#70 + + ***
+Bombardier
+Neihu
+vehicle
+*** + + SENTENCE#71 + + ***
+automatic operation
+operation
+depot
+storage
+maintenance
+*** + + SENTENCE#72 + + ***
+Muzha system
+Muzha
+system Overview
+system
+Muzha line
+line
+station
+interlockings
+switch
+*** + + SENTENCE#73 + + ***
+Brownfield project
+project
+overlay
+atc
+system
+*** + + SENTENCE#74 + + ***
+Muzha depot
+Muzha
+depot
+switch
+storage
+train
+test track
+track
+car wash
+OCC
+Muzha line
+line
+OCC during Phase
+Phase
+*** + + SENTENCE#75 + + ***
+Muzha
+atc
+block system
+block
+system
+year
+*** + + SENTENCE#76 + + ***
+wayside atc
+wayside
+atc
+system
+operation
+order
+Neihu vehicle
+Neihu
+vehicle
+fleet
+*** + + SENTENCE#77 + + ***
+installation
+track
+region
+atc
+purpose
+*** + + SENTENCE#78 + + ***
+Muzha depot
+Muzha
+depot
+Neihu depot
+Neihu
+region
+atc
+Phase
+*** + + SENTENCE#79 + + ***
+october
+Bombardier
+CBTC
+Bombardier transportation
+figure
+Neihu-Muzha line system
+Neihu-Muzha line
+line
+system
+Brownfield nature
+project
+integration
+planning skill
+year
+*** + + SENTENCE#80 + + ***
+program
+phase
+Neihu extension
+Neihu
+Muzha line
+Muzha
+line
+installation
+atc equipment
+atc
+equipment
+central control
+central
+control
+depot
+maintenance
+storage
+delivery
+vehicle
+*** + + SENTENCE#81 + + ***
+phase
+Neihu line enters
+Neihu line
+Neihu
+line
+revenue service
+service
+*** + + SENTENCE#82 + + ***
+time
+Muzha
+Neihu line
+Neihu
+line
+*** + + SENTENCE#83 + + ***
+phase
+program
+Muzha
+Neihu line
+Neihu
+line
+system
+*** + + SENTENCE#84 + + ***
+installation
+CITYFLO
+atc system
+atc
+system
+Muzha line
+Muzha
+line
+cutover
+disruption
+service
+*** + + SENTENCE#85 + + ***
+Additional new vehicle
+vehicle
+Muzha vehicle
+Muzha
+depot
+*** + + SENTENCE#86 + + ***
+phase
+Muzha vehicle
+Muzha
+vehicle
+CITYFLO
+operation
+system
+*** + + SENTENCE#87 + + ***
+Muzha central control
+Muzha
+central control
+central
+control
+operation
+Muzha/Neihu line
+line
+Neihu central control
+Neihu
+redundancy
+*** + + SENTENCE#88 + + ***
+operation
+fleet
+vehicle
+Neihu vehicle
+Neihu
+*** + + SENTENCE#89 + + ***
+project
+installation
+CITYFLO
+atc
+Muzha line
+Muzha
+line
+disruption
+revenue service
+service
+retrofit
+Muzha vehicle
+vehicle
+vehicle atc
+*** + + SENTENCE#90 + + ***
+project
+implementation
+risk
+*** + + SENTENCE#91 + + ***
+Phase
+project
+Neihu system
+Neihu
+system
+revenue service
+service
+*** + + SENTENCE#92 + + ***
+time
+Neihu vehicle
+Neihu
+vehicle
+integration
+vehicle atc
+atc
+equipment
+pittsburgh test track
+test track
+track
+*** + + SENTENCE#93 + + ***
+atc system
+atc
+system
+OCC
+equipment
+pittsburgh in preparation
+fat
+taiwan
+*** + + SENTENCE#94 + + ***
+fat
+hardware
+Muzha
+Neihu
+wayside atc
+wayside
+atc
+*** + + SENTENCE#95 + + ***
+system element
+system
+element
+communication
+passenger information system
+passenger
+information
+platform door
+platform
+power supply
+power
+*** + + SENTENCE#96 + + ***
+place
+fat
+*** + + SENTENCE#97 + + ***
+fat
+Neihu wayside system
+Neihu
+wayside
+system
+wayside equipment
+equipment
+OCC
+component
+atc
+site
+installation
+integration
+testing
+Neihu depot
+depot
+test track
+track
+segment
+Neihu system
+*** + + SENTENCE#98 + + ***
+installation
+testing
+equipment
+Bombardier
+*** + + SENTENCE#99 + + ***
+installation
+testing
+*** + + SENTENCE#100 + + ***
+wayside equipment
+wayside
+equipment
+system
+testing
+step
+site
+*** + + SENTENCE#101 + + ***
+testing
+plan
+place in preparation
+place
+preparation for integration
+integration
+vehicle
+*** + + SENTENCE#102 + + ***
+time
+work
+vehicle
+Muzha vehicle
+Muzha
+CITYFLO
+phase
+project
+overlay
+wayside equipment
+wayside
+equipment
+Muzha system atc
+Muzha system
+system
+atc
+Phase
+*** + + SENTENCE#103 + + ***
+requirement
+Muzha revenue service
+Muzha
+revenue service
+service
+overlay
+installation
+place
+system
+*** + + SENTENCE#104 + + ***
+october
+Bombardier
+CBTC
+Bombardier transportation
+problem
+installation
+site in taipei
+site
+taipei
+information
+atc
+vehicle
+Muzha system
+Muzha
+system
+Muzha vehicle
+wayside
+cutover
+plan
+*** + + SENTENCE#105 + + ***
+time
+integration
+atc system
+atc
+system
+Muzha switch
+Muzha
+switch
+platform screen door
+platform
+component
+*** + + SENTENCE#106 + + ***
+installation
+CITYFLO
+Muzha depot
+Muzha
+depot
+line of Sight
+line
+Sight
+los
+radio transmission
+radio
+transmission
+area
+system
+Radiax cable
+Radiax
+*** + + SENTENCE#107 + + ***
+production Neihu vehicle
+Neihu vehicle
+Neihu
+vehicle
+Muzha wayside equipment
+Muzha
+wayside equipment
+wayside
+equipment
+*** + + SENTENCE#108 + + ***
+time
+cutover
+CITYFLO
+atc
+Neihu vehicle
+Neihu
+vehicle
+Phase
+system
+testing
+operation
+*** + + SENTENCE#109 + + ***
+step
+risk
+atc cutover
+atc
+cutover
+*** + + SENTENCE#110 + + ***
+cutover
+CITYFLO
+Muzha system
+Muzha
+system
+place during Phase
+place
+Phase
+project
+*** + + SENTENCE#111 + + ***
+phase
+delivery
+Neihu vehicle
+Neihu
+vehicle
+Muzha line
+Muzha
+line
+service
+fleet
+*** + + SENTENCE#112 + + ***
+risk
+operation
+line
+atc
+vehicle
+phase
+introduction
+Neihu line
+Neihu
+revenue service
+service
+*** + + SENTENCE#113 + + ***
+phase
+project
+retrofit
+Muzha vehicle
+Muzha
+vehicle
+installation
+OCC
+Muzha depot
+depot
+*** + + SENTENCE#114 + + ***
+installation
+OCC
+risk
+equipment
+Neihu OCC
+Neihu
+*** + + SENTENCE#115 + + ***
+vehicle integration issue
+vehicle
+integration
+program
+risk
+project
+*** + + SENTENCE#116 + + ***
+Muzha vehicle
+Muzha
+vehicle
+integration
+CITYFLO
+project
+*** + + SENTENCE#117 + + ***
+vehicle
+year
+*** + + SENTENCE#118 + + ***
+risk
+Muzha vehicle
+Muzha
+vehicle
+Bombardier in taipei
+Bombardier
+taipei
+test track
+track
+*** + + SENTENCE#119 + + ***
+testing
+vehicle
+development
+interface
+CITYFLO
+braking
+propulsion control unit
+control
+Muzha vehicle
+Muzha
+*** + + SENTENCE#120 + + ***
+vehicle atc system
+vehicle atc
+vehicle
+atc system
+atc
+system
+test vehicle
+testing
+integration of vehicle
+integration
+*** + + SENTENCE#121 + + ***
+testing
+vehicle
+CITYFLO
+Neihu system
+Neihu
+system
+*** + + SENTENCE#122 + + ***
+vehicle
+testing program
+testing
+program
+Neihu vehicle
+Neihu
+work
+*** + + SENTENCE#123 + + ***
+test track
+track
+vehicle
+service
+operation
+*** + + SENTENCE#124 + + ***
+step
+risk
+Muzha vehicle retrofit
+Muzha vehicle
+Muzha
+vehicle
+retrofit
+transition
+Phase
+project
+OCC
+introduction
+revenue service
+service
+pair
+*** + + SENTENCE#125 + + ***
+figure
+Bombardier
+CBTC
+application
+requirement
+type of vehicle
+type
+vehicle
+CBTC on-board system
+system
+system in place
+place
+*** + + SENTENCE#126 + + ***
+requirement
+vehicle
+CBTC
+line
+*** + + SENTENCE#127 + + ***
+case
+approach
+system
+interlocking system
+use
+track circuit
+track
+occupancy detection
+occupancy
+*** + + SENTENCE#128 + + ***
+challenge
+interface
+system
+system performance
+performance
+*** + + SENTENCE#129 + + ***
+october
+Bombardier
+CBTC
+Bombardier transportation
+installation of CBTC
+installation
+overlay in order
+overlay
+order
+*** + + SENTENCE#130 + + ***
+CBTC system
+CBTC
+system
+architecture
+capability
+line
+*** + + SENTENCE#131 + + ***
+approach
+benefit of CBTC
+CBTC
+implementation
+*** + + SENTENCE#132 + + ***
+CBTC
+evolution
+technology
+atc operation
+atc
+operation
+year
+CBTC system
+system
+failure
+train control system
+train control
+train
+control
+*** + + SENTENCE#133 + + ***
+CBTC system
+CBTC
+system
+equipment
+*** + + SENTENCE#134 + + ***
+CBTC
+way
+architecture
+use
+technology
+system
+*** + + SENTENCE#135 + + ***
+redundancy
+design
+failure
+availability
+system
+*** + + SENTENCE#136 + + ***
+discussion
+philosophy of interoperability
+interoperability
+*** + + SENTENCE#137 + + ***
+discussion
+evolution
+atc system
+atc
+system
+*** + + SENTENCE#138 + + ***
+ability
+train
+system
+line
+*** + + SENTENCE#139 + + ***
+radio component
+radio
+component
+CBTC
+area
+evolution
+*** + + SENTENCE#140 + + ***
+use
+frequency band
+*** + + SENTENCE#141 + + ***
+ghz band
+spread spectrum technology
+technology
+*** + + SENTENCE#142 + + ***
+communication highway
+communication
+datum
+train
+wayside
+*** + + SENTENCE#143 + + ***
+information
+train control
+train
+control
+communication
+*** + + SENTENCE#144 + + ***
+interoperability element
+interoperability
+element
+*** + + SENTENCE#145 + + ***
+ability
+train
+line
+approach
+*** + + SENTENCE#146 + + ***
+demand
+control
+interface
+*** + + SENTENCE#147 + + ***
+effort
+time
+interoperability conclusion
+interoperability
+ability
+CBTC system
+CBTC
+system
+flexibility in term
+flexibility
+term
+rail operator
+operator
+traffic demand
+traffic
+demand
+*** + + SENTENCE#148 + + ***
+UTO system
+UTO
+system
+traffic capacity
+traffic
+UITP president
+*** + + SENTENCE#149 + + ***
+rail operator
+operator
+driver function
+function
+onboard attendant
+onboard
+customer
+service
+*** + + SENTENCE#150 + + ***
+mass transit
+train control system
+train control
+train
+control
+system
+year
+Driverless train Operation
+*** + + SENTENCE#151 + + ***
+evolution
+technology
+system
+architecture
+*** + + SENTENCE#152 + + ***
+advantage
+UTO system
+UTO
+system
+flexibility
+cost
+cost of operation
+operation
+operator
+technology
+*** + + SENTENCE#153 + + ***
+number
+mass transit operator
+mass transit
+operator
+world
+CBTC system
+CBTC
+system
+network
+*** + + SENTENCE#154 + + ***
+system
+block
+communication
+equipment
+maintenance
+fall
+*** + + SENTENCE#155 + + ***
+challenge
+supplier
+cost
+technology
+system
+implementation
+approach
+order
+risk
+time
+*** + + SENTENCE#156 + + ***
+Bombardier inc
+Bombardier
+*** + + SENTENCE#157 + + ***
+subsidiary
+*** + + SENTENCE#158 + + ***
+Bombardier inc
+Bombardier
+*** + + SENTENCE#159 + + ***
+subsidiary
+*** + + SENTENCE#160 + + ***
+october
+CITYFLO
+system Overview
+system
+jeffrey s
+*** + + SENTENCE#161 + + ***
+Bombardier transportation
+Bombardier
+effort
+product
+technology
+capability
+signalling solution
+signalling
+solution
+product line
+line
+*** + + SENTENCE#162 + + ***
+product
+Bombardier INTERFLO
+Bombardier
+INTERFLO
+mainline solution
+solution
+Bombardier CITYFLO
+CITYFLO
+need
+*** + + SENTENCE#163 + + ***
+CITYFLO system
+CITYFLO
+system
+railway solution
+railway
+solution
+type
+mass transit
+rail vehicle
+vehicle
+metro
+mode
+customer s need
+customer
+need
+*** + + SENTENCE#164 + + ***
+cab signalling
+cab
+signalling
+train operation
+train
+operation
+*** + + SENTENCE#165 + + ***
+system
+customer
+requirement
+demand
+life
+*** + + SENTENCE#166 + + ***
+key word
+INTERFLO
+CITYFLO
+CBTC
+ato
+atp
+ATS
+atc CITYFLO
+atc
+Bombardier INTERFLO
+Bombardier
+Bombardier CITYFLO
+er.com jeffrey s
+jeffrey s
+*** + + SENTENCE#167 + + ***
+Stover CITYFLO
+CITYFLO
+system Overview
+system
+automated
+atc
+automatic train control
+train control
+train
+control
+ATS
+ato
+automatic train Operation
+atp
+automatic train protection
+BDR
+base data radio
+data
+radio
+CBTC
+communication
+CCO
+central control
+central
+transmission
+emergency
+operation
+mode
+*** + + SENTENCE#168 + + ***
+data
+control
+block
+*** + + SENTENCE#169 + + ***
+control
+MBCS
+block
+system
+MDR
+mobile data radio
+mobile
+data
+radio
+passenger information system
+passenger
+information
+RATO
+Region ato
+Region
+ato
+RATP
+Region atp
+atp
+Region atc
+atc
+radio communication
+communication
+train control
+train
+performance
+TRS
+train Registry system
+TWC
+Wayside communication
+Wayside
+power supply
+power
+VATP
+vehicle atp
+vehicle
+VATO
+vehicle ato
+VATC
+vehicle atc
+high-performance backplane bus
+*** + + SENTENCE#170 + + ***
+Wayside
+atc
+Wayside communication
+communication
+train
+Introduction Increased urbanization
+cost of fuel
+cost
+congestion
+mass transit market
+mass transit
+market
+*** + + SENTENCE#171 + + ***
+need
+mass transit system
+mass transit
+system
+rail industry
+challenge
+way
+reliability
+cost
+*** + + SENTENCE#172 + + ***
+railway
+train control system
+train control
+train
+control
+system
+*** + + SENTENCE#173 + + ***
+train control system
+train control
+train
+control
+system
+need
+mass transit market
+mass transit
+market
+line of sight
+line
+train operation system
+train operation
+operation
+UTO
+*** + + SENTENCE#174 + + ***
+signalling
+train control product
+train control
+train
+control
+product
+component
+performance
+railway
+*** + + SENTENCE#175 + + ***
+railway industry
+railway
+development effort
+development
+effort
+train control system
+train control
+train
+control
+system
+advantage
+technology
+market
+*** + + SENTENCE#176 + + ***
+Bombardier transportation
+Bombardier
+effort
+product
+technology
+capability
+signalling solution
+signalling
+solution
+product line
+line
+*** + + SENTENCE#177 + + ***
+product
+Bombardier INTERFLO
+Bombardier
+INTERFLO
+mainline solution
+solution
+Bombardier CITYFLO
+CITYFLO
+need
+*** + + SENTENCE#178 + + ***
+INTERFLO
+system
+mainline solution
+solution
+customer s need
+customer
+need
+operation control system
+operation
+control
+interlocking system
+train
+wayside equipment
+wayside
+equipment
+*** + + SENTENCE#179 + + ***
+CITYFLO system
+CITYFLO
+system
+railway solution
+railway
+solution
+type
+mass transit
+rail vehicle
+vehicle
+metro
+mode
+customer s need
+customer
+need
+*** + + SENTENCE#180 + + ***
+cab signalling
+cab
+signalling
+train operation
+train
+operation
+*** + + SENTENCE#181 + + ***
+system
+customer
+requirement
+demand
+life
+*** + + SENTENCE#182 + + ***
+solution
+application
+*** + + SENTENCE#183 + + ***
+INTERFLO
+train location
+train
+location
+information system INTERFLO
+information
+system
+Conventional
+line system INTERFLO
+line
+ERTMS
+ERTMS level
+taiwan
+atp
+Continuous track
+track
+communication system INTERFLO
+communication
+CITYFLO
+Manual tram
+LRV control system
+control
+onboard
+cab
+mass transit system
+mass transit
+CBTC
+block CITYFLO
+block
+STO metro system
+metro
+STO CBTC
+automated
+DTO/UTO
+block system trademark
+block system
+Bombardier inc
+Bombardier
+subsidiary jeffrey s
+subsidiary
+jeffrey s
+*** + + SENTENCE#184 + + ***
+Stover CITYFLO
+CITYFLO
+system Overview
+system
+solution
+train control
+train
+control
+CBTC
+*** + + SENTENCE#185 + + ***
+system
+track circuit
+track
+onboard operator
+onboard
+operator
+choice
+*** + + SENTENCE#186 + + ***
+installation
+*** + + SENTENCE#187 + + ***
+CITYFLO
+overlay
+train control system
+train control
+train
+control
+system
+block
+*** + + SENTENCE#188 + + ***
+operation
+metro
+wayside
+vehicle equipment
+vehicle
+equipment
+program
+transport capacity
+speed
+reliability
+stock asset
+stock
+*** + + SENTENCE#189 + + ***
+CITYFLO
+design Features CITYFLO
+design
+system
+block technique
+block
+train
+railway network
+railway
+network
+system performance
+performance
+flexibility
+safety
+reliability
+availability
+*** + + SENTENCE#190 + + ***
+CITYFLO
+service proven component
+service
+component
+date CBTC product
+CBTC
+product
+atc system
+atc
+system
+service history
+rail transit
+*** + + SENTENCE#191 + + ***
+evolution
+train control technology
+train control
+train
+control
+technology
+san francisco
+area
+rapid transit
+*** + + SENTENCE#192 + + ***
+CITYFLO
+atc
+operation
+datum
+communication
+track circuit
+track
+requirement
+system
+technology
+world
+*** + + SENTENCE#193 + + ***
+feature
+system
+redundant configuration
+system architecture
+architecture
+radio communication
+radio
+communication
+plan
+layout change
+automatic Restart
+train Registry system
+train
+CITYFLO monitoring system
+CITYFLO
+CFMS
+industry standard interface
+interface
+life cycle cost
+life
+cost
+safety the CITYFLO
+safety
+solution
+redundancy
+train control equipment
+train control
+control
+equipment
+*** + + SENTENCE#194 + + ***
+CITYFLO
+solution eliminates
+solution
+equipment
+wayside
+communication
+system
+*** + + SENTENCE#195 + + ***
+system
+radio
+block
+train
+position
+point
+*** + + SENTENCE#196 + + ***
+equipment
+tag
+point
+position measurement error
+position
+error
+*** + + SENTENCE#197 + + ***
+EBI cab
+cab
+atp
+train
+speed
+end
+movement authority
+movement
+*** + + SENTENCE#198 + + ***
+automatic Startup
+train Registry system
+train
+system
+*** + + SENTENCE#199 + + ***
+CBTC system
+CBTC
+system
+failure
+initialization process
+initialization
+process
+region
+segment
+*** + + SENTENCE#200 + + ***
+sweeping
+train
+segment
+region
+*** + + SENTENCE#201 + + ***
+time
+process
+hour
+metro
+operation
+*** + + SENTENCE#202 + + ***
+CBTC system
+CBTC
+system
+*** + + SENTENCE#203 + + ***
+train Registry system
+train
+system
+TRS
+CITYFLO
+solution
+area
+*** + + SENTENCE#204 + + ***
+information
+automatic train protection
+train
+atp
+communication
+system
+*** + + SENTENCE#205 + + ***
+need
+sweeping
+auto operation
+operation
+time
+minute
+*** + + SENTENCE#206 + + ***
+automatic train Operation
+train
+ato
+system
+line
+distance
+*** + + SENTENCE#207 + + ***
+ato
+braking
+power
+track
+vehicle
+*** + + SENTENCE#208 + + ***
+ato system
+ato
+system
+platform
+door operation
+operation
+station
+*** + + SENTENCE#209 + + ***
+system
+control
+metro
+operator
+overview
+traffic
+*** + + SENTENCE#210 + + ***
+CITYFLO
+atp
+ato
+operation
+availability
+*** + + SENTENCE#211 + + ***
+system
+fall
+capability
+metro
+operation
+train operation
+train
+event
+*** + + SENTENCE#212 + + ***
+CITYFLO Monitoring system
+CITYFLO
+system
+CFMS
+*** + + SENTENCE#213 + + ***
+salient feature
+feature
+CITYFLO
+system
+ability
+datum
+event
+place
+*** + + SENTENCE#214 + + ***
+case
+CFMS
+identification
+problem
+*** + + SENTENCE#215 + + ***
+railway
+CFMS
+identification
+problem
+action in order
+action
+order
+availability
+system
+*** + + SENTENCE#216 + + ***
+CFMS
+system
+development effort
+development
+effort
+CITYFLO
+*** + + SENTENCE#217 + + ***
+CITYFLO
+system
+choice
+service
+san francisco
+Dallas/Fort worth
+automated
+*** + + SENTENCE#218 + + ***
+system
+transit authority
+LRT tunnel system
+operation
+*** + + SENTENCE#219 + + ***
+CITYFLO
+london heathrow terminal
+automated
+rapid transit
+south korea
+*** + + SENTENCE#220 + + ***
+project
+system
+operation
+jeffrey s
+*** + + SENTENCE#221 + + ***
+Stover CITYFLO
+CITYFLO
+system Overview
+system
+year
+*** + + SENTENCE#222 + + ***
+madrid metro
+metro
+CITYFLO solution
+CITYFLO
+solution
+choice
+atc
+line
+passenger
+year
+*** + + SENTENCE#223 + + ***
+CITYFLO
+purpose
+section
+overview of CITYFLO
+overview
+train control system
+train control
+train
+control
+system
+concept
+term Moving block
+term
+block
+system architecture
+architecture
+information about CITYFLO
+information
+system availability
+availability
+*** + + SENTENCE#224 + + ***
+Moving block Concept
+block
+system
+train occupancy
+train
+occupancy
+track circuit
+track
+section
+moving-block system
+speed
+*** + + SENTENCE#225 + + ***
+train control
+train
+control
+train control system
+system
+information
+wayside
+radio
+transmission
+*** + + SENTENCE#226 + + ***
+CITYFLO
+system
+track
+operator
+operation
+*** + + SENTENCE#227 + + ***
+system architecture
+system
+architecture
+train control system
+train control
+train
+control
+CITYFLO
+atc
+sub-systems
+function
+hardware
+*** + + SENTENCE#228 + + ***
+figure
+train control system
+train control
+train
+control
+system architecture
+system
+architecture
+metro installation
+metro
+installation
+*** + + SENTENCE#229 + + ***
+figure
+CITYFLO
+train control system
+train control
+train
+control
+system architecture
+system
+architecture
+element
+safety
+ATS
+central control
+central
+ato
+atp
+vehicle ato
+vehicle
+vehicle atp
+Region ato
+Region
+Region atp
+TWC
+RF
+*** + + SENTENCE#230 + + ***
+ATS
+Operational central control
+central control
+central
+control
+OCC
+traffic
+*** + + SENTENCE#231 + + ***
+ATS system
+ATS
+system
+operator interface
+operator
+interface
+control
+configuration datum
+datum
+transmission
+ATP/ATO maintenance datum
+maintenance
+datum logging
+report generation
+override request
+initialization
+fleet
+service
+train
+headway
+route assignment
+route
+operation
+train dispatch
+failure
+mode
+train management
+fleet hold
+skip station
+station
+set
+emergency brake
+emergency
+safety
+failure management strategy
+central control
+central
+function
+communication
+power distribution
+power
+traction SCADA
+control centre operator
+CCO
+*** + + SENTENCE#232 + + ***
+display
+information
+status
+system
+*** + + SENTENCE#233 + + ***
+information
+CCO
+system
+action
+*** + + SENTENCE#234 + + ***
+CCO
+command
+system operation
+system
+operation
+system management function
+function
+*** + + SENTENCE#235 + + ***
+CC subsystem
+subsystem
+CCO
+central control network
+central control
+central
+control
+network
+*** + + SENTENCE#236 + + ***
+central control network
+central control
+central
+control
+network
+ATS functionality
+ATS
+Wayside network
+Wayside
+*** + + SENTENCE#237 + + ***
+CCO
+system from central
+system
+central
+*** + + SENTENCE#238 + + ***
+Additional workstation
+area
+central control network
+central control
+central
+control
+network
+maintenance technician
+maintenance
+wayside
+vehicle ATP/ATO equipment
+vehicle
+equipment
+*** + + SENTENCE#239 + + ***
+ATS display
+ATS
+display
+user interface
+interface
+status
+position
+switch
+route
+train
+railway network
+railway
+network
+mode
+jeffrey s
+*** + + SENTENCE#240 + + ***
+Stover CITYFLO
+CITYFLO
+system Overview
+system
+system performance
+performance
+status
+system operation
+operation
+message
+vehicle alarm
+vehicle
+data
+figure
+example
+train control
+train
+control
+ATS
+datum logger
+datum
+*** + + SENTENCE#241 + + ***
+datum
+*** + + SENTENCE#242 + + ***
+time of occurrence
+time
+time of resumption
+resumption of operation
+operation
+identification
+number
+train
+*** + + SENTENCE#243 + + ***
+event
+ATS
+example
+failure
+system
+train
+headway regulation
+headway
+RATO
+*** + + SENTENCE#244 + + ***
+ATS system monitor
+ATS system
+ATS
+system
+system operation
+operation
+*** + + SENTENCE#245 + + ***
+ATS
+system operation
+system
+operation
+ato
+atp
+*** + + SENTENCE#246 + + ***
+automatic train control
+train control
+train
+control
+atc
+*** + + SENTENCE#247 + + ***
+atc system
+atc
+system
+wayside
+onboard
+*** + + SENTENCE#248 + + ***
+Wayside
+atc
+number of region
+number
+region
+area
+metro
+line
+number of train
+train
+*** + + SENTENCE#249 + + ***
+term Region atc
+term
+Region atc
+Region
+atc
+*** + + SENTENCE#250 + + ***
+Region atc refers
+Region atc
+Region
+atc
+set
+Region control equipment
+control
+equipment
+Region atp
+atp
+Region ato
+ato
+TWC equipment
+TWC
+*** + + SENTENCE#251 + + ***
+Region atc
+Region
+atc
+interlockings
+collection of switch
+switch
+point
+atc equipment
+equipment
+station
+*** + + SENTENCE#252 + + ***
+Region atp
+Region
+atp
+Region ato
+ato
+Region atp computer
+system
+performance
+CITYFLO
+train control system
+train control
+train
+control
+*** + + SENTENCE#253 + + ***
+information
+sub-systems
+Wayside network backbone
+Wayside network
+Wayside
+network
+central control network
+central control
+central
+control
+*** + + SENTENCE#254 + + ***
+train
+set
+vehicle atc
+vehicle
+atc
+VATC
+equipment
+redundancy
+*** + + SENTENCE#255 + + ***
+train location
+train
+location
+wheel axle
+*** + + SENTENCE#256 + + ***
+tolerance in equipment
+equipment
+wheel diameter
+error
+*** + + SENTENCE#257 + + ***
+Norming point
+Norming
+point
+track
+vehicle
+*** + + SENTENCE#258 + + ***
+point
+tag
+transponder interrogator
+vehicle
+*** + + SENTENCE#259 + + ***
+atc
+component
+wayside
+onboard
+sub-systems
+*** + + SENTENCE#260 + + ***
+EBI cab
+cab
+automatic train protection
+train
+atp
+*** + + SENTENCE#261 + + ***
+EBI cab system
+EBI cab
+cab
+system
+safety
+train control system
+train control
+train
+control
+*** + + SENTENCE#262 + + ***
+wayside
+component
+Region atp
+Region
+atp
+RATP
+onboard
+vehicle atp
+vehicle
+VATP
+*** + + SENTENCE#263 + + ***
+VATP
+operation
+train
+train movement
+movement
+occupancy generation
+occupancy
+*** + + SENTENCE#264 + + ***
+CITYFLO
+system
+atp system
+atp
+safety critical task
+safety
+RATP
+VATP
+train
+RATP Roll-back protection
+control
+VATP Overspeed protection
+braking Interlocks
+braking
+VATP Parted-Train protection
+RATP Occupancy generation
+door control
+Region atp
+Region
+*** + + SENTENCE#265 + + ***
+atp system interface
+atp system
+atp
+system
+interface
+ato
+base datum radio
+datum radio
+datum
+radio
+*** + + SENTENCE#266 + + ***
+atp system
+atp
+system
+processor for safety
+safety
+*** + + SENTENCE#267 + + ***
+function
+atp system
+atp
+system
+datum
+trainborne ATCs
+device
+control
+*** + + SENTENCE#268 + + ***
+event of failure
+event
+failure
+ATS control screen
+ATS
+control
+*** + + SENTENCE#269 + + ***
+wayside device interface
+wayside
+device
+interface
+Region
+control
+system
+*** + + SENTENCE#270 + + ***
+atc
+control
+system
+*** + + SENTENCE#271 + + ***
+train control
+train
+control
+function
+atc
+*** + + SENTENCE#272 + + ***
+automatic train Operation
+train
+ato
+EBI cruise system
+system
+operation
+train control system
+train control
+control
+CITYFLO
+*** + + SENTENCE#273 + + ***
+atp
+ato system
+ato
+system
+region
+train
+component
+Region ato
+Region
+RATO
+vehicle ato
+vehicle
+VATO
+*** + + SENTENCE#274 + + ***
+Region atc
+Region
+atc
+ato
+Region ato
+*** + + SENTENCE#275 + + ***
+Region ato
+Region
+ato
+function
+train movement
+train
+movement
+station
+operation
+*** + + SENTENCE#276 + + ***
+jeffrey s
+*** + + SENTENCE#277 + + ***
+Stover CITYFLO
+CITYFLO
+system Overview
+system
+function
+Region ato
+Region
+ato
+train movement control
+train movement
+train
+movement
+control
+command
+element
+wayside
+jerk
+VATO Stopping accuracy
+VATO
+VATO train operation
+train operation
+operation
+speed
+performance
+door control
+RATO
+VATO Onboard
+announcement
+display
+Wayside
+passenger
+display system
+*** + + SENTENCE#278 + + ***
+system
+status
+control datum
+control
+datum
+Region ato
+Region
+ato
+central control system
+central control
+central
+*** + + SENTENCE#279 + + ***
+Region ato unit
+Region ato
+Region
+ato
+master
+Standby unit
+*** + + SENTENCE#280 + + ***
+ato system
+ato
+system
+Region atp
+Region
+atp
+*** + + SENTENCE#281 + + ***
+Region ato
+Region
+ato
+datum
+region
+system issue command
+system
+command
+*** + + SENTENCE#282 + + ***
+announcement
+station
+Region ato
+Region
+ato
+location
+train
+*** + + SENTENCE#283 + + ***
+train
+station
+Region ato
+Region
+ato
+station sign
+announcement
+*** + + SENTENCE#284 + + ***
+Region
+message identifies
+message
+passenger information system
+passenger
+information
+system
+station sign
+station
+announcement
+*** + + SENTENCE#285 + + ***
+station
+control
+Region ato computer
+Region ato
+Region
+ato
+vehicle tag reader
+vehicle
+tag
+train
+initialization
+*** + + SENTENCE#286 + + ***
+transition area
+transition
+area
+system
+RS-485 serial network
+network
+Region ato
+Region
+ato
+vehicle tag reader
+vehicle
+tag
+*** + + SENTENCE#287 + + ***
+transition area
+transition
+area
+datum
+vehicle tag reader
+vehicle
+tag
+Region ato
+Region
+ato
+train initialization information
+train
+initialization
+information
+Region atp
+atp
+*** + + SENTENCE#288 + + ***
+Region atp
+Region
+atp
+vehicle atp
+vehicle
+initialization process
+initialization
+process
+*** + + SENTENCE#289 + + ***
+Region ato
+Region
+ato
+Region atp computer
+Region atp
+atp
+Wayside network
+Wayside
+network
+*** + + SENTENCE#290 + + ***
+vehicle
+message
+vehicle ato
+ato
+Region atp
+Region
+atp
+*** + + SENTENCE#291 + + ***
+Region ato
+Region
+ato
+central control system
+central control
+central
+control
+system
+Wayside network
+Wayside
+network
+train
+TWC
+communication
+wayside
+train control
+Wayside communication
+subsystem
+*** + + SENTENCE#292 + + ***
+TWC
+radio frequency
+radio
+RF
+subsystem
+*** + + SENTENCE#293 + + ***
+RF
+communication
+coaxial cable
+line of Sight
+line
+Sight
+los
+antenna network
+network
+wayside
+transmits datum
+datum
+train
+onboard mobile antenna
+onboard
+mobile
+*** + + SENTENCE#294 + + ***
+train
+region
+TWC
+*** + + SENTENCE#295 + + ***
+atc
+message
+wayside atc
+wayside
+communication
+*** + + SENTENCE#296 + + ***
+train
+communication
+wayside atc
+wayside
+atc
+block
+lost-communication train
+time
+atc equipment
+equipment
+service brake
+service
+*** + + SENTENCE#297 + + ***
+communication
+wayside atc
+wayside
+atc
+block
+train
+*** + + SENTENCE#298 + + ***
+TWC
+train control datum
+train control
+train
+control datum
+control
+datum
+wayside
+ATP/ATO maintenance datum
+maintenance
+Centralized Maintenance office
+*** + + SENTENCE#299 + + ***
+radio connection
+radio
+use
+base datum radio
+datum radio
+datum
+BDRs
+*** + + SENTENCE#300 + + ***
+spread spectrum radio
+radio
+CBTC system
+CBTC
+system
+*** + + SENTENCE#301 + + ***
+BDR
+MDR
+*** + + SENTENCE#302 + + ***
+requirement
+power transmission
+power
+transmission
+frequency band
+ITU recommendation
+*** + + SENTENCE#303 + + ***
+RF-to-fiber conversion unit
+EoCell
+radio signal
+radio
+coaxial cable
+los antenna
+los
+*** + + SENTENCE#304 + + ***
+EoCell device
+EoCell
+device
+*** + + SENTENCE#305 + + ***
+power
+coaxial cable
+los antenna
+los
+EoCell equipment
+EoCell
+equipment
+*** + + SENTENCE#306 + + ***
+base data radio
+data
+radio
+BDR
+Region atp
+Region
+atp
+master
+*** + + SENTENCE#307 + + ***
+BDR
+switch
+pair
+RF-to-Fiber master converter
+master
+*** + + SENTENCE#308 + + ***
+Region
+*** + + SENTENCE#309 + + ***
+RF system
+RF
+system
+mode
+*** + + SENTENCE#310 + + ***
+master a
+master
+cell
+master b
+coaxial cable segment
+coaxial cable
+segment
+cell fails
+radio
+*** + + SENTENCE#311 + + ***
+figure
+architecture
+RF distribution network
+RF distribution
+RF
+network
+*** + + SENTENCE#312 + + ***
+figure
+CITYFLO
+radio
+data
+transmission
+system architecture
+system
+architecture
+region
+*** + + SENTENCE#313 + + ***
+Region atp
+Region
+atp
+datum
+train
+*** + + SENTENCE#314 + + ***
+information
+central control
+central
+control
+Region ato
+Region
+ato
+datum
+jeffrey s
+*** + + SENTENCE#315 + + ***
+Stover CITYFLO
+CITYFLO
+system Overview
+system
+datum
+train
+*** + + SENTENCE#316 + + ***
+TWC equipment
+TWC
+equipment
+Radiax
+BDR
+Distribution Amplifiers
+overview in Fogure
+overview
+mobile Antennas
+mobile
+train
+MDR
+mobile data radio
+data
+radio
+*** + + SENTENCE#317 + + ***
+data
+MDR
+vehicle atp
+vehicle
+atp
+VATP
+*** + + SENTENCE#318 + + ***
+line of Sight
+line
+Sight antennae
+Sight
+Radiax
+RF distribution
+RF
+system
+design process
+design
+process
+application
+site
+customer requirement
+customer
+requirement
+*** + + SENTENCE#319 + + ***
+CITYFLO
+concept
+feature
+Moving-Block system
+system
+DTO/UTO
+*** + + SENTENCE#320 + + ***
+CITYFLO
+Segment
+track in
+track
+train control
+train
+control
+MovingBlock system
+system
+train control system
+information
+occupancy
+*** + + SENTENCE#321 + + ***
+CITYFLO
+track
+Segment
+section of track
+section
+set
+speed
+platform
+location
+Region Boundary
+Region
+end of line
+end
+line
+emergency Walkway location
+emergency
+block Locations the
+block
+figure
+example
+segment layout
+segment
+CITYFLO system
+system
+*** + + SENTENCE#322 + + ***
+figure
+CITYFLO segment Layout
+CITYFLO
+segment
+Region Number
+Region
+Segment Number
+Segment
+*** + + SENTENCE#323 + + ***
+segment layout
+segment
+determination of location
+location
+block
+system
+MBCS
+Region Number
+Region
+Segment Number
+Segment
+*** + + SENTENCE#324 + + ***
+example
+train
+segment
+location
+train in MBCS
+MBCS
+Region
+Segment
+*** + + SENTENCE#325 + + ***
+Norming Points
+Norming
+Norming point
+point
+device
+tag
+location datum
+location
+datum
+*** + + SENTENCE#326 + + ***
+tag
+track
+location datum
+location
+datum
+MBCS
+*** + + SENTENCE#327 + + ***
+train
+tag
+RF
+tag reader antenna
+*** + + SENTENCE#328 + + ***
+tag in turn
+tag
+location
+train
+*** + + SENTENCE#329 + + ***
+tag location
+tag
+location
+train
+element
+train control system
+train control
+control
+system
+*** + + SENTENCE#330 + + ***
+train
+location
+*** + + SENTENCE#331 + + ***
+train
+error
+*** + + SENTENCE#332 + + ***
+train
+route
+point
+*** + + SENTENCE#333 + + ***
+train
+location
+information
+Norming point Tag
+Norming point
+Norming
+point
+tag location
+tag
+*** + + SENTENCE#334 + + ***
+purpose
+Norming Points
+Norming
+train
+position error
+position
+error
+*** + + SENTENCE#335 + + ***
+train
+route
+location
+onboard
+system
+*** + + SENTENCE#336 + + ***
+system
+error
+*** + + SENTENCE#337 + + ***
+error
+train
+movement
+route
+*** + + SENTENCE#338 + + ***
+train control system
+train control
+train
+control
+system
+position error
+position
+error
+Norming Points
+Norming
+positioning error
+*** + + SENTENCE#339 + + ***
+figure
+error
+*** + + SENTENCE#340 + + ***
+figure
+position error
+position
+error
+event
+point
+train
+*** + + SENTENCE#341 + + ***
+operation
+headway
+*** + + SENTENCE#342 + + ***
+Conflict Points
+Conflict
+jeffrey s
+*** + + SENTENCE#343 + + ***
+Stover CITYFLO
+CITYFLO
+system Overview
+system
+Conflict point
+Conflict
+point
+end
+movement authority
+movement
+location
+track
+train
+*** + + SENTENCE#344 + + ***
+Region atp
+Region
+atp
+Conflict Points
+Conflict
+movement of train
+movement
+train
+railway network
+railway
+network
+*** + + SENTENCE#345 + + ***
+Conflict Points
+Conflict
+Rear of train
+train in Front
+train
+end of line
+end
+line
+point
+end of route
+route
+*** + + SENTENCE#346 + + ***
+train Occupancy
+train
+CITYFLO
+moving-block system
+system
+train occupancy
+occupancy
+wayside control system
+wayside
+control
+*** + + SENTENCE#347 + + ***
+train
+occupancy
+braking
+*** + + SENTENCE#348 + + ***
+atc
+location
+occupancy
+train
+*** + + SENTENCE#349 + + ***
+atc
+train
+occupancy
+distance
+wayside atc
+wayside
+*** + + SENTENCE#350 + + ***
+atc
+worst-case performance parameter
+performance
+system
+braking distance
+braking
+distance
+*** + + SENTENCE#351 + + ***
+emergency brake
+emergency
+distance
+speed of zero
+speed
+segment
+train
+route
+*** + + SENTENCE#352 + + ***
+emergency brake
+emergency
+distance
+*** + + SENTENCE#353 + + ***
+distance
+train
+head footprint
+point
+*** + + SENTENCE#354 + + ***
+distance
+train
+head footprint
+service brake
+service
+point
+*** + + SENTENCE#355 + + ***
+segment
+train
+route
+distance
+route segment
+line speed limit
+line
+speed
+emergency brake
+emergency
+safety restriction
+safety
+emergency braking
+braking
+*** + + SENTENCE#356 + + ***
+distance
+emergency brake
+emergency
+service brake
+service
+*** + + SENTENCE#357 + + ***
+service brake
+service
+safety restriction
+safety
+braking
+train
+distance
+*** + + SENTENCE#358 + + ***
+service brake
+service
+distance
+*** + + SENTENCE#359 + + ***
+service brake
+service
+*** + + SENTENCE#360 + + ***
+service brake
+service
+distance
+purpose
+ato
+train
+atp
+emergency brake stop
+emergency brake
+emergency
