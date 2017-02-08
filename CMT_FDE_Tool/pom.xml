@@ -4,6 +4,15 @@
 	<groupId>CMT_FDE_Tool</groupId>
 	<artifactId>CMT_FDE_Tool</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+
+	<repositories>
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
+
+	</repositories>
+
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<resources>
@@ -29,6 +38,40 @@
 					<target>1.7</target>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>main.CommonalityMiningTool</mainClass>
+							<classpathPrefix>dependency-jars/</classpathPrefix>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.5.1</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>
+								${project.build.directory}/dependency-jars/
+							</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 	<dependencies>
@@ -44,8 +87,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com.github.imatesiu</groupId>
-			<artifactId>restt2k</artifactId>
-			<version>v0.2</version>
+			<artifactId>RestT2K</artifactId>
+			<version>0.3</version>
 		</dependency>
 
 		<dependency>
@@ -54,11 +97,5 @@
 			<version>2.4</version>
 		</dependency>
 	</dependencies>
-	<repositories>
-		<repository>
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
-		</repository>
 
-	</repositories>
 </project>
